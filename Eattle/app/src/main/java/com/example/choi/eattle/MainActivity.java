@@ -14,21 +14,26 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //위치 관련 서비스 시작
+        Intent locationIntent = new Intent(this,NearSpotService.class);
+        startService(locationIntent);
     }
 
-
+    //사진 뷰어, 관광 뷰어로 나누어지는 부분
     public void mOnClickButton(View v){
         switch(v.getId()){
             case R.id.picture:
-                Intent toPicture = new Intent(this,AlbumActivity.class);
+                Intent toPicture = new Intent(this,AlbumMainActivity.class);
                 startActivity(toPicture);
                 break;
             case R.id.tour:
-                Intent toTour = new Intent(this,TourActivity.class);
+                Intent toTour = new Intent(this,TourMainActivity.class);
                 startActivity(toTour);
                 break;
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

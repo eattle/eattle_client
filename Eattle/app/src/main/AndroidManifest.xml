@@ -1,12 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.choi.eattle" >
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+    <!-- 내 프로젝트에 대한 보안 수준 설정. -->
+    <permission
+        android:name="com.example.choi.eattle.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <!-- 구글맵 API v2의 권한 설정 -->
+    <uses-permission android:name="org.androidtown.lbs.map.permission.MAPS_RECEIVE" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <!--
+ The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but are recommended.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- 일반 권한 설정 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+
+    <!-- OpenGL 사용 설정 -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <!-- 라이브러리 사용 설정 -->
+        <uses-library android:name="com.google.android.maps" />
+        <!-- 구글맵 API v2 키 설정 -->
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyAQ-niH896mlRGjoPP4WmrD_1DvvTZfImM" />
+
+        <!-- GMS 라이브러리 버전 설정 -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -16,22 +59,33 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".AlbumActivity"
-            android:label="@string/title_activity_album"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.choi.eattle.MainActivity" />
+            android:name=".TourMainActivity"
+            android:label="@string/title_activity_tour_main" >
         </activity>
         <activity
-            android:name=".TourActivity"
-            android:label="@string/title_activity_tour"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.choi.eattle.MainActivity" />
+            android:name=".AlbumMainActivity"
+            android:label="@string/title_activity_album_main" >
         </activity>
+
+        <service
+            android:name=".NearSpotService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <activity
+            android:name=".DetailedInfoActivity"
+            android:label="@string/title_activity_detailed_info" >
+        </activity>
+
+        <activity
+            android:name=".TourMapActivity"
+            android:label="@string/title_activity_tour_map" >
+        </activity>
+
+
     </application>
 
 </manifest>
