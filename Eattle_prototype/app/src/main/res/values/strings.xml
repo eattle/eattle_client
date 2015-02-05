@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Eattle_Prototype</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_tour_map">TourMapActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_tour_main">TourMainActivity</string>
+    <string name="title_activity_album_main">AlbumMainActivity</string>
+    <string name="title_activity_detailed_info">DetailedInfoActivity</string>
+    <string name="title_activity_spot_page">SpotPage</string>
+
+</resources>
