@@ -6,7 +6,7 @@ import android.os.Parcelable;
 /**
  * Created by choi on 2015-01-21.
  */
-//관광지 정보들을 담고 있는 클래스
+//관광지 정보들을 담고 있는 클래스 - DB에서 읽어들인 데이터로 초기화 한다.
 public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> {
     private String name;
     private int resId;

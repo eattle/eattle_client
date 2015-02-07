@@ -24,6 +24,7 @@ public class TourMapActivity extends ActionBarActivity {
 
     private static GoogleMap map;
     public static PolylineOptions rectOptions = new PolylineOptions();
+    static int firstZoom=0;//0이면 현재 위치로 확대, 1이면 안함.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +64,23 @@ public class TourMapActivity extends ActionBarActivity {
         LatLng curPoint = new LatLng(latitude, longitude);
 
         //지도를 어느정도 확대해서 보여줄 것인지
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
+        if(TourMapActivity.firstZoom == 0) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 15));
+            TourMapActivity.firstZoom = 1;
+        }
 
         // 지도 유형 설정. 지형도인 경우에는 GoogleMap.MAP_TYPE_TERRAIN, 위성 지도인 경우에는 GoogleMap.MAP_TYPE_SATELLITE
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         Polyline polyline = map.addPolyline(rectOptions);
         // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-        showSpotPosition(37.4871636, 126.979744, "우리집", "벽적골 태영아파트 933동");
-        showSpotPosition(37.2501539, 127.0641907, "아딸", "벽적골 태영아파트 입구");
-        showSpotPosition(37.5043299, 127.0447994, "소프트웨어 마에스트로", "강남구 역삼동");
+        showSpotPosition(40.418776, -86.925172, "150", "Purdue village");
+        showSpotPosition(40.423646, -86.922908, "Burton Morgan", "Burton Morgan");
+        showSpotPosition(40.421226, -86.922258, "DLR", "DLR");
+        showSpotPosition(40.425588, -86.910810, "PMU", "PMU");
+        showSpotPosition(40.427661, -86.911128, "Knoy hall", "Knoy hall");
 
-        showSpotPosition(37.5042846, 127.0414756, "성산일출봉", "강남구 역삼동");
-        showSpotPosition(37.502757, 127.043621, "제주월드컵경기장", "강남구 역삼동");
-        showSpotPosition(37.5009083, 127.045714, "백록담", "강남구 역삼동");
-        showSpotPosition(37.5032836, 127.0446134, "돌하르방공원", "강남구 역삼동");
-        showSpotPosition(37.5005613, 127.035285, "한라수목원", "강남구 역삼동");
+
     }
 
     /**

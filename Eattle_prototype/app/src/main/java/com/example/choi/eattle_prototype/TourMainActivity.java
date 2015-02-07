@@ -29,13 +29,12 @@ public class TourMainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tour_main);
 
-
-        //임의의 지점으로 설정한 더미데이터
-        spot[0] = new TouristSpotInfo("성산일출봉",R.drawable.spot1,37.5042846,127.0414756);
-        spot[1] = new TouristSpotInfo("제주월드컵경기장",R.drawable.spot2,37.502757,127.043621);
-        spot[2] = new TouristSpotInfo("백록담",R.drawable.spot3,37.5009083,127.045714);
-        spot[3] = new TouristSpotInfo("돌하르방공원",R.drawable.spot4,37.5032836,127.0446134);
-        spot[4] = new TouristSpotInfo("한라수목원",R.drawable.spot5,37.5005613,127.035285);
+        //임의의 지점으로 설정한 더미데이터 - DB에서 데이터를 읽어와야 하는 부분
+        spot[0] = new TouristSpotInfo("기숙사 150동",R.drawable.spot1,40.418776, -86.925172);
+        spot[1] = new TouristSpotInfo("Burton Morgan",R.drawable.spot2,40.423646, -86.922908);
+        spot[2] = new TouristSpotInfo("DLR",R.drawable.spot3,40.421226, -86.922258);
+        spot[3] = new TouristSpotInfo("PMU",R.drawable.spot4,40.425588, -86.910810);
+        spot[4] = new TouristSpotInfo("Knoy Hall",R.drawable.spot5,40.427661, -86.9111284);
 
         //메인 액티비티를 띄울 때 위도, 경도 정보가 있으면
         //거리가 가까운 순으로 관광지들을 정리한다.
