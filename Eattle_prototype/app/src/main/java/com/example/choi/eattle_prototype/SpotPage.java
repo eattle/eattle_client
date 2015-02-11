@@ -32,7 +32,6 @@ public class SpotPage extends LinearLayout {
         super(context);
         init(context);
         this.spotNum = spotNum;
-        Log.d("SpotPage","!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+spotNum);
         //depth1에 대해 클릭 리스너를 등록한다. depth2에 대해서는 클릭 리스너를 등록하지 않는다.
         if(spotNum != -1) {
             TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(spotNum);
