@@ -3,6 +3,7 @@ package com.example.choi.eattle_prototype;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -46,7 +47,14 @@ public class ViewPagerAdapter extends PagerAdapter {
      */
     public Object instantiateItem(ViewGroup container, int position) {
         // create a instance of the page and set data
-        SpotPage page = new SpotPage(mContext,position);
+        SpotPage page;
+        if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitutde() == 1){
+            page = new SpotPage(mContext,-1);
+        }
+        else {
+            Log.d("ViewPagerAdapter",Integer.toString(position));
+            page = new SpotPage(mContext, position);
+        }
         page.setNameText(tourSpot[position].getName());
         page.setImage(tourSpot[position].getResId());
 

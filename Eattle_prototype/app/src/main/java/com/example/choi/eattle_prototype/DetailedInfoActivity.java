@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class DetailedInfoActivity extends ActionBarActivity {
 
-    private int NUMOFSPOT = 5;
+    private int NUMOFSPOTDETAILED;
     private int currentSpot; // 어떤 관광지를 터치해서 들어왔는지
 
     /*
@@ -41,7 +41,8 @@ public class DetailedInfoActivity extends ActionBarActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this,spot);
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수
-        pager.setOffscreenPageLimit(NUMOFSPOT);
+        NUMOFSPOTDETAILED = spot.size();//상세 정보의 개수만큼
+        pager.setOffscreenPageLimit(NUMOFSPOTDETAILED);
     }
 
     public void onNewIntent(Intent newIntent){

@@ -28,20 +28,56 @@ public class SpotPage extends LinearLayout {
 
     public static final int CALL_NUMBER = 1001;
 
-    public SpotPage(Context context,int spotNum) {
+    public SpotPage(final Context context, int spotNum) {
         super(context);
         init(context);
         this.spotNum = spotNum;
+        Log.d("SpotPage","!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+spotNum);
+        //depth1에 대해 클릭 리스너를 등록한다. depth2에 대해서는 클릭 리스너를 등록하지 않는다.
+        if(spotNum != -1) {
+            TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(spotNum);
+            tourSpotPicture.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (v.getId() == R.id.tourSpotPicture) {
+                        Log.d("MainActivity", " 클릭 성공");
+                        //선택된 관광지에 대한 추가 액티비티를 띄운다.
+                        Intent intent = new Intent(context, DetailedInfoActivity.class);
+
+                        //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
+                        ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
+
+                        TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(getSpotNum());
+                        String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+
+                        for (int i = 0; i < args.length; i++) {
+                            String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[i];
+                            Cursor c = MainActivity.db.rawQuery(SQL, null);
+                            c.moveToNext();
+                            String spotInfo = c.getString(0);
+                            String _picName = c.getString(1);
+                            //R.drawable을 동적으로 가져온다.
+                            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
+                            spot.add(new TouristSpotInfo(spotInfo, picName, 1, 1));
+                        }
+
+                        //객체배열을 ArrayList로 넘겨준다.
+                        intent.putParcelableArrayListExtra("spots", spot);
+                        context.startActivity(intent);
+                    }
+                }
+            });
+        }
+
     }
 
-    public SpotPage(Context context, AttributeSet attrs,int spotNum) {
+    public SpotPage(Context context, AttributeSet attrs, int spotNum) {
         super(context, attrs);
 
         init(context);
         this.spotNum = spotNum;
     }
 
-    private void init(final Context context) {
+    private void init(Context context) {
         Log.d("MainActivity", "SpotPage init함수 호출");
         mContext = context;
 
@@ -51,39 +87,6 @@ public class SpotPage extends LinearLayout {
 
         tourSpotPicture = (ImageView) view.findViewById(R.id.tourSpotPicture);
         nameText = (TextView) view.findViewById(R.id.nameText);
-        //depth1에서만 작동해야 함
-        tourSpotPicture.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (v.getId() == R.id.tourSpotPicture) {
-                    Log.d("MainActivity", " 클릭 성공");
-                    //선택된 관광지에 대한 추가 액티비티를 띄운다.
-                    Intent intent = new Intent(context, DetailedInfoActivity.class);
-
-                    //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
-                    ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
-
-                    //spot[spotNum]을 통해 detailedInfo를 DB에서 얻어온다.
-                    TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(spotNum);
-                    String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
-
-                    for(int i=0;i<args.length;i++){
-                        String SQL = "SELECT info,picName FROM spotInfo WHERE _id = "+args[i];
-                        Cursor c = MainActivity.db.rawQuery(SQL,null);
-                        c.moveToNext();
-                        String spotInfo = c.getString(0);
-                        String _picName = c.getString(1);
-                        //R.drawable을 동적으로 가져온다.
-                        int picName = getResources().getIdentifier(_picName,"drawable",CONSTANT.PACKAGE_NAME);
-                        spot.add(new TouristSpotInfo(spotInfo,picName,1,1));
-                    }
-
-                    //객체배열을 ArrayList로 넘겨준다.
-                    intent.putParcelableArrayListExtra("spots",spot);
-                    context.startActivity(intent);
-                }
-            }
-        });
-
     }
 
     public void setImage(int resId) {
@@ -96,5 +99,8 @@ public class SpotPage extends LinearLayout {
 
     public void setNameText(String nameStr) {
         nameText.setText(nameStr);
+    }
+    public int getSpotNum(){
+        return this.spotNum;
     }
 }
