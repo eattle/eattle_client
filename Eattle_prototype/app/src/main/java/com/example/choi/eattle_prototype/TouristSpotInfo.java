@@ -15,15 +15,27 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     private double longitutde; //경도
     //private int radius; //반경
     private double spotDistanceFromMe; // 현재 위치로 부터 얼마나 떨어져 있는지
+    //private int[] detailedInfo;
+    private String[] detailedInfo;
 
     public TouristSpotInfo() {
     }
 
+    //depth2를 위한 생성자
     public TouristSpotInfo(String name, int resId, double latitude, double longitutde) {
         this.name = name;
         this.resId = resId;
         this.latitude = latitude;
         this.longitutde = longitutde;
+    }
+
+    //depth1을 위한 생성자
+    public TouristSpotInfo(String name, int resId, double latitude, double longitutde, String spotInfoID) {
+        this.name = name;
+        this.resId = resId;
+        this.latitude = latitude;
+        this.longitutde = longitutde;
+        this.detailedInfo =  spotInfoID.split("\\.");// 마침표(.)단위로 파싱한다.
     }
 
     public TouristSpotInfo(Parcel src) {
@@ -92,6 +104,10 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
 
     double getSpotDistanceFromMe() {
         return this.spotDistanceFromMe;
+    }
+
+    String[] getDetailedInfo(){
+        return this.detailedInfo;
     }
 
     void setSpotDistanceFromMe(double spotDistanceFromMe) {

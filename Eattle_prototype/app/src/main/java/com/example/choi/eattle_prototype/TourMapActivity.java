@@ -33,9 +33,6 @@ public class TourMapActivity extends ActionBarActivity {
 
         // 지도 객체 참조
         map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-        //경로 그리기
-
-
     }
 
     @Override

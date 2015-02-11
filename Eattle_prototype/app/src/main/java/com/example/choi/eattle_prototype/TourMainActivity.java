@@ -1,9 +1,10 @@
 package com.example.choi.eattle_prototype;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,12 +16,11 @@ import java.util.Arrays;
 
 public class TourMainActivity extends ActionBarActivity {
 
-    private int NUMOFSPOT = 5;//관광지 개수
-    ImageView[] tourSpotPicture = new ImageView[NUMOFSPOT];
-    TouristSpotInfo[] spot = new TouristSpotInfo[NUMOFSPOT];//관광지정보
-    static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
-    static double lastLatitude;//가장 마지막으로 받은 위도
-    static double lastLongitutde;//가장 마지막으로 받은 경도
+    ImageView[] tourSpotPicture = new ImageView[CONSTANT.NUMOFSPOT];
+    private static TouristSpotInfo[] spot = new TouristSpotInfo[CONSTANT.NUMOFSPOT];//관광지정보
+    private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
+    private static double lastLatitude;//가장 마지막으로 받은 위도
+    private static double lastLongitutde;//가장 마지막으로 받은 경도
 
 
 
@@ -29,18 +29,38 @@ public class TourMainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tour_main);
 
-        //임의의 지점으로 설정한 더미데이터 - DB에서 데이터를 읽어와야 하는 부분
+        //관광지 목록들을 DB에서 읽어온다-------------------------------------------------------
+        /*
         spot[0] = new TouristSpotInfo("기숙사 150동",R.drawable.spot1,40.418776, -86.925172);
         spot[1] = new TouristSpotInfo("Burton Morgan",R.drawable.spot2,40.423646, -86.922908);
         spot[2] = new TouristSpotInfo("DLR",R.drawable.spot3,40.421226, -86.922258);
         spot[3] = new TouristSpotInfo("PMU",R.drawable.spot4,40.425588, -86.910810);
         spot[4] = new TouristSpotInfo("Knoy Hall",R.drawable.spot5,40.427661, -86.9111284);
+        */
+        String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
+        Cursor c = MainActivity.db.rawQuery(SQL,null);
+        int recordCount = c.getCount();
+
+        for(int i=0;i<recordCount;i++){
+            c.moveToNext();
+            String name = c.getString(0);
+            String _picName = c.getString(1);
+            //R.drawable을 동적으로 가져온다.
+            //int picName = getResources().getIdentifier(_picName,"drawable",getPackageName());
+            int picName = getResources().getIdentifier(_picName,"drawable",CONSTANT.PACKAGE_NAME);
+
+            float latitude = c.getFloat(2);
+            float longitude = c.getFloat(3);
+            String spotInfoID = c.getString(4);
+            spot[i] = new TouristSpotInfo(name,picName,latitude,longitude,spotInfoID);
+        }
+        //------------------------------------------------------------------------------------
 
         //메인 액티비티를 띄울 때 위도, 경도 정보가 있으면
         //거리가 가까운 순으로 관광지들을 정리한다.
         if(havelatlonInfo == true){
             //현재 위치로부터의 거리를 계산한다.
-            for(int i=0;i<NUMOFSPOT;i++) {
+            for(int i=0;i<CONSTANT.NUMOFSPOT;i++) {
                 double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
                 spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", Double.toString(temp));
@@ -67,7 +87,7 @@ public class TourMainActivity extends ActionBarActivity {
 
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
-        pager.setOffscreenPageLimit(NUMOFSPOT);
+        pager.setOffscreenPageLimit(CONSTANT.NUMOFSPOT);
 
 
         // 페이지가 변경될 때
@@ -90,10 +110,10 @@ public class TourMainActivity extends ActionBarActivity {
         super.onResume();
         if(havelatlonInfo == true){
             //현재 위치로부터의 거리를 계산한다.
-            for(int i=0;i<NUMOFSPOT;i++){
+            for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
                 double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
                 spot[i].setSpotDistanceFromMe(temp);
-                Log.d("MainActivity", Double.toString(temp));            //가까운 순으로 정렬한다.
+                Log.d("MainActivity", Double.toString(temp));//가까운 순으로 정렬한다.
             }
             Arrays.sort(spot);
         }
@@ -105,7 +125,7 @@ public class TourMainActivity extends ActionBarActivity {
 
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
-        pager.setOffscreenPageLimit(NUMOFSPOT);
+        pager.setOffscreenPageLimit(CONSTANT.NUMOFSPOT);
 
     }
 
@@ -149,7 +169,9 @@ public class TourMainActivity extends ActionBarActivity {
     public static void setLastLongitutde(double lastLongitutde){
         TourMainActivity.lastLongitutde = lastLongitutde;
     }
-
+    public static TouristSpotInfo getTouristSpotInfo(int index){
+        return spot[index];
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -3,6 +3,7 @@ package com.example.choi.eattle_prototype;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,6 +51,7 @@ public class SpotPage extends LinearLayout {
 
         tourSpotPicture = (ImageView) view.findViewById(R.id.tourSpotPicture);
         nameText = (TextView) view.findViewById(R.id.nameText);
+        //depth1에서만 작동해야 함
         tourSpotPicture.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (v.getId() == R.id.tourSpotPicture) {
@@ -59,43 +61,22 @@ public class SpotPage extends LinearLayout {
 
                     //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
                     ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
-                    if(spotNum == 0){
-                        //names = new String[]{"상세보기 1", "상세보기 2", "상세보기 3", "상세보기 4", "상세보기 5"};
-                        //resIds = new int[]{R.drawable.detailed1_1, R.drawable.detailed1_2, R.drawable.detailed1_3, R.drawable.detailed1_4, R.drawable.detailed1_5};
-                        spot.add(new TouristSpotInfo("상세보기1",R.drawable.detailed1_1,1,1));
-                        spot.add(new TouristSpotInfo("상세보기2",R.drawable.detailed1_2,1,1));
-                        spot.add(new TouristSpotInfo("상세보기3",R.drawable.detailed1_3,1,1));
-                        spot.add(new TouristSpotInfo("상세보기4",R.drawable.detailed1_4,1,1));
-                        spot.add(new TouristSpotInfo("상세보기5",R.drawable.detailed1_5,1,1));
+
+                    //spot[spotNum]을 통해 detailedInfo를 DB에서 얻어온다.
+                    TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(spotNum);
+                    String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+
+                    for(int i=0;i<args.length;i++){
+                        String SQL = "SELECT info,picName FROM spotInfo WHERE _id = "+args[i];
+                        Cursor c = MainActivity.db.rawQuery(SQL,null);
+                        c.moveToNext();
+                        String spotInfo = c.getString(0);
+                        String _picName = c.getString(1);
+                        //R.drawable을 동적으로 가져온다.
+                        int picName = getResources().getIdentifier(_picName,"drawable",CONSTANT.PACKAGE_NAME);
+                        spot.add(new TouristSpotInfo(spotInfo,picName,1,1));
                     }
-                    else if(spotNum == 1){
-                        spot.add(new TouristSpotInfo("상세보기1",R.drawable.detailed2_1,1,1));
-                        spot.add(new TouristSpotInfo("상세보기2",R.drawable.detailed2_2,1,1));
-                        spot.add(new TouristSpotInfo("상세보기3",R.drawable.detailed2_3,1,1));
-                        spot.add(new TouristSpotInfo("상세보기4",R.drawable.detailed2_4,1,1));
-                        spot.add(new TouristSpotInfo("상세보기5",R.drawable.detailed2_5,1,1));
-                    }
-                    else if(spotNum == 2){
-                        spot.add(new TouristSpotInfo("상세보기1",R.drawable.detailed3_1,1,1));
-                        spot.add(new TouristSpotInfo("상세보기2",R.drawable.detailed3_2,1,1));
-                        spot.add(new TouristSpotInfo("상세보기3",R.drawable.detailed3_3,1,1));
-                        spot.add(new TouristSpotInfo("상세보기4",R.drawable.detailed3_4,1,1));
-                        spot.add(new TouristSpotInfo("상세보기5",R.drawable.detailed3_5,1,1));
-                    }
-                    else if(spotNum == 3){
-                        spot.add(new TouristSpotInfo("상세보기1",R.drawable.detailed4_1,1,1));
-                        spot.add(new TouristSpotInfo("상세보기2",R.drawable.detailed4_2,1,1));
-                        spot.add(new TouristSpotInfo("상세보기3",R.drawable.detailed4_3,1,1));
-                        spot.add(new TouristSpotInfo("상세보기4",R.drawable.detailed4_4,1,1));
-                        spot.add(new TouristSpotInfo("상세보기5",R.drawable.detailed4_5,1,1));
-                    }
-                    else if(spotNum == 4){
-                        spot.add(new TouristSpotInfo("상세보기1",R.drawable.detailed5_1,1,1));
-                        spot.add(new TouristSpotInfo("상세보기2",R.drawable.detailed5_2,1,1));
-                        spot.add(new TouristSpotInfo("상세보기3",R.drawable.detailed5_3,1,1));
-                        spot.add(new TouristSpotInfo("상세보기4",R.drawable.detailed5_4,1,1));
-                        spot.add(new TouristSpotInfo("상세보기5",R.drawable.detailed5_5,1,1));
-                    }
+
                     //객체배열을 ArrayList로 넘겨준다.
                     intent.putParcelableArrayListExtra("spots",spot);
                     context.startActivity(intent);

@@ -33,7 +33,6 @@ public class ViewPagerAdapter extends PagerAdapter {
         mContext = context;
     }
 
-
     /**
      * 페이지 갯수
      */
