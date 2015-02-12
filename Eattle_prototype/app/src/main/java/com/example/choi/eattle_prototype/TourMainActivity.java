@@ -76,37 +76,8 @@ public class TourMainActivity extends ActionBarActivity {
             String spotInfoID = c.getString(4);
             spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
 
-            //리스트 형식의 뷰에도 마찬가지로 추가한다.
-            FrameLayout listLayout = new FrameLayout(this);
-            ImageView listImage = new ImageView(this);
-            TextView listText = new TextView(this);
-            //listLayout.setOrientation(LinearLayout.HORIZONTAL);
-            listLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,200));
-
-            // 해당 레이아웃의 파라미터 값을 호출
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) listLayout.getLayoutParams();
-            // 해당 margin값 변경
-            lp.setMargins(15,15,15,15);
-            // 변경된 값 적용
-            listLayout.setLayoutParams(lp);
-
-            listImage.setImageResource(picName);
-            listImage.setScaleType(ImageView.ScaleType.CENTER_CROP); // 레이아웃 크기에 이미지를 맞춘다
-            //listImage.setLayoutParams(new ViewGroup.LayoutParams(120,120));
-            listImage.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
-            listImage.setAlpha(1200);
-
-            listText.setText(name);
-            listText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            listText.setPadding(10, 10, 20, 10);
-            listText.setTextColor(Color.WHITE);
-            listText.setTextSize(20);
-            listText.setGravity(Gravity.CENTER);
-            //한줄 추가
-            listLayout.addView(listImage);
-            listLayout.addView(listText);
-            //전체 추가
-            list.addView(listLayout);
+            //리스트(스크롤뷰)에 관광지를 추가한다.
+            addTouristSpotToList(picName,name);
         }
         //------------------------------------------------------------------------------------
 
@@ -133,7 +104,6 @@ public class TourMainActivity extends ActionBarActivity {
             }
         });
         //"모드변환" 버튼-----------------------------------------------------------
-
         Button changeMode = (Button) findViewById(R.id.changeMode);
         changeMode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,6 +158,7 @@ public class TourMainActivity extends ActionBarActivity {
 
     public void onResume() {
         super.onResume();
+
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
@@ -197,16 +168,19 @@ public class TourMainActivity extends ActionBarActivity {
             }
             Arrays.sort(spot);
         }
-        // 뷰페이저 객체를 참조하고 어댑터를 설정합니다.
+        // 스크롤뷰 다시 그리기-------------------------------------------
+        list.removeAllViews();
+        for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
+            addTouristSpotToList(spot[i].getResId(),spot[i].getName());
+        }
+        // 뷰페이저 다시 그리기-------------------------------------------
+        // 뷰페이저 객체를 참조하고 어댑터를 설정
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-
-        //지정된 텍스트와 이미지로 뷰페이지를 생성한다.
+        //지정된 텍스트와 이미지로 뷰페이지를 생성
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, spot);
-
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
         pager.setOffscreenPageLimit(CONSTANT.NUMOFSPOT);
-
     }
 
     //현재 위치에서 관광지까지의 거리 계산을 위한 함수
@@ -229,7 +203,39 @@ public class TourMainActivity extends ActionBarActivity {
 
         return result;
     }
+    public void addTouristSpotToList(int picName,String name){
+        //리스트 형식의 뷰에도 마찬가지로 추가한다.
+        FrameLayout listLayout = new FrameLayout(this);
+        ImageView listImage = new ImageView(this);
+        TextView listText = new TextView(this);
+        //listLayout.setOrientation(LinearLayout.HORIZONTAL);
+        listLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,200));
 
+        // 해당 레이아웃의 파라미터 값을 호출
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) listLayout.getLayoutParams();
+        // 해당 margin값 변경
+        lp.setMargins(15,15,15,15);
+        // 변경된 값 적용
+        listLayout.setLayoutParams(lp);
+
+        listImage.setImageResource(picName);
+        listImage.setScaleType(ImageView.ScaleType.CENTER_CROP); // 레이아웃 크기에 이미지를 맞춘다
+        //listImage.setLayoutParams(new ViewGroup.LayoutParams(120,120));
+        listImage.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
+        listImage.setAlpha(1200);
+
+        listText.setText(name);
+        listText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        listText.setPadding(10, 10, 20, 10);
+        listText.setTextColor(Color.WHITE);
+        listText.setTextSize(20);
+        listText.setGravity(Gravity.CENTER);
+        //한줄 추가
+        listLayout.addView(listImage);
+        listLayout.addView(listText);
+        //전체 추가
+        list.addView(listLayout);
+    }
     /*
     //제스처(줌인,줌아웃)을 인식하기 위한 함수
     public boolean onTouchEvent(MotionEvent event) {
