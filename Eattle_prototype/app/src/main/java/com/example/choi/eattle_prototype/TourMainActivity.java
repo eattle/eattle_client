@@ -5,15 +5,14 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.Arrays;
 
@@ -24,7 +23,11 @@ public class TourMainActivity extends ActionBarActivity {
     private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
     private static double lastLatitude;//가장 마지막으로 받은 위도
     private static double lastLongitutde;//가장 마지막으로 받은 경도
+    private int mode = 0;//0이면 뷰페이저, 1이면 리스트 형식으로
+    private android.support.v4.view.ViewPager pager;
+    private LinearLayout list;
 
+    /*
     //제스처를 인식하기 위한 변수들-----------------
     // 드래그시 좌표 저장
     int posX1=0, posX2=0, posY1=0, posY2=0;
@@ -35,12 +38,13 @@ public class TourMainActivity extends ActionBarActivity {
     static final int DRAG = 1;
     static final int ZOOM = 2;
     int mode = NONE;
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tour_main);
-
+        pager = (android.support.v4.view.ViewPager) findViewById(R.id.pager);
+        list = (LinearLayout) findViewById(R.id.list);
         //관광지 목록들을 DB에서 읽어온다-------------------------------------------------------
         /*
         spot[0] = new TouristSpotInfo("기숙사 150동",R.drawable.spot1,40.418776, -86.925172);
@@ -50,29 +54,44 @@ public class TourMainActivity extends ActionBarActivity {
         spot[4] = new TouristSpotInfo("Knoy Hall",R.drawable.spot5,40.427661, -86.9111284);
         */
         String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
-        Cursor c = MainActivity.db.rawQuery(SQL,null);
+        Cursor c = MainActivity.db.rawQuery(SQL, null);
         int recordCount = c.getCount();
 
-        for(int i=0;i<recordCount;i++){
+        for (int i = 0; i < recordCount; i++) {
             c.moveToNext();
             String name = c.getString(0);
             String _picName = c.getString(1);
             //R.drawable을 동적으로 가져온다.
             //int picName = getResources().getIdentifier(_picName,"drawable",getPackageName());
-            int picName = getResources().getIdentifier(_picName,"drawable",CONSTANT.PACKAGE_NAME);
+            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
 
             float latitude = c.getFloat(2);
             float longitude = c.getFloat(3);
             String spotInfoID = c.getString(4);
-            spot[i] = new TouristSpotInfo(name,picName,latitude,longitude,spotInfoID);
+            spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
+
+            //리스트 형식의 뷰에도 마찬가지로 추가한다.
+            LinearLayout listLayout = new LinearLayout(this);
+            ImageView listImage = new ImageView(this);
+            TextView listText = new TextView(this);
+            listLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            listImage.setImageResource(picName);
+
+            listText.setText(name);
+            //한줄 추가
+            listLayout.addView(listImage);
+            listLayout.addView(listText);
+            //전체 추가
+            list.addView(listLayout);
         }
         //------------------------------------------------------------------------------------
 
         //메인 액티비티를 띄울 때 위도, 경도 정보가 있으면
         //거리가 가까운 순으로 관광지들을 정리한다.
-        if(havelatlonInfo == true){
+        if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
-            for(int i=0;i<CONSTANT.NUMOFSPOT;i++) {
+            for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
                 double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
                 spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", Double.toString(temp));
@@ -80,22 +99,45 @@ public class TourMainActivity extends ActionBarActivity {
             Arrays.sort(spot);
         }
 
-        //"지도보기" 버튼
-        Button toMap = (Button)findViewById(R.id.toMap);
+        //"지도보기" 버튼-----------------------------------------------------------
+        Button toMap = (Button) findViewById(R.id.toMap);
         toMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //지도를 띄운다.
-                Intent intent = new Intent(getBaseContext(),TourMapActivity.class);
+                Intent intent = new Intent(getBaseContext(), TourMapActivity.class);
                 startActivity(intent);
             }
         });
+        //"모드변환" 버튼-----------------------------------------------------------
+
+        Button changeMode = (Button) findViewById(R.id.changeMode);
+        changeMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //관광지를 하나씩 보여줄 것인지, 리스트 형태로 보여줄 것인지
+                if (mode == 0) {//뷰페이저->리스트뷰
+                    //뷰페이저를 안보이도록 한다.
+                    pager.setVisibility(View.INVISIBLE);
+                    //리스트를 보이도록 한다.
+                    list.setVisibility(View.VISIBLE);
+                    mode=1;
+                } else if (mode == 1) {//리스트뷰->뷰페이저
+                    //리스트를 안보이도록 한다.
+                    list.setVisibility(View.INVISIBLE);
+                    //뷰페이저를 보이도록 한다.
+                    pager.setVisibility(View.VISIBLE);
+                    mode=0;
+                }
+            }
+        });
+
 
         // 뷰페이저 객체를 참조하고 어댑터를 설정합니다.
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
 
         //지정된 텍스트와 이미지로 뷰페이지를 생성한다.
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this,spot);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this, spot);
 
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
@@ -103,26 +145,29 @@ public class TourMainActivity extends ActionBarActivity {
 
 
         // 페이지가 변경될 때
-        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener(){
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
 
             @Override
-            public void onPageScrollStateChanged(int state) {}
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
             @Override
             //페이지가 변경될때
-            public void onPageSelected(int position) {}
+            public void onPageSelected(int position) {
+            }
         });
 
 
     }
-    public void onResume(){
+
+    public void onResume() {
         super.onResume();
-        if(havelatlonInfo == true){
+        if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
-            for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
+            for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
                 double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
                 spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", Double.toString(temp));//가까운 순으로 정렬한다.
@@ -133,7 +178,7 @@ public class TourMainActivity extends ActionBarActivity {
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
 
         //지정된 텍스트와 이미지로 뷰페이지를 생성한다.
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this,spot);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this, spot);
 
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
@@ -142,12 +187,12 @@ public class TourMainActivity extends ActionBarActivity {
     }
 
     //현재 위치에서 관광지까지의 거리 계산을 위한 함수
-    public static double calcDistance(double lat1, double lon1, double lat2, double lon2){
+    public static double calcDistance(double lat1, double lon1, double lat2, double lon2) {
         double EARTH_R, Rad, radLat1, radLat2, radDist;
         double distance, ret;
 
         EARTH_R = 6371000.0;
-        Rad = Math.PI/180;
+        Rad = Math.PI / 180;
         radLat1 = Rad * lat1;
         radLat2 = Rad * lat2;
         radDist = Rad * (lon1 - lon2);
@@ -157,11 +202,12 @@ public class TourMainActivity extends ActionBarActivity {
         ret = EARTH_R * Math.acos(distance);
 
         double result = Math.round(Math.round(ret) / 1000);
-        if(result == 0) result = Math.round(ret);
+        if (result == 0) result = Math.round(ret);
 
         return result;
     }
 
+    /*
     //제스처(줌인,줌아웃)을 인식하기 위한 함수
     public boolean onTouchEvent(MotionEvent event) {
         int act = event.getAction();
@@ -235,29 +281,36 @@ public class TourMainActivity extends ActionBarActivity {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
         return FloatMath.sqrt(x * x + y * y);
-    }
+    }*/
     // get, set
-    public static boolean getHavelatlonInfo(){
+    public static boolean getHavelatlonInfo() {
         return havelatlonInfo;
     }
-    public static void setHavelatlonInfo(boolean havelatlonInfo){
+
+    public static void setHavelatlonInfo(boolean havelatlonInfo) {
         TourMainActivity.havelatlonInfo = havelatlonInfo;
     }
-    public static double getLastLatitude(){
+
+    public static double getLastLatitude() {
         return lastLatitude;
     }
-    public static void setLastLatitude(double lastLatitude){
+
+    public static void setLastLatitude(double lastLatitude) {
         TourMainActivity.lastLatitude = lastLatitude;
     }
-    public static double getLastLongitutde(){
+
+    public static double getLastLongitutde() {
         return lastLongitutde;
     }
-    public static void setLastLongitutde(double lastLongitutde){
+
+    public static void setLastLongitutde(double lastLongitutde) {
         TourMainActivity.lastLongitutde = lastLongitutde;
     }
-    public static TouristSpotInfo getTouristSpotInfo(int index){
+
+    public static TouristSpotInfo getTouristSpotInfo(int index) {
         return spot[index];
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

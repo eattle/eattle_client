@@ -12,7 +12,16 @@
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#ffffffff" />
+            android:background="#ffffffff"
+            android:visibility="visible"
+            />
+        <LinearLayout
+            android:id="@+id/list"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible">
+            </LinearLayout>
         <Button
             android:id="@+id/toMap"
             android:layout_width="wrap_content"
@@ -20,5 +29,12 @@
             android:text="지도보기"
             android:textSize="20dp" />
 
+        <Button
+            android:id="@+id/changeMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="모드변환"
+            android:textSize="20dp"
+            android:layout_gravity="center_horizontal|top" />
     </FrameLayout>
 </RelativeLayout>
