@@ -2,16 +2,21 @@ package com.example.choi.eattle_prototype;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -26,7 +31,7 @@ public class TourMainActivity extends ActionBarActivity {
     private int mode = 0;//0이면 뷰페이저, 1이면 리스트 형식으로
     private android.support.v4.view.ViewPager pager;
     private LinearLayout list;
-
+    private ScrollView scroll;
     /*
     //제스처를 인식하기 위한 변수들-----------------
     // 드래그시 좌표 저장
@@ -45,6 +50,7 @@ public class TourMainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_tour_main);
         pager = (android.support.v4.view.ViewPager) findViewById(R.id.pager);
         list = (LinearLayout) findViewById(R.id.list);
+        scroll = (ScrollView) findViewById(R.id.scroll);
         //관광지 목록들을 DB에서 읽어온다-------------------------------------------------------
         /*
         spot[0] = new TouristSpotInfo("기숙사 150동",R.drawable.spot1,40.418776, -86.925172);
@@ -71,14 +77,31 @@ public class TourMainActivity extends ActionBarActivity {
             spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
 
             //리스트 형식의 뷰에도 마찬가지로 추가한다.
-            LinearLayout listLayout = new LinearLayout(this);
+            FrameLayout listLayout = new FrameLayout(this);
             ImageView listImage = new ImageView(this);
             TextView listText = new TextView(this);
-            listLayout.setOrientation(LinearLayout.HORIZONTAL);
+            //listLayout.setOrientation(LinearLayout.HORIZONTAL);
+            listLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,200));
+
+            // 해당 레이아웃의 파라미터 값을 호출
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) listLayout.getLayoutParams();
+            // 해당 margin값 변경
+            lp.setMargins(15,15,15,15);
+            // 변경된 값 적용
+            listLayout.setLayoutParams(lp);
 
             listImage.setImageResource(picName);
+            listImage.setScaleType(ImageView.ScaleType.CENTER_CROP); // 레이아웃 크기에 이미지를 맞춘다
+            //listImage.setLayoutParams(new ViewGroup.LayoutParams(120,120));
+            listImage.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
+            listImage.setAlpha(1200);
 
             listText.setText(name);
+            listText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            listText.setPadding(10, 10, 20, 10);
+            listText.setTextColor(Color.WHITE);
+            listText.setTextSize(20);
+            listText.setGravity(Gravity.CENTER);
             //한줄 추가
             listLayout.addView(listImage);
             listLayout.addView(listText);
@@ -120,11 +143,11 @@ public class TourMainActivity extends ActionBarActivity {
                     //뷰페이저를 안보이도록 한다.
                     pager.setVisibility(View.INVISIBLE);
                     //리스트를 보이도록 한다.
-                    list.setVisibility(View.VISIBLE);
+                    scroll.setVisibility(View.VISIBLE);
                     mode=1;
                 } else if (mode == 1) {//리스트뷰->뷰페이저
                     //리스트를 안보이도록 한다.
-                    list.setVisibility(View.INVISIBLE);
+                    scroll.setVisibility(View.INVISIBLE);
                     //뷰페이저를 보이도록 한다.
                     pager.setVisibility(View.VISIBLE);
                     mode=0;
