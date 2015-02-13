@@ -140,7 +140,7 @@ public class TourMainActivity extends ActionBarActivity {
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
                 double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
                 GLOBAL.spot[i].setSpotDistanceFromMe(temp);
-                Log.d("MainActivity", Double.toString(temp));//가까운 순으로 정렬한다.
+                Log.d("MainActivity", GLOBAL.spot[i].getName()+" 가 현재 위치로 부터 떨어진 거리 : "+Double.toString(temp));
             }
             Arrays.sort(GLOBAL.spot);
         }

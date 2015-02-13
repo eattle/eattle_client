@@ -47,7 +47,10 @@ public class NearSpotService extends Service implements Runnable{
         //DB에서 관광지를 불러온다.
         //데이터베이스 OPEN
         dbHelper = new DatabaseHelper(this);
+        Log.d("NearSpotService", "DEBUG!!!!!!!!!!!!!!!!!!!");
         db = dbHelper.getWritableDatabase();
+        dbHelper.onCreate(db);//onCreate함수를 강제로 호출해준다(안그러면 폰에서 안됨)
+
         String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
         Cursor c = db.rawQuery(SQL, null);
         GLOBAL.recordCount = c.getCount();
