@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class TourMainActivity extends ActionBarActivity {
 
     ImageView[] tourSpotPicture = new ImageView[CONSTANT.NUMOFSPOT];
-    private static TouristSpotInfo[] spot = new TouristSpotInfo[CONSTANT.NUMOFSPOT];//관광지정보
+    //private static TouristSpotInfo[] spot = new TouristSpotInfo[CONSTANT.NUMOFSPOT];//관광지정보
     private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
     private static double lastLatitude;//가장 마지막으로 받은 위도
     private static double lastLongitutde;//가장 마지막으로 받은 경도
@@ -52,33 +52,10 @@ public class TourMainActivity extends ActionBarActivity {
         pager = (android.support.v4.view.ViewPager) findViewById(R.id.pager);
         list = (LinearLayout) findViewById(R.id.list);
         scroll = (ScrollView) findViewById(R.id.scroll);
-        //관광지 목록들을 DB에서 읽어온다-------------------------------------------------------
-        /*
-        spot[0] = new TouristSpotInfo("기숙사 150동",R.drawable.spot1,40.418776, -86.925172);
-        spot[1] = new TouristSpotInfo("Burton Morgan",R.drawable.spot2,40.423646, -86.922908);
-        spot[2] = new TouristSpotInfo("DLR",R.drawable.spot3,40.421226, -86.922258);
-        spot[3] = new TouristSpotInfo("PMU",R.drawable.spot4,40.425588, -86.910810);
-        spot[4] = new TouristSpotInfo("Knoy Hall",R.drawable.spot5,40.427661, -86.9111284);
-        */
-        String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
-        Cursor c = MainActivity.db.rawQuery(SQL, null);
-        int recordCount = c.getCount();
 
-        for (int i = 0; i < recordCount; i++) {
-            c.moveToNext();
-            String name = c.getString(0);
-            String _picName = c.getString(1);
-            //R.drawable을 동적으로 가져온다.
-            //int picName = getResources().getIdentifier(_picName,"drawable",getPackageName());
-            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-
-            float latitude = c.getFloat(2);
-            float longitude = c.getFloat(3);
-            String spotInfoID = c.getString(4);
-            spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
-
+        for (int i = 0; i < GLOBAL.recordCount; i++) {
             //리스트(스크롤뷰)에 관광지를 추가한다.
-            addTouristSpotToList(picName,name,i);
+            addTouristSpotToList(GLOBAL.spot[i].getResId(),GLOBAL.spot[i].getName(),i);
         }
         //------------------------------------------------------------------------------------
 
@@ -87,11 +64,11 @@ public class TourMainActivity extends ActionBarActivity {
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
-                double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
-                spot[i].setSpotDistanceFromMe(temp);
-                Log.d("MainActivity", Double.toString(temp));
+                double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
+                GLOBAL.spot[i].setSpotDistanceFromMe(temp);
+                Log.d("MainActivity", GLOBAL.spot[i].getName()+" 가 현재 위치로 부터 떨어진 거리 : "+Double.toString(temp));
             }//가까운 순으로 정렬한다.
-            Arrays.sort(spot);
+            Arrays.sort(GLOBAL.spot);
         }
 
         //"지도보기" 버튼-----------------------------------------------------------
@@ -131,7 +108,7 @@ public class TourMainActivity extends ActionBarActivity {
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
 
         //지정된 텍스트와 이미지로 뷰페이지를 생성한다.
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this, spot);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this, GLOBAL.spot);
 
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
@@ -161,22 +138,22 @@ public class TourMainActivity extends ActionBarActivity {
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
-                double temp = calcDistance(lastLatitude, lastLongitutde, spot[i].getLatitude(), spot[i].getLongitutde());
-                spot[i].setSpotDistanceFromMe(temp);
+                double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
+                GLOBAL.spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", Double.toString(temp));//가까운 순으로 정렬한다.
             }
-            Arrays.sort(spot);
+            Arrays.sort(GLOBAL.spot);
         }
         // 스크롤뷰 다시 그리기-------------------------------------------
         list.removeAllViews();
         for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
-            addTouristSpotToList(spot[i].getResId(),spot[i].getName(),i);
+            addTouristSpotToList(GLOBAL.spot[i].getResId(),GLOBAL.spot[i].getName(),i);
         }
         // 뷰페이저 다시 그리기-------------------------------------------
         // 뷰페이저 객체를 참조하고 어댑터를 설정
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         //지정된 텍스트와 이미지로 뷰페이지를 생성
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this, spot);
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this, GLOBAL.spot);
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
         pager.setOffscreenPageLimit(CONSTANT.NUMOFSPOT);
@@ -243,12 +220,11 @@ public class TourMainActivity extends ActionBarActivity {
                 //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
                 ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
 
-                TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(i);
-                String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+                String[] args = GLOBAL.spot[i].getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
 
                 for (int j = 0; j < args.length; j++) {
                     String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[j];
-                    Cursor c = MainActivity.db.rawQuery(SQL, null);
+                    Cursor c = NearSpotService.db.rawQuery(SQL, null);
                     c.moveToNext();
                     String spotInfo = c.getString(0);
                     String _picName = c.getString(1);
@@ -364,9 +340,6 @@ public class TourMainActivity extends ActionBarActivity {
         TourMainActivity.lastLongitutde = lastLongitutde;
     }
 
-    public static TouristSpotInfo getTouristSpotInfo(int index) {
-        return spot[index];
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

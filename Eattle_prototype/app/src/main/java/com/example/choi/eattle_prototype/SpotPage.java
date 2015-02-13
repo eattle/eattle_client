@@ -34,7 +34,6 @@ public class SpotPage extends LinearLayout {
         this.spotNum = spotNum;
         //depth1에 대해 클릭 리스너를 등록한다. depth2에 대해서는 클릭 리스너를 등록하지 않는다.
         if(spotNum != -1) {
-            TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(spotNum);
             tourSpotPicture.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (v.getId() == R.id.tourSpotPicture) {
@@ -73,12 +72,11 @@ public class SpotPage extends LinearLayout {
         //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
         ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
 
-        TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(getSpotNum());
-        String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+        String[] args = GLOBAL.spot[getSpotNum()].getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
 
         for (int i = 0; i < args.length; i++) {
             String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[i];
-            Cursor c = MainActivity.db.rawQuery(SQL, null);
+            Cursor c = NearSpotService.db.rawQuery(SQL, null);
             c.moveToNext();
             String spotInfo = c.getString(0);
             String _picName = c.getString(1);

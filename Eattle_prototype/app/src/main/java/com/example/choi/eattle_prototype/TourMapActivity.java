@@ -33,6 +33,11 @@ public class TourMapActivity extends ActionBarActivity {
 
         // 지도 객체 참조
         map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+
+        for(int i=0;i<GLOBAL.recordCount;i++){
+            // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
+            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName());
+        }
     }
 
     @Override
@@ -70,20 +75,12 @@ public class TourMapActivity extends ActionBarActivity {
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         Polyline polyline = map.addPolyline(rectOptions);
-        // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-        showSpotPosition(40.418776, -86.925172, "150", "Purdue village");
-        showSpotPosition(40.423646, -86.922908, "Burton Morgan", "Burton Morgan");
-        showSpotPosition(40.421226, -86.922258, "DLR", "DLR");
-        showSpotPosition(40.425588, -86.910810, "PMU", "PMU");
-        showSpotPosition(40.427661, -86.911128, "Knoy hall", "Knoy hall");
-
-
     }
 
     /**
      * 관광지를 표시하기 위해 정의한 메소드
      */
-    private static void showSpotPosition(Double latitude, Double longitude, String title, String snippet) {
+    public static void showSpotPosition(double latitude, double longitude, String title, String snippet) {
         MarkerOptions marker = new MarkerOptions();
         //우리집
         marker.position(new LatLng(latitude, longitude));//관광지의 위치를 지정한다.

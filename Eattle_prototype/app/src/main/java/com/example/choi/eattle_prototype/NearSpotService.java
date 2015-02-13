@@ -10,6 +10,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,30 +32,42 @@ public class NearSpotService extends Service implements Runnable{
     //관광지 푸시를 위한 변수들
     private LocationManager mLocationManager;//시스템 서비스
     private SpotIntentReceiver mIntentReceiver;
-
     ArrayList mPendingIntentList;
 
     String intentKey = "spotProximity";
-
+    //데이터베이스 관련 변수
+    private DatabaseHelper dbHelper;
+    public static SQLiteDatabase db;
     public NearSpotService() {
     }
 
     public void onCreate(){
         super.onCreate();
         Log.d("NearSpotService", "위치 관련 서비스 시작");
+        //DB에서 관광지를 불러온다.
+        //데이터베이스 OPEN
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
+        String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
+        Cursor c = db.rawQuery(SQL, null);
+        GLOBAL.recordCount = c.getCount();
+
+        for (int i = 0; i < GLOBAL.recordCount; i++) {
+            c.moveToNext();
+            String name = c.getString(0);
+            String _picName = c.getString(1);
+            //R.drawable을 동적으로 가져온다.
+            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
+
+            float latitude = c.getFloat(2);
+            float longitude = c.getFloat(3);
+            String spotInfoID = c.getString(4);
+            GLOBAL.spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
+        }
         //-------------특정 관광지에 근접했는지 체크한다-------------
         // 위치 관리자 객체 참조
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mPendingIntentList = new ArrayList();
-        //7개의 관광지를 등록
-        int countTargets = 7;
-        register(1001, 40.418776, -86.925172, 2000, -1);//150
-        register(1002, 40.423646, -86.922908, 2000, -1);//Burton Morgan
-        register(1003, 40.421226, -86.922258, 2000, -1);//DLR
-        register(1004, 40.425588, -86.910810, 2000, -1);//PMU
-        register(1005, 40.427661, -86.9111284, 2000, -1);//Knoy hall
-
-
 
         // 수신자 객체 생성하여 등록
         //SpotIntentReceiver는 브로드캐스트 수신자를 상속함.
@@ -61,7 +75,7 @@ public class NearSpotService extends Service implements Runnable{
         //브로드캐스트 수신자는 처음부터 메니페스트 파일에 등록될 수도 있지만
         //자바 코드에서 registerReceiver를 통해 등록될 수도 있다.
         registerReceiver(mIntentReceiver, mIntentReceiver.getFilter());
-        Toast.makeText(getApplicationContext(), countTargets + "개 관광지에 대한 근접 리스너 등록", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), GLOBAL.recordCount + "개 관광지에 대한 근접 리스너 등록", Toast.LENGTH_LONG).show();
 
         //쓰레드를 생성하여 위치 관련 서비스 시작
         Thread nearSpotService = new Thread(this);
@@ -96,6 +110,10 @@ public class NearSpotService extends Service implements Runnable{
                 gpsListener,
                 Looper.getMainLooper());
 
+        for(int i=0;i<GLOBAL.recordCount;i++){
+            //근접 관광지 체크를 위해 등록
+            register(1001+i,GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),2000,-1);
+        }
 //        Toast.makeText(getApplicationContext(), "위치 확인 시작", Toast.LENGTH_SHORT).show();
     }
 
@@ -245,9 +263,11 @@ public class NearSpotService extends Service implements Runnable{
             mLastReceivedIntent = null;
         }
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
 }

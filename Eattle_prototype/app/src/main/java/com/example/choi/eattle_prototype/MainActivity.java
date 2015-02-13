@@ -1,7 +1,6 @@
 package com.example.choi.eattle_prototype;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -11,9 +10,7 @@ import android.view.View;
 
 public class MainActivity extends ActionBarActivity {
 
-    //데이터베이스 관련 변수
-    private DatabaseHelper dbHelper;
-    public static SQLiteDatabase db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,12 +20,6 @@ public class MainActivity extends ActionBarActivity {
         //위치 관련 서비스 시작
         Intent locationIntent = new Intent(this,NearSpotService.class);
         startService(locationIntent);
-
-
-        //데이터베이스 OPEN
-
-        dbHelper = new DatabaseHelper(this);
-        db = dbHelper.getWritableDatabase();
     }
 
     //사진 뷰어, 관광 뷰어로 나누어지는 부분
