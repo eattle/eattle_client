@@ -29,10 +29,11 @@ public class TourMainActivity extends ActionBarActivity {
     private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
     private static double lastLatitude;//가장 마지막으로 받은 위도
     private static double lastLongitutde;//가장 마지막으로 받은 경도
-    private int mode = 0;//0이면 뷰페이저, 1이면 리스트 형식으로
+    private int viewMode = 0;//0이면 뷰페이저, 1이면 리스트 형식으로
     private android.support.v4.view.ViewPager pager;
     private LinearLayout list;
     private ScrollView scroll;
+
     /*
     //제스처를 인식하기 위한 변수들-----------------
     // 드래그시 좌표 저장
@@ -66,6 +67,7 @@ public class TourMainActivity extends ActionBarActivity {
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
                 double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
                 GLOBAL.spot[i].setSpotDistanceFromMe(temp);
+                Log.d("MainActivity", "관광지의 위도, 경도"+Double.toString(GLOBAL.spot[i].getLatitude())+" "+Double.toString(GLOBAL.spot[i].getLongitutde()));
                 Log.d("MainActivity", GLOBAL.spot[i].getName()+" 가 현재 위치로 부터 떨어진 거리 : "+Double.toString(temp));
             }//가까운 순으로 정렬한다.
             Arrays.sort(GLOBAL.spot);
@@ -87,18 +89,18 @@ public class TourMainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //관광지를 하나씩 보여줄 것인지, 리스트 형태로 보여줄 것인지
-                if (mode == 0) {//뷰페이저->리스트뷰
+                if (viewMode == 0) {//뷰페이저->리스트뷰
                     //뷰페이저를 안보이도록 한다.
                     pager.setVisibility(View.INVISIBLE);
                     //리스트를 보이도록 한다.
                     scroll.setVisibility(View.VISIBLE);
-                    mode=1;
-                } else if (mode == 1) {//리스트뷰->뷰페이저
+                    viewMode=1;
+                } else if (viewMode == 1) {//리스트뷰->뷰페이저
                     //리스트를 안보이도록 한다.
                     scroll.setVisibility(View.INVISIBLE);
                     //뷰페이저를 보이도록 한다.
                     pager.setVisibility(View.VISIBLE);
-                    mode=0;
+                    viewMode=0;
                 }
             }
         });
@@ -138,10 +140,12 @@ public class TourMainActivity extends ActionBarActivity {
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
+                Log.d("MainActivity", "!!!"+Double.toString(lastLatitude)+" "+Double.toString(lastLongitutde));
+                Log.d("MainActivity", "관광지의 위도, 경도"+Double.toString(GLOBAL.spot[i].getLatitude())+" "+Double.toString(GLOBAL.spot[i].getLongitutde()));
                 double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
                 GLOBAL.spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", GLOBAL.spot[i].getName()+" 가 현재 위치로 부터 떨어진 거리 : "+Double.toString(temp));
-            }
+            }//가까운 순으로 정렬한다.
             Arrays.sort(GLOBAL.spot);
         }
         // 스크롤뷰 다시 그리기-------------------------------------------
@@ -160,6 +164,82 @@ public class TourMainActivity extends ActionBarActivity {
     }
 
     //현재 위치에서 관광지까지의 거리 계산을 위한 함수
+    public double calcDistance(double P1_latitude, double P1_longitude,
+                           double P2_latitude, double P2_longitude) {
+        if ((P1_latitude == P2_latitude) && (P1_longitude == P2_longitude)) {
+            return 0;
+        }
+        double e10 = P1_latitude * Math.PI / 180;
+        double e11 = P1_longitude * Math.PI / 180;
+        double e12 = P2_latitude * Math.PI / 180;
+        double e13 = P2_longitude * Math.PI / 180;
+  /* 타원체 GRS80 */
+        double c16 = 6356752.314140910;
+        double c15 = 6378137.000000000;
+        double c17 = 0.0033528107;
+        double f15 = c17 + c17 * c17;
+        double f16 = f15 / 2;
+        double f17 = c17 * c17 / 2;
+        double f18 = c17 * c17 / 8;
+        double f19 = c17 * c17 / 16;
+        double c18 = e13 - e11;
+        double c20 = (1 - c17) * Math.tan(e10);
+        double c21 = Math.atan(c20);
+        double c22 = Math.sin(c21);
+        double c23 = Math.cos(c21);
+        double c24 = (1 - c17) * Math.tan(e12);
+        double c25 = Math.atan(c24);
+        double c26 = Math.sin(c25);
+        double c27 = Math.cos(c25);
+        double c29 = c18;
+        double c31 = (c27 * Math.sin(c29) * c27 * Math.sin(c29))
+                + (c23 * c26 - c22 * c27 * Math.cos(c29))
+                * (c23 * c26 - c22 * c27 * Math.cos(c29));
+        double c33 = (c22 * c26) + (c23 * c27 * Math.cos(c29));
+        double c35 = Math.sqrt(c31) / c33;
+        double c36 = Math.atan(c35);
+        double c38 = 0;
+        if (c31 == 0) {
+            c38 = 0;
+        } else {
+            c38 = c23 * c27 * Math.sin(c29) / Math.sqrt(c31);
+        }
+        double c40 = 0;
+        if ((Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38))) == 0) {
+            c40 = 0;
+        } else {
+            c40 = c33 - 2 * c22 * c26
+                    / (Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38)));
+        }
+        double c41 = Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38))
+                * (c15 * c15 - c16 * c16) / (c16 * c16);
+        double c43 = 1 + c41 / 16384
+                * (4096 + c41 * (-768 + c41 * (320 - 175 * c41)));
+        double c45 = c41 / 1024 * (256 + c41 * (-128 + c41 * (74 - 47 * c41)));
+        double c47 = c45
+                * Math.sqrt(c31)
+                * (c40 + c45
+                / 4
+                * (c33 * (-1 + 2 * c40 * c40) - c45 / 6 * c40
+                * (-3 + 4 * c31) * (-3 + 4 * c40 * c40)));
+        double c50 = c17
+                / 16
+                * Math.cos(Math.asin(c38))
+                * Math.cos(Math.asin(c38))
+                * (4 + c17
+                * (4 - 3 * Math.cos(Math.asin(c38))
+                * Math.cos(Math.asin(c38))));
+        double c52 = c18
+                + (1 - c50)
+                * c17
+                * c38
+                * (Math.acos(c33) + c50 * Math.sin(Math.acos(c33))
+                * (c40 + c50 * c33 * (-1 + 2 * c40 * c40)));
+        double c54 = c16 * c43 * (Math.atan(c35) - c47);
+        // return distance in meter
+        return c54;
+    }
+    /*
     public static double calcDistance(double lat1, double lon1, double lat2, double lon2) {
         double EARTH_R, Rad, radLat1, radLat2, radDist;
         double distance, ret;
@@ -169,16 +249,23 @@ public class TourMainActivity extends ActionBarActivity {
         radLat1 = Rad * lat1;
         radLat2 = Rad * lat2;
         radDist = Rad * (lon1 - lon2);
-
+        Log.d("calcDistance","radDist : "+Double.toString(radDist));
         distance = Math.sin(radLat1) * Math.sin(radLat2);
         distance = distance + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radDist);
+        Log.d("calcDistance","distance : "+Double.toString(distance));
         ret = EARTH_R * Math.acos(distance);
+        Log.d("calcDistance","ret : "+Double.toString(ret));
 
         double result = Math.round(Math.round(ret) / 1000);
-        if (result == 0) result = Math.round(ret);
+        Log.d("calcDistance","result : "+Double.toString(result));
+        if (result == 0) {
+            Log.d("calcDistance","result가 0!!!!!!");
+
+            result = Math.round(ret);
+        }
 
         return result;
-    }
+    }*/
     //스크롤뷰(리스트)에 관광지들을 동적으로 추가하는 함수
     public void addTouristSpotToList(int picName,String name, final int i){
         //리스트 형식의 뷰에도 마찬가지로 추가한다.
@@ -240,6 +327,7 @@ public class TourMainActivity extends ActionBarActivity {
         });
 
     }
+
     /*
     //제스처(줌인,줌아웃)을 인식하기 위한 함수
     public boolean onTouchEvent(MotionEvent event) {

@@ -54,16 +54,15 @@ public class NearSpotService extends Service implements Runnable{
         String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
         Cursor c = db.rawQuery(SQL, null);
         GLOBAL.recordCount = c.getCount();
-
+        GLOBAL.spot  = new TouristSpotInfo[GLOBAL.recordCount];
         for (int i = 0; i < GLOBAL.recordCount; i++) {
             c.moveToNext();
             String name = c.getString(0);
             String _picName = c.getString(1);
             //R.drawable을 동적으로 가져온다.
             int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-
-            float latitude = c.getFloat(2);
-            float longitude = c.getFloat(3);
+            double latitude = c.getDouble(2);
+            double longitude = c.getDouble(3);
             String spotInfoID = c.getString(4);
             GLOBAL.spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
         }
@@ -132,8 +131,8 @@ public class NearSpotService extends Service implements Runnable{
          * 위치 정보가 확인되었을 때 호출되는 메소드
          */
         public void onLocationChanged(Location location) {
-            Double latitude = location.getLatitude();
-            Double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
 
             TourMainActivity.setHavelatlonInfo(true); // 위치 정보를 받았다는 표시
             TourMainActivity.setLastLatitude(latitude); // 최신으로 받은 위도
