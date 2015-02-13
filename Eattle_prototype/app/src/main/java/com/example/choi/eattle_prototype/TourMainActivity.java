@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TourMainActivity extends ActionBarActivity {
@@ -77,7 +78,7 @@ public class TourMainActivity extends ActionBarActivity {
             spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
 
             //리스트(스크롤뷰)에 관광지를 추가한다.
-            addTouristSpotToList(picName,name);
+            addTouristSpotToList(picName,name,i);
         }
         //------------------------------------------------------------------------------------
 
@@ -142,11 +143,9 @@ public class TourMainActivity extends ActionBarActivity {
             @Override
             public void onPageScrollStateChanged(int state) {
             }
-
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
-
             @Override
             //페이지가 변경될때
             public void onPageSelected(int position) {
@@ -158,7 +157,7 @@ public class TourMainActivity extends ActionBarActivity {
 
     public void onResume() {
         super.onResume();
-
+        //거리에 따라 관광지를 정렬한다
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
             for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
@@ -171,7 +170,7 @@ public class TourMainActivity extends ActionBarActivity {
         // 스크롤뷰 다시 그리기-------------------------------------------
         list.removeAllViews();
         for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
-            addTouristSpotToList(spot[i].getResId(),spot[i].getName());
+            addTouristSpotToList(spot[i].getResId(),spot[i].getName(),i);
         }
         // 뷰페이저 다시 그리기-------------------------------------------
         // 뷰페이저 객체를 참조하고 어댑터를 설정
@@ -203,7 +202,8 @@ public class TourMainActivity extends ActionBarActivity {
 
         return result;
     }
-    public void addTouristSpotToList(int picName,String name){
+    //스크롤뷰(리스트)에 관광지들을 동적으로 추가하는 함수
+    public void addTouristSpotToList(int picName,String name, final int i){
         //리스트 형식의 뷰에도 마찬가지로 추가한다.
         FrameLayout listLayout = new FrameLayout(this);
         ImageView listImage = new ImageView(this);
@@ -235,6 +235,34 @@ public class TourMainActivity extends ActionBarActivity {
         listLayout.addView(listText);
         //전체 추가
         list.addView(listLayout);
+        listLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), DetailedInfoActivity.class);
+
+                //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
+                ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
+
+                TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(i);
+                String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+
+                for (int j = 0; j < args.length; j++) {
+                    String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[j];
+                    Cursor c = MainActivity.db.rawQuery(SQL, null);
+                    c.moveToNext();
+                    String spotInfo = c.getString(0);
+                    String _picName = c.getString(1);
+                    //R.drawable을 동적으로 가져온다.
+                    int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
+                    spot.add(new TouristSpotInfo(spotInfo, tempPicName, 1, 1));
+                }
+
+                //객체배열을 ArrayList로 넘겨준다.
+                intent.putParcelableArrayListExtra("spots", spot);
+                startActivity(intent);
+            }
+        });
+
     }
     /*
     //제스처(줌인,줌아웃)을 인식하기 위한 함수

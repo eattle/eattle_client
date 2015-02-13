@@ -40,28 +40,7 @@ public class SpotPage extends LinearLayout {
                     if (v.getId() == R.id.tourSpotPicture) {
                         Log.d("MainActivity", " 클릭 성공");
                         //선택된 관광지에 대한 추가 액티비티를 띄운다.
-                        Intent intent = new Intent(context, DetailedInfoActivity.class);
-
-                        //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
-                        ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
-
-                        TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(getSpotNum());
-                        String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
-
-                        for (int i = 0; i < args.length; i++) {
-                            String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[i];
-                            Cursor c = MainActivity.db.rawQuery(SQL, null);
-                            c.moveToNext();
-                            String spotInfo = c.getString(0);
-                            String _picName = c.getString(1);
-                            //R.drawable을 동적으로 가져온다.
-                            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-                            spot.add(new TouristSpotInfo(spotInfo, picName, 1, 1));
-                        }
-
-                        //객체배열을 ArrayList로 넘겨준다.
-                        intent.putParcelableArrayListExtra("spots", spot);
-                        context.startActivity(intent);
+                        createDetailedInfoActivity(context);
                     }
                 }
             });
@@ -88,6 +67,32 @@ public class SpotPage extends LinearLayout {
         nameText = (TextView) view.findViewById(R.id.nameText);
     }
 
+    public void createDetailedInfoActivity(Context context){
+        Intent intent = new Intent(context, DetailedInfoActivity.class);
+
+        //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
+        ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
+
+        TouristSpotInfo tempInfo = TourMainActivity.getTouristSpotInfo(getSpotNum());
+        String[] args = tempInfo.getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+
+        for (int i = 0; i < args.length; i++) {
+            String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[i];
+            Cursor c = MainActivity.db.rawQuery(SQL, null);
+            c.moveToNext();
+            String spotInfo = c.getString(0);
+            String _picName = c.getString(1);
+            //R.drawable을 동적으로 가져온다.
+            int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
+            spot.add(new TouristSpotInfo(spotInfo, picName, 1, 1));
+        }
+
+        //객체배열을 ArrayList로 넘겨준다.
+        intent.putParcelableArrayListExtra("spots", spot);
+        context.startActivity(intent);
+    }
+
+    //get, set
     public void setImage(int resId) {
         tourSpotPicture.setImageResource(resId);
     }
