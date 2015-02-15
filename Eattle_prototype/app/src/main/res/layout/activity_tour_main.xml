@@ -4,9 +4,40 @@
     android:layout_height="match_parent"
     tools:context="com.example.choi.eattle_prototype.TourMainActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:id="@+id/buttonPart">
+
+        <Button
+            android:id="@+id/toMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_shape"
+            android:text="지도보기"
+            android:textSize="20dp"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+
+            />
+
+        <Button
+            android:id="@+id/changeMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="모드변환"
+            android:textSize="20dp"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:background="@drawable/button_shape"/>
+    </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/buttonPart">
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
@@ -20,7 +51,9 @@
             android:id="@+id/scroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:visibility="invisible">
+
             <LinearLayout
                 android:id="@+id/list"
                 android:layout_width="match_parent"
@@ -30,19 +63,6 @@
             </LinearLayout>
         </ScrollView>
 
-        <Button
-            android:id="@+id/toMap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="지도보기"
-            android:textSize="20dp" />
 
-        <Button
-            android:id="@+id/changeMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|top"
-            android:text="모드변환"
-            android:textSize="20dp" />
     </FrameLayout>
 </RelativeLayout>

@@ -23,14 +23,14 @@ public class ViewPagerAdapter extends PagerAdapter {
         mContext = context;
     }
     public ViewPagerAdapter(Context context, TouristSpotInfo[] tourSpot){//TourSpot 배열을 전달받았을 때
-        this.tourSpot = new TouristSpotInfo[tourSpot.length];
-        System.arraycopy(tourSpot,0,this.tourSpot,0,tourSpot.length);
+        this.tourSpot = new TouristSpotInfo[GLOBAL.recordCount];
+        System.arraycopy(tourSpot,0,this.tourSpot,0,GLOBAL.recordCount);
 
         mContext = context;
     }
 
     public ViewPagerAdapter(Context context, ArrayList<TouristSpotInfo> spot) {//TourSpot ArrayList를 받았을 때
-        this.tourSpot = spot.toArray(new TouristSpotInfo[spot.size()]);
+        this.tourSpot = spot.toArray(new TouristSpotInfo[GLOBAL.recordCount]);
         mContext = context;
     }
 
@@ -38,7 +38,7 @@ public class ViewPagerAdapter extends PagerAdapter {
      * 페이지 갯수
      */
     public int getCount() {
-        return tourSpot.length;
+        return GLOBAL.recordCount;
     }
 
 

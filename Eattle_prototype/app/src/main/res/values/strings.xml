@@ -11,4 +11,6 @@
     <string name="title_activity_detailed_info">DetailedInfoActivity</string>
     <string name="title_activity_spot_page">SpotPage</string>
 
+    <color name="white">#FFFFFF</color>
+
 </resources>

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,8 @@ public class TourMainActivity extends ActionBarActivity {
     private LinearLayout list;
     private ScrollView scroll;
 
+    //스와이프를 인식하기 위한 변수
+    private float x1,x2;
     /*
     //제스처를 인식하기 위한 변수들-----------------
     // 드래그시 좌표 저장
@@ -139,7 +143,7 @@ public class TourMainActivity extends ActionBarActivity {
         //거리에 따라 관광지를 정렬한다
         if (havelatlonInfo == true) {
             //현재 위치로부터의 거리를 계산한다.
-            for (int i = 0; i < CONSTANT.NUMOFSPOT; i++) {
+            for (int i = 0; i < GLOBAL.recordCount; i++) {
                 Log.d("MainActivity", "!!!"+Double.toString(lastLatitude)+" "+Double.toString(lastLongitutde));
                 Log.d("MainActivity", "관광지의 위도, 경도"+Double.toString(GLOBAL.spot[i].getLatitude())+" "+Double.toString(GLOBAL.spot[i].getLongitutde()));
                 double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
@@ -150,7 +154,7 @@ public class TourMainActivity extends ActionBarActivity {
         }
         // 스크롤뷰 다시 그리기-------------------------------------------
         list.removeAllViews();
-        for(int i=0;i<CONSTANT.NUMOFSPOT;i++){
+        for(int i=0;i<GLOBAL.recordCount;i++){
             addTouristSpotToList(GLOBAL.spot[i].getResId(),GLOBAL.spot[i].getName(),i);
         }
         // 뷰페이저 다시 그리기-------------------------------------------
@@ -160,7 +164,7 @@ public class TourMainActivity extends ActionBarActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, GLOBAL.spot);
         pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수 설정
-        pager.setOffscreenPageLimit(CONSTANT.NUMOFSPOT);
+        pager.setOffscreenPageLimit(GLOBAL.recordCount);
     }
 
     //현재 위치에서 관광지까지의 거리 계산을 위한 함수
@@ -299,6 +303,8 @@ public class TourMainActivity extends ActionBarActivity {
         listLayout.addView(listText);
         //전체 추가
         list.addView(listLayout);
+
+        /*
         listLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -324,9 +330,82 @@ public class TourMainActivity extends ActionBarActivity {
                 intent.putParcelableArrayListExtra("spots", spot);
                 startActivity(intent);
             }
-        });
+        });*/
+        //스와이프 인식하기
+        listLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        x1 = event.getX();
+                        Toast.makeText(getApplicationContext(), "action_down", Toast.LENGTH_SHORT).show ();
+                        return true;
+                    //    break;
+                    case MotionEvent.ACTION_UP:
+                        x2 = event.getX();
 
+                        Toast.makeText(getApplicationContext(), "action_up"+Float.toString(x1)+" "+Float.toString(x2), Toast.LENGTH_SHORT).show();
+
+                        float deltaX = x2 - x1;
+                        if(Math.abs(deltaX) < 10){//관광지 선택으로 인식
+                            Intent intent = new Intent(getApplicationContext(), DetailedInfoActivity.class);
+
+                            //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
+                            ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
+
+                            String[] args = GLOBAL.spot[i].getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
+
+                            for (int j = 0; j < args.length; j++) {
+                                String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[j];
+                                Cursor c = NearSpotService.db.rawQuery(SQL, null);
+                                c.moveToNext();
+                                String spotInfo = c.getString(0);
+                                String _picName = c.getString(1);
+                                //R.drawable을 동적으로 가져온다.
+                                int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
+                                spot.add(new TouristSpotInfo(spotInfo, tempPicName, 1, 1));
+                            }
+
+                            //객체배열을 ArrayList로 넘겨준다.
+                            intent.putParcelableArrayListExtra("spots", spot);
+                            startActivity(intent);
+                            x1 = event.getX();
+                        }
+                        else if (Math.abs(deltaX) > CONSTANT.MIN_DISTANCE)//스와이프로 인식
+                        {
+                            Toast.makeText(getApplicationContext(), "swipe", Toast.LENGTH_SHORT).show ();
+                            //spot에서 i인덱스를 가진 관광지를 목록에서 지운다.
+                            for(int j=(i+1);j<GLOBAL.recordCount;j++) {
+                                GLOBAL.spot[j-1] = GLOBAL.spot[j];
+                            }
+                            GLOBAL.recordCount--;
+                            CONSTANT.NUMOFSPOT--;
+                            //새로 그린다.
+                            onResume();
+                            /*
+                            for(int j=0;j<GLOBAL.recordCount;j++) {
+                                addTouristSpotToList(GLOBAL.spot[j].getResId(),GLOBAL.spot[j].getName(),j);
+                            }*/
+                        }
+                        else
+                        {
+                            // consider as something else - a screen tap for example
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
     }
+    //리스트뷰에서 스와이프를 인식하기 위한 함수
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+
+        return super.onTouchEvent(event);
+    }
+
 
     /*
     //제스처(줌인,줌아웃)을 인식하기 위한 함수
@@ -403,6 +482,8 @@ public class TourMainActivity extends ActionBarActivity {
         float y = event.getY(0) - event.getY(1);
         return FloatMath.sqrt(x * x + y * y);
     }*/
+
+
     // get, set
     public static boolean getHavelatlonInfo() {
         return havelatlonInfo;

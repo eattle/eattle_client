@@ -114,7 +114,7 @@ public class NearSpotService extends Service implements Runnable{
 
         for(int i=0;i<GLOBAL.recordCount;i++){
             //근접 관광지 체크를 위해 등록
-            register(1001+i,GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),2000,-1);
+            register(1001+i,GLOBAL.spot[i].getName(),GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),2000,-1);
         }
 //        Toast.makeText(getApplicationContext(), "위치 확인 시작", Toast.LENGTH_SHORT).show();
     }
@@ -172,10 +172,11 @@ public class NearSpotService extends Service implements Runnable{
     /**
      * 근접 관광지 푸시 관련
      */
-    private void register(int id, double latitude, double longitude, float radius, long expiration) {
+    private void register(int id, String name,double latitude, double longitude, float radius, long expiration) {
         Log.d("GPS", "근접 관광지 푸시 관련, register 함수 호출");
         Intent proximityIntent = new Intent(intentKey);
         proximityIntent.putExtra("id", id);
+        proximityIntent.putExtra("name",name);
         proximityIntent.putExtra("latitude", latitude);
         proximityIntent.putExtra("longitude", longitude);
         //pendingIntent : 인텐트를 바로 전달하지 않고, 지연시켜주는 인텐트.
@@ -234,6 +235,7 @@ public class NearSpotService extends Service implements Runnable{
                 mLastReceivedIntent = intent;
 
                 int id = intent.getIntExtra("id", 0);
+                String name = intent.getStringExtra("name");
                 double latitude = intent.getDoubleExtra("latitude", 0.0D);
                 double longitude = intent.getDoubleExtra("longitude", 0.0D);
 
@@ -246,9 +248,9 @@ public class NearSpotService extends Service implements Runnable{
                 mCompatBuilder.setSmallIcon(R.drawable.ic_launcher);
                 mCompatBuilder.setTicker("주변에 관광 명소가 있어요!");
                 mCompatBuilder.setWhen(System.currentTimeMillis());
-                mCompatBuilder.setNumber(10);
+                mCompatBuilder.setNumber(1);
                 mCompatBuilder.setContentTitle("Eattle");
-                mCompatBuilder.setContentText("주변에 관광 명소가 있어요!\n확인하러 갈까요?");
+                mCompatBuilder.setContentText(name+"가 가까이 있어요!\n확인하러 갈까요?");
                 mCompatBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
                 mCompatBuilder.setContentIntent(pendingIntent);
                 mCompatBuilder.setAutoCancel(true);
