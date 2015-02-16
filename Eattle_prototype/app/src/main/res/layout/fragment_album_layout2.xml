@@ -1,0 +1,61 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    >
+
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:id="@+id/imageView6"
+        android:scaleType="centerCrop"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_marginRight="1dp"
+        android:layout_marginLeft="2dp" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:id="@+id/imageView7"
+        android:scaleType="centerCrop"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/imageView6"
+        android:layout_toEndOf="@+id/imageView6"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="2"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:id="@+id/imageView8"
+        android:scaleType="centerCrop"
+        android:layout_alignTop="@+id/imageView7"
+        android:layout_toRightOf="@+id/imageView7"
+        android:layout_toEndOf="@+id/imageView7"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_marginRight="1dp"
+        android:layout_marginLeft="1dp" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:id="@+id/imageView9"
+        android:scaleType="centerCrop"
+        android:layout_alignTop="@+id/imageView8"
+        android:layout_toRightOf="@+id/imageView8"
+        android:layout_toEndOf="@+id/imageView8"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="2dp" />
+
+</LinearLayout>

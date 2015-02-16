@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <!--
  The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but are recommended.
@@ -31,7 +36,9 @@
         </activity>
         <activity
             android:name=".AlbumMainActivity"
-            android:label="@string/title_activity_album_main" >
+            android:label="@string/title_activity_album_main"
+            android:theme="@style/AlbumTheme"
+            android:screenOrientation="landscape">
         </activity>
         <activity
             android:name=".TourMainActivity"
