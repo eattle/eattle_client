@@ -11,7 +11,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 /*
@@ -36,7 +35,7 @@ public class TourMapActivity extends ActionBarActivity {
 
         for(int i=0;i<GLOBAL.recordCount;i++){
             // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName());
+            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
         }
     }
 
@@ -46,6 +45,12 @@ public class TourMapActivity extends ActionBarActivity {
         // 내 위치 자동 표시 enable
         //지도에 현재 나의 위치를 점으로 찍어 표시해주는 코드
         map.setMyLocationEnabled(true);
+
+        //관광지를 방문했을 경우 업데이트 해야 하므로 다시 호출
+        for(int i=0;i<GLOBAL.recordCount;i++){
+            // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
+            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
+        }
     }
 
     @Override
@@ -74,20 +79,24 @@ public class TourMapActivity extends ActionBarActivity {
         // 지도 유형 설정. 지형도인 경우에는 GoogleMap.MAP_TYPE_TERRAIN, 위성 지도인 경우에는 GoogleMap.MAP_TYPE_SATELLITE
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        Polyline polyline = map.addPolyline(rectOptions);
+        // 지도 위에 경로를 그리기 위한 부분
+        //Polyline polyline = map.addPolyline(rectOptions);
     }
 
     /**
      * 관광지를 표시하기 위해 정의한 메소드
      */
-    public static void showSpotPosition(double latitude, double longitude, String title, String snippet) {
+    public static void showSpotPosition(double latitude, double longitude, String title, String snippet,int visit) {
         MarkerOptions marker = new MarkerOptions();
         //우리집
         marker.position(new LatLng(latitude, longitude));//관광지의 위치를 지정한다.
         marker.title("● 관광지명 : " + title + "\n");
         marker.snippet("● 주소 : \n " + snippet);
         marker.draggable(true);
-        marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.spot));
+        if(visit == 0)//아직 안방문
+            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.spot_notvisit));
+        else if(visit == 1)
+            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.spot_visit));
 
         map.addMarker(marker);
     }

@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,18 +37,7 @@ public class TourMainActivity extends ActionBarActivity {
 
     //스와이프를 인식하기 위한 변수
     private float x1,x2;
-    /*
-    //제스처를 인식하기 위한 변수들-----------------
-    // 드래그시 좌표 저장
-    int posX1=0, posX2=0, posY1=0, posY2=0;
-    // 핀치시 두좌표간의 거리 저장
-    float oldDist = 1f;
-    float newDist = 1f;
-    static final int NONE = 0;
-    static final int DRAG = 1;
-    static final int ZOOM = 2;
-    int mode = NONE;
-*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -243,33 +231,7 @@ public class TourMainActivity extends ActionBarActivity {
         // return distance in meter
         return c54;
     }
-    /*
-    public static double calcDistance(double lat1, double lon1, double lat2, double lon2) {
-        double EARTH_R, Rad, radLat1, radLat2, radDist;
-        double distance, ret;
 
-        EARTH_R = 6371000.0;
-        Rad = Math.PI / 180;
-        radLat1 = Rad * lat1;
-        radLat2 = Rad * lat2;
-        radDist = Rad * (lon1 - lon2);
-        Log.d("calcDistance","radDist : "+Double.toString(radDist));
-        distance = Math.sin(radLat1) * Math.sin(radLat2);
-        distance = distance + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radDist);
-        Log.d("calcDistance","distance : "+Double.toString(distance));
-        ret = EARTH_R * Math.acos(distance);
-        Log.d("calcDistance","ret : "+Double.toString(ret));
-
-        double result = Math.round(Math.round(ret) / 1000);
-        Log.d("calcDistance","result : "+Double.toString(result));
-        if (result == 0) {
-            Log.d("calcDistance","result가 0!!!!!!");
-
-            result = Math.round(ret);
-        }
-
-        return result;
-    }*/
     //스크롤뷰(리스트)에 관광지들을 동적으로 추가하는 함수
     public void addTouristSpotToList(int picName,String name, final int i){
         //리스트 형식의 뷰에도 마찬가지로 추가한다.
@@ -304,34 +266,7 @@ public class TourMainActivity extends ActionBarActivity {
         //전체 추가
         list.addView(listLayout);
 
-        /*
-        listLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), DetailedInfoActivity.class);
-
-                //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
-                ArrayList<TouristSpotInfo> spot = new ArrayList<TouristSpotInfo>();
-
-                String[] args = GLOBAL.spot[i].getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
-
-                for (int j = 0; j < args.length; j++) {
-                    String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[j];
-                    Cursor c = NearSpotService.db.rawQuery(SQL, null);
-                    c.moveToNext();
-                    String spotInfo = c.getString(0);
-                    String _picName = c.getString(1);
-                    //R.drawable을 동적으로 가져온다.
-                    int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-                    spot.add(new TouristSpotInfo(spotInfo, tempPicName, 1, 1));
-                }
-
-                //객체배열을 ArrayList로 넘겨준다.
-                intent.putParcelableArrayListExtra("spots", spot);
-                startActivity(intent);
-            }
-        });*/
-        //스와이프 인식하기
+        //터치 이벤트를 등록한다.
         listLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -339,16 +274,17 @@ public class TourMainActivity extends ActionBarActivity {
                 {
                     case MotionEvent.ACTION_DOWN:
                         x1 = event.getX();
-                        Toast.makeText(getApplicationContext(), "action_down", Toast.LENGTH_SHORT).show ();
+                        //Toast.makeText(getApplicationContext(), "action_down", Toast.LENGTH_SHORT).show ();
                         return true;
                     //    break;
                     case MotionEvent.ACTION_UP:
                         x2 = event.getX();
 
-                        Toast.makeText(getApplicationContext(), "action_up"+Float.toString(x1)+" "+Float.toString(x2), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "action_up"+Float.toString(x1)+" "+Float.toString(x2), Toast.LENGTH_SHORT).show();
 
                         float deltaX = x2 - x1;
-                        if(Math.abs(deltaX) < 10){//관광지 선택으로 인식
+                        //관광지 선택으로 인식
+                        if(Math.abs(deltaX) < 10){
                             Intent intent = new Intent(getApplicationContext(), DetailedInfoActivity.class);
 
                             //DB 쿼리로 변경될 부분, intent와 함께 넘겨줄 데이터를 정의하는 부분
@@ -372,9 +308,10 @@ public class TourMainActivity extends ActionBarActivity {
                             startActivity(intent);
                             x1 = event.getX();
                         }
-                        else if (Math.abs(deltaX) > CONSTANT.MIN_DISTANCE)//스와이프로 인식
+                        //스와이프로 인식
+                        else if (Math.abs(deltaX) > CONSTANT.MIN_DISTANCE)
                         {
-                            Toast.makeText(getApplicationContext(), "swipe", Toast.LENGTH_SHORT).show ();
+                            //Toast.makeText(getApplicationContext(), "swipe", Toast.LENGTH_SHORT).show ();
                             //spot에서 i인덱스를 가진 관광지를 목록에서 지운다.
                             for(int j=(i+1);j<GLOBAL.recordCount;j++) {
                                 GLOBAL.spot[j-1] = GLOBAL.spot[j];
@@ -383,14 +320,6 @@ public class TourMainActivity extends ActionBarActivity {
                             CONSTANT.NUMOFSPOT--;
                             //새로 그린다.
                             onResume();
-                            /*
-                            for(int j=0;j<GLOBAL.recordCount;j++) {
-                                addTouristSpotToList(GLOBAL.spot[j].getResId(),GLOBAL.spot[j].getName(),j);
-                            }*/
-                        }
-                        else
-                        {
-                            // consider as something else - a screen tap for example
                         }
                         break;
                 }
@@ -398,91 +327,6 @@ public class TourMainActivity extends ActionBarActivity {
             }
         });
     }
-    //리스트뷰에서 스와이프를 인식하기 위한 함수
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-
-        return super.onTouchEvent(event);
-    }
-
-
-    /*
-    //제스처(줌인,줌아웃)을 인식하기 위한 함수
-    public boolean onTouchEvent(MotionEvent event) {
-        int act = event.getAction();
-        String strMsg = "";
-
-        switch(act & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:    //첫번째 손가락 터치(드래그 용도)
-                posX1 = (int) event.getX();
-                posY1 = (int) event.getY();
-
-                Log.d("zoom", "mode=DRAG");
-                mode = DRAG;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if(mode == DRAG) {  // 드래그 중
-                    posX2 = (int) event.getX();
-                    posY2 = (int) event.getY();
-
-                    if(Math.abs(posX2-posX1)>20 || Math.abs(posY2-posY1)>20) {
-                        posX1 = posX2;
-                        posY1 = posY2;
-                        strMsg = "drag";
-                        Toast toast = Toast.makeText(this, strMsg, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                } else if (mode == ZOOM) {    // 핀치 중
-                    newDist = spacing(event);
-
-                    Log.d("zoom", "newDist=" + newDist);
-                    Log.d("zoom", "oldDist=" + oldDist);
-
-                    if (newDist - oldDist > 40) { // zoom in
-                        oldDist = newDist;
-
-                        strMsg = "zoom in";//확대
-                        Toast toast = Toast.makeText(this, strMsg, Toast.LENGTH_SHORT);
-                        toast.show();
-                    } else if(oldDist - newDist > 40) { // zoom out
-                        oldDist = newDist;
-
-                        strMsg = "zoom out";//축소
-                        Toast toast = Toast.makeText(this, strMsg, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_UP:    // 첫번째 손가락을 떼었을 경우
-            case MotionEvent.ACTION_POINTER_UP:  // 두번째 손가락을 떼었을 경우
-                mode = NONE;
-                break;
-            case MotionEvent.ACTION_POINTER_DOWN:
-                //두번째 손가락 터치(손가락 2개를 인식하였기 때문에 핀치 줌으로 판별)
-                mode = ZOOM;
-
-                newDist = spacing(event);
-                oldDist = spacing(event);
-
-                Log.d("zoom", "newDist=" + newDist);
-                Log.d("zoom", "oldDist=" + oldDist);
-                Log.d("zoom", "mode=ZOOM");
-                break;
-            case MotionEvent.ACTION_CANCEL:
-            default :
-                break;
-        }
-
-        return super.onTouchEvent(event);
-    }
-
-    private float spacing(MotionEvent event) {
-        float x = event.getX(0) - event.getX(1);
-        float y = event.getY(0) - event.getY(1);
-        return FloatMath.sqrt(x * x + y * y);
-    }*/
-
 
     // get, set
     public static boolean getHavelatlonInfo() {

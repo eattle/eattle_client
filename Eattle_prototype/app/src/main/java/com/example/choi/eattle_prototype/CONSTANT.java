@@ -13,6 +13,6 @@ public class CONSTANT {
     final static String PACKAGE_NAME = "com.example.choi.eattle_prototype";
 
     //관광지를 리스트형식으로 볼때 스와이프 범위를 결정하는 상수
-    static final int MIN_DISTANCE = 150;
+    static final int MIN_DISTANCE = 250;
 
 }

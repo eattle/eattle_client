@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -22,8 +21,6 @@ import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +111,7 @@ public class NearSpotService extends Service implements Runnable{
 
         for(int i=0;i<GLOBAL.recordCount;i++){
             //근접 관광지 체크를 위해 등록
-            register(1001+i,GLOBAL.spot[i].getName(),GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),2000,-1);
+            register(1001+i,GLOBAL.spot[i].getName(),GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),200,-1);
         }
 //        Toast.makeText(getApplicationContext(), "위치 확인 시작", Toast.LENGTH_SHORT).show();
     }
@@ -141,9 +138,11 @@ public class NearSpotService extends Service implements Runnable{
             String msg = "위도 : "+ latitude + "/ 경도:"+ longitude;
             Log.i("GPSLocationService", msg);
 
+            /*
             //구글 지도에 그리기 위한 위도, 경도를 추가한다.
             TourMapActivity.rectOptions.add(new LatLng(latitude, longitude));
             TourMapActivity.rectOptions.color(Color.BLUE);
+            */
 
             // 현재 위치의 지도를 보여주기 위해 정의한 메소드 호출
             //최상위 액티비티가 TourMapActivity(지도) 일때만 지도에 그려준다.
@@ -232,6 +231,7 @@ public class NearSpotService extends Service implements Runnable{
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
                 Log.d("GPS", "근접 관광지 푸시 관련 onReceive 함수 호출");
+
                 mLastReceivedIntent = intent;
 
                 int id = intent.getIntExtra("id", 0);
@@ -239,7 +239,7 @@ public class NearSpotService extends Service implements Runnable{
                 double latitude = intent.getDoubleExtra("latitude", 0.0D);
                 double longitude = intent.getDoubleExtra("longitude", 0.0D);
 
-                //Toast.makeText(context, "근접한 관광지 : " + id + ", " + latitude + ", " + longitude, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "근접한 관광지 : " + id + ", 이름 : " +name + " " + latitude + ", " + longitude, Toast.LENGTH_LONG).show();
                 //notification
                 NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, TourMapActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -256,6 +256,28 @@ public class NearSpotService extends Service implements Runnable{
                 mCompatBuilder.setAutoCancel(true);
 
                 nm.notify(222, mCompatBuilder.build());
+
+                //일단 해당 관광지를 방문한 것으로 판단하고 표시한다.
+                for(int i=0;i<GLOBAL.recordCount;i++){
+                    if(name.equals(GLOBAL.spot[i].getName())){
+                        GLOBAL.spot[i].setVisit(1);
+                        break;
+                    }
+                }
+                //현재 최상위 액티비티가 지도이면 바로 표시한다.
+                ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+                List<ActivityManager.RunningTaskInfo> Info = am.getRunningTasks(1);
+                ComponentName topActivity = Info.get(0).topActivity;
+                String topactivityname = topActivity.getClassName();
+                Log.d("GPS", topactivityname);
+                if(topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
+                    Log.d("GPSLocationService", "최상위 액티비티 : TourMapActivity");
+                    //관광지를 방문했을 경우 업데이트 해야 하므로 다시 호출
+                    for(int i=0;i<GLOBAL.recordCount;i++){
+                        // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
+                        TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
+                    }
+                }
             }
         }
 
