@@ -25,7 +25,7 @@ public class SpotPage extends LinearLayout {
 
     TextView nameText;
     ImageView tourSpotPicture;
-
+    ImageView favorite;
     int spotNum;//어떤 관광지?
 
     public static final int CALL_NUMBER = 1001;
@@ -46,8 +46,18 @@ public class SpotPage extends LinearLayout {
         super(context);
         init(context);
         this.spotNum = spotNum;
-        //depth1에 대해 클릭 리스너를 등록한다. depth2에 대해서는 클릭 리스너를 등록하지 않는다.
+        favorite = (ImageView)findViewById(R.id.favorite);
+
+        //depth2가 아닐때
         if (spotNum != -1) {
+            //즐겨찾기 표시 부분
+            if(GLOBAL.spot[spotNum].getFavorite() == 0) {//즐겨찾기가 아님
+                favorite.setVisibility(View.INVISIBLE);
+            }
+            else if(GLOBAL.spot[spotNum].getFavorite() == 1) {//즐겨찾기
+                favorite.setVisibility(View.VISIBLE);
+            }
+            //depth1에 대해 클릭 리스너를 등록한다. depth2에 대해서는 클릭 리스너를 등록하지 않는다.
             tourSpotPicture.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (v.getId() == R.id.tourSpotPicture) {
@@ -159,8 +169,9 @@ public class SpotPage extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.activity_spot_page, this, true);
 
-        tourSpotPicture = (ImageView) view.findViewById(R.id.tourSpotPicture);
-        nameText = (TextView) view.findViewById(R.id.nameText);
+        tourSpotPicture = (ImageView)findViewById(R.id.tourSpotPicture);
+        nameText = (TextView)findViewById(R.id.nameText);
+
     }
 
     public void createDetailedInfoActivity(Context context) {

@@ -23,22 +23,27 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class NearSpotService extends Service implements Runnable{
+public class NearSpotService extends Service implements Runnable {
     //관광지 푸시를 위한 변수들
     private LocationManager mLocationManager;//시스템 서비스
     private SpotIntentReceiver mIntentReceiver;
     ArrayList mPendingIntentList;
+    private static double lastLatitude;//가장 마지막으로 받은 위도
+    private static double lastLongitutde;//가장 마지막으로 받은 경도
+    private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
 
     String intentKey = "spotProximity";
     //데이터베이스 관련 변수
     private DatabaseHelper dbHelper;
     public static SQLiteDatabase db;
+
     public NearSpotService() {
     }
 
-    public void onCreate(){
+    public void onCreate() {
         super.onCreate();
         Log.d("NearSpotService", "위치 관련 서비스 시작");
         //DB에서 관광지를 불러온다.
@@ -51,7 +56,7 @@ public class NearSpotService extends Service implements Runnable{
         String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
         Cursor c = db.rawQuery(SQL, null);
         GLOBAL.recordCount = c.getCount();
-        GLOBAL.spot  = new TouristSpotInfo[GLOBAL.recordCount];
+        GLOBAL.spot = new TouristSpotInfo[GLOBAL.recordCount];
         for (int i = 0; i < GLOBAL.recordCount; i++) {
             c.moveToNext();
             String name = c.getString(0);
@@ -80,11 +85,12 @@ public class NearSpotService extends Service implements Runnable{
         Thread nearSpotService = new Thread(this);
         nearSpotService.start();
     }
+
     /**
      * 현재 위치 확인을 위해 정의한 메소드
      */
     private void startLocationService() {
-        Log.d("NearSpotService","startLocationService 호출");
+        Log.d("NearSpotService", "startLocationService 호출");
         // 위치 관리자 객체 참조
         LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -109,16 +115,115 @@ public class NearSpotService extends Service implements Runnable{
                 gpsListener,
                 Looper.getMainLooper());
 
-        for(int i=0;i<GLOBAL.recordCount;i++){
+        for (int i = 0; i < GLOBAL.recordCount; i++) {
             //근접 관광지 체크를 위해 등록
-            register(1001+i,GLOBAL.spot[i].getName(),GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),200,-1);
+            register(1001 + i, GLOBAL.spot[i].getName(), GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde(), 200, -1);
         }
 //        Toast.makeText(getApplicationContext(), "위치 확인 시작", Toast.LENGTH_SHORT).show();
     }
 
-    public void run(){
+    public void run() {
 //        Looper.prepare();
         startLocationService();
+    }
+    //현재 위치에서 관광지까지의 거리 계산을 위한 함수
+    public double calcDistance(double P1_latitude, double P1_longitude,
+                                      double P2_latitude, double P2_longitude) {
+        if ((P1_latitude == P2_latitude) && (P1_longitude == P2_longitude)) {
+            return 0;
+        }
+        double e10 = P1_latitude * Math.PI / 180;
+        double e11 = P1_longitude * Math.PI / 180;
+        double e12 = P2_latitude * Math.PI / 180;
+        double e13 = P2_longitude * Math.PI / 180;
+        /* 타원체 GRS80 */
+        double c16 = 6356752.314140910;
+        double c15 = 6378137.000000000;
+        double c17 = 0.0033528107;
+        double f15 = c17 + c17 * c17;
+        double f16 = f15 / 2;
+        double f17 = c17 * c17 / 2;
+        double f18 = c17 * c17 / 8;
+        double f19 = c17 * c17 / 16;
+        double c18 = e13 - e11;
+        double c20 = (1 - c17) * Math.tan(e10);
+        double c21 = Math.atan(c20);
+        double c22 = Math.sin(c21);
+        double c23 = Math.cos(c21);
+        double c24 = (1 - c17) * Math.tan(e12);
+        double c25 = Math.atan(c24);
+        double c26 = Math.sin(c25);
+        double c27 = Math.cos(c25);
+        double c29 = c18;
+        double c31 = (c27 * Math.sin(c29) * c27 * Math.sin(c29))
+                + (c23 * c26 - c22 * c27 * Math.cos(c29))
+                * (c23 * c26 - c22 * c27 * Math.cos(c29));
+        double c33 = (c22 * c26) + (c23 * c27 * Math.cos(c29));
+        double c35 = Math.sqrt(c31) / c33;
+        double c36 = Math.atan(c35);
+        double c38 = 0;
+        if (c31 == 0) {
+            c38 = 0;
+        } else {
+            c38 = c23 * c27 * Math.sin(c29) / Math.sqrt(c31);
+        }
+        double c40 = 0;
+        if ((Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38))) == 0) {
+            c40 = 0;
+        } else {
+            c40 = c33 - 2 * c22 * c26
+                    / (Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38)));
+        }
+        double c41 = Math.cos(Math.asin(c38)) * Math.cos(Math.asin(c38))
+                * (c15 * c15 - c16 * c16) / (c16 * c16);
+        double c43 = 1 + c41 / 16384
+                * (4096 + c41 * (-768 + c41 * (320 - 175 * c41)));
+        double c45 = c41 / 1024 * (256 + c41 * (-128 + c41 * (74 - 47 * c41)));
+        double c47 = c45
+                * Math.sqrt(c31)
+                * (c40 + c45
+                / 4
+                * (c33 * (-1 + 2 * c40 * c40) - c45 / 6 * c40
+                * (-3 + 4 * c31) * (-3 + 4 * c40 * c40)));
+        double c50 = c17
+                / 16
+                * Math.cos(Math.asin(c38))
+                * Math.cos(Math.asin(c38))
+                * (4 + c17
+                * (4 - 3 * Math.cos(Math.asin(c38))
+                * Math.cos(Math.asin(c38))));
+        double c52 = c18
+                + (1 - c50)
+                * c17
+                * c38
+                * (Math.acos(c33) + c50 * Math.sin(Math.acos(c33))
+                * (c40 + c50 * c33 * (-1 + 2 * c40 * c40)));
+        double c54 = c16 * c43 * (Math.atan(c35) - c47);
+        // return distance in meter
+        return c54;
+    }
+    // get, set
+    public boolean getHavelatlonInfo() {
+        return havelatlonInfo;
+    }
+
+    public void setHavelatlonInfo(boolean havelatlonInfo) {
+        this.havelatlonInfo = havelatlonInfo;
+    }
+    public double getLastLatitude() {
+        return this.lastLatitude;
+    }
+
+    public void setLastLatitude(double lastLatitude) {
+        this.lastLatitude = lastLatitude;
+    }
+
+    public double getLastLongitutde() {
+        return this.lastLongitutde;
+    }
+
+    public void setLastLongitutde(double lastLongitutde) {
+        this.lastLongitutde = lastLongitutde;
     }
     /**
      * 리스너 정의
@@ -131,11 +236,11 @@ public class NearSpotService extends Service implements Runnable{
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
 
-            TourMainActivity.setHavelatlonInfo(true); // 위치 정보를 받았다는 표시
-            TourMainActivity.setLastLatitude(latitude); // 최신으로 받은 위도
-            TourMainActivity.setLastLongitutde(longitude); // 최신으로 받은 경도
+            setHavelatlonInfo(true); // 위치 정보를 받았다는 표시
+            setLastLatitude(latitude); // 최신으로 받은 위도
+            setLastLongitutde(longitude); // 최신으로 받은 경도
 
-            String msg = "위도 : "+ latitude + "/ 경도:"+ longitude;
+            String msg = "위도 : " + latitude + "/ 경도:" + longitude;
             Log.i("GPSLocationService", msg);
 
             /*
@@ -147,15 +252,51 @@ public class NearSpotService extends Service implements Runnable{
             // 현재 위치의 지도를 보여주기 위해 정의한 메소드 호출
             //최상위 액티비티가 TourMapActivity(지도) 일때만 지도에 그려준다.
 
-            ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
             List<ActivityManager.RunningTaskInfo> Info = am.getRunningTasks(1);
             ComponentName topActivity = Info.get(0).topActivity;
             String topactivityname = topActivity.getClassName();
             Log.d("GPS", topactivityname);
-            if(topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
+            if (topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
                 Log.d("GPSLocationService", "최상위 액티비티 : TourMapActivity");
                 TourMapActivity.showCurrentLocation(latitude, longitude);
             }
+
+            //거리에 따라 관광지를 정렬한다
+            int numOfTempFavorite=0;
+            int numOfTempNotFavorite=0;
+            //현재 위치로부터의 거리를 계산한다.
+            for (int i = 0; i < GLOBAL.recordCount; i++) {
+                if(GLOBAL.spot[i].getFavorite() == 0)
+                    numOfTempNotFavorite++;
+                else if(GLOBAL.spot[i].getFavorite() == 1)
+                    numOfTempFavorite++;
+                Log.d("MainActivity", "관광지의 위도, 경도" + Double.toString(GLOBAL.spot[i].getLatitude()) + " " + Double.toString(GLOBAL.spot[i].getLongitutde()));
+                double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
+                GLOBAL.spot[i].setSpotDistanceFromMe(temp);
+                Log.d("MainActivity", GLOBAL.spot[i].getName() + " 가 현재 위치로 부터 떨어진 거리 : " + Double.toString(temp));
+            }
+            //가까운 순으로 정렬한다.
+            TouristSpotInfo[] tempFavorite = new TouristSpotInfo[numOfTempFavorite];
+            TouristSpotInfo[] tempNotFavorite = new TouristSpotInfo[numOfTempNotFavorite];
+            numOfTempFavorite=0;
+            numOfTempNotFavorite=0;
+            for (int i = 0; i < GLOBAL.recordCount; i++) {
+                if(GLOBAL.spot[i].getFavorite() == 1) {//즐겨찾기
+                    tempFavorite[numOfTempFavorite++]=GLOBAL.spot[i];
+                }
+                else if(GLOBAL.spot[i].getFavorite() == 0)
+                    tempNotFavorite[numOfTempNotFavorite++]=GLOBAL.spot[i];
+            }
+            Arrays.sort(tempFavorite);
+            Arrays.sort(tempNotFavorite);
+            for(int i=0;i<GLOBAL.recordCount;i++){
+                if(i<numOfTempFavorite)
+                    GLOBAL.spot[i]=tempFavorite[i];
+                else
+                    GLOBAL.spot[i]=tempNotFavorite[i-numOfTempFavorite];
+            }
+
         }
 
         public void onProviderDisabled(String provider) {
@@ -168,14 +309,12 @@ public class NearSpotService extends Service implements Runnable{
         }
     }
 
-    /**
-     * 근접 관광지 푸시 관련
-     */
-    private void register(int id, String name,double latitude, double longitude, float radius, long expiration) {
+    // 근접 관광지 푸시를 위해 등록하는 함수
+    private void register(int id, String name, double latitude, double longitude, float radius, long expiration) {
         Log.d("GPS", "근접 관광지 푸시 관련, register 함수 호출");
         Intent proximityIntent = new Intent(intentKey);
         proximityIntent.putExtra("id", id);
-        proximityIntent.putExtra("name",name);
+        proximityIntent.putExtra("name", name);
         proximityIntent.putExtra("latitude", latitude);
         proximityIntent.putExtra("longitude", longitude);
         //pendingIntent : 인텐트를 바로 전달하지 않고, 지연시켜주는 인텐트.
@@ -204,6 +343,7 @@ public class NearSpotService extends Service implements Runnable{
             mIntentReceiver = null;
         }
     }
+
     /**
      * 브로드캐스팅 메시지를 받았을 때 처리할 수신자 정의
      */
@@ -239,7 +379,7 @@ public class NearSpotService extends Service implements Runnable{
                 double latitude = intent.getDoubleExtra("latitude", 0.0D);
                 double longitude = intent.getDoubleExtra("longitude", 0.0D);
 
-                Toast.makeText(context, "근접한 관광지 : " + id + ", 이름 : " +name + " " + latitude + ", " + longitude, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "근접한 관광지 : " + id + ", 이름 : " + name + " " + latitude + ", " + longitude, Toast.LENGTH_LONG).show();
                 //notification
                 NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, TourMapActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -250,7 +390,7 @@ public class NearSpotService extends Service implements Runnable{
                 mCompatBuilder.setWhen(System.currentTimeMillis());
                 mCompatBuilder.setNumber(1);
                 mCompatBuilder.setContentTitle("Eattle");
-                mCompatBuilder.setContentText(name+"가 가까이 있어요!\n확인하러 갈까요?");
+                mCompatBuilder.setContentText(name + "가 가까이 있어요!\n확인하러 갈까요?");
                 mCompatBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
                 mCompatBuilder.setContentIntent(pendingIntent);
                 mCompatBuilder.setAutoCancel(true);
@@ -258,24 +398,24 @@ public class NearSpotService extends Service implements Runnable{
                 nm.notify(222, mCompatBuilder.build());
 
                 //일단 해당 관광지를 방문한 것으로 판단하고 표시한다.
-                for(int i=0;i<GLOBAL.recordCount;i++){
-                    if(name.equals(GLOBAL.spot[i].getName())){
+                for (int i = 0; i < GLOBAL.recordCount; i++) {
+                    if (name.equals(GLOBAL.spot[i].getName())) {
                         GLOBAL.spot[i].setVisit(1);
                         break;
                     }
                 }
                 //현재 최상위 액티비티가 지도이면 바로 표시한다.
-                ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+                ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
                 List<ActivityManager.RunningTaskInfo> Info = am.getRunningTasks(1);
                 ComponentName topActivity = Info.get(0).topActivity;
                 String topactivityname = topActivity.getClassName();
                 Log.d("GPS", topactivityname);
-                if(topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
+                if (topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
                     Log.d("GPSLocationService", "최상위 액티비티 : TourMapActivity");
                     //관광지를 방문했을 경우 업데이트 해야 하므로 다시 호출
-                    for(int i=0;i<GLOBAL.recordCount;i++){
+                    for (int i = 0; i < GLOBAL.recordCount; i++) {
                         // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-                        TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
+                        TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getVisit());
                     }
                 }
             }

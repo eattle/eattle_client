@@ -7,4 +7,5 @@ public class GLOBAL {
     public static TouristSpotInfo[] spot;//관광지정보
     public static int recordCount;
 
+    public static int isLongClick=0;
 }
