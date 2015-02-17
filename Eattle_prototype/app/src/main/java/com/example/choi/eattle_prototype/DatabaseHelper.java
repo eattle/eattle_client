@@ -52,6 +52,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL( "insert into spot (name, latitude, longitutde, spotInfoID, spotGroupID, productID, picName) values ('DLR',40.421226,-86.922258,'11.12.13.14.15',0,0,'spot3');" );
             db.execSQL( "insert into spot (name, latitude, longitutde, spotInfoID, spotGroupID, productID, picName) values ('PMU',40.425588,-86.91081,'16.17.18.19.20',0,0,'spot4');" );
             db.execSQL( "insert into spot (name, latitude, longitutde, spotInfoID, spotGroupID, productID, picName) values ('Knoy Hall',40.427661,-86.9111284,'21.22.23.24.25',0,0,'spot5');" );
+            db.execSQL( "insert into spot (name, latitude, longitutde, spotInfoID, spotGroupID, productID, picName) values ('Research Park',40.4614305,-86.9308978,'26.27.28.29.30',0,0,'spot6');" );
+
         } catch(Exception ex) {
             Log.e("DatabaseHelper", "Exception in insert SQL", ex);
         }
@@ -89,6 +91,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기3','detailed4_3');" );
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기4','detailed4_4');" );
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기5','detailed4_5');" );
+            db.execSQL( "insert into spotInfo (info,picName) values ('상세보기1','detailed5_1');" );
+            db.execSQL( "insert into spotInfo (info,picName) values ('상세보기2','detailed5_2');" );
+            db.execSQL( "insert into spotInfo (info,picName) values ('상세보기3','detailed5_3');" );
+            db.execSQL( "insert into spotInfo (info,picName) values ('상세보기4','detailed5_4');" );
+            db.execSQL( "insert into spotInfo (info,picName) values ('상세보기5','detailed5_5');" );
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기1','detailed5_1');" );
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기2','detailed5_2');" );
             db.execSQL( "insert into spotInfo (info,picName) values ('상세보기3','detailed5_3');" );

@@ -31,16 +31,30 @@
             android:textSize="20dp"
             android:layout_margin="5dp"
             android:padding="5dp"
+            android:paddingTop="15dp"
             android:background="@drawable/button_shape"/>
 
         <Button
+            android:id="@+id/trash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="관광지복구"
+            android:text="휴지통"
             android:textSize="20dp"
             android:layout_margin="5dp"
             android:padding="5dp"
+            android:paddingTop="15dp"
             android:background="@drawable/button_shape"/>
+        <Button
+            android:id="@+id/gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="갤러리"
+            android:textSize="20dp"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:paddingTop="15dp"
+            android:background="@drawable/button_shape"/>
+
     </LinearLayout>
 
     <FrameLayout
@@ -57,7 +71,7 @@
 
 
         <ScrollView
-            android:id="@+id/scroll"
+            android:id="@+id/scroll_1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
@@ -65,12 +79,27 @@
             android:background="@color/white">
 
             <LinearLayout
-                android:id="@+id/list"
+                android:id="@+id/list_1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
             </LinearLayout>
         </ScrollView>
 
+        <ScrollView
+            android:id="@+id/scroll_2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:id="@+id/list_2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            </LinearLayout>
+        </ScrollView>
     </FrameLayout>
 </RelativeLayout>

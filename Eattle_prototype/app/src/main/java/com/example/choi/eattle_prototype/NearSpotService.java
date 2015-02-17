@@ -96,7 +96,7 @@ public class NearSpotService extends Service implements Runnable {
 
         // 리스너 객체 생성
         GPSListener gpsListener = new GPSListener();
-        long minTime = 10000;//몇 ms 마다 위치를 확인할 것인지
+        long minTime = 20000;//몇 ms 마다 위치를 확인할 것인지
         float minDistance = 0;
 
         // GPS 기반 위치 요청

@@ -1,9 +1,9 @@
 package com.example.choi.eattle_prototype;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,10 +38,11 @@ public class DetailedInfoActivity extends ActionBarActivity {
         Intent i = getIntent();
         spot = i.getParcelableArrayListExtra("spots");
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(this,spot);
-        pager.setAdapter(adapter);
         // 뷰페이저 페이지 개수
         NUMOFSPOTDETAILED = spot.size();//상세 정보의 개수만큼
+        ViewPagerAdapter adapter = new ViewPagerAdapter(this,spot,NUMOFSPOTDETAILED);
+        pager.setAdapter(adapter);
+
         pager.setOffscreenPageLimit(NUMOFSPOTDETAILED);
     }
 
