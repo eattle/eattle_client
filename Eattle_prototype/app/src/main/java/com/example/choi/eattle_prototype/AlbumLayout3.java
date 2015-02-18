@@ -13,24 +13,26 @@ import android.widget.ImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AlbumLayout1 extends Fragment implements AlbumLayout {
+public class AlbumLayout3 extends Fragment implements AlbumLayout{
 
-    public final static String TAG = "AlbumLayout1";
-    public final static int MAX_IMAGE_NUM = 5;
+    public final static String TAG = "AlbumLayout3";
+
+    final static int MAX_IMAGE_NUM = 4;
     ImageView[] mImages = new ImageView[MAX_IMAGE_NUM];
     boolean movedOnImage;
 
-    public AlbumLayout1() {
+
+    public AlbumLayout3() {
         // Required empty public constructor
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_album_layout1, container, false);
+        return inflater.inflate(R.layout.fragment_album_layout3, container, false);
     }
-
 
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
@@ -80,6 +82,7 @@ public class AlbumLayout1 extends Fragment implements AlbumLayout {
         }
          */
     };
+
 
     @Override
     public int getMaxImageNum() {

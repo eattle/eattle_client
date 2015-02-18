@@ -51,7 +51,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         // create a instance of the page and set data
         SpotPage page;
-        if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitutde() == 1){
+        if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitude() == 1){
             page = new SpotPage(mContext,-1);
         }
         else {

@@ -35,7 +35,7 @@ public class TourMapActivity extends ActionBarActivity {
 
         for(int i=0;i<GLOBAL.recordCount;i++){
             // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
+            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitude(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
         }
     }
 
@@ -49,7 +49,7 @@ public class TourMapActivity extends ActionBarActivity {
         //관광지를 방문했을 경우 업데이트 해야 하므로 다시 호출
         for(int i=0;i<GLOBAL.recordCount;i++){
             // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitutde(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
+            TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(),GLOBAL.spot[i].getLongitude(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getName(),GLOBAL.spot[i].getVisit());
         }
     }
 
