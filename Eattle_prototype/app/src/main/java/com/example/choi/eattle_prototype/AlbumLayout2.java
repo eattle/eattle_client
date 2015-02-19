@@ -13,7 +13,7 @@ import android.widget.ImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AlbumLayout2 extends Fragment {
+public class AlbumLayout2 extends Fragment implements AlbumLayout{
 
     public final static String TAG = "AlbumLayout2";
 
@@ -79,4 +79,8 @@ public class AlbumLayout2 extends Fragment {
     };
 
 
+    @Override
+    public int getMaxImageNum() {
+        return MAX_IMAGE_NUM;
+    }
 }

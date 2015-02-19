@@ -32,7 +32,7 @@ public class NearSpotService extends Service implements Runnable {
     private SpotIntentReceiver mIntentReceiver;
     ArrayList mPendingIntentList;
     private static double lastLatitude;//가장 마지막으로 받은 위도
-    private static double lastLongitutde;//가장 마지막으로 받은 경도
+    private static double lastLongitude;//가장 마지막으로 받은 경도
     private static boolean havelatlonInfo = false; //메인 액티비티를 띄울 때 위도,경도 정보가 있으면 true, 없으면 false
 
     String intentKey = "spotProximity";
@@ -53,7 +53,8 @@ public class NearSpotService extends Service implements Runnable {
         db = dbHelper.getWritableDatabase();
         dbHelper.onCreate(db);//onCreate함수를 강제로 호출해준다(안그러면 폰에서 안됨)
 
-        String SQL = "SELECT name,explanation,picName,latitude,longitutde,spotInfoID FROM spot";
+        String SQL = "SELECT name,explanation,picName,latitude,longitude,spotInfoID FROM spot";
+
         Cursor c = db.rawQuery(SQL, null);
         GLOBAL.recordCount = c.getCount();
         GLOBAL.spot = new TouristSpotInfo[GLOBAL.recordCount];
@@ -118,7 +119,7 @@ public class NearSpotService extends Service implements Runnable {
 
         for (int i = 0; i < GLOBAL.recordCount; i++) {
             //근접 관광지 체크를 위해 등록
-            register(1001 + i, GLOBAL.spot[i].getName(), GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde(), 200, -1);
+            register(1001 + i, GLOBAL.spot[i].getName(), GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitude(), 200, -1);
         }
 //        Toast.makeText(getApplicationContext(), "위치 확인 시작", Toast.LENGTH_SHORT).show();
     }
@@ -219,12 +220,12 @@ public class NearSpotService extends Service implements Runnable {
         this.lastLatitude = lastLatitude;
     }
 
-    public double getLastLongitutde() {
-        return this.lastLongitutde;
+    public double getLastLongitude() {
+        return this.lastLongitude;
     }
 
-    public void setLastLongitutde(double lastLongitutde) {
-        this.lastLongitutde = lastLongitutde;
+    public void setLastLongitude(double lastLongitude) {
+        this.lastLongitude = lastLongitude;
     }
     /**
      * 리스너 정의
@@ -239,7 +240,7 @@ public class NearSpotService extends Service implements Runnable {
 
             setHavelatlonInfo(true); // 위치 정보를 받았다는 표시
             setLastLatitude(latitude); // 최신으로 받은 위도
-            setLastLongitutde(longitude); // 최신으로 받은 경도
+            setLastLongitude(longitude); // 최신으로 받은 경도
 
             String msg = "위도 : " + latitude + "/ 경도:" + longitude;
             Log.i("GPSLocationService", msg);
@@ -272,8 +273,8 @@ public class NearSpotService extends Service implements Runnable {
                     numOfTempNotFavorite++;
                 else if(GLOBAL.spot[i].getFavorite() == 1)
                     numOfTempFavorite++;
-                Log.d("MainActivity", "관광지의 위도, 경도" + Double.toString(GLOBAL.spot[i].getLatitude()) + " " + Double.toString(GLOBAL.spot[i].getLongitutde()));
-                double temp = calcDistance(lastLatitude, lastLongitutde, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde());
+                Log.d("MainActivity", "관광지의 위도, 경도" + Double.toString(GLOBAL.spot[i].getLatitude()) + " " + Double.toString(GLOBAL.spot[i].getLongitude()));
+                double temp = calcDistance(lastLatitude, lastLongitude, GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitude());
                 GLOBAL.spot[i].setSpotDistanceFromMe(temp);
                 Log.d("MainActivity", GLOBAL.spot[i].getName() + " 가 현재 위치로 부터 떨어진 거리 : " + Double.toString(temp));
             }
@@ -432,7 +433,7 @@ public class NearSpotService extends Service implements Runnable {
                     //관광지를 방문했을 경우 업데이트 해야 하므로 다시 호출
                     for (int i = 0; i < GLOBAL.recordCount; i++) {
                         // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
-                        TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getVisit());
+                        TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitude(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getVisit());
                     }
                 }
                 //일단 푸시를 받은 관광지는 펜딩인텐트 목록에서 제외한다.
@@ -440,7 +441,7 @@ public class NearSpotService extends Service implements Runnable {
                     PendingIntentInfo tempInfo = (PendingIntentInfo)mPendingIntentList.get(i);
                     if(tempInfo.getName().equals(name)){
                         mLocationManager.removeProximityAlert(tempInfo.getPintent());//근접경보해제
-                        mPendingIntentList.remove(i);
+                        //mPendingIntentList.remove(i);
                     }
                 }
             }

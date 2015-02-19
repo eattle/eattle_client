@@ -46,4 +46,14 @@ public class AlbumImageSetter {
 
         mCursor.moveToNext();
     }
+
+    void setCursorPrev(int num){
+        int position = mCursor.getPosition() - num;
+        mCursor.moveToPosition(position);
+    }
+
+}
+
+interface AlbumLayout{
+    int getMaxImageNum();
 }

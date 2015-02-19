@@ -13,7 +13,7 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     private int resId;
     //위치 정보
     private double latitude; //위도
-    private double longitutde; //경도
+    private double longitude; //경도
     //private int radius; //반경
     private double spotDistanceFromMe; // 현재 위치로 부터 얼마나 떨어져 있는지
     private String[] detailedInfo;
@@ -23,23 +23,23 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     }
 
     //depth2를 위한 생성자
-    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitutde) {
+    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitude) {
         this.name = name;
         this.explanation = explanation;
         this.resId = resId;
         this.latitude = latitude;
-        this.longitutde = longitutde;
+        this.longitude = longitude;
         this.visit = 0;
         this.favorite = 0;
     }
 
     //depth1을 위한 생성자
-    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitutde, String spotInfoID) {
+    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitude, String spotInfoID) {
         this.name = name;
         this.explanation = explanation;
         this.resId = resId;
         this.latitude = latitude;
-        this.longitutde = longitutde;
+        this.longitude = longitude;
         this.detailedInfo =  spotInfoID.split("\\.");// 마침표(.)단위로 파싱한다.
         this.visit = 0;
         this.favorite = 0;
@@ -50,7 +50,7 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
         this.explanation = src.readString();
         this.resId = src.readInt();
         this.latitude = src.readDouble();
-        this.longitutde = src.readDouble();
+        this.longitude = src.readDouble();
     }
 
     @SuppressWarnings("unchecked")
@@ -80,7 +80,7 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
         dest.writeString(this.explanation);
         dest.writeInt(this.resId);
         dest.writeDouble(this.latitude);
-        dest.writeDouble(this.longitutde);
+        dest.writeDouble(this.longitude);
     }
 
     //spotDistanceFromMe를 기준으로 오름차순으로 정렬하기 위한 함수
@@ -109,8 +109,8 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
         return this.latitude;
     }
 
-    double getLongitutde() {
-        return this.longitutde;
+    double getLongitude() {
+        return this.longitude;
     }
 
     double getSpotDistanceFromMe() {

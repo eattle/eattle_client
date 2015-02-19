@@ -52,7 +52,7 @@ public class ViewPagerAdapter extends PagerAdapter {
         // create a instance of the page and set data
         SpotPage page;
         //depth2
-        if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitutde() == 1){
+        if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitude() == 1){
             page = new SpotPage(mContext,-1);
         }
         else {
