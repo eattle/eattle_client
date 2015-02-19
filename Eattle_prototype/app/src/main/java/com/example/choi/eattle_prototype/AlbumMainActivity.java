@@ -2,10 +2,9 @@ package com.example.choi.eattle_prototype;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.support.v7.app.ActionBarActivity;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +32,8 @@ public class AlbumMainActivity extends ActionBarActivity {
         addFragment();
 
         ImageSetter = new AlbumImageSetter(this);
+
+        SQLiteDatabase db = NearSpotService.db;
 
     }
 
