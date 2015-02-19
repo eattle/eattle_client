@@ -9,6 +9,7 @@ import android.os.Parcelable;
 //관광지 정보들을 담고 있는 클래스 - DB에서 읽어들인 데이터로 초기화 한다.
 public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> {
     private String name;
+    private String explanation;
     private int resId;
     //위치 정보
     private double latitude; //위도
@@ -22,8 +23,9 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     }
 
     //depth2를 위한 생성자
-    public TouristSpotInfo(String name, int resId, double latitude, double longitutde) {
+    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitutde) {
         this.name = name;
+        this.explanation = explanation;
         this.resId = resId;
         this.latitude = latitude;
         this.longitutde = longitutde;
@@ -32,8 +34,9 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     }
 
     //depth1을 위한 생성자
-    public TouristSpotInfo(String name, int resId, double latitude, double longitutde, String spotInfoID) {
+    public TouristSpotInfo(String name, String explanation, int resId, double latitude, double longitutde, String spotInfoID) {
         this.name = name;
+        this.explanation = explanation;
         this.resId = resId;
         this.latitude = latitude;
         this.longitutde = longitutde;
@@ -44,6 +47,7 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
 
     public TouristSpotInfo(Parcel src) {
         this.name = src.readString();
+        this.explanation = src.readString();
         this.resId = src.readInt();
         this.latitude = src.readDouble();
         this.longitutde = src.readDouble();
@@ -73,6 +77,7 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.name);
+        dest.writeString(this.explanation);
         dest.writeInt(this.resId);
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitutde);
@@ -93,7 +98,9 @@ public class TouristSpotInfo implements Parcelable, Comparable<TouristSpotInfo> 
     String getName() {
         return this.name;
     }
-
+    String getExplanation() {
+        return this.explanation;
+    }
     int getResId() {
         return this.resId;
     }

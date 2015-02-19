@@ -40,6 +40,7 @@ public class NearSpotService extends Service implements Runnable {
     private DatabaseHelper dbHelper;
     public static SQLiteDatabase db;
 
+
     public NearSpotService() {
     }
 
@@ -49,24 +50,24 @@ public class NearSpotService extends Service implements Runnable {
         //DB에서 관광지를 불러온다.
         //데이터베이스 OPEN
         dbHelper = new DatabaseHelper(this);
-        Log.d("NearSpotService", "DEBUG!!!!!!!!!!!!!!!!!!!");
         db = dbHelper.getWritableDatabase();
         dbHelper.onCreate(db);//onCreate함수를 강제로 호출해준다(안그러면 폰에서 안됨)
 
-        String SQL = "SELECT name,picName,latitude,longitutde,spotInfoID FROM spot";
+        String SQL = "SELECT name,explanation,picName,latitude,longitutde,spotInfoID FROM spot";
         Cursor c = db.rawQuery(SQL, null);
         GLOBAL.recordCount = c.getCount();
         GLOBAL.spot = new TouristSpotInfo[GLOBAL.recordCount];
         for (int i = 0; i < GLOBAL.recordCount; i++) {
             c.moveToNext();
             String name = c.getString(0);
-            String _picName = c.getString(1);
+            String explanation = c.getString(1);
+            String _picName = c.getString(2);
             //R.drawable을 동적으로 가져온다.
             int picName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-            double latitude = c.getDouble(2);
-            double longitude = c.getDouble(3);
-            String spotInfoID = c.getString(4);
-            GLOBAL.spot[i] = new TouristSpotInfo(name, picName, latitude, longitude, spotInfoID);
+            double latitude = c.getDouble(3);
+            double longitude = c.getDouble(4);
+            String spotInfoID = c.getString(5);
+            GLOBAL.spot[i] = new TouristSpotInfo(name, explanation, picName, latitude, longitude, spotInfoID);
         }
         //-------------특정 관광지에 근접했는지 체크한다-------------
         // 위치 관리자 객체 참조
@@ -319,16 +320,33 @@ public class NearSpotService extends Service implements Runnable {
         proximityIntent.putExtra("longitude", longitude);
         //pendingIntent : 인텐트를 바로 전달하지 않고, 지연시켜주는 인텐트.
         PendingIntent Pintent = PendingIntent.getBroadcast(getBaseContext(), id, proximityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
         mLocationManager.addProximityAlert(latitude, longitude, radius, expiration, Pintent);
 
-        mPendingIntentList.add(Pintent);
+        PendingIntentInfo pendingIntentInfo = new PendingIntentInfo(Pintent,name);
+        mPendingIntentList.add(pendingIntentInfo);
     }
 
-    /**
-     * 등록한 정보 해제
-     */
+    //근접 푸시 관련 펜딩인텐트를 관리하기 위한 클래스
+    private class PendingIntentInfo{
+        private PendingIntent Pintent;
+        private String name;//관광지 이름
 
+        PendingIntentInfo(){}
+        PendingIntentInfo(PendingIntent Pintent,String name){
+            this.Pintent = Pintent;
+            this.name = name;
+        }
+
+        public PendingIntent getPintent(){
+            return Pintent;
+        }
+        public String getName(){
+            return name;
+        }
+    }
+
+    /*
+    //근접 푸시 해제
     private void unregister() {
         if (mPendingIntentList != null) {
             for (int i = 0; i < mPendingIntentList.size(); i++) {
@@ -342,7 +360,7 @@ public class NearSpotService extends Service implements Runnable {
             unregisterReceiver(mIntentReceiver);
             mIntentReceiver = null;
         }
-    }
+    }*/
 
     /**
      * 브로드캐스팅 메시지를 받았을 때 처리할 수신자 정의
@@ -373,7 +391,6 @@ public class NearSpotService extends Service implements Runnable {
                 Log.d("GPS", "근접 관광지 푸시 관련 onReceive 함수 호출");
 
                 mLastReceivedIntent = intent;
-
                 int id = intent.getIntExtra("id", 0);
                 String name = intent.getStringExtra("name");
                 double latitude = intent.getDoubleExtra("latitude", 0.0D);
@@ -416,6 +433,14 @@ public class NearSpotService extends Service implements Runnable {
                     for (int i = 0; i < GLOBAL.recordCount; i++) {
                         // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
                         TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitutde(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getVisit());
+                    }
+                }
+                //일단 푸시를 받은 관광지는 펜딩인텐트 목록에서 제외한다.
+                for(int i=0;i<mPendingIntentList.size();i++){
+                    PendingIntentInfo tempInfo = (PendingIntentInfo)mPendingIntentList.get(i);
+                    if(tempInfo.getName().equals(name)){
+                        mLocationManager.removeProximityAlert(tempInfo.getPintent());//근접경보해제
+                        mPendingIntentList.remove(i);
                     }
                 }
             }

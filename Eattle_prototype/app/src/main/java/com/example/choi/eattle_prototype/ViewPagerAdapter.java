@@ -46,11 +46,12 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 
     /**
-     * 뷰페이저가 만들어졌을 때 호출됨(NUMOFSPOT 수만큼 호출됨)
+     * 뷰페이저가 만들어졌을 때 호출됨(GLOBAL.NUMOFSPOT 수만큼 호출됨)
      */
     public Object instantiateItem(ViewGroup container, int position) {
         // create a instance of the page and set data
         SpotPage page;
+        //depth2
         if(tourSpot[position].getLatitude() == 1 && tourSpot[position].getLongitutde() == 1){
             page = new SpotPage(mContext,-1);
         }
@@ -60,7 +61,8 @@ public class ViewPagerAdapter extends PagerAdapter {
         }
         page.setNameText(tourSpot[position].getName());
         page.setImage(tourSpot[position].getResId());
-
+        Log.d("ViewpagerInstantiateItem","!!!!!!!!!!!!" + tourSpot[position].getExplanation());
+        page.setInfoText(tourSpot[position].getExplanation());
         // 컨테이너에 추가
         //container.addView(page, ((ViewPager)container).getChildCount() > position ? position : ((ViewPager)container).getChildCount());
         container.addView(page, position);

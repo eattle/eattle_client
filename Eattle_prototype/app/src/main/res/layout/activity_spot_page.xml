@@ -1,11 +1,11 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.choi.eattle_prototype.SpotPage"
     android:weightSum="1">
 
-    <!--관광지 설명-->
+    <!--관광지 이름-->
     <TextView
         android:id="@+id/nameText"
         android:layout_width="match_parent"
@@ -13,7 +13,7 @@
         android:textSize="20dp"
         android:paddingTop="30dp"
         android:gravity="center"/>
-
+    <!--즐겨찾기 마크-->
     <ImageView
         android:id="@+id/favorite"
         android:layout_width="wrap_content"
@@ -24,7 +24,22 @@
     <!--관광지 사진-->
     <ImageView
         android:id="@+id/tourSpotPicture"
+        android:layout_below="@id/nameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"/>>
-</FrameLayout>
+        android:paddingTop="50dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_gravity="center"
+        />
+    <!--관광지 한줄 설명-->
+    <TextView
+        android:id="@+id/infoText"
+        android:layout_below="@id/tourSpotPicture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:padding="30dp"
+        android:gravity="center"/>
+
+</RelativeLayout>

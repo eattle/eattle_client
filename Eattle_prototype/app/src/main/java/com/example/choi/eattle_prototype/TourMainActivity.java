@@ -231,14 +231,15 @@ public class TourMainActivity extends ActionBarActivity {
                 String[] args = GLOBAL.spot[i].getDetailedInfo();//특정 관광지의 상세정보 ID를 얻어온다.
 
                 for (int j = 0; j < args.length; j++) {
-                    String SQL = "SELECT info,picName FROM spotInfo WHERE _id = " + args[j];
+                    String SQL = "SELECT infoTitle,explanation,picName FROM spotInfo WHERE _id = " + args[j];
                     Cursor c = NearSpotService.db.rawQuery(SQL, null);
                     c.moveToNext();
-                    String spotInfo = c.getString(0);
-                    String _picName = c.getString(1);
+                    String infoTitle = c.getString(0);
+                    String explanation = c.getString(1);
+                    String _picName = c.getString(2);
                     //R.drawable을 동적으로 가져온다.
                     int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-                    spot.add(new TouristSpotInfo(spotInfo, tempPicName, 1, 1));
+                    spot.add(new TouristSpotInfo(infoTitle,explanation, tempPicName, 1, 1));
                 }
 
                 //객체배열을 ArrayList로 넘겨준다.
