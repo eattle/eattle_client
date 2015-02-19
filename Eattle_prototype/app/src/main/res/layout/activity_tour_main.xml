@@ -17,9 +17,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/button_shape"
             android:text="지도보기"
-            android:textSize="20dp"
+            android:textSize="15dp"
             android:layout_margin="5dp"
             android:padding="5dp"
+            android:layout_weight="1"
 
             />
 
@@ -28,32 +29,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="모드변환"
-            android:textSize="20dp"
+            android:textSize="15dp"
             android:layout_margin="5dp"
             android:padding="5dp"
             android:paddingTop="15dp"
-            android:background="@drawable/button_shape"/>
+            android:background="@drawable/button_shape"
+            android:layout_weight="1"
+            />
 
         <Button
             android:id="@+id/trash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="휴지통"
-            android:textSize="20dp"
+            android:textSize="15dp"
             android:layout_margin="5dp"
             android:padding="5dp"
             android:paddingTop="15dp"
-            android:background="@drawable/button_shape"/>
+            android:background="@drawable/button_shape"
+            android:layout_weight="1"
+            />
         <Button
             android:id="@+id/gallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="갤러리"
-            android:textSize="20dp"
+            android:textSize="15dp"
             android:layout_margin="5dp"
             android:padding="5dp"
             android:paddingTop="15dp"
-            android:background="@drawable/button_shape"/>
+            android:background="@drawable/button_shape"
+            android:layout_weight="1"
+            />
 
     </LinearLayout>
 

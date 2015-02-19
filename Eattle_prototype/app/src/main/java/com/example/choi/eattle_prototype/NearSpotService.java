@@ -403,7 +403,7 @@ public class NearSpotService extends Service implements Runnable {
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, new Intent(context, TourMapActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder mCompatBuilder = new NotificationCompat.Builder(context);
-                mCompatBuilder.setSmallIcon(R.drawable.ic_launcher);
+                mCompatBuilder.setSmallIcon(R.drawable.appicon);
                 mCompatBuilder.setTicker("주변에 관광 명소가 있어요!");
                 mCompatBuilder.setWhen(System.currentTimeMillis());
                 mCompatBuilder.setNumber(1);
