@@ -38,7 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // PATH Table - column names
 //    private static final String KEY_TIME = "time";
-    private static final String KEY_SPOTNAME = "spotname";
+//    private static final String KEY_SPOTID = "spotID";
 
     // SPOT Table - column names
     private static final String KEY_ID = "id";
@@ -81,7 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + TABLE_PATH
                     + "("
                     + KEY_TIME + " LONG PRIMARY KEY NOT NULL, "
-                    + KEY_SPOTNAME + " STRING NOT NULL"
+                    + "spotID" + " INTEGER NOT NULL"
                     + ");";
 
     // spot table create statement
@@ -92,6 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + " explanation VARCHAR(200), "
                     + " latitude DOUBLE, "
                     + " longitude DOUBLE, "
+                    + " radius DOUBLE, "
                     + " spotInfoID VARCHAR(255), "
                     + " spotGroupID INTEGER, "
                     + " productID INTEGER, "
@@ -140,6 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PICTURE);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOT);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTINFO);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRODUCT);
         } catch (Exception ex) {
             Log.e(LOG, "Exception in DROP_SQL", ex);
         }
@@ -157,12 +159,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         try {
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('Dormitory150','여기는 Dormitory150입니다', 40.418776, -86.925172,'1.2.3.4.5',0,0,'spot1');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('Burton Morgan','여기는 Burton Morgan입니다',40.423646, -86.922908,'6.7.8.9.10',0,0,'spot2');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('DLR','여기는 DLR입니다',40.421226,-86.922258,'11.12.13.14.15',0,0,'spot3');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('PMU','여기는 PMU입니다',40.425588,-86.91081,'16.17.18.19.20',0,0,'spot4');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('Knoy Hall','여기는 Knoy Hall입니다',40.427661,-86.9111284,'21.22.23.24.25',0,0,'spot5');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, spotInfoID, spotGroupID, productID, picName) values ('Research Park','여기는 Research Park입니다',40.4614305,-86.9308978,'26.27.28.29.30',0,0,'spot6');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Dormitory150','여기는 Dormitory150입니다', 37.5037165, 127.044845,1000,'1.2.3.4.5',0,0,'spot1');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Burton Morgan','여기는 Burton Morgan입니다',40.423646, -86.922908,1000,'6.7.8.9.10',0,0,'spot2');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('DLR','여기는 DLR입니다',40.421226,-86.922258,1000,'11.12.13.14.15',0,0,'spot3');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('PMU','여기는 PMU입니다',40.425588,-86.91081,1000,'16.17.18.19.20',0,0,'spot4');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Knoy Hall','여기는 Knoy Hall입니다',40.427661,-86.9111284,1000,'21.22.23.24.25',0,0,'spot5');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Research Park','여기는 Research Park입니다',40.4614305,-86.9308978,1000,'26.27.28.29.30',0,0,'spot6');");
 
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed1_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed1_2');");

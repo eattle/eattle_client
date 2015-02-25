@@ -239,7 +239,7 @@ public class TourMainActivity extends ActionBarActivity {
                     String _picName = c.getString(2);
                     //R.drawable을 동적으로 가져온다.
                     int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-                    spot.add(new TouristSpotInfo(infoTitle,explanation, tempPicName, 1, 1));
+                    spot.add(new TouristSpotInfo(Integer.parseInt(args[j]),infoTitle,explanation, tempPicName, 1, 1));
                 }
 
                 //객체배열을 ArrayList로 넘겨준다.
