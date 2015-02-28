@@ -270,6 +270,7 @@ public class NearSpotService extends Service implements Runnable {
                         Info = am.getRunningTasks(1);
                         topActivity = Info.get(0).topActivity;
                         topactivityname = topActivity.getClassName();*/
+
                         Log.d("GPS", topactivityname);
                         if (topactivityname.equals("com.example.choi.eattle_prototype.TourMapActivity")) {
                             Log.d("GPSLocationService", "최상위 액티비티 : TourMapActivity");
@@ -278,6 +279,7 @@ public class NearSpotService extends Service implements Runnable {
                                 // 특정 위치에 관광지를 표시하기 위해 정의한 메소드(여기에 관광지들 등록하면 됨)
                                 TourMapActivity.showSpotPosition(GLOBAL.spot[i].getLatitude(), GLOBAL.spot[i].getLongitude(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getName(), GLOBAL.spot[i].getVisit());
                             }
+                            //TourMapActivity.showSpotPosition(GLOBAL.spot[0].getLatitude(), GLOBAL.spot[0].getLongitude(), GLOBAL.spot[0].getName(), GLOBAL.spot[0].getName(), GLOBAL.spot[0].getVisit());
                         }
 
                         Log.d("NearSpotService","관광지 방문 시작");

@@ -61,7 +61,7 @@ public class ViewPagerAdapter extends PagerAdapter {
         }
         page.setNameText(tourSpot[position].getName());
         page.setImage(tourSpot[position].getResId());
-        Log.d("ViewpagerInstantiateItem","!!!!!!!!!!!!" + tourSpot[position].getExplanation());
+        Log.d("ViewpagerInstantiate","!!!!!!!!!!!!" + tourSpot[position].getExplanation());
         page.setInfoText(tourSpot[position].getExplanation());
         // 컨테이너에 추가
         //container.addView(page, ((ViewPager)container).getChildCount() > position ? position : ((ViewPager)container).getChildCount());

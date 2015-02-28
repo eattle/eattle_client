@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20dp"
-        android:paddingTop="30dp"
+        android:paddingTop="100dp"
         android:gravity="center"/>
     <!--즐겨찾기 마크-->
     <ImageView
@@ -25,13 +25,13 @@
     <ImageView
         android:id="@+id/tourSpotPicture"
         android:layout_below="@id/nameText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="360dp"
+        android:layout_height="270dp"
         android:paddingTop="50dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_gravity="center"
-        />
+        android:scaleType="centerCrop" />
     <!--관광지 한줄 설명-->
     <TextView
         android:id="@+id/infoText"

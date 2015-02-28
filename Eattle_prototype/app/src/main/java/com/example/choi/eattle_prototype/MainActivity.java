@@ -20,6 +20,7 @@ public class MainActivity extends ActionBarActivity {
         //위치 관련 서비스 시작
         Intent locationIntent = new Intent(this,NearSpotService.class);
         startService(locationIntent);
+
     }
 
     //사진 뷰어, 관광 뷰어로 나누어지는 부분

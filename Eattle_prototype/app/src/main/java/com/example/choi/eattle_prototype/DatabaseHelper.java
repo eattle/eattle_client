@@ -159,44 +159,99 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         try {
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Dormitory150','여기는 Dormitory150입니다', 37.5037165, 127.044845,1000,'1.2.3.4.5',0,0,'spot1');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Burton Morgan','여기는 Burton Morgan입니다',40.423646, -86.922908,1000,'6.7.8.9.10',0,0,'spot2');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('DLR','여기는 DLR입니다',40.421226,-86.922258,1000,'11.12.13.14.15',0,0,'spot3');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('PMU','여기는 PMU입니다',40.425588,-86.91081,1000,'16.17.18.19.20',0,0,'spot4');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Knoy Hall','여기는 Knoy Hall입니다',40.427661,-86.9111284,1000,'21.22.23.24.25',0,0,'spot5');");
-            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Research Park','여기는 Research Park입니다',40.4614305,-86.9308978,1000,'26.27.28.29.30',0,0,'spot6');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Cary Franklin Levering Quadrangle','여기는 Cary Franklin Levering Quadrangle입니다', 37.5037165, 127.044845,1000,'1.2.3.4',0,0,'spot1');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Cordova recreational sports center','여기는 Cordova recreational sports center입니다',40.423646, -86.922908,1000,'5.6.7.8.9.10.11.12.13.14',0,0,'spot2');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Discovery Park','여기는 Discovery Park입니다',40.421226,-86.922258,1000,'15.16.17.18.19.20.21.22.23.24.25.26',0,0,'spot3');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Earhart','여기는 Earhart입니다',40.425588,-86.91081,1000,'27.28.29.30.31',0,0,'spot4');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Neil armstrong','여기는 Neil armstrong입니다',40.427661,-86.9111284,1000,'32.33.34.35.36',0,0,'spot5');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('PMU','여기는 PMU입니다',40.4614305,-86.9308978,1000,'37.38.39',0,0,'spot6');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Purdue Bell Tower','여기는 Purdue Bell Tower입니다',40.4614305,-86.9308978,1000,'40.41.42.43.44',0,0,'spot7');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Purdue Mall','여기는 Purdue Mall입니다',40.4614305,-86.9308978,1000,'45.46.47.48',0,0,'spot8');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Ross-Ade stadium','여기는 Ross-Ade stadium입니다',40.4614305,-86.9308978,1000,'49.50.51',0,0,'spot9');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Wiley Hall','여기는 Wiley Hall입니다',40.4614305,-86.9308978,1000,'52.53.54.55.56',0,0,'spot10');");
+            db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Winsor Hall','여기는 Winsor Hall입니다',40.4614305,-86.9308978,1000,'57.58',0,0,'spot11');");
 
+            //Cary Franklin Levering Quadrangle
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed1_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed1_2');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed1_3');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed1_4');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed1_5');");
+
+            //Cordova recreational sports center
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed2_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed2_2');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed2_3');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed2_4');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_5');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_6');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_7');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_8');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_9');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed2_10');");
+
+            //Discovery Park
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed3_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed3_2');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed3_3');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed3_4');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_5');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_6');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_7');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_8');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_9');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_10');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_11');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed3_12');");
+
+            //Earhart
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed4_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed4_2');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed4_3');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed4_4');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed4_5');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed5_1');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed5_2');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed5_3');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed5_4');");
-            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed5_5');");
+
+            //Neil armstrong
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed5_1');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed5_2');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed5_3');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed5_4');");
             db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed5_5');");
 
+
+            //PMU
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed6_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed6_2');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed6_3');");
+
+
+            //Purdue Bell Tower
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed7_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed7_2');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed7_3');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed7_4');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed7_5');");
+
+            //Purdue Mall
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed8_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed8_2');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed8_3');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed8_4');");
+
+            //Ross-Ade stadium
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed9_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed9_2');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed9_3');");
+
+            //Wiley Hall
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed10_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed10_2');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기2','상세보기 내용','detailed10_3');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기3','상세보기 내용','detailed10_4');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기4','상세보기 내용','detailed10_5');");
+
+            //Winsor Hall
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기5','상세보기 내용','detailed11_1');");
+            db.execSQL("insert into spotInfo (infoTitle,explanation,picName) values ('상세보기1','상세보기 내용','detailed11_2');");
 
         } catch (Exception ex) {
             Log.e(LOG, "Exception in insert SQL", ex);
