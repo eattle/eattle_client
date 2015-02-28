@@ -207,9 +207,13 @@ public class AlbumMainActivity extends ActionBarActivity {
 
         if(fragment == null){
             tr.add(R.id.frame, layout, "" + layoutnum);
+            tr.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+
         }else {
             tr.replace(R.id.frame, layout, ""+layoutnum);
             tr.addToBackStack(null);
+            tr.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
         }
 
         //백스택에 저장해야됨

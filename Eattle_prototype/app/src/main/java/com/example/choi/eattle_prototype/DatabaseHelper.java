@@ -171,14 +171,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         try {
-/*
+
             db.execSQL("insert into path (time,spotid) values ( 1423319520, 1);");
             db.execSQL("insert into path (time,spotid) values ( 1423326060, 2);");
             db.execSQL("insert into path (time,spotid) values ( 1423342320, 3);");
             db.execSQL("insert into path (time,spotid) values ( 1423348260, 5);");
             db.execSQL("insert into path (time,spotid) values ( 1423351860, 4);");
             db.execSQL("insert into path (time,spotid) values ( 1423353150, -1);");
-*/
+
 
             db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Cary Franklin Levering Quadrangle','여기는 Cary Franklin Levering Quadrangle입니다', 37.5037165, 127.044845,1000,'1.2.3.4',0,0,'spot1');");
             db.execSQL("insert into spot (name, explanation, latitude, longitude, radius, spotInfoID, spotGroupID, productID, picName) values ('Cordova recreational sports center','여기는 Cordova recreational sports center입니다',40.423646, -86.922908,1000,'5.6.7.8.9.10.11.12.13.14',0,0,'spot2');");
