@@ -1,9 +1,12 @@
-package com.example.choi.eattle_prototype.model;
+package com.example.choi.eattle_prototype.model1;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by GA on 2015. 2. 18..
  */
-public class Spot {
+public class Spot implements Parcelable{
 
     int id;
     String name;
@@ -17,6 +20,9 @@ public class Spot {
     public Spot() {
     }
 
+    public Spot(Parcel in) {
+        readFromParcel(in);
+    }
     public Spot(String name, float latitude, float longitude, String spotInfoID, int spotgroupID, int productID, String picName) {
         this.name = name;
         this.latitude = latitude;
@@ -101,4 +107,43 @@ public class Spot {
     public void setPicName(String picName) {
         this.picName = picName;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel dest, int flags) {
+
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeFloat(latitude);
+        dest.writeFloat(longitude);
+        dest.writeString(spotInfoID);
+        dest.writeInt(spotgroupID);
+        dest.writeInt(productID);
+        dest.writeString(picName);
+    }
+
+    private void readFromParcel(Parcel in){
+        id = in.readInt();
+        name = in.readString();
+        latitude = in.readFloat();
+        longitude = in.readFloat();
+        spotInfoID = in.readString();
+        spotgroupID = in.readInt();
+        productID = in.readInt();
+        picName = in.readString();
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Spot createFromParcel(Parcel in) {
+            return new Spot(in);
+        }
+
+        public Spot[] newArray(int size) {
+            return new Spot[size];
+        }
+    };
 }

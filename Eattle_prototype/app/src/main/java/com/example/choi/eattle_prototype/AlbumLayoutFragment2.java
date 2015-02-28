@@ -2,7 +2,7 @@ package com.example.choi.eattle_prototype;
 
 
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,19 +13,22 @@ import android.widget.ImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AlbumLayout2 extends Fragment implements AlbumLayout{
+public class AlbumLayoutFragment2 extends Fragment implements AlbumLayout{
 
     public final static String TAG = "AlbumLayout2";
 
     final static int MAX_IMAGE_NUM = 4;
     ImageView[] mImages = new ImageView[MAX_IMAGE_NUM];
     boolean movedOnImage;
+    int mImageNum;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        mImageNum = 0;
+
         return inflater.inflate(R.layout.fragment_album_layout2, container, false);
     }
 
@@ -38,7 +41,7 @@ public class AlbumLayout2 extends Fragment implements AlbumLayout{
         mImages[3] = (ImageView)getView().findViewById(R.id.imageView9);
 
         for(int i = 0; i < MAX_IMAGE_NUM; i++) {
-            AlbumMainActivity.ImageSetter.setImage(mImages[i]);
+            if(AlbumMainActivity.ImageSetter.setImage(mImages[i])) mImageNum++;
             mImages[i].setOnClickListener(mOnClickListener);
         }
 
@@ -78,9 +81,14 @@ public class AlbumLayout2 extends Fragment implements AlbumLayout{
          */
     };
 
-
     @Override
     public int getMaxImageNum() {
         return MAX_IMAGE_NUM;
     }
+
+    @Override
+    public int getImageNum() {
+        return mImageNum;
+    }
+
 }

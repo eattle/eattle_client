@@ -17,23 +17,29 @@ public class AlbumImageSetter {
     ContentResolver mCr;
     Context context;
 
-    public AlbumImageSetter(Context context){
+    public AlbumImageSetter(Context context, long startTime, long endTime){
         this.context = context;
         mCr = context.getContentResolver();
-        setCursor();
+        setCursor(startTime, endTime);
     }
 
-    void setCursor(){
+    public void changeTime(long startTime, long endTime){
+        setCursor(startTime, endTime);
+    }
+    public void changeCursorToLast(){mCursor.moveToLast();}
+
+    void setCursor(long startTime, long endTime){
         //mCursor position : -1
         //Toast.makeText(MainActivity.this, mCursor.getPosition() + "", Toast.LENGTH_SHORT).show();
         //Initialize Position to zero
-        mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.ImageColumns.DATA}, null, null, MediaStore.Images.ImageColumns.DATE_ADDED+" DESC");
+        mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.ImageColumns.DATA}, MediaStore.Images.ImageColumns.DATE_ADDED + " BETWEEN " + startTime + " AND " + endTime, null, MediaStore.Images.ImageColumns.DATE_ADDED+" ASC");
+//        mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_ADDED+" DESC");
         mCursor.moveToFirst();
     }
 
-    void setImage(ImageView image){
-        if(mCursor.isAfterLast())   return;
-        if(mCursor.isBeforeFirst()) return;
+    boolean setImage(ImageView image){
+        if(mCursor.isAfterLast())   return false;
+        if(mCursor.isBeforeFirst()) return false;
         String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
         try {
             BitmapFactory.Options opt = new BitmapFactory.Options();
@@ -45,7 +51,18 @@ public class AlbumImageSetter {
         }
 
         mCursor.moveToNext();
+        return true;
     }
+
+    boolean isOver(){
+        if(mCursor.isAfterLast())   return true;
+        else                        return false;
+    }
+    boolean isStart(){
+        if(mCursor.isBeforeFirst())   return true;
+        else                        return false;
+    }
+
 
     void setCursorPrev(int num){
         int position = mCursor.getPosition() - num;
@@ -54,6 +71,3 @@ public class AlbumImageSetter {
 
 }
 
-interface AlbumLayout{
-    int getMaxImageNum();
-}
