@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -147,6 +148,15 @@ public class TourMainActivity extends ActionBarActivity {
         drawViewPagerMode();
         // 삭제영역 다시 그리기-------------------------------------------
         list_2.removeAllViews();
+        //휴지통에 표시할 관광지가 없을 때
+        if(GLOBAL.recordCount == CONSTANT.NUMOFSPOT){
+            TextView tempLayout = new TextView(this);
+            tempLayout.setText("휴지통이 비어있어요!");
+            tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+            tempLayout.setTextSize(20);
+            tempLayout.setGravity(Gravity.CENTER);
+            list_2.addView(tempLayout);
+        }
         for (int i = GLOBAL.recordCount; i < CONSTANT.NUMOFSPOT; i++) {
             addTouristSpotToList(GLOBAL.spot[i].getResId(), GLOBAL.spot[i].getName(), i, 1);
         }
@@ -201,6 +211,7 @@ public class TourMainActivity extends ActionBarActivity {
             listLayout.addView(favorite);
 
             //전체 추가
+
             list_1.addView(listLayout);
         } else if (isThrown == 1)//휴지통에 있는 것들
             list_2.addView(listLayout);
@@ -239,7 +250,7 @@ public class TourMainActivity extends ActionBarActivity {
                     String _picName = c.getString(2);
                     //R.drawable을 동적으로 가져온다.
                     int tempPicName = getResources().getIdentifier(_picName, "drawable", CONSTANT.PACKAGE_NAME);
-                    spot.add(new TouristSpotInfo(infoTitle,explanation, tempPicName, 1, 1));
+                    spot.add(new TouristSpotInfo(Integer.parseInt(args[j]),infoTitle,explanation, tempPicName, 1, 1));
                 }
 
                 //객체배열을 ArrayList로 넘겨준다.
