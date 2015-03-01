@@ -1,4 +1,4 @@
-package com.example.choi.eattle_prototype.model;
+package com.example.choi.eattle_prototype.model1;
 
 /**
  * Created by GA on 2015. 2. 18..

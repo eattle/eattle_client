@@ -38,7 +38,7 @@ public class NearSpotService extends Service implements Runnable {
 
     String intentKey = "spotProximity";
     //데이터베이스 관련 변수
-    private DatabaseHelper dbHelper;
+    public static DatabaseHelper dbHelper;
     public static SQLiteDatabase db;
 
     //관광지 방문 여부를 판단하기 위한 변수

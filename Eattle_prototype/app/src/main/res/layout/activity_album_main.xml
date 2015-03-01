@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/layout">
+        android:id="@+id/frame">
 
     </RelativeLayout>
 
@@ -17,7 +17,7 @@
         android:text="Prev"
         android:id="@+id/prev"
         android:layout_gravity="left|bottom"
-        android:onClick="mOnClickButton" />
+        android:onClick="mOnClick" />
 
     <Button
         android:layout_width="wrap_content"
@@ -26,6 +26,6 @@
         android:id="@+id/next"
         android:layout_gravity="right|bottom"
         android:elegantTextHeight="false"
-        android:onClick="mOnClickButton" />
+        android:onClick="mOnClick" />
 
 </FrameLayout>
