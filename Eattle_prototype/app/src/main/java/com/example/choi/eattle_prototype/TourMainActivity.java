@@ -340,7 +340,20 @@ public class TourMainActivity extends ActionBarActivity {
                 GLOBAL.spot[GLOBAL.recordCount] = tempInfo;
                 GLOBAL.recordCount++;
                 break;
+            case 4://휴지통에 버리기
+                GLOBAL.spot[selectedSpot].setFavorite(0);//즐겨찾기 해제
+                tempInfo = GLOBAL.spot[selectedSpot];
+                //spot에서 i인덱스를 가진 관광지를 목록에서 지운다.
+                for (int j = (selectedSpot + 1); j < GLOBAL.recordCount; j++) {
+                    GLOBAL.spot[j - 1] = GLOBAL.spot[j];
+                }
+                //스와이프된 관광지를 spot배열의 삭제 목록 영역으로 보낸다.
+                GLOBAL.spot[GLOBAL.recordCount - 1] = tempInfo;
+                GLOBAL.recordCount--;
 
+                //새로 그린다.
+                onResume();
+                break;
         }
         //다시 그린다.
         onResume();
@@ -359,6 +372,7 @@ public class TourMainActivity extends ActionBarActivity {
                 menu.add(0, 1, 0, "즐겨찾기 등록");
             if (GLOBAL.spot[selectedSpot].getFavorite() == 1)//이미 즐겨찾기로 등록되어 있는 경우
                 menu.add(0, 2, 0, "즐겨찾기 해제");
+            menu.add(0,4,0,"관광지 삭제");
         }
     }
 
