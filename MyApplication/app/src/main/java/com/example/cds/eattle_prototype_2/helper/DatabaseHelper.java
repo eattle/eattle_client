@@ -40,7 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //private static final String KEY_NAME = "name";
 
 
-    private static final String CREATE_TABLE_MEDIA = "CREATE TABLE" + TABLE_MEDIA
+    private static final String CREATE_TABLE_MEDIA = "CREATE TABLE " + TABLE_MEDIA
             + "(" + KEY_ID + " INTEGER PRIMARY KEY NOT NULL,"
             + KEY_FOLDER_ID + " INTEGER NOT NULL,"
             + KEY_NAME + " VARCHAR(100) NOT NULL,"
@@ -51,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_LONGITUDE + " DOUBLE,"
             + KEY_TAG + " VARCHAR(100)" + ")";
 
-    private static final String CREATE_TABLE_FOLDER = "CREATE TABLE" + TABLE_FOLDER
+    private static final String CREATE_TABLE_FOLDER = "CREATE TABLE " + TABLE_FOLDER
             + "(" + KEY_ID + " INTEGER PRIMARY KEY NOT NULL,"
             + KEY_NAME + " VARCHAR(100) NOT NULL" + ")";
 
