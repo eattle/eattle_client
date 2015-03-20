@@ -1,14 +1,12 @@
 package com.example.cds.eattle_prototype_2;
 
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,16 +15,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    DatabaseHelper db;
 
     //앨범의 Image Setting(미디어 DB 연결)
     static AlbumImageSetter ImageSetter;
@@ -39,6 +39,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        db = new DatabaseHelper(getApplicationContext());
 
         ListView list = (ListView)findViewById(R.id.list);
         mImage = (ImageView)findViewById(R.id.image);
