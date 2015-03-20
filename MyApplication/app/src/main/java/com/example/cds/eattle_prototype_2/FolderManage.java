@@ -56,7 +56,7 @@ public class FolderManage {
     }
 
     //디렉토리(폴더),파일 삭제하기
-    public boolean deleteFile(File file){
+    public static boolean deleteFile(File file){
         boolean result;
         if(file!=null&&file.exists()){
             file.delete();
