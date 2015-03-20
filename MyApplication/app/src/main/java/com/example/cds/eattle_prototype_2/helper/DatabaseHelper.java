@@ -46,8 +46,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
     private static final String KEY_STANDARDDERIVATION = "standardDerivation";
 
-    private static final String CREATE_TABLE_MEDIA = "CREATE TABLE " + TABLE_MEDIA
-            + " (" + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
+    private static final String CREATE_TABLE_MEDIA =
+            "CREATE TABLE " + TABLE_MEDIA + " ("
+            + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + KEY_FOLDER_ID + " INTEGER NOT NULL, "
             + KEY_NAME + " VARCHAR(100) NOT NULL, "
             + KEY_YEAR + " INTEGER NOT NULL, "
@@ -55,16 +56,21 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_DAY + " INTEGER, "
             + KEY_LATITUDE + " DOUBLE, "
             + KEY_LONGITUDE + " DOUBLE, "
-            + KEY_TAG + " VARCHAR(100) " + ")";
+            + KEY_TAG + " VARCHAR(100) "
+            + ")";
 
-    private static final String CREATE_TABLE_FOLDER = "CREATE TABLE " + TABLE_FOLDER
-            + " (" + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + KEY_NAME + " VARCHAR(100) NOT NULL " + ")";
+    private static final String CREATE_TABLE_FOLDER =
+            "CREATE TABLE " + TABLE_FOLDER + " ("
+            + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + KEY_NAME + " VARCHAR(100) NOT NULL "
+            + ")";
 
-    private static final String CREATE_TABLE_MANAGER = "CREATE TABLE " + TABLE_MANAGER
-            + " (" + KEY_TOTALPICTURENUM + " INTEGER PRIMARY KEY NOT NULL, "
+    private static final String CREATE_TABLE_MANAGER =
+            "CREATE TABLE " + TABLE_MANAGER + " ("
+            + KEY_TOTALPICTURENUM + " INTEGER PRIMARY KEY NOT NULL, "
             + KEY_AVERAGEINTERVAL + " LONG, "
-            + KEY_STANDARDDERIVATION + " LONG" + ")";
+            + KEY_STANDARDDERIVATION + " LONG"
+            + ")";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,9 +78,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FOLDER);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANAGER);
 
         db.execSQL(CREATE_TABLE_MEDIA);
         db.execSQL(CREATE_TABLE_FOLDER);

@@ -1,31 +1,21 @@
 package com.example.cds.eattle_prototype_2;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Manager;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -50,15 +40,15 @@ public class MainActivity extends ActionBarActivity {
 
         //데이터베이스 OPEN
         db = new DatabaseHelper(this);
-        //SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();;
-        //db.onCreate(sqLiteDatabase);
 
         Button classification = (Button)findViewById(R.id.classification);
         classification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-                long averageInterval=totalInterval/totalPictureNum;
+                long averageInterval = totalInterval;
+                if(totalPictureNum != 0)
+                    averageInterval /= totalPictureNum;
 
                 //DB를 참조한다.
                 Manager m = new Manager(totalPictureNum,averageInterval,standardDerivation);
