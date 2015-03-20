@@ -1,15 +1,13 @@
 package com.example.cds.eattle_prototype_2;
 
-import android.content.ContentResolver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Picture;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,40 +17,55 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.model.Manager;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
 
+    //데이터베이스 관련 변수들
+    DatabaseHelper db;
+
     //앨범의 Image Setting(미디어 DB 연결)
     static AlbumImageSetter ImageSetter;
-    Cursor mCursor;
     ImageView mImage;
+
+    int totalPictureNum=0;//사진들의 총 개수
+    long totalInterval;//사진 간격의 총합
+    long standardDerivation=0;//사진 간격의 표준편차
+
     int folderID=0;//시간에 따라 할당될 폴더 아이디 (0부터 시작)
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //데이터베이스 OPEN
+        db = new DatabaseHelper(this);
+        //SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();;
+        //db.onCreate(sqLiteDatabase);
+
         Button classification = (Button)findViewById(R.id.classification);
         classification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pictureClassification();
+                calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+                long averageInterval=totalInterval/totalPictureNum;
+
+                //DB를 참조한다.
+                Manager m = new Manager(totalPictureNum,averageInterval,standardDerivation);
+                db.createManager(m);
             }
         });
 
-        //ListView list = (ListView)findViewById(R.id.list);
         mImage = (ImageView)findViewById(R.id.image);
 
         ImageSetter = new AlbumImageSetter(this,0,0);
@@ -78,8 +91,72 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    private void calculatePictureInterval() {
+        totalInterval=0;
+        totalPictureNum=0;
+        ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
+        long pictureTakenTime=0;
+        while (ImageSetter.mCursor.moveToNext()) {
+            //사진이 촬영된 날짜
+            long _pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
+            _pictureTakenTime *= 1000; //second->millisecond
+
+            totalInterval += _pictureTakenTime-pictureTakenTime;
+            pictureTakenTime = _pictureTakenTime;
+            totalPictureNum++;
+        }
+        Toast.makeText(getBaseContext(),Long.toString(totalPictureNum)+" "+Long.toString(totalInterval),Toast.LENGTH_LONG).show();
+    }
+    private void pictureClassification() {
+
+    }
+
+        AdapterView.OnItemClickListener mItemClickListener =
+            new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    ImageSetter.mCursor.moveToPosition(position);
+                    //사진들의 경로를 가져오는 부분
+                    String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                    try{
+                        BitmapFactory.Options opt = new BitmapFactory.Options();
+                        opt.inSampleSize=4;
+                        Bitmap bm = BitmapFactory.decodeFile(path,opt);
+                        mImage.setImageBitmap(bm);
+                    }
+                    catch(OutOfMemoryError e){
+                        Toast.makeText(getBaseContext(), "이미지가 너무 큽니다", Toast.LENGTH_LONG).show();
+                    }
+                }
+            };
 
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+}
+
+    /*
     private void pictureClassification(){
         //사진들을 하나하나 순회하면서, 날짜별로 묶는다.
         String folderID="";
@@ -93,7 +170,7 @@ public class MainActivity extends ActionBarActivity {
             //사진이 촬영된 날짜
             long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             pictureTakenTime *= 1000; //second->millisecond
-            //millisecond -> Date
+            //millisecond -> Calendar
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
             String _folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
@@ -113,7 +190,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         Toast.makeText(getBaseContext(),"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
-    }
+    }*/
 
     /*
     private void pictureClassification(){
@@ -233,48 +310,3 @@ public class MainActivity extends ActionBarActivity {
 
         Toast.makeText(getBaseContext(),"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
     }*/
-
-    AdapterView.OnItemClickListener mItemClickListener =
-            new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ImageSetter.mCursor.moveToPosition(position);
-                    //사진들의 경로를 가져오는 부분
-                    String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-                    try{
-                        BitmapFactory.Options opt = new BitmapFactory.Options();
-                        opt.inSampleSize=4;
-                        Bitmap bm = BitmapFactory.decodeFile(path,opt);
-                        mImage.setImageBitmap(bm);
-                    }
-                    catch(OutOfMemoryError e){
-                        Toast.makeText(getBaseContext(), "이미지가 너무 큽니다", Toast.LENGTH_LONG).show();
-                    }
-                }
-            };
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-}
-
