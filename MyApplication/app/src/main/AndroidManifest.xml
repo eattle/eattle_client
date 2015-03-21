@@ -27,6 +27,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.cds.eattle_prototype_2.MainActivity" />
         </activity>
+        <activity
+            android:name=".AlbumLayout"
+            android:label="@string/title_activity_album_layout" >
+        </activity>
     </application>
 
 </manifest>
