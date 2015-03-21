@@ -4,7 +4,7 @@ package com.example.cds.eattle_prototype_2.model;
  * Created by GA on 2015. 3. 19..
  */
 public class Media {
-    int id;             //전체에서의 사진 id **primary key**
+    long id;             //전체에서의 사진 id **primary key**
     int folder_id;   //폴더 id (속한 스토리의 id)
     String name;        //사진 경로
     int year;           //년
@@ -17,7 +17,7 @@ public class Media {
     public Media() {
     }
 
-    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String tag) {
+    public Media(long id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String tag) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
@@ -50,11 +50,11 @@ public class Media {
         this.day = day;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

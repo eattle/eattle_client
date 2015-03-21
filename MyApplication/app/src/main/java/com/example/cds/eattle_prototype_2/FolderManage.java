@@ -20,9 +20,9 @@ public class FolderManage {
         if (!dir.exists())
         {
             dir.mkdirs();
-            Log.i(TAG, "!dir.exists");
+            Log.i(TAG, dir_path+" 폴더 생성 완료");
         }else{
-            Log.i( TAG , "dir.exists" );
+            Log.i( TAG , dir_path+" 폴더가 이미 존재" );
         }
 
         return dir;
@@ -101,12 +101,34 @@ public class FolderManage {
     }
 
     //파일 이름 바꾸기
-    public static boolean reNameFile(File file , File new_name){
-        boolean result;
-        if(file!=null&&file.exists()&&file.renameTo(new_name)){
-            result=true;
+    public static String reNameFile(File file , File new_name){
+        String result;
+        if(file!=null&&file.exists()){
+            if(!new_name.exists()) {//이미 존재하지 않는 폴더 이름이라면
+                file.renameTo(new_name);
+                Log.d("FolderManage", "폴더 이름 변경 성공");
+                result = new_name.getName();
+            }
+            else{//이미 존재하는 폴더 이름이라면
+                //폴더 이름에 적절한 숫자를 붙인다.
+                int i=2;
+                String path = new_name.getAbsolutePath();
+                File temp = null;
+                while(true){//new_name이 이름에 포함된 디렉토리의 개수를 파악한다.
+                    String _path = path+"-"+i+"번째";
+                    temp = new File(_path);
+                    if(!temp.exists()) {
+                        file.renameTo(temp);
+                        break;
+                    }
+                    i++;
+                }
+                Log.d("FolderManage", "폴더 이름 변경 성공");
+                result=temp.getName();
+            }
         }else{
-            result=false;
+            Log.d("FolderManage","폴더 이름 변경 실패");
+            result="";
         }
         return result;
     }
@@ -180,6 +202,7 @@ public class FolderManage {
                 e.printStackTrace();
             }
             result = true;
+            Log.d("FolderManager","copyFile() 성공");
         }else{
             result = false;
         }
