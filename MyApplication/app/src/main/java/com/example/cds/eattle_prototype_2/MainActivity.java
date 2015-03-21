@@ -1,6 +1,7 @@
 package com.example.cds.eattle_prototype_2;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import com.example.cds.eattle_prototype_2.model.Manager;
 import com.example.cds.eattle_prototype_2.model.Media;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -62,7 +64,7 @@ public class MainActivity extends ActionBarActivity {
     public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
         LinearLayout storyList = (LinearLayout)findViewById(R.id.storyList);
         storyList.removeAllViews();//일단 기존의 스토리 목록을 지운다.
-        List<Folder> folderList = db.getAllFolders();
+        final List<Folder> folderList = db.getAllFolders();
 
         if(folderList.isEmpty()) {//폴더가 정리되어 있지 않으면
             TextView tempLayout = new TextView(this);
@@ -76,17 +78,19 @@ public class MainActivity extends ActionBarActivity {
             LayoutInflater inflater = (LayoutInflater)getSystemService(this.LAYOUT_INFLATER_SERVICE);
 
             for(int i=0;i<folderList.size();i++) {
-                /*
-                TextView tempLayout = new TextView(this);
-                tempLayout.setText(folderList.get(i).getName());
-                tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                tempLayout.setTextSize(20);
-                //tempLayout.setPadding(30,30,30,30);
-                tempLayout.setGravity(Gravity.CENTER);
-                storyList.addView(tempLayout);*/
-
                 TextView tempLayout = (TextView)inflater.inflate(R.layout.story_list, null, false);
                 tempLayout.setText(folderList.get(i).getName());
+                final int id=folderList.get(i).getId();
+                tempLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getApplicationContext(), .class);
+
+                        //객체배열을 ArrayList로 넘겨준다.
+                        intent.putExtra("id",id);
+                        startActivity(intent);
+                    }
+                });
                 storyList.addView(tempLayout);
             }
         }
