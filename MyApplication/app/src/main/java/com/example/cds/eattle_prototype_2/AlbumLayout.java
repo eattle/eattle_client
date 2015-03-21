@@ -1,18 +1,72 @@
 package com.example.cds.eattle_prototype_2;
 
-import android.support.v7.app.ActionBarActivity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.model.Media;
+
+import java.util.List;
 
 
 public class AlbumLayout extends ActionBarActivity {
+
+    GridView mGrid;
+    List<Media> mMediaList;
+    DatabaseHelper db;
+    int mFolderId;
+    String mFolderName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_layout);
+
+        db = DatabaseHelper.getInstance(getApplicationContext());
+
+        Intent intent=new Intent(this.getIntent());
+        mFolderId = intent.getIntExtra("id", 0);
+        mFolderName = db.getFolder(mFolderId).getName();
+
+
+        mGrid = (GridView) findViewById(R.id.imagegrid);
+
+//        ContentResolver cr = getContentResolver();
+
+//        mCursor = cr.query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, null, null, null, null);
+        mMediaList = db.getAllMediaByFolder(mFolderId);
+
+        ImageAdapter Adapter = new ImageAdapter(this);
+        mGrid.setAdapter(Adapter);
+
+        mGrid.setOnItemClickListener(mItemClickListener);
+
     }
+
+    AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener(){
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+            /*
+            mCursor.moveToPosition(position);
+            String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+            Intent intent = new Intent(getApplicationContext(), ImageFull.class);
+            intent.putExtra("path", path);
+            startActivity(intent);
+            */
+        }
+    };
 
 
     @Override
@@ -35,5 +89,49 @@ public class AlbumLayout extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class ImageAdapter extends BaseAdapter {
+        private Context mContext;
+
+        public ImageAdapter(Context c){
+            mContext = c;
+        }
+
+        public int getCount(){
+            return mMediaList.size();
+        }
+
+        public Object getItem(int position){
+            return position;
+        }
+
+        public long getItemId(int position){
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent){
+            ImageView imageView;
+            if(convertView == null){
+                imageView = new ImageView(mContext);
+            }
+            else{
+                imageView = (ImageView)convertView;
+            }
+
+//            mCursor.moveToPosition(position);
+
+//            Uri uri = Uri.withAppendedPath(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails._ID)));
+
+
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ mFolderName +"/"+Long.toString(mMediaList.get(position).getId())+".jpg";
+            imageView.setImageURI(Uri.parse(path));
+            imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
+
+            imageView.setAdjustViewBounds(true);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+            return imageView;
+        }
     }
 }
