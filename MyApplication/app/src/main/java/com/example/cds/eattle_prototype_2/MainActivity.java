@@ -1,5 +1,6 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -9,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
@@ -39,9 +39,9 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         //데이터베이스 OPEN
-        db = new DatabaseHelper(this);
+        db = DatabaseHelper.getInstance(getApplicationContext());
 
-        Button classification = (Button)findViewById(R.id.classification);
+        /*Button classification = (Button)findViewById(R.id.classification);
         classification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +54,7 @@ public class MainActivity extends ActionBarActivity {
                 Manager m = new Manager(totalPictureNum,averageInterval,standardDerivation);
                 db.createManager(m);
             }
-        });
+        });*/
 
         mImage = (ImageView)findViewById(R.id.image);
 
@@ -76,9 +76,27 @@ public class MainActivity extends ActionBarActivity {
         list.setOnItemClickListener(mItemClickListener);
         startManagingCursor(mCursor);
         */
+    }
 
 
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.classification:
+                calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+                long averageInterval = totalInterval;
+                if (totalPictureNum != 0)
+                    averageInterval /= totalPictureNum;
 
+                //DB를 참조한다.
+                Manager m = new Manager(totalPictureNum, averageInterval, standardDerivation);
+                db.createManager(m);
+                break;
+            case R.id.manager:
+                Intent toDBView = new Intent(this,ManagerDBView.class);
+                startActivity(toDBView);
+               break;
+
+        }
     }
 
     private void calculatePictureInterval() {
