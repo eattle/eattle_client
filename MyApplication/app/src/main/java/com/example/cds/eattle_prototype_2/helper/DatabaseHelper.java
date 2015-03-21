@@ -18,6 +18,8 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper{
 
+    private static DatabaseHelper Instance;
+
     private static final int DATABASE_VERSION = 1;
 
     private static final String DATABASE_NAME = "FileManager";
@@ -72,7 +74,16 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_STANDARDDERIVATION + " LONG"
             + ")";
 
+    public static DatabaseHelper getInstance(Context context){
+        if(Instance == null){
+            Instance = new DatabaseHelper(context.getApplicationContext());
+        }
+        return Instance;
+    }
+
     public DatabaseHelper(Context context) {
+
+
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -312,21 +323,25 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         return db.insert(TABLE_MANAGER, null, values);
     }
 
-    public Manager getManager(){
-        SQLiteDatabase db = this.getReadableDatabase();
-
+    public List<Manager> getManagers(){
+        List<Manager> managers = new ArrayList<Manager>();
         String selectQuery = "SELECT * FROM " + TABLE_MANAGER;
 
-        Cursor c = db.rawQuery(selectQuery,null);
-        if(c!=null)
-            c.moveToFirst();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
 
-        Manager m = new Manager();
-        m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
-        m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
-        m.setStandardDerivation(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
+        if(c.moveToFirst()){
+            do{
+                Manager m = new Manager();
+                m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
+                m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
+                m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
+                managers.add(m);
+            }while(c.moveToNext());
+        }
 
-        return m;
+        return managers;
+
     }
 
 

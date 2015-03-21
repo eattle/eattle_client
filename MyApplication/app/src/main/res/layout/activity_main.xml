@@ -11,7 +11,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="사진 정리(백업) 시작"
-        android:textSize="24dp"/>
+        android:textSize="24dp"
+        android:onClick="onClick" />
+
+    <Button
+        android:id="@+id/manager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="manager DB 확인"
+        android:textSize="24dp"
+        android:onClick="onClick" />
     <!-- 이미지 목록들 -->
     <!--
     <ListView
