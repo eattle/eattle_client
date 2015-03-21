@@ -82,7 +82,8 @@ public class MainActivity extends ActionBarActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(getApplicationContext(), AlbumLayout.class);
                         //객체배열을 ArrayList로 넘겨준다.
-                        intent.putExtra("id", id);
+                        Log.d("asdf",id+"!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        intent.putExtra("folderId", id);
                         startActivity(intent);
                     }
                 });
@@ -134,12 +135,13 @@ public class MainActivity extends ActionBarActivity {
     }
     private void pictureClassification() {//시간간격을 바탕으로 사진들을 분류하는 함수
         db.deleteAllFolder();
+        db.deleteAllMedia();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         File picture=null;
         File dir=null;
         String startFolderID="";
         String endFolderID="";
-        int folderIDForDB=-1;//Folder DB에 들어가는 아이디
+        int folderIDForDB=0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
         while(ImageSetter.mCursor.moveToNext()){
@@ -183,7 +185,8 @@ public class MainActivity extends ActionBarActivity {
             //사진을 새로운 폴더로 복사한다.
             FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
             //DB에 사진 데이터를 넣는다.
-            Media m = new Media(pictureID,folderIDForDB,"",cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
+            Log.d("MainActivity",pictureID+" : ID!!!"+folderIDForDB);
+            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
             db.createMedia(m);
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;

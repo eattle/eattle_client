@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,7 +39,7 @@ public class AlbumLayout extends ActionBarActivity {
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         Intent intent=new Intent(this.getIntent());
-        mFolderId = intent.getIntExtra("id", 0);
+        mFolderId = intent.getIntExtra("folderId", 0);
         mFolderName = db.getFolder(mFolderId).getName();
 
 
@@ -123,8 +124,9 @@ public class AlbumLayout extends ActionBarActivity {
 
 //            Uri uri = Uri.withAppendedPath(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails._ID)));
 
+            Log.e("albumlayout", "folder :" + mFolderId + "position :" + position + "Id :" + mMediaList.get(position).getName());
 
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ mFolderName +"/"+Long.toString(mMediaList.get(position).getId())+".jpg";
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ mFolderName +"/"+mMediaList.get(position).getName()+".jpg";
             imageView.setImageURI(Uri.parse(path));
             imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
 

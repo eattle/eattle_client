@@ -318,6 +318,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
     }
 
+    public void deleteAllMedia(){
+        Log.d("DatabaseHelper","deleteAllMedia() 호출");
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+TABLE_MEDIA);
+    }
+
 
     /******************* MANAGER *******************/
     /*
