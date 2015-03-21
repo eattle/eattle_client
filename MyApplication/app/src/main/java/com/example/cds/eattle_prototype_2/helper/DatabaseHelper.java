@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.cds.eattle_prototype_2.model.Folder;
 import com.example.cds.eattle_prototype_2.model.Manager;
@@ -89,19 +90,24 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d("DatabaseHelper", "Database Helper onCreate 함수 호출");
+
 
         db.execSQL(CREATE_TABLE_MEDIA);
         db.execSQL(CREATE_TABLE_FOLDER);
         db.execSQL(CREATE_TABLE_MANAGER);
-
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FOLDER);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANAGER);
-
+        //기존의 테이블들을 일단 삭제하고 새로 만든다
+        try {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_FOLDER);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANAGER);
+        } catch (Exception ex) {
+            Log.e("DatabaseHelper", "Exception in DROP_SQL", ex);
+        }
 
         onCreate(db);
     }
@@ -194,6 +200,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         }
 
         db.delete(TABLE_MEDIA, KEY_ID + " = ? ", new String[]{String.valueOf(folder.getId())});
+    }
+
+    public void deleteAllFolder(){
+        Log.d("DatabaseHelper","deleteAllFolder() 호출");
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+TABLE_FOLDER);
     }
 
     /******************* MEDIA *******************/
