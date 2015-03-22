@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -132,7 +131,8 @@ public class AlbumLayout extends ActionBarActivity {
 
             Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path), CONSTANT.THUMBSIZE, CONSTANT.THUMBSIZE);
 
-            imageView.setImageURI(Uri.parse(path));
+            imageView.setImageBitmap(ThumbImage);
+//            imageView.setImageURI(Uri.parse(path));
  //           imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
 
             imageView.setAdjustViewBounds(true);
