@@ -125,7 +125,7 @@ public class AlbumLayout extends ActionBarActivity {
 
 //            Uri uri = Uri.withAppendedPath(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails._ID)));
 
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ ".thumbnail" +"/"+mMediaList.get(position).getName()+".jpg";
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+mMediaList.get(position).getName()+".jpg";
 
             //Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path), CONSTANT.THUMBSIZE, CONSTANT.THUMBSIZE);
 

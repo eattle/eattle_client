@@ -1,6 +1,7 @@
 package com.example.cds.eattle_prototype_2;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -173,18 +174,18 @@ public class MainActivity extends ActionBarActivity {
         db.deleteAllMedia();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         File picture=null;
-        File picture_thumbnail = null;
         File dir=null;
         String startFolderID="";
         String endFolderID="";
         int folderIDForDB=0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
-        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/.thumbnail/";
+        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/thumbnail/";
+        FolderManage.makeDirectory(folderThumbnailName);
+
 
         while(ImageSetter.mCursor.moveToNext()){
             picture = new File(ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)));
-            picture_thumbnail = new File(ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA)));
             //사진 ID
             long pictureID = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             //사진이 촬영된 날짜
@@ -194,6 +195,21 @@ public class MainActivity extends ActionBarActivity {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
             String folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
+
+            Cursor thumbnailCursor = MediaStore.Images.Thumbnails.queryMiniThumbnail(
+                    getContentResolver(), pictureID,
+                    MediaStore.Images.Thumbnails.MINI_KIND,
+                    null );
+
+            if( thumbnailCursor != null && thumbnailCursor.getCount() > 0 ) {
+                Log.e("thumbnail", ""+pictureID);
+                thumbnailCursor.moveToFirst();//**EDIT**
+                File picture_thumbnail = new File(thumbnailCursor.getString( thumbnailCursor.getColumnIndex( MediaStore.Images.Thumbnails.DATA ) ));
+                FolderManage.copyFile(picture_thumbnail , folderThumbnailName+Long.toString(pictureID)+".jpg");
+            }
+            thumbnailCursor.close();
+
+
 
             Log.d("MainActivity", "[pictureID] : " + Long.toString(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
@@ -223,7 +239,6 @@ public class MainActivity extends ActionBarActivity {
             }
             //사진을 새로운 폴더로 복사한다.
             FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
-            FolderManage.copyFile(picture_thumbnail , folderThumbnailName+Long.toString(pictureID)+".jpg");
 
             //DB에 사진 데이터를 넣는다.
             Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
@@ -246,6 +261,7 @@ public class MainActivity extends ActionBarActivity {
         //메인화면의 스토리 목록을 갱신한다.
         drawMainView();
         Toast.makeText(getBaseContext(),"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
+        ImageSetter.mCursor.close();
     }
 
         AdapterView.OnItemClickListener mItemClickListener =
