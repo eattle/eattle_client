@@ -74,12 +74,12 @@ public class MainActivity extends ActionBarActivity {
             LayoutInflater inflater = (LayoutInflater)getSystemService(this.LAYOUT_INFLATER_SERVICE);
 
             for(int i=0;i<folderList.size();i++) {
-
+/*
                 LinearLayout linearLayout = (LinearLayout)inflater.inflate(R.layout.story_list,null,false);
                 TextView textView = (TextView)linearLayout.getChildAt(0);
                 textView.setText(folderList.get(i).getName());
+*/
 
-                /*
                 LinearLayout linearLayout = new LinearLayout(this);
                 linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200));
 
@@ -89,7 +89,10 @@ public class MainActivity extends ActionBarActivity {
                 // 해당 margin값 변경
                 lp.setMargins(15, 15, 15, 15);
                 // 변경된 값 적용
-                linearLayout.setLayoutParams(lp);*/
+                linearLayout.setLayoutParams(lp);
+                TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
+                textView.setText(folderList.get(i).getName());
+
                 final int id=folderList.get(i).getId();
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -100,6 +103,7 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(intent);
                     }
                 });
+                linearLayout.addView(textView);
                 storyList.addView(linearLayout);
             }
         }
