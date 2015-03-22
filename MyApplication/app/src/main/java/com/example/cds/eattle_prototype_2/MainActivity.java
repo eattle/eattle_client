@@ -74,10 +74,27 @@ public class MainActivity extends ActionBarActivity {
             LayoutInflater inflater = (LayoutInflater)getSystemService(this.LAYOUT_INFLATER_SERVICE);
 
             for(int i=0;i<folderList.size();i++) {
-                TextView tempLayout = (TextView)inflater.inflate(R.layout.story_list, null, false);
-                tempLayout.setText(folderList.get(i).getName());
+/*
+                LinearLayout linearLayout = (LinearLayout)inflater.inflate(R.layout.story_list,null,false);
+                TextView textView = (TextView)linearLayout.getChildAt(0);
+                textView.setText(folderList.get(i).getName());
+*/
+
+                LinearLayout linearLayout = new LinearLayout(this);
+                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200));
+
+
+                // 해당 레이아웃의 파라미터 값을 호출
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) linearLayout.getLayoutParams();
+                // 해당 margin값 변경
+                lp.setMargins(15, 15, 15, 15);
+                // 변경된 값 적용
+                linearLayout.setLayoutParams(lp);
+                TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
+                textView.setText(folderList.get(i).getName());
+
                 final int id=folderList.get(i).getId();
-                tempLayout.setOnClickListener(new View.OnClickListener() {
+                textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(getApplicationContext(), AlbumLayout.class);
@@ -86,7 +103,8 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(intent);
                     }
                 });
-                storyList.addView(tempLayout);
+                linearLayout.addView(textView);
+                storyList.addView(linearLayout);
             }
         }
 
