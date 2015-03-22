@@ -82,7 +82,6 @@ public class MainActivity extends ActionBarActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(getApplicationContext(), AlbumLayout.class);
                         //객체배열을 ArrayList로 넘겨준다.
-                        Log.d("asdf",id+"!!!!!!!!!!!!!!!!!!!!!!!!!");
                         intent.putExtra("folderId", id);
                         startActivity(intent);
                     }
@@ -185,7 +184,6 @@ public class MainActivity extends ActionBarActivity {
             //사진을 새로운 폴더로 복사한다.
             FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
             //DB에 사진 데이터를 넣는다.
-            Log.d("MainActivity",pictureID+" : ID!!!"+folderIDForDB);
             Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
             db.createMedia(m);
             _pictureTakenTime = pictureTakenTime;
