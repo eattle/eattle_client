@@ -2,9 +2,7 @@ package com.example.cds.eattle_prototype_2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -127,13 +125,13 @@ public class AlbumLayout extends ActionBarActivity {
 
 //            Uri uri = Uri.withAppendedPath(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails._ID)));
 
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ mFolderName +"/"+mMediaList.get(position).getName()+".jpg";
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ ".thumbnail" +"/"+mMediaList.get(position).getName()+".jpg";
 
-            Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path), CONSTANT.THUMBSIZE, CONSTANT.THUMBSIZE);
+            //Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path), CONSTANT.THUMBSIZE, CONSTANT.THUMBSIZE);
 
-            imageView.setImageBitmap(ThumbImage);
-//            imageView.setImageURI(Uri.parse(path));
- //           imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
+            //imageView.setImageBitmap(ThumbImage);
+            imageView.setImageURI(Uri.parse(path));
+            imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
 
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);

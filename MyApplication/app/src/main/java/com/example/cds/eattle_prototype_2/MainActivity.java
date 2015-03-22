@@ -137,14 +137,18 @@ public class MainActivity extends ActionBarActivity {
         db.deleteAllMedia();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         File picture=null;
+        File picture_thumbnail = null;
         File dir=null;
         String startFolderID="";
         String endFolderID="";
         int folderIDForDB=0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
+        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/.thumbnail/";
+
         while(ImageSetter.mCursor.moveToNext()){
             picture = new File(ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)));
+            picture_thumbnail = new File(ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA)));
             //사진 ID
             long pictureID = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             //사진이 촬영된 날짜
@@ -183,6 +187,8 @@ public class MainActivity extends ActionBarActivity {
             }
             //사진을 새로운 폴더로 복사한다.
             FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
+            FolderManage.copyFile(picture_thumbnail , folderThumbnailName+Long.toString(pictureID)+".jpg");
+
             //DB에 사진 데이터를 넣는다.
             Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
             db.createMedia(m);
