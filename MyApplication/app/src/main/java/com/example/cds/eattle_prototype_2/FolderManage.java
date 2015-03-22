@@ -59,8 +59,22 @@ public class FolderManage {
     public static boolean deleteFile(File file){
         boolean result;
         if(file!=null&&file.exists()){
-            file.delete();
+                File[] childFileList = file.listFiles();
+                for(File childFile : childFileList)
+                {
+                    if(childFile.isDirectory()) {
+                        deleteFile(new File(childFile.getAbsolutePath()));    //하위 디렉토리
+                    }
+                    else {
+                        childFile.delete();    //하위 파일
+                    }
+                }
+
+
+            file.delete();    //root 삭제
+
             result = true;
+            Log.d("FolderManage","deleteFile() 성공");
         }else{
             result = false;
         }

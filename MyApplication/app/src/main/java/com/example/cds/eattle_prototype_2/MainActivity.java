@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -64,7 +65,7 @@ public class MainActivity extends ActionBarActivity {
 
         if(folderList.isEmpty()) {//폴더가 정리되어 있지 않으면
             TextView tempLayout = new TextView(this);
-            tempLayout.setText("휴지통이 비어있어요!");
+            tempLayout.setText("앨범이 비어있어요!");
             tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
             tempLayout.setTextSize(20);
             tempLayout.setGravity(Gravity.CENTER);
@@ -113,17 +114,6 @@ public class MainActivity extends ActionBarActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.classification:
-                Toast.makeText(getBaseContext(),"사진 정리 중",Toast.LENGTH_LONG).show();
-                ImageSetter = new AlbumImageSetter(this,0,0);
-                calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-                long averageInterval = totalInterval;
-                if (totalPictureNum != 0)
-                    averageInterval /= totalPictureNum;
-
-                //DB를 참조한다.
-                Manager m = new Manager(totalPictureNum, averageInterval, standardDerivation);
-                db.createManager(m);//Manager DB에 값들을 집어넣음
-
                 pictureClassification();
                 break;
             case R.id.manager:
@@ -131,9 +121,18 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(toDBView);
                break;
 
+            case R.id.intervalOk:
+                EditText editText = (EditText)findViewById(R.id.intervalText);
+                String text = editText.getText().toString();
+                if(text!=null) {//시간간격을 입력했으면
+                    CONSTANT.TIMEINTERVAL = Long.parseLong(text);
+                    pictureClassification();
+                }
+                else
+                    Toast.makeText(getBaseContext(),"시간 간격을 입력하세요",Toast.LENGTH_SHORT).show();
+                editText.clearFocus();
         }
     }
-
 
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
         totalInterval=0;
@@ -151,6 +150,25 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     private void pictureClassification() {//시간간격을 바탕으로 사진들을 분류하는 함수
+        //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
+        String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
+        for(int i=0;i<folderList.length;i++){
+            //Log.d("!!!!",Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"+"~~~~~~~~~~~~");
+            if(!folderList[i].equals("Camera") && !folderList[i].equals(".thumbnails"))
+                FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
+        }
+        //---------------------------------------------
+        Toast.makeText(getBaseContext(),"사진 정리 중",Toast.LENGTH_LONG).show();
+        ImageSetter = new AlbumImageSetter(this, 0, 0);
+        calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+        long averageInterval = totalInterval;
+        if (totalPictureNum != 0)
+            averageInterval /= totalPictureNum;
+
+        //DB를 참조한다.
+        Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
+        db.createManager(_m);//Manager DB에 값들을 집어넣음
+
         db.deleteAllFolder();
         db.deleteAllMedia();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
