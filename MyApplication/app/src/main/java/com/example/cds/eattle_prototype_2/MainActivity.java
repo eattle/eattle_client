@@ -183,9 +183,8 @@ public class MainActivity extends ActionBarActivity {
                     MediaStore.Images.Thumbnails.MINI_KIND,
                     null );
 
-            if( thumbnailCursor != null && thumbnailCursor.getCount() > 0 ) {
+            if( thumbnailCursor != null && thumbnailCursor.moveToFirst()) {
                 Log.e("thumbnail", ""+pictureID);
-                thumbnailCursor.moveToFirst();//**EDIT**
                 File picture_thumbnail = new File(thumbnailCursor.getString( thumbnailCursor.getColumnIndex( MediaStore.Images.Thumbnails.DATA ) ));
                 FolderManage.copyFile(picture_thumbnail , folderThumbnailName+Long.toString(pictureID)+".jpg");
             }
