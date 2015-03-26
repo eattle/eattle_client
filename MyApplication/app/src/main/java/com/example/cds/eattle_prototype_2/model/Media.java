@@ -1,9 +1,11 @@
 package com.example.cds.eattle_prototype_2.model;
 
+import java.io.Serializable;
+
 /**
  * Created by GA on 2015. 3. 19..
  */
-public class Media {
+public class Media implements Serializable{
     long id;             //전체에서의 사진 id **primary key**
     int folder_id;   //폴더 id (속한 스토리의 id)
     String name;        //사진 경로

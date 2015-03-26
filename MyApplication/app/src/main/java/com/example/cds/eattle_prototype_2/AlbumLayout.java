@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
@@ -81,13 +80,18 @@ public class AlbumLayout extends ActionBarActivity {
 
     AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener(){
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-            /*
-            mCursor.moveToPosition(position);
+            Bundle extras = new Bundle();
+            extras.putSerializable("selectedMedia", mMediaList.get(position));
+            Intent intent = new Intent(getApplicationContext(), FullPicture.class);
+//            intent.putExtra("id", mMediaList.get(position).getId());
+            intent.putExtras(extras);
+
+/*            mCursor.moveToPosition(position);
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
             Intent intent = new Intent(getApplicationContext(), ImageFull.class);
-            intent.putExtra("path", path);
+            intent.putExtra("path", path);*/
             startActivity(intent);
-            */
+
         }
     };
 
@@ -154,7 +158,7 @@ public class AlbumLayout extends ActionBarActivity {
 
             imageView.setImageURI(Uri.parse(path));
             //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, GridView.AUTO_FIT);
-            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT,GridView.AUTO_FIT);
+            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT,400);
             imageView.setLayoutParams(params);
 
             imageView.setAdjustViewBounds(true);

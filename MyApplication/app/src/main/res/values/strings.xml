@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_manager_dbview">ManagerDBView</string>
     <string name="title_activity_album_layout">AlbumLayout</string>
+    <string name="title_activity_full_picture">FullPicture</string>
 
 </resources>

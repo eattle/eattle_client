@@ -31,6 +31,10 @@
             android:name=".AlbumLayout"
             android:label="@string/title_activity_album_layout" >
         </activity>
+        <activity
+            android:name=".FullPicture"
+            android:label="@string/title_activity_full_picture" >
+        </activity>
     </application>
 
 </manifest>

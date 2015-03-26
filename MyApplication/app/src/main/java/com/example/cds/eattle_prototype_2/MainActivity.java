@@ -2,7 +2,6 @@ package com.example.cds.eattle_prototype_2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -161,6 +160,8 @@ public class MainActivity extends ActionBarActivity {
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         long pictureTakenTime=0;
         while (ImageSetter.mCursor.moveToNext()) {
+            String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+
             //썸네일 사진들은 계산대상에서 제외한다
             if(path.contains("thumbnail")) {
                 Log.d("pictureClassification","썸네일은 분류대상에서 제외");
