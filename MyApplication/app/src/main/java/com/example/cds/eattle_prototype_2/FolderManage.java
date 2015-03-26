@@ -59,8 +59,22 @@ public class FolderManage {
     public static boolean deleteFile(File file){
         boolean result;
         if(file!=null&&file.exists()){
-            file.delete();
+                File[] childFileList = file.listFiles();
+                for(File childFile : childFileList)
+                {
+                    if(childFile.isDirectory()) {
+                        deleteFile(new File(childFile.getAbsolutePath()));    //하위 디렉토리
+                    }
+                    else {
+                        childFile.delete();    //하위 파일
+                    }
+                }
+
+
+            file.delete();    //root 삭제
+
             result = true;
+            Log.d("FolderManage","deleteFile() 성공");
         }else{
             result = false;
         }
@@ -106,8 +120,8 @@ public class FolderManage {
         if(file!=null&&file.exists()){
             if(!new_name.exists()) {//이미 존재하지 않는 폴더 이름이라면
                 file.renameTo(new_name);
-                Log.d("FolderManage", "폴더 이름 변경 성공");
                 result = new_name.getName();
+                Log.d("FolderManage", "폴더 이름 변경 성공  "+result);
             }
             else{//이미 존재하는 폴더 이름이라면
                 //폴더 이름에 적절한 숫자를 붙인다.
@@ -123,8 +137,9 @@ public class FolderManage {
                     }
                     i++;
                 }
-                Log.d("FolderManage", "폴더 이름 변경 성공");
                 result=temp.getName();
+                Log.d("FolderManage", "폴더 이름 변경 성공   "+result);
+
             }
         }else{
             Log.d("FolderManage","폴더 이름 변경 실패");

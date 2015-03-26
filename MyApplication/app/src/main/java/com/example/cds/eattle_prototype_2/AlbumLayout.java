@@ -2,10 +2,13 @@ package com.example.cds.eattle_prototype_2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,8 +17,11 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.model.Folder;
 import com.example.cds.eattle_prototype_2.model.Media;
 
 import java.util.List;
@@ -23,14 +29,14 @@ import java.util.List;
 
 public class AlbumLayout extends ActionBarActivity {
 
-
-
+    TextView textView;
+    ImageView imageView;
     GridView mGrid;
     List<Media> mMediaList;
     DatabaseHelper db;
     int mFolderId;
     String mFolderName;
-
+    String representativeImage;//대표이미지
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +47,24 @@ public class AlbumLayout extends ActionBarActivity {
 
         Intent intent=new Intent(this.getIntent());
         mFolderId = intent.getIntExtra("folderId", 0);
-        mFolderName = db.getFolder(mFolderId).getName();
+        Folder folderTemp = db.getFolder(mFolderId);
+        mFolderName = folderTemp.getName();
+        representativeImage = folderTemp.getImage();
 
+        //폴더(스토리)의 제목 등록
+        textView = (TextView)findViewById(R.id.albumTitle);
+        textView.setText(mFolderName);
+        //폴더(스토리)의 대표사진 등록
+        imageView = (ImageView)findViewById(R.id.imageView);
+        //썸네일 이미지를 생성한다
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inSampleSize = 4;//기존 해상도의 1/16로 줄인다
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ representativeImage+".jpg";
+        Log.d("!!!!!!",path+"~!~!~!");
+        Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
+        imageView.setImageBitmap(bitmap);
 
+        //그리드 뷰 등록
         mGrid = (GridView) findViewById(R.id.imagegrid);
 
 //        ContentResolver cr = getContentResolver();
@@ -130,8 +151,11 @@ public class AlbumLayout extends ActionBarActivity {
             //Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path), CONSTANT.THUMBSIZE, CONSTANT.THUMBSIZE);
 
             //imageView.setImageBitmap(ThumbImage);
+
             imageView.setImageURI(Uri.parse(path));
-            imageView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
+            //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, GridView.AUTO_FIT);
+            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT,GridView.AUTO_FIT);
+            imageView.setLayoutParams(params);
 
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);

@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -7,6 +7,7 @@
     android:orientation="vertical" tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -34,8 +35,10 @@
     </LinearLayout>
 
     <ScrollView
+        android:layout_below="@+id/buttons"
+        android:layout_above="@+id/inputInterval"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
         <LinearLayout
             android:id="@+id/storyList"
             android:layout_width="match_parent"
@@ -46,4 +49,25 @@
             </LinearLayout>
         </ScrollView>
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/inputInterval"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/intervalText"
+            android:hint="분류할 시간 간격을 입력하세요"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"/>
+        <Button
+            android:id="@+id/intervalOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@layout/button_shape"
+            android:text="확인"
+            android:layout_weight="1"
+            android:onClick="onClick"/>
+    </LinearLayout>
+</RelativeLayout>

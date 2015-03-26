@@ -1,9 +1,11 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -16,6 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,6 +32,8 @@ import com.example.cds.eattle_prototype_2.model.Manager;
 import com.example.cds.eattle_prototype_2.model.Media;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.List;
 
@@ -65,7 +72,7 @@ public class MainActivity extends ActionBarActivity {
 
         if(folderList.isEmpty()) {//폴더가 정리되어 있지 않으면
             TextView tempLayout = new TextView(this);
-            tempLayout.setText("휴지통이 비어있어요!");
+            tempLayout.setText("앨범이 비어있어요!");
             tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
             tempLayout.setTextSize(20);
             tempLayout.setGravity(Gravity.CENTER);
@@ -81,16 +88,25 @@ public class MainActivity extends ActionBarActivity {
                 textView.setText(folderList.get(i).getName());
 */
 
-                LinearLayout linearLayout = new LinearLayout(this);
-                linearLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200));
-
+                FrameLayout frameLayout = new FrameLayout(this);
+                frameLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200));
 
                 // 해당 레이아웃의 파라미터 값을 호출
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) linearLayout.getLayoutParams();
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) frameLayout.getLayoutParams();
                 // 해당 margin값 변경
                 lp.setMargins(15, 15, 15, 15);
                 // 변경된 값 적용
-                linearLayout.setLayoutParams(lp);
+                frameLayout.setLayoutParams(lp);
+
+                ImageView imageView = new ImageView(this);
+                //imageView.setImageResource(picName);
+                imageView.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+folderList.get(i).getImage()+".jpg"));
+
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); // 레이아웃 크기에 이미지를 맞춘다
+                //listImage.setLayoutParams(new ViewGroup.LayoutParams(120,120));
+                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                imageView.setAlpha(1200);
+
                 TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
                 textView.setText(folderList.get(i).getName());
 
@@ -104,8 +120,9 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(intent);
                     }
                 });
-                linearLayout.addView(textView);
-                storyList.addView(linearLayout);
+                frameLayout.addView(imageView);
+                frameLayout.addView(textView);
+                storyList.addView(frameLayout);
             }
         }
 
@@ -114,27 +131,29 @@ public class MainActivity extends ActionBarActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.classification:
-                Toast.makeText(getBaseContext(),"사진 정리 중",Toast.LENGTH_LONG).show();
-                ImageSetter = new AlbumImageSetter(this,0,0);
-                calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-                long averageInterval = totalInterval;
-                if (totalPictureNum != 0)
-                    averageInterval /= totalPictureNum;
-
-                //DB를 참조한다.
-                Manager m = new Manager(totalPictureNum, averageInterval, standardDerivation);
-                db.createManager(m);//Manager DB에 값들을 집어넣음
-
+                Toast.makeText(this,"사진 정리 중",Toast.LENGTH_LONG).show();
+                Button classification = (Button)findViewById(R.id.classification);
+                classification.setEnabled(false); // 클릭 무효화
                 pictureClassification();
+                classification.setEnabled(true); // 클릭 유효화
                 break;
             case R.id.manager:
                 Intent toDBView = new Intent(this,ManagerDBView.class);
                 startActivity(toDBView);
                break;
 
+            case R.id.intervalOk:
+                EditText editText = (EditText)findViewById(R.id.intervalText);
+                String text = editText.getText().toString();
+                if(text!=null) {//시간간격을 입력했으면
+                    CONSTANT.TIMEINTERVAL = Long.parseLong(text);
+                    pictureClassification();
+                }
+                else
+                    Toast.makeText(getBaseContext(),"시간 간격을 입력하세요",Toast.LENGTH_SHORT).show();
+                editText.clearFocus();
         }
     }
-
 
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
         totalInterval=0;
@@ -142,9 +161,16 @@ public class MainActivity extends ActionBarActivity {
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         long pictureTakenTime=0;
         while (ImageSetter.mCursor.moveToNext()) {
+            //썸네일 사진들은 계산대상에서 제외한다
+            if(path.contains("thumbnail")) {
+                Log.d("pictureClassification","썸네일은 분류대상에서 제외");
+                continue;
+            }
             //사진이 촬영된 날짜
             long _pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             _pictureTakenTime *= 1000; //second->millisecond
+            if(pictureTakenTime == 0)
+                pictureTakenTime = _pictureTakenTime;
 
             totalInterval += _pictureTakenTime-pictureTakenTime;
             pictureTakenTime = _pictureTakenTime;
@@ -152,6 +178,24 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     private void pictureClassification() {//시간간격을 바탕으로 사진들을 분류하는 함수
+        //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
+        String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
+        for(int i=0;i<folderList.length;i++){
+            //Log.d("!!!!",Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"+"~~~~~~~~~~~~");
+            if(!folderList[i].equals("Camera") && !folderList[i].equals("thumbnail"))
+                FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
+        }
+        //---------------------------------------------
+        ImageSetter = new AlbumImageSetter(this, 0, 0);
+        calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+        long averageInterval = totalInterval;
+        if (totalPictureNum != 0)
+            averageInterval /= totalPictureNum;
+        CONSTANT.TIMEINTERVAL=averageInterval;
+        //DB를 참조한다.
+        Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
+        db.createManager(_m);//Manager DB에 값들을 집어넣음
+
         db.deleteAllFolder();
         db.deleteAllMedia();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
@@ -161,13 +205,22 @@ public class MainActivity extends ActionBarActivity {
         String endFolderID="";
         int folderIDForDB=0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
+        String representativeImage="";//폴더에 들어가는 대표이미지의 이름(경로제외), 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
         String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/thumbnail/";
         FolderManage.makeDirectory(folderThumbnailName);
 
 
         while(ImageSetter.mCursor.moveToNext()){
-            picture = new File(ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)));
+            String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+
+            //썸네일 사진들은 분류대상에서 제외한다
+            if(path.contains("thumbnail")) {
+                Log.d("pictureClassification","썸네일은 분류대상에서 제외");
+                continue;
+            }
+
+            picture = new File(path);
             //사진 ID
             long pictureID = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             //사진이 촬영된 날짜
@@ -177,20 +230,28 @@ public class MainActivity extends ActionBarActivity {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
             String folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
-
+            if(representativeImage.equals(""))
+                representativeImage = Long.toString(pictureID);
+            /*
             Cursor thumbnailCursor = MediaStore.Images.Thumbnails.queryMiniThumbnail(
                     getContentResolver(), pictureID,
                     MediaStore.Images.Thumbnails.MINI_KIND,
                     null );
-
-            if( thumbnailCursor != null && thumbnailCursor.moveToFirst()) {
+            Log.d("thumbnail",thumbnailCursor.getCount()+"!!!");
+            if( thumbnailCursor != null && thumbnailCursor.getCount() > 0 ) {
+            //if( thumbnailCursor != null){
                 Log.e("thumbnail", ""+pictureID);
                 File picture_thumbnail = new File(thumbnailCursor.getString( thumbnailCursor.getColumnIndex( MediaStore.Images.Thumbnails.DATA ) ));
                 FolderManage.copyFile(picture_thumbnail , folderThumbnailName+Long.toString(pictureID)+".jpg");
             }
             thumbnailCursor.close();
+            */
 
-
+            //썸네일 이미지를 생성한다
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
+            Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
+            createThumbnail(bitmap, folderThumbnailName, Long.toString(pictureID)+".jpg");
 
             Log.d("MainActivity", "[pictureID] : " + Long.toString(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
@@ -207,8 +268,9 @@ public class MainActivity extends ActionBarActivity {
 
                     String _new_name=FolderManage.reNameFile(dir, new_name);
                     //Folder DB에 넣는다.
-                    Folder f = new Folder(folderIDForDB,_new_name);
+                    Folder f = new Folder(folderIDForDB,_new_name,representativeImage);
                     db.createFolder(f);
+                    representativeImage="";
                     Log.d("MainActivity","tempEattle 폴더 이름 변경");
                 }
 
@@ -236,7 +298,11 @@ public class MainActivity extends ActionBarActivity {
                 new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "~" + endFolderID + "의 스토리");
             } else
                 new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "의 스토리");
-            FolderManage.reNameFile(dir, new_name);
+            String _new_name = FolderManage.reNameFile(dir, new_name);
+            //Folder DB에 넣는다.
+            Folder f = new Folder(folderIDForDB,_new_name,representativeImage);
+            db.createFolder(f);
+            representativeImage="";
             Log.d("MainActivity","tempEattle 폴더 이름 변경");
         }
         //메인화면의 스토리 목록을 갱신한다.
@@ -245,6 +311,49 @@ public class MainActivity extends ActionBarActivity {
         ImageSetter.mCursor.close();
     }
 
+    // 외장 메모리 DCIM 전체 MediaScanning
+    public static void startExtMediaScan(Context mContext){
+        mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
+    }
+    //썸네일 생성 함수
+    public static void createThumbnail(Bitmap bitmap, String strFilePath, String filename) {
+
+        File file = new File(strFilePath);
+
+        if (!file.exists()) {
+            file.mkdirs();
+            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+        }
+        File fileCacheItem = new File(strFilePath + filename);
+        //strFilePath+filename이 이미 존재한다면, 썸네일을 만들 필요가 없다
+        if(fileCacheItem.exists()){
+            Log.d("createThumbnail","썸네일이 이미 존재합니다");
+            return;
+        }
+
+        OutputStream out = null;
+
+
+
+
+        try {
+            int height=bitmap.getHeight();
+            int width=bitmap.getWidth();
+
+            fileCacheItem.createNewFile();
+            out = new FileOutputStream(fileCacheItem);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
         AdapterView.OnItemClickListener mItemClickListener =
             new AdapterView.OnItemClickListener() {
                 @Override
