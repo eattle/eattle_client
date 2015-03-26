@@ -21,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String DATABASE_NAME = "FileManager";
 
@@ -43,6 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //folder
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
+    private static final String KEY_IMAGE = "image";
 
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
@@ -65,7 +66,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String CREATE_TABLE_FOLDER =
             "CREATE TABLE " + TABLE_FOLDER + " ("
             + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
-            + KEY_NAME + " VARCHAR(100) NOT NULL "
+            + KEY_NAME + " VARCHAR(255) NOT NULL, "
+            + KEY_IMAGE + " VARCHAR(255) NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_MANAGER =
@@ -122,6 +124,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, folder.getName());
+        values.put(KEY_IMAGE, folder.getImage());
 
         return db.insert(TABLE_FOLDER, null, values);
     }
@@ -136,6 +139,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
+        /*
         if(c.moveToFirst()){
             do{
                 Folder f = new Folder();
@@ -143,6 +147,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
                 folders.add(f);
             }while(c.moveToNext());
+        }*/
+        while(c.moveToNext()){
+            Folder f = new Folder();
+            f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+            folders.add(f);
         }
 
         return folders;
@@ -165,6 +176,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
         f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+        f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
 
         return f;
 
