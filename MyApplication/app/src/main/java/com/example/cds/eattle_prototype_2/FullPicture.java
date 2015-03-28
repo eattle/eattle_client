@@ -33,13 +33,20 @@ public class FullPicture extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_picture);
 
-        Object selectedMedia =  this.getIntent().getExtras().get("selectedMedia");
+        Bundle bundle = this.getIntent().getExtras();
 
-        mMediaList = db.getAllMediaByFolder(((Media)selectedMedia).getFolder_id());
-        mediaPosition = ((int) ((Media)selectedMedia).getId());
+        int folderId = bundle.getInt("folderId");
+        mediaPosition = bundle.getInt("position");
+//        int folderId = this.getIntent().getExtras().get("folderId");
+//        Object selectedMedia =  this.getIntent().getExtras().get("selectedMedia");
+
+        mMediaList = db.getAllMediaByFolder(folderId);
+        Log.d("media", ""+mMediaList.size());
+//        mediaPosition = ((int) ((Media)selectedMedia).getId());
 
         ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(new TouchImageAdapter());
+        mViewPager.setCurrentItem(mediaPosition);
 
     }
 

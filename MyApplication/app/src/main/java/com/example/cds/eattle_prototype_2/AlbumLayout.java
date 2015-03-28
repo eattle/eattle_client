@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,10 +79,14 @@ public class AlbumLayout extends ActionBarActivity {
     AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener(){
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
             Bundle extras = new Bundle();
-            extras.putSerializable("selectedMedia", mMediaList.get(position));
+//            extras.putParcelable();
+            extras.putInt("folderId", mMediaList.get(position).getFolder_id());
+            extras.putInt("position", position);
+//            extras.putSerializable("selectedMedia", mMediaList.get(position));
             Intent intent = new Intent(getApplicationContext(), FullPicture.class);
 //            intent.putExtra("id", mMediaList.get(position).getId());
             intent.putExtras(extras);
+//            intent.putExtra("position", position);
 
 /*            mCursor.moveToPosition(position);
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
