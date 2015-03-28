@@ -40,7 +40,6 @@ public class FullPicture extends ActionBarActivity {
 
         ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(new TouchImageAdapter());
-
     }
 
     class TouchImageAdapter extends PagerAdapter {
