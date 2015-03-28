@@ -161,10 +161,9 @@ public class MainActivity extends ActionBarActivity {
         long pictureTakenTime=0;
         while (ImageSetter.mCursor.moveToNext()) {
             String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-
             //썸네일 사진들은 계산대상에서 제외한다
-            if(path.contains("thumbnail")) {
-                Log.d("pictureClassification","썸네일은 분류대상에서 제외");
+            if(path.contains("thumbnail") || path.contains("스토리")) {
+                Log.d("pictureClassification","썸네일 및 기존 스토리는 계산대상에서 제외");
                 continue;
             }
             //사진이 촬영된 날짜
@@ -215,9 +214,10 @@ public class MainActivity extends ActionBarActivity {
         while(ImageSetter.mCursor.moveToNext()){
             String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
 
+            Log.d("사진 분류",path);
             //썸네일 사진들은 분류대상에서 제외한다
-            if(path.contains("thumbnail")) {
-                Log.d("pictureClassification","썸네일은 분류대상에서 제외");
+            if(path.contains("thumbnail") || path.contains("스토리")) {
+                Log.d("pictureClassification","썸네일 및 기존 스토리는 분류 대상에서 제외");
                 continue;
             }
 
@@ -313,6 +313,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     // 외장 메모리 DCIM 전체 MediaScanning
+    // 킷캣 이후 버전 이후로 앱단에서 스캐닝 불가
     public static void startExtMediaScan(Context mContext){
         mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
     }

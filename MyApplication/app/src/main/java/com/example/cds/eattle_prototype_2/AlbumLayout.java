@@ -59,7 +59,6 @@ public class AlbumLayout extends ActionBarActivity {
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inSampleSize = 4;//기존 해상도의 1/16로 줄인다
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ representativeImage+".jpg";
-        Log.d("!!!!!!",path+"~!~!~!");
         Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
         imageView.setImageBitmap(bitmap);
 
