@@ -1,5 +1,8 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -20,6 +23,8 @@ import java.util.List;
 
 
 public class FullPicture extends ActionBarActivity {
+
+    final static int TAGING = 11111;
 
     DatabaseHelper db;
     List<Media> mMediaList;
@@ -63,12 +68,12 @@ public class FullPicture extends ActionBarActivity {
         public View instantiateItem(ViewGroup container, int position) {
             TouchImageView img = new TouchImageView(container.getContext());
 
-            Media m = mMediaList.get(position);
+            final Media m = mMediaList.get(position);
 
             String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
             try {
                 BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inSampleSize = 8;
+                opt.inSampleSize = 4;
                 Bitmap bm = BitmapFactory.decodeFile(path, opt);
                 img.setImageBitmap(bm);
             } catch (OutOfMemoryError e) {
@@ -77,18 +82,58 @@ public class FullPicture extends ActionBarActivity {
 
 //            img.setImageURI();
 //            img.setImageResource(mMediaList.get(mediaPosition+position));
+
             container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+            img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FragmentManager fm = getFragmentManager();
+                    Fragment fragment = fm.findFragmentById(R.id.frame);
+                    if(fragment == null) {
+
+                        FragmentTransaction tr = fm.beginTransaction();
+                        TabToTag ttt = TabToTag.newInstance(m.getId());
+                        tr.add(R.id.frame, ttt, "TabToTag");
+                        tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        tr.commit();
+                    }
+                    else{
+                        FragmentTransaction tr = fm.beginTransaction();
+                        tr.remove(fragment);
+                        tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+
+                        tr.commit();
+                        fm.executePendingTransactions();
+                    }
+                }
+            });
+
             return img;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
+
             container.removeView((View) object);
         }
 
         @Override
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
+        }
+
+        @Override
+        public void startUpdate(ViewGroup container){
+            FragmentManager fm = getFragmentManager();
+            Fragment fragment = fm.findFragmentById(R.id.frame);
+            if(fragment != null) {
+                FragmentTransaction tr = fm.beginTransaction();
+                tr.remove(fragment);
+                tr.commit();
+                fm.executePendingTransactions();
+            }
+            super.startUpdate(container);
         }
 
     }
