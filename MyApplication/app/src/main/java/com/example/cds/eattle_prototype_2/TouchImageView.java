@@ -763,6 +763,8 @@ public class TouchImageView extends ImageView {
             if(doubleTapListener != null) {
                 return doubleTapListener.onSingleTapConfirmed(e);
             }
+
+
             return performClick();
         }
 
