@@ -10,33 +10,23 @@
         android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2">
+        android:orientation="horizontal">
+
         <Button
             android:id="@+id/classification"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="사진 정리(백업) 시작"
+            android:text="당신의 아름다운 추억을 정리하세요"
             android:textSize="15dp"
             android:background="@layout/button_shape"
-            android:layout_weight="1"
-            android:layout_marginRight="10dp"
-           android:onClick="onClick" />
-
-        <Button
-            android:id="@+id/manager"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="manager DB 확인"
-            android:textSize="15dp"
-            android:background="@layout/button_shape"
-            android:layout_weight="1"
+            android:padding="3dp"
             android:onClick="onClick" />
+
     </LinearLayout>
 
+    <!--
     <ScrollView
         android:layout_below="@+id/buttons"
-        android:layout_above="@+id/inputInterval"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -48,7 +38,14 @@
 
             </LinearLayout>
         </ScrollView>
-
+    -->
+    <ListView
+        android:id="@+id/storyList"
+        android:layout_below="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layoutAnimation="@anim/layout_bottom_top_slide"></ListView>
+    <!--
     <LinearLayout
         android:id="@+id/inputInterval"
         android:layout_alignParentBottom="true"
@@ -69,5 +66,5 @@
             android:text="확인"
             android:layout_weight="1"
             android:onClick="onClick"/>
-    </LinearLayout>
+    </LinearLayout>-->
 </RelativeLayout>
