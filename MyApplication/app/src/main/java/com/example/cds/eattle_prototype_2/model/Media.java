@@ -6,9 +6,9 @@ import java.io.Serializable;
  * Created by GA on 2015. 3. 19..
  */
 public class Media implements Serializable {
-    long id;             //전체에서의 사진 id **primary key**
+    long id;             //전체에서의 사진 id **primary key**(media DB의 사진 ID와 관련 없음)
     int folder_id;   //폴더 id (속한 스토리의 id)
-    String name;        //사진 경로
+    String name;        //사진ID(media DB의 ID).jpg
     int year;           //년
     int month;          //월
     int day;            //일

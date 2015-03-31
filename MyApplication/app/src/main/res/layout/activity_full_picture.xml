@@ -12,10 +12,18 @@
 
     </com.example.cds.eattle_prototype_2.ExtendedViewPager>
 
-    <FrameLayout
+    <!-- Tag들이 들어갈 Layout -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/frame">
-    </FrameLayout>
+        android:id="@+id/tagLayout">
+    </LinearLayout>
+    <!--
+    <fragment
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.example.cds.eattle_prototype_2.TabToTag"/>-->
+
 
 </FrameLayout>

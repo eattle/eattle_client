@@ -47,6 +47,7 @@ public class TabToTag extends Fragment {
 
         btn.setText(""+id);
 
+        //태그를 클릭했을 때
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {

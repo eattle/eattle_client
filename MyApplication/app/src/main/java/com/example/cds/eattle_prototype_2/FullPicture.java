@@ -19,10 +19,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
@@ -63,6 +65,9 @@ public class FullPicture extends ActionBarActivity {
 
 //        private static int[] images = { R.drawable.nature_1, R.drawable.nature_2, R.drawable.nature_3, R.drawable.nature_4, R.drawable.nature_5 };
 
+        //하나의 이미지에 하나 이상의 태그가 있기 때문에 ArrayList를 선언한다
+        ArrayList<TabToTag> tagArrayList = new ArrayList<TabToTag>();
+
         @Override
         public int getCount() {
             return mMediaList.size();
@@ -89,24 +94,48 @@ public class FullPicture extends ActionBarActivity {
 
             container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 
+
+            //태그를 불러오기 위한 클릭 리스너
             img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     FragmentManager fm = getFragmentManager();
-                    Fragment fragment = fm.findFragmentById(R.id.frame);
+                    //태그가 들어갈 레이아웃을 불러온다
+                    Fragment fragment = fm.findFragmentById(R.id.tagLayout);
                     if(fragment == null) {
 
                         FragmentTransaction tr = fm.beginTransaction();
-                        TabToTag ttt = TabToTag.newInstance(m.getId());
-                        tr.add(R.id.frame, ttt, "TabToTag");
+
+
+                        //Tag DB에서 해당 이미지의 아이디로 태그 목록들을 불러온다
+                        long pictureID = Long.valueOf(m.getName());
+                        //TODO
+
+                        //반복문을 통해 모든 태그들을 등록한다
+                        int numOfTag = 2;//TODO , 2는 더미데이터
+                        for(int i=0;i<numOfTag;i++){
+                            //태그의 이름을 가져온다
+                            //TODO
+
+                            //TabToTag 객체를 생성한다
+                            TabToTag ttt = TabToTag.newInstance(m.getYear());//TODO , m.getYear()는 더미데이터
+                            tr.add(R.id.tagLayout, ttt, "TabToTag");
+
+                            //태그의 위치를 조정한다
+                            //TODO
+                        }
+
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         tr.commit();
                     }
                     else{
                         FragmentTransaction tr = fm.beginTransaction();
+
+                        //tagArrayList에 있는 모든 태그들을 삭제한다
+                        //TODO
+                        
                         tr.remove(fragment);
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-
                         tr.commit();
                         fm.executePendingTransactions();
                     }
@@ -130,7 +159,7 @@ public class FullPicture extends ActionBarActivity {
         @Override
         public void startUpdate(ViewGroup container){
             FragmentManager fm = getFragmentManager();
-            Fragment fragment = fm.findFragmentById(R.id.frame);
+            Fragment fragment = fm.findFragmentById(R.id.tagLayout);
             if(fragment != null) {
                 FragmentTransaction tr = fm.beginTransaction();
                 tr.remove(fragment);
