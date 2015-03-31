@@ -161,6 +161,7 @@ public class MainActivity extends ActionBarActivity {
         long pictureTakenTime=0;
         while (ImageSetter.mCursor.moveToNext()) {
             String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+            Log.d("MainActivity","!!"+path);
             //썸네일 사진들은 계산대상에서 제외한다
             if(path.contains("thumbnail") || path.contains("스토리")) {
                 Log.d("pictureClassification","썸네일 및 기존 스토리는 계산대상에서 제외");
