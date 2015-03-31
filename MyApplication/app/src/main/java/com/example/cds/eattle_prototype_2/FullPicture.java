@@ -1,5 +1,6 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -7,18 +8,21 @@ import android.os.Environment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
 
 import java.util.List;
 
-
+//스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
 public class FullPicture extends ActionBarActivity {
 
     DatabaseHelper db;
@@ -44,10 +48,10 @@ public class FullPicture extends ActionBarActivity {
         Log.d("media", ""+mMediaList.size());
 //        mediaPosition = ((int) ((Media)selectedMedia).getId());
 
+        //뷰페이저 생성
         ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
-        mViewPager.setAdapter(new TouchImageAdapter());
+        mViewPager.setAdapter(new TouchImageAdapter());//뷰페이저 어댑터 설정
         mViewPager.setCurrentItem(mediaPosition);
-
     }
 
     class TouchImageAdapter extends PagerAdapter {
@@ -77,7 +81,14 @@ public class FullPicture extends ActionBarActivity {
 
 //            img.setImageURI();
 //            img.setImageResource(mMediaList.get(mediaPosition+position));
-            container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            Button tag = (Button)inflater.inflate(R.layout.tag,null);
+
+            RelativeLayout fullPicture = (RelativeLayout)findViewById(R.id.fullPicture);
+            tag.setText("TEST TAG");
+            //container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            container.addView(tag, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
             return img;
         }
 

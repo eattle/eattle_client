@@ -1,6 +1,7 @@
 package com.example.cds.eattle_prototype_2;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -16,13 +17,18 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.OverScroller;
+import android.widget.RelativeLayout;
 import android.widget.Scroller;
+import android.widget.TextView;
 
 /**
  * Created by GA on 2015. 3. 27..
@@ -64,7 +70,7 @@ public class TouchImageView extends ImageView {
     private Context context;
     private Fling fling;
 
-    private ScaleType mScaleType;
+    private ImageView.ScaleType mScaleType;
 
     private boolean imageRenderedAtLeastOnce;
     private boolean onDrawReady;
@@ -124,7 +130,19 @@ public class TouchImageView extends ImageView {
         onDrawReady = false;
         super.setOnTouchListener(new PrivateOnTouchListener());
     }
+    /*
+    private void init(Context context) {
+        Log.d("TouchImageView", "TouchImageView init함수 호출");
+        this.context = context;
 
+        // inflate XML layout
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.activity_spot_page, this, true);
+
+        tourSpotPicture = (ImageView)findViewById(R.id.tourSpotPicture);
+        nameText = (TextView)findViewById(R.id.nameText);
+        infoText = (TextView)findViewById(R.id.infoText);
+    }*/
     @Override
     public void setOnTouchListener(View.OnTouchListener l) {
         userTouchListener = l;
@@ -390,7 +408,7 @@ public class TouchImageView extends ImageView {
     /**
      * Set zoom parameters equal to another TouchImageView. Including scale, position,
      * and ScaleType.
-     * @param TouchImageView
+     //* @param TouchImageView
      */
     public void setZoom(TouchImageView img) {
         PointF center = img.getScrollPosition();
@@ -800,7 +818,6 @@ public class TouchImageView extends ImageView {
     /**
      * Responsible for all touch events. Handles the heavy lifting of drag and also sends
      * touch events to Scale Detector and Gesture Detector.
-     * @author Ortiz
      *
      */
     private class PrivateOnTouchListener implements OnTouchListener {
@@ -812,6 +829,7 @@ public class TouchImageView extends ImageView {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             PointF curr = new PointF(event.getX(), event.getY());
@@ -819,6 +837,17 @@ public class TouchImageView extends ImageView {
             if (state == State.NONE || state == State.DRAG || state == State.FLING) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        Log.d("TouchImageView","MotionEvent.ACTION_DOWN 호출");
+                        /*
+                        //태그를 불러온다
+                        //태그 DB에서 현재 이미지의 태그들을 가지고 온다(DB에서 가지고 오는 시점은 변할 수 있음)
+                        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        Button tag = (Button)inflater.inflate(R.layout.tag,null);
+
+                        RelativeLayout fullPicture = (RelativeLayout)findViewById(R.id.fullPicture);
+                        tag.setText("TEST TAG");
+                        //this.addView(tag);*/
+
                         last.set(curr);
                         if (fling != null)
                             fling.cancelFling();

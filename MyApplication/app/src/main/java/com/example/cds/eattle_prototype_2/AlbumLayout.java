@@ -56,7 +56,7 @@ public class AlbumLayout extends ActionBarActivity {
         imageView = (ImageView)findViewById(R.id.imageView);
         //썸네일 이미지를 생성한다
         BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inSampleSize = 4;//기존 해상도의 1/16로 줄인다
+        opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ representativeImage+".jpg";
         Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
         imageView.setImageBitmap(bitmap);
