@@ -1,24 +1,22 @@
 package com.example.cds.eattle_prototype_2.model;
 
 /**
- * Created by GA on 2015. 3. 20..
+ * Created by GA on 2015. 3. 31..
  */
-public class Folder {
+public class Tag {
     long id;
     String name;
-    String image;
 
-    public Folder() {
+    public Tag() {
     }
 
-    public Folder(String name) {
-        this.name = name;
-    }
-
-    public Folder(long id, String name, String image) {
+    public Tag(long id, String name) {
         this.id = id;
         this.name = name;
-        this.image = image;
+    }
+
+    public Tag(String name) {
+        this.name = name;
     }
 
     public long getId() {
@@ -35,13 +33,5 @@ public class Folder {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getImage(){
-        return image;
-    }
-
-    public void setImage(String image){
-        this.image = image;
     }
 }

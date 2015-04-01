@@ -32,7 +32,7 @@ public class AlbumLayout extends ActionBarActivity {
     GridView mGrid;
     List<Media> mMediaList;
     DatabaseHelper db;
-    int mFolderId;
+    long mFolderId;
     String mFolderName;
     String representativeImage;//대표이미지
 
@@ -44,7 +44,7 @@ public class AlbumLayout extends ActionBarActivity {
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         Intent intent=new Intent(this.getIntent());
-        mFolderId = intent.getIntExtra("folderId", 0);
+        mFolderId = intent.getLongExtra("folderId", 0);
         Folder folderTemp = db.getFolder(mFolderId);
         mFolderName = folderTemp.getName();
         representativeImage = folderTemp.getImage();
@@ -80,7 +80,7 @@ public class AlbumLayout extends ActionBarActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
             Bundle extras = new Bundle();
 //            extras.putParcelable();
-            extras.putInt("folderId", mMediaList.get(position).getFolder_id());
+            extras.putLong("folderId", mMediaList.get(position).getFolder_id());
             extras.putInt("position", position);
 //            extras.putSerializable("selectedMedia", mMediaList.get(position));
             Intent intent = new Intent(getApplicationContext(), FullPicture.class);

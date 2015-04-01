@@ -109,7 +109,7 @@ public class MainActivity extends ActionBarActivity {
                 TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
                 textView.setText(folderList.get(i).getName());
 
-                final int id=folderList.get(i).getId();
+                final long id=folderList.get(i).getId();
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -204,7 +204,7 @@ public class MainActivity extends ActionBarActivity {
         File dir=null;
         String startFolderID="";
         String endFolderID="";
-        int folderIDForDB=0;//Folder DB에 들어가는 아이디
+        long folderIDForDB=0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String representativeImage="";//폴더에 들어가는 대표이미지의 이름(경로제외), 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
@@ -286,7 +286,7 @@ public class MainActivity extends ActionBarActivity {
             FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
 
             //DB에 사진 데이터를 넣는다.
-            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
+            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0);
             db.createMedia(m);
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;

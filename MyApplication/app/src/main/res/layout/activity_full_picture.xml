@@ -13,11 +13,11 @@
     </com.example.cds.eattle_prototype_2.ExtendedViewPager>
 
     <!-- Tag들이 들어갈 Layout -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/tagLayout">
-    </LinearLayout>
+    </FrameLayout>
     <!--
     <fragment
         android:id="@+id/frame"
