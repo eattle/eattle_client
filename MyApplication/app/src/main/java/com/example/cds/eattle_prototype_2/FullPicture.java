@@ -166,7 +166,6 @@ public class FullPicture extends ActionBarActivity {
             Fragment fragment = fm.findFragmentById(R.id.tagLayout);
             if(fragment != null) {
                 FragmentTransaction tr = fm.beginTransaction();
-                tr.replace()
                 tr.remove(fragment);
                 tr.commit();
                 fm.executePendingTransactions();
