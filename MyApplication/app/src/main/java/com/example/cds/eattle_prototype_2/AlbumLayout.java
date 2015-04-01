@@ -51,6 +51,7 @@ public class AlbumLayout extends ActionBarActivity {
 
         //폴더(스토리)의 제목 등록
         textView = (TextView)findViewById(R.id.albumTitle);
+        String[] splitOfFolderName = mFolderName.split("_");
         textView.setText(mFolderName);
         //폴더(스토리)의 대표사진 등록
         imageView = (ImageView)findViewById(R.id.imageView);
@@ -60,6 +61,7 @@ public class AlbumLayout extends ActionBarActivity {
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ representativeImage+".jpg";
         Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
         imageView.setImageBitmap(bitmap);
+        imageView.setAlpha(0.4f);
 
         //그리드 뷰 등록
         mGrid = (GridView) findViewById(R.id.imagegrid);

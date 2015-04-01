@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,9 @@ public class MainActivity extends ActionBarActivity {
 
     int folderID=0;//시간에 따라 할당될 폴더 아이디 (0부터 시작)
 
+    private ListView storyList;//메인화면의 스토리 목록들이 들어가는 리스트뷰
+    private StoryListAdapter storyListAdapter;//리스트뷰를 위한 어댑터
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +69,32 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
+        //커스텀 어댑터 생성
+        storyListAdapter = new StoryListAdapter(this);
+        //activity_main.xml에 있는 storyList 리스트뷰에 연결
+        storyList = (ListView)findViewById(R.id.storyList);
+        //ListView에 어댑터 연결
+        storyList.setAdapter(storyListAdapter);
+
+        //리스트뷰에 아이템 추가---------------------------
+        //모든 폴더 목록들을 불러온다
+        List<Folder> folderList = db.getAllFolders();
+        if(folderList.isEmpty()) {//폴더가 정리되어 있지 않으면
+            TextView tempLayout = new TextView(this);
+            tempLayout.setText("앨범이 비어있어요!");
+            tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
+            tempLayout.setTextSize(20);
+            tempLayout.setGravity(Gravity.CENTER);
+            storyList.addView(tempLayout);
+        }
+        else {
+            for (int i = 0; i < folderList.size(); i++) {
+                StoryListItem tempItem = new StoryListItem(folderList.get(i).getImage(),folderList.get(i).getName(),folderList.get(i).getId());
+                storyListAdapter.add(tempItem);
+            }
+        }
+
+        /*
         LinearLayout storyList = (LinearLayout)findViewById(R.id.storyList);
         storyList.removeAllViews();//일단 기존의 스토리 목록을 지운다.
         final List<Folder> folderList = db.getAllFolders();
@@ -81,11 +111,6 @@ public class MainActivity extends ActionBarActivity {
             LayoutInflater inflater = (LayoutInflater)getSystemService(this.LAYOUT_INFLATER_SERVICE);
 
             for(int i=0;i<folderList.size();i++) {
-/*
-                LinearLayout linearLayout = (LinearLayout)inflater.inflate(R.layout.story_list,null,false);
-                TextView textView = (TextView)linearLayout.getChildAt(0);
-                textView.setText(folderList.get(i).getName());
-*/
 
                 FrameLayout frameLayout = new FrameLayout(this);
                 frameLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 200));
@@ -104,7 +129,7 @@ public class MainActivity extends ActionBarActivity {
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); // 레이아웃 크기에 이미지를 맞춘다
                 //listImage.setLayoutParams(new ViewGroup.LayoutParams(120,120));
                 imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                imageView.setAlpha(1200);
+                imageView.setAlpha(0.4f);
 
                 TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
                 textView.setText(folderList.get(i).getName());
@@ -123,7 +148,7 @@ public class MainActivity extends ActionBarActivity {
                 frameLayout.addView(textView);
                 storyList.addView(frameLayout);
             }
-        }
+        }*/
 
     }
 
@@ -136,11 +161,8 @@ public class MainActivity extends ActionBarActivity {
                 pictureClassification();
                 classification.setEnabled(true); // 클릭 유효화
                 break;
-            case R.id.manager:
-                Intent toDBView = new Intent(this,ManagerDBView.class);
-                startActivity(toDBView);
-               break;
 
+            /*
             case R.id.intervalOk:
                 EditText editText = (EditText)findViewById(R.id.intervalText);
                 String text = editText.getText().toString();
@@ -150,7 +172,7 @@ public class MainActivity extends ActionBarActivity {
                 }
                 else
                     Toast.makeText(getBaseContext(),"시간 간격을 입력하세요",Toast.LENGTH_SHORT).show();
-                editText.clearFocus();
+                editText.clearFocus();*/
         }
     }
 

@@ -134,6 +134,10 @@ public class FullPicture extends ActionBarActivity {
                     }
                     else{
                         FragmentTransaction tr = fm.beginTransaction();
+
+                        //tagArrayList에 있는 모든 태그들을 삭제한다
+                        //TODO
+
                         tr.remove(fragment);
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         tr.commit();
