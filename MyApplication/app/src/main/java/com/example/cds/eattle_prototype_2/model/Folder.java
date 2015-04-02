@@ -4,7 +4,7 @@ package com.example.cds.eattle_prototype_2.model;
  * Created by GA on 2015. 3. 20..
  */
 public class Folder {
-    long id;
+    int id;
     String name;
     String image;
 
@@ -15,17 +15,22 @@ public class Folder {
         this.name = name;
     }
 
-    public Folder(long id, String name, String image) {
+    public Folder(int id, String name, String image) {
         this.id = id;
         this.name = name;
         this.image = image;
     }
 
-    public long getId() {
+    public Folder(String image, String name) {
+        this.image = image;
+        this.name = name;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

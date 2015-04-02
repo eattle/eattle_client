@@ -57,14 +57,14 @@ public class StoryListAdapter extends BaseAdapter{
             storyImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+items.get(position).getImgID()+".jpg"));
 
             //특정 아이템에 해당하는 폴더 아이디를 가져온다
-            final long folderID = items.get(position).getFolderID();
+            final int folderID = items.get(position).getFolderID();
             //리스트 클릭 리스너
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, AlbumLayout.class);
-                    //객체배열을 ArrayList로 넘겨준다.
-                    intent.putExtra("folderId", folderID);
+                    intent.putExtra("kind", CONSTANT.FOLDER);
+                    intent.putExtra("id", folderID);
                     mContext.startActivity(intent);
                 }
             });

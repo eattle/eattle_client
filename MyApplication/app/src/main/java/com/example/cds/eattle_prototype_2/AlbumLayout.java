@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,19 +23,24 @@ import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Folder;
 import com.example.cds.eattle_prototype_2.model.Media;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class AlbumLayout extends ActionBarActivity {
 
-    TextView textView;
-    ImageView imageView;
+    DatabaseHelper db;
+
+    TextView titleText;
+    ImageView titleImage;
+
     GridView mGrid;
     List<Media> mMediaList;
-    DatabaseHelper db;
-    long mFolderId;
-    String mFolderName;
-    String representativeImage;//대표이미지
+
+    int id;
+    String titleName;
+    String titleImagePath;
+//    String mFolderName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,33 +49,61 @@ public class AlbumLayout extends ActionBarActivity {
 
         db = DatabaseHelper.getInstance(getApplicationContext());
 
+        titleText = (TextView)findViewById(R.id.titleText);
+        titleImage = (ImageView)findViewById(R.id.titleImage);
+
+
+        //인텐트로부터 사진 검색을 위한 (folderId) 초기화
         Intent intent=new Intent(this.getIntent());
-        mFolderId = intent.getLongExtra("folderId", 0);
-        Folder folderTemp = db.getFolder(mFolderId);
-        mFolderName = folderTemp.getName();
-        representativeImage = folderTemp.getImage();
+        id = intent.getIntExtra("id", -1);
+        if(intent.getIntExtra("kind", 0) == CONSTANT.FOLDER){
+            Folder f = db.getFolder(id);
+            mMediaList = db.getAllMediaByFolder(id);
+
+            String[] tempName = f.getName().split("_");
+            titleName = tempName[0]+"년 "+tempName[1]+"월 "+tempName[2].replace("의","일의");
+            titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
+
+//            titleText.setText(f.getName());
+/*            try {
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inSampleSize = 4;
+                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
+
+                Bitmap bm = BitmapFactory.decodeFile(path, opt);
+                titleImage.setImageBitmap(bm);
+            } catch (OutOfMemoryError e) {
+                Log.e("warning", "이미지가 너무 큽니다");
+            }*/
+        } else{
+
+        }
+
+//        mTagId = intent.getIntExtra("tagId", -1);
+
+//        if(mFolderId != -1) {
+//            Folder folderTemp = db.getFolder(mFolderId);
+//            mFolderName = folderTemp.getName();
+//        } else {
+//            mTagId = intent.getIntExtra("tagId", -1);
+
+//        }
 
         //폴더(스토리)의 제목 등록
-        textView = (TextView)findViewById(R.id.albumTitle);
-        String[] splitOfFolderName = mFolderName.split("_");
-        textView.setText(mFolderName);
+//        titleText = (TextView)findViewById(R.id.titleText);
+        titleText.setText(titleName);
         //폴더(스토리)의 대표사진 등록
-        imageView = (ImageView)findViewById(R.id.imageView);
-        //썸네일 이미지를 생성한다
+//        titleImage = (ImageView)findViewById(R.id.titleImage);
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
-        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ representativeImage+".jpg";
-        Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
-        imageView.setImageBitmap(bitmap);
-        imageView.setAlpha(0.4f);
+//        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ folderTemp.getImage()+".jpg";
+        Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath,opt);
+        titleImage.setImageBitmap(bitmap);
+        titleImage.setAlpha(0.4f);
 
         //그리드 뷰 등록
         mGrid = (GridView) findViewById(R.id.imagegrid);
-
-//        ContentResolver cr = getContentResolver();
-
-//        mCursor = cr.query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, null, null, null, null);
-        mMediaList = db.getAllMediaByFolder(mFolderId);
+//        mMediaList = db.getAllMediaByFolder(mFolderId);
 
         ImageAdapter Adapter = new ImageAdapter(this);
         mGrid.setAdapter(Adapter);
@@ -80,22 +114,11 @@ public class AlbumLayout extends ActionBarActivity {
 
     AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener(){
         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-            Bundle extras = new Bundle();
-//            extras.putParcelable();
-            extras.putLong("folderId", mMediaList.get(position).getFolder_id());
-            extras.putInt("position", position);
-//            extras.putSerializable("selectedMedia", mMediaList.get(position));
             Intent intent = new Intent(getApplicationContext(), FullPicture.class);
-//            intent.putExtra("id", mMediaList.get(position).getId());
-            intent.putExtras(extras);
-//            intent.putExtra("position", position);
-
-/*            mCursor.moveToPosition(position);
-            String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-            Intent intent = new Intent(getApplicationContext(), ImageFull.class);
-            intent.putExtra("path", path);*/
+            intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
+//            intent.putExtra("folderId", mMediaList.get(position).getFolder_id());
+            intent.putExtra("position", position);
             startActivity(intent);
-
         }
     };
 

@@ -6,22 +6,22 @@ package com.example.cds.eattle_prototype_2;
 public class StoryListItem {
     private String imgID;//이미지 이름
     private String name;//스토리 이름
-    private long folderID;//특정 스토리에 해당하는 폴더 아이디
+    private int folderID;//특정 스토리에 해당하는 폴더 아이디
 
     public StoryListItem(){
 
     }
 
-    public StoryListItem(String imgID,String name,long folderID){
+    public StoryListItem(String imgID,String name,int folderID){
         this.imgID = imgID;
         this.name = name;
         this.folderID = folderID;
     }
-    public void setFolderID(long folderID) {
+    public void setFolderID(int folderID) {
         this.folderID = folderID;
     }
 
-    public long getFolderID() {
+    public int getFolderID() {
 
         return folderID;
     }

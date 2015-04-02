@@ -11,12 +11,12 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/imageView"
+            android:id="@+id/titleImage"
             android:alpha="1200"
             android:scaleType="centerCrop" />
 
         <TextView
-            android:id="@+id/albumTitle"
+            android:id="@+id/titleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

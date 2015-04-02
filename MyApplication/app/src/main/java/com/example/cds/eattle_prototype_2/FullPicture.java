@@ -4,6 +4,7 @@ package com.example.cds.eattle_prototype_2;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ public class FullPicture extends ActionBarActivity {
 
     DatabaseHelper db;
     List<Media> mMediaList;
-    int mediaPosition;
+    int initialMediaPosition;
 
 
     @Override
@@ -38,21 +39,15 @@ public class FullPicture extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_picture);
 
-        Bundle bundle = this.getIntent().getExtras();
-
-        long folderId = bundle.getLong("folderId");
-        mediaPosition = bundle.getInt("position");
-//        int folderId = this.getIntent().getExtras().get("folderId");
-//        Object selectedMedia =  this.getIntent().getExtras().get("selectedMedia");
-
-        mMediaList = db.getAllMediaByFolder(folderId);
-        Log.d("media", ""+mMediaList.size());
-//        mediaPosition = ((int) ((Media)selectedMedia).getId());
+        Intent intent = getIntent();
+        mMediaList = intent.getParcelableArrayListExtra("mediaList");
+//        int folderId = intent.getIntExtra("folderId", 0);
+        initialMediaPosition = intent.getIntExtra("position", 0);
 
         //뷰페이저 생성
         ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(new TouchImageAdapter());//뷰페이저 어댑터 설정
-        mViewPager.setCurrentItem(mediaPosition);
+        mViewPager.setCurrentItem(initialMediaPosition);
     }
 
     class TouchImageAdapter extends PagerAdapter {

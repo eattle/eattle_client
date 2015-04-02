@@ -1,24 +1,35 @@
 package com.example.cds.eattle_prototype_2;
 
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.model.Tag;
+
+import java.util.List;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class TabToTag extends Fragment {
+    DatabaseHelper db;
+    int media_id;
 
-    public static TabToTag newInstance(long id){
+    int a = 0;
+
+    public static TabToTag newInstance(int id){
         TabToTag ttt = new TabToTag();
 
         Bundle args = new Bundle();
-        args.putLong("id", id);
+        args.putInt("id", id);
         ttt.setArguments(args);
 
         return ttt;
@@ -33,25 +44,78 @@ public class TabToTag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        db = DatabaseHelper.getInstance(getActivity());
 
         View root = inflater.inflate(R.layout.fragment_tab_to_tag, container, false);
 
-        long id = 0;
-
         Bundle args = getArguments();
         if(args != null){
-            id = args.getLong("id");
+            media_id = args.getInt("id");
         }
+
+        final LinearLayout layout = (LinearLayout)root.findViewById(R.id.tagLayout);
+        List<Tag> tags= db.getAllTagsByMediaId(media_id);
+
+        int s = tags.size();
+
+        for(int i = 0; i < s; i++){
+            Button tagButton = new Button(getActivity());
+            tagButton.setText(""+tags.get(i).getName());
+            tagButton.setId(tags.get(i).getId());
+            tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            layout.addView(tagButton);
+            tagButton.setOnClickListener(new Button.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), AlbumLayout.class);
+                    intent.putExtra("tagId", (((Button)v).getId()));
+                    startActivity(intent);
+                }
+            });
+        }
+//        text.setText(tags_);
+
+
 
         final Button btn = (Button)root.findViewById(R.id.button);
 
-        btn.setText(""+id);
+//        final TextView text = (TextView)root.findViewById(R.id.tags);
 
-        //태그를 클릭했을 때
+        btn.setText("태그 추가");
+
+
+
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btn.setText("clicked");
+                int tag_id = db.createTag(""+(a++), media_id);
+
+                List<Tag> tags= db.getAllTagsByMediaId(media_id);
+                int s = tags.size();
+                for(int i = 0; i < s; i++){
+                    Button tagButton = new Button(getActivity());
+                    tagButton.setText(""+tags.get(i).getName());
+                    tagButton.setId(tags.get(i).getId());
+                    tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    layout.addView(tagButton);
+                    tagButton.setOnClickListener(new Button.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getActivity(), AlbumLayout.class);
+                            intent.putExtra("tagId", (((Button)v).getId()));
+                            startActivity(intent);
+                        }
+                    });
+                }
+
+
+/*                int s = tags.size();
+                String tags_ = "";
+
+                for(int i = 0; i < s; i++){
+                    tags_ += " #"+ tags.get(i).getName();
+                }
+                text.setText(tags_);*/
             }
         });
 
