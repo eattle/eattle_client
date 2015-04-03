@@ -168,23 +168,16 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
-        /*
+
         if(c.moveToFirst()){
             do{
                 Folder f = new Folder();
                 f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
                 folders.add(f);
             }while(c.moveToNext());
-        }*/
-        while(c.moveToNext()){
-            Folder f = new Folder();
-            f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-            f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-            f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-            folders.add(f);
         }
-
         return folders;
     }
 
@@ -192,23 +185,19 @@ public class DatabaseHelper extends SQLiteOpenHelper{
      * getting folder by id
      */
     public Folder getFolder(int id){
-        SQLiteDatabase db = this.getReadableDatabase();
-
+        Folder folder = new Folder();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ID + " = " + id;
 
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
-        if(c != null)
-            c.moveToFirst();
+        if(c.moveToFirst()){
+            folder.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+        }
 
-        Folder f = new Folder();
-
-        f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-        f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-        f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-
-        return f;
-
+        return folder;
     }
 
 
@@ -275,6 +264,29 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         return (int)db.insert(TABLE_MEDIA, null, values);
     }
 
+    /*
+    * getting Single Media by Media id
+    */
+    public Media getMediaById(int media_id){
+        Media media = new Media();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_ID + " = " + media_id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+            media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            media.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+            media.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+            media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+            media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+            media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+        }
+
+        return media;
+    }
 
     /*
      * getting all media
@@ -328,6 +340,36 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
 
                 media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+
+    /*
+     * getting Media by Tag id
+     */
+    public List<Media> getAllMediaByTagId(int tag_id){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_MEDIA + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " = " + tag_id ;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+
+                media.add(m);
+
             }while(c.moveToNext());
         }
 
@@ -456,12 +498,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     }
 
     /*
-    * getting Tags by Tag id
+    * getting Tags by Media id
     */
     public List<Tag> getAllTagsByMediaId(int media_id){
         List<Tag> tags = new ArrayList<Tag>();
 //        List<Tag> tags = new ArrayList<Tag>();
-        String selectQuery = "SELECT * FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
+        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
@@ -591,6 +633,28 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         return 0;
     }
+
+    public List<Media_Tag> getAllMediaTag(){
+        List<Media_Tag> mediaTag = new ArrayList<Media_Tag>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media_Tag t = new Media_Tag();
+                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                t.setTag_id(c.getInt(c.getColumnIndex(KEY_TAG_ID)));
+                t.setMedia_id(c.getInt(c.getColumnIndex(KEY_MEDIA_ID)));
+
+                mediaTag.add(t);
+            }while(c.moveToNext());
+        }
+
+        return mediaTag;
+    }
+
 
     /*
      * deleting single media to tag relation

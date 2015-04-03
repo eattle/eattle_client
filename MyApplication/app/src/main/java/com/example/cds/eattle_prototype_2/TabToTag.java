@@ -56,6 +56,7 @@ public class TabToTag extends Fragment {
         final LinearLayout layout = (LinearLayout)root.findViewById(R.id.tagLayout);
         List<Tag> tags= db.getAllTagsByMediaId(media_id);
 
+
         int s = tags.size();
 
         for(int i = 0; i < s; i++){
@@ -68,7 +69,9 @@ public class TabToTag extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), AlbumLayout.class);
-                    intent.putExtra("tagId", (((Button)v).getId()));
+                    intent.putExtra("kind", CONSTANT.TAG);
+                    intent.putExtra("id", (((Button)v).getId()));
+                    intent.putExtra("mediaId", media_id);
                     startActivity(intent);
                 }
             });
@@ -102,7 +105,9 @@ public class TabToTag extends Fragment {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(getActivity(), AlbumLayout.class);
-                            intent.putExtra("tagId", (((Button)v).getId()));
+                            intent.putExtra("kind", CONSTANT.TAG);
+                            intent.putExtra("id", (((Button)v).getId()));
+                            intent.putExtra("mediaId", media_id);
                             startActivity(intent);
                         }
                     });
