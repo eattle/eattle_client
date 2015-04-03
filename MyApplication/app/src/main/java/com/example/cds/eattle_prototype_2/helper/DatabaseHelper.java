@@ -10,6 +10,8 @@ import android.util.Log;
 import com.example.cds.eattle_prototype_2.model.Folder;
 import com.example.cds.eattle_prototype_2.model.Manager;
 import com.example.cds.eattle_prototype_2.model.Media;
+import com.example.cds.eattle_prototype_2.model.Media_Tag;
+import com.example.cds.eattle_prototype_2.model.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +23,15 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
 
     private static final String DATABASE_NAME = "FileManager";
 
     private static final String TABLE_MEDIA = "media";
     private static final String TABLE_FOLDER = "folder";
     private static final String TABLE_MANAGER = "manager";
+    private static final String TABLE_TAG = "tag";
+    private static final String TABLE_MEDIA_TAG = "media_tag";
 
     //media(사진)
     private static final String KEY_ID = "id";             //전체에서의 사진 id **primary key**
@@ -38,7 +42,15 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_DAY = "day";            //일
     private static final String KEY_LATITUDE = "latitude";       //위도도
     private static final String KEY_LONGITUDE = "longitude";      //경
-    private static final String KEY_TAG = "tag";         //추가 태그
+
+    //tag
+    //private static final String KEY_ID = "id";
+    //private static final String KEY_NAME = "name";
+
+    //media_tag
+    //private static final String KEY_ID = "id";
+    private static final String KEY_TAG_ID = "tag_id";
+    private static final String KEY_MEDIA_ID = "media_id";
 
     //folder
     //private static final String KEY_ID = "id";
@@ -52,20 +64,32 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static final String CREATE_TABLE_MEDIA =
             "CREATE TABLE " + TABLE_MEDIA + " ("
-            + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_FOLDER_ID + " INTEGER NOT NULL, "
             + KEY_NAME + " VARCHAR(100) NOT NULL, "
             + KEY_YEAR + " INTEGER NOT NULL, "
-            + KEY_MONTH + " INTEGER, "
-            + KEY_DAY + " INTEGER, "
+            + KEY_MONTH + " INTEGER NOT NULL, "
+            + KEY_DAY + " INTEGER NOT NULL, "
             + KEY_LATITUDE + " DOUBLE, "
-            + KEY_LONGITUDE + " DOUBLE, "
-            + KEY_TAG + " VARCHAR(100) "
+            + KEY_LONGITUDE + " DOUBLE "
             + ")";
+
+    private static final String CREATE_TABLE_TAG =
+            "CREATE TABLE " + TABLE_TAG + " ("
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + KEY_NAME + " VARCHAR(100) NOT NULL "
+                    + ")";
+
+    private static final String CREATE_TABLE_MEDIA_TAG =
+            "CREATE TABLE " + TABLE_MEDIA_TAG + " ("
+                    + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + KEY_TAG_ID + " LONG NOT NULL, "
+                    + KEY_MEDIA_ID + " LONG NOT NULL "
+                    + ")";
 
     private static final String CREATE_TABLE_FOLDER =
             "CREATE TABLE " + TABLE_FOLDER + " ("
-            + KEY_ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_NAME + " VARCHAR(255) NOT NULL, "
             + KEY_IMAGE + " VARCHAR(255) NOT NULL "
             + ")";
@@ -96,6 +120,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
 
         db.execSQL(CREATE_TABLE_MEDIA);
+        db.execSQL(CREATE_TABLE_TAG);
+        db.execSQL(CREATE_TABLE_MEDIA_TAG);
         db.execSQL(CREATE_TABLE_FOLDER);
         db.execSQL(CREATE_TABLE_MANAGER);
     }
@@ -105,6 +131,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         //기존의 테이블들을 일단 삭제하고 새로 만든다
         try {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAG);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA_TAG);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_FOLDER);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANAGER);
         } catch (Exception ex) {
@@ -119,14 +147,15 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     /*
      * Creating folder
      */
-    public long createFolder(Folder folder){
+    public int createFolder(Folder folder){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, folder.getId());
         values.put(KEY_NAME, folder.getName());
         values.put(KEY_IMAGE, folder.getImage());
 
-        return db.insert(TABLE_FOLDER, null, values);
+        return (int)db.insert(TABLE_FOLDER, null, values);
     }
 
     /*
@@ -185,6 +214,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     /*
      * Updating a folder by id
+     * return number of updated row
      */
     public int updateFolder(Folder folder){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -220,15 +250,20 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         db.execSQL("DELETE FROM "+TABLE_FOLDER);
     }
 
+
+
+
+
     /******************* MEDIA *******************/
 
     /*
      * creating media
      */
-    public long createMedia(Media media){
+    public int createMedia(Media media){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, media.getId());
         values.put(KEY_FOLDER_ID, media.getFolder_id());
         values.put(KEY_NAME, media.getName());
         values.put(KEY_YEAR, media.getYear());
@@ -236,9 +271,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_DAY, media.getDay());
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
-        values.put(KEY_TAG, media.getTag());
 
-        return db.insert(TABLE_MEDIA, null, values);
+        return (int)db.insert(TABLE_MEDIA, null, values);
     }
 
 
@@ -263,7 +297,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setTag(c.getString(c.getColumnIndex(KEY_TAG)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -293,7 +326,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setTag(c.getString(c.getColumnIndex(KEY_TAG)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -316,7 +348,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_DAY, media.getDay());
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
-        values.put(KEY_TAG, media.getTag());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
 
@@ -325,23 +356,282 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     /*
      * Deleting media by id
      */
-    public void deleteMedia(long id){
+    public void deleteMedia(int id){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
+        deleteMediaTagByMediaId(id);
     }
 
     public void deleteAllMedia(){
         Log.d("DatabaseHelper","deleteAllMedia() 호출");
         SQLiteDatabase db=this.getWritableDatabase();
-        db.execSQL("DELETE FROM "+TABLE_MEDIA);
+        db.execSQL("DELETE FROM " + TABLE_MEDIA);
+        deleteAllMediaTag();
     }
+
+    /******************* TAG *******************/
+
+    /*
+     * creating tag at media_id
+     */
+    public int createTag(String tag_name, int media_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int tag_id = getTagIdByTagName(tag_name);
+        if(tag_id == 0) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_NAME, tag_name);
+
+            tag_id = (int)db.insert(TABLE_TAG, null, values);
+        }
+        createMediaTag(tag_id, media_id);
+
+        return tag_id;
+    }
+
+    /*
+    * creating tag at folder_id
+    */
+    public int createTagByFolder(String tag_name, int folder_id){
+        List<Media> media = getAllMediaByFolder(folder_id);
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //일단 태그 만들어줌
+        int tag_id = getTagIdByTagName(tag_name);
+        if(tag_id == 0) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_NAME, tag_name);
+
+            tag_id = (int)db.insert(TABLE_TAG, null, values);
+        }
+
+        for(int i = 0, n = media.size(); i < n; i++){
+            createMediaTag(tag_id, media.get(i).getId());
+        }
+
+        return tag_id;
+    }
+
+    /*
+     * getting all tags
+     */
+    public List<Tag> getAllTags(){
+        List<Tag> tags = new ArrayList<Tag>();
+        String selectQuery = "SELECT * FROM " + TABLE_TAG;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Tag t = new Tag();
+                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+
+                tags.add(t);
+            }while(c.moveToNext());
+        }
+
+        return tags;
+    }
+
+    /*
+     * getting Tag by Tag id
+     */
+    public Tag getTagByTagId(int tag_id){
+        Tag tag = new Tag();
+//        List<Tag> tags = new ArrayList<Tag>();
+        String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_ID + " = " + tag_id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            tag.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            tag.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+        }
+
+        return tag;
+    }
+
+    /*
+    * getting Tags by Tag id
+    */
+    public List<Tag> getAllTagsByMediaId(int media_id){
+        List<Tag> tags = new ArrayList<Tag>();
+//        List<Tag> tags = new ArrayList<Tag>();
+        String selectQuery = "SELECT * FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Tag t = new Tag();
+                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+
+                tags.add(t);
+            }while(c.moveToNext());
+        }
+
+        return tags;
+    }
+
+
+    /*
+    * getting Tag by Tag name
+    */
+    public int getTagIdByTagName(String tag_name){
+        String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_NAME + " = \"" + tag_name + "\"";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            return c.getInt(c.getColumnIndex(KEY_ID));
+        }
+
+        return 0;
+    }
+
+
+
+    /*
+     * updating tag
+     * 태그 이름이 바뀔 경우 사용
+     */
+    public int updateTag(Tag tag){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_ID, tag.getId());
+        values.put(KEY_NAME, tag.getName());
+
+        return  db.update(TABLE_TAG, values, KEY_ID + " = ? ", new String[] {String.valueOf(tag.getId())});
+    }
+
+    /*
+     * Deleting tag by id
+     */
+    public void deleteTagById(int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_TAG, KEY_ID + " = ?", new String[]{String.valueOf(id)});
+
+        deleteMediaTagByTagId(id);
+    }
+
+    /*
+     * Deleting tag by name
+     */
+    public void deleteTagByName(String name){
+        SQLiteDatabase db = this.getWritableDatabase();
+        int tag_id = getTagIdByTagName(name);
+        deleteTagById(tag_id);
+        deleteMediaTagByTagId(tag_id);
+//        db.delete(TABLE_TAG, KEY_NAME + " = ?", new String[]{String.valueOf(name)});
+    }
+
+
+    public void deleteAllTag(){
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+TABLE_TAG);
+        deleteAllMediaTag();
+    }
+
+
+    /******************* MEDIA_TAG *******************/
+
+    /*
+     * creating media to tag relation
+     */
+    public int createMediaTag(Media_Tag relation){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int id = getMediaTagByIds(relation.getTag_id(), relation.getMedia_id());
+        if(id == 0) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_TAG_ID, relation.getTag_id());
+            values.put(KEY_MEDIA_ID, relation.getMedia_id());
+
+            id = (int)db.insert(TABLE_MEDIA_TAG, null, values);
+        }
+
+        return id;
+    }
+
+    /*
+     * creating media to tag relation
+     */
+    public int createMediaTag(int tag_id, int media_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int id = getMediaTagByIds(tag_id, media_id);
+        if(id == 0) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_TAG_ID, tag_id);
+            values.put(KEY_MEDIA_ID, media_id);
+
+            id = (int)db.insert(TABLE_MEDIA_TAG, null, values);
+        }
+
+        return id;
+    }
+
+    public int getMediaTagByIds(int tag_id, int media_id){
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG + " WHERE " + KEY_MEDIA_ID + " = " + media_id + " AND " + KEY_TAG_ID + " = " + tag_id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            return c.getInt(c.getColumnIndex(KEY_ID));
+        }
+
+        return 0;
+    }
+
+    /*
+     * deleting single media to tag relation
+     */
+    public void deleteMediaTag(int tag_id, int media_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
+    }
+
+    /*
+     * deleting media to tag relation by tag_id
+     */
+    public void deleteMediaTagByTagId(int tag_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ?", new String[]{String.valueOf(tag_id)});
+    }
+
+    /*
+     * deleting media to tag relation by media_id
+     */
+    public void deleteMediaTagByMediaId(int media_Id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MEDIA_TAG, KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(media_Id)});
+    }
+
+    /*
+     * deleting media to tag relation by media_id
+     */
+    public void deleteAllMediaTag(){
+        SQLiteDatabase db=this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+TABLE_MEDIA_TAG);
+    }
+
+
 
 
     /******************* MANAGER *******************/
     /*
      * creating Manager
      */
-    public long createManager(Manager manager){
+    public int createManager(Manager manager){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MANAGER,null,null);//기존의 데이터들을 모두 삭제한다.
 
@@ -350,7 +640,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_AVERAGEINTERVAL, manager.getAverageInterval());
         values.put(KEY_STANDARDDERIVATION, manager.getStandardDerivation());
 
-        return db.insert(TABLE_MANAGER, null, values);
+        return (int)db.insert(TABLE_MANAGER, null, values);
     }
 
     public List<Manager> getManagers(){

@@ -21,6 +21,11 @@ public class Folder {
         this.image = image;
     }
 
+    public Folder(String image, String name) {
+        this.image = image;
+        this.name = name;
+    }
+
     public int getId() {
         return id;
     }

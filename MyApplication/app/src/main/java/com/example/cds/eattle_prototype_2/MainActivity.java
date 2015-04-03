@@ -11,17 +11,13 @@ import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
             tempLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 300));
             tempLayout.setTextSize(20);
             tempLayout.setGravity(Gravity.CENTER);
-            storyList.addView(tempLayout);
+//            storyList.addView(tempLayout);
         }
         else {
             for (int i = 0; i < folderList.size(); i++) {
@@ -143,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
                 TextView textView = (TextView)inflater.inflate(R.layout.story_list,null,false);
                 textView.setText(folderList.get(i).getName());
 
-                final int id=folderList.get(i).getId();
+                final long id=folderList.get(i).getId();
                 textView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -213,7 +209,6 @@ public class MainActivity extends ActionBarActivity {
         //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
         String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
         for(int i=0;i<folderList.length;i++){
-            //Log.d("!!!!",Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"+"~~~~~~~~~~~~");
             if(!folderList[i].equals("Camera") && !folderList[i].equals("thumbnail"))
                 FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
         }
@@ -230,6 +225,8 @@ public class MainActivity extends ActionBarActivity {
 
         db.deleteAllFolder();
         db.deleteAllMedia();
+        db.deleteAllTag();
+        db.deleteAllMediaTag();
         ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
         File picture=null;
         File dir=null;
@@ -255,7 +252,7 @@ public class MainActivity extends ActionBarActivity {
 
             picture = new File(path);
             //사진 ID
-            long pictureID = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             //사진이 촬영된 날짜
             long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             pictureTakenTime *= 1000; //second->millisecond
@@ -264,7 +261,7 @@ public class MainActivity extends ActionBarActivity {
             cal.setTimeInMillis(pictureTakenTime);
             String folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
             if(representativeImage.equals(""))
-                representativeImage = Long.toString(pictureID);
+                representativeImage = String.valueOf(pictureID);
             /*
             Cursor thumbnailCursor = MediaStore.Images.Thumbnails.queryMiniThumbnail(
                     getContentResolver(), pictureID,
@@ -284,9 +281,9 @@ public class MainActivity extends ActionBarActivity {
             BitmapFactory.Options opt = new BitmapFactory.Options();
             opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
             Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
-            createThumbnail(bitmap, folderThumbnailName, Long.toString(pictureID)+".jpg");
+            createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID)+".jpg");
 
-            Log.d("MainActivity", "[pictureID] : " + Long.toString(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
+            Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
             Log.d("MainActivity","pictureTakenTime-_pictureTakenTime = "+(pictureTakenTime-_pictureTakenTime));
@@ -314,10 +311,10 @@ public class MainActivity extends ActionBarActivity {
                 folderIDForDB++;
             }
             //사진을 새로운 폴더로 복사한다.
-            FolderManage.copyFile(picture , folderName+Long.toString(pictureID)+".jpg");
+            FolderManage.copyFile(picture , folderName+String.valueOf(pictureID)+".jpg");
 
             //DB에 사진 데이터를 넣는다.
-            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0,"");
+            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),0,0);
             db.createMedia(m);
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;

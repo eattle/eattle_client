@@ -4,6 +4,7 @@ package com.example.cds.eattle_prototype_2;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,15 +12,11 @@ import android.os.Environment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
@@ -30,11 +27,9 @@ import java.util.List;
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
 public class FullPicture extends ActionBarActivity {
 
-    final static int TAGING = 11111;
-
     DatabaseHelper db;
     List<Media> mMediaList;
-    int mediaPosition;
+    int initialMediaPosition;
 
 
     @Override
@@ -44,21 +39,15 @@ public class FullPicture extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_picture);
 
-        Bundle bundle = this.getIntent().getExtras();
-
-        int folderId = bundle.getInt("folderId");
-        mediaPosition = bundle.getInt("position");
-//        int folderId = this.getIntent().getExtras().get("folderId");
-//        Object selectedMedia =  this.getIntent().getExtras().get("selectedMedia");
-
-        mMediaList = db.getAllMediaByFolder(folderId);
-        Log.d("media", ""+mMediaList.size());
-//        mediaPosition = ((int) ((Media)selectedMedia).getId());
+        Intent intent = getIntent();
+        mMediaList = intent.getParcelableArrayListExtra("mediaList");
+//        int folderId = intent.getIntExtra("folderId", 0);
+        initialMediaPosition = intent.getIntExtra("position", 0);
 
         //뷰페이저 생성
         ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(new TouchImageAdapter());//뷰페이저 어댑터 설정
-        mViewPager.setCurrentItem(mediaPosition);
+        mViewPager.setCurrentItem(initialMediaPosition);
     }
 
     class TouchImageAdapter extends PagerAdapter {
@@ -94,6 +83,17 @@ public class FullPicture extends ActionBarActivity {
 
             container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 
+/*            FragmentManager fm = getFragmentManager();
+            Fragment fragment = fm.findFragmentById(R.id.tagLayout);
+            //프래그먼트가 있으면, 프래그먼를 새로 넣고 값을 바꿔준다.
+            if(fragment != null) {
+                FragmentTransaction tr = fm.beginTransaction();
+                TabToTag ttt = TabToTag.newInstance(m.getId());
+                tr.replace(R.id.tagLayout, ttt);
+                tr.commit();
+                fm.executePendingTransactions();
+
+            }*/
 
             //태그를 불러오기 위한 클릭 리스너
             img.setOnClickListener(new View.OnClickListener() {
@@ -103,30 +103,29 @@ public class FullPicture extends ActionBarActivity {
                     //태그가 들어갈 레이아웃을 불러온다
                     Fragment fragment = fm.findFragmentById(R.id.tagLayout);
                     if(fragment == null) {
-
                         FragmentTransaction tr = fm.beginTransaction();
-
-
+                        TabToTag ttt = TabToTag.newInstance(m.getId());//TODO , m.getYear()는 더미데이터
+                        tr.add(R.id.tagLayout, ttt, "TabToTag");
+                        tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        tr.commit();
                         //Tag DB에서 해당 이미지의 아이디로 태그 목록들을 불러온다
-                        long pictureID = Long.valueOf(m.getName());
+//                        long pictureID = Long.valueOf(m.getName());
                         //TODO
 
                         //반복문을 통해 모든 태그들을 등록한다
-                        int numOfTag = 2;//TODO , 2는 더미데이터
-                        for(int i=0;i<numOfTag;i++){
-                            //태그의 이름을 가져온다
-                            //TODO
+//                        int numOfTag = 2;//TODO , 2는 더미데이터
+//                        for(int i=0;i<numOfTag;i++){
+                        //태그의 이름을 가져온다
+                        //TODO
 
-                            //TabToTag 객체를 생성한다
-                            TabToTag ttt = TabToTag.newInstance(m.getYear());//TODO , m.getYear()는 더미데이터
-                            tr.add(R.id.tagLayout, ttt, "TabToTag");
+                        //TabToTag 객체를 생성한다
+//                            TabToTag ttt = TabToTag.newInstance(m.getYear());//TODO , m.getYear()는 더미데이터
+//                            tr.add(R.id.tagLayout, ttt, "TabToTag");
 
-                            //태그의 위치를 조정한다
-                            //TODO
-                        }
+                        //태그의 위치를 조정한다
+                        //TODO
+//                        }
 
-                        tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                        tr.commit();
                     }
                     else{
                         FragmentTransaction tr = fm.beginTransaction();
