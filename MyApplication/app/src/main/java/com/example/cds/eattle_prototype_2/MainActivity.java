@@ -68,6 +68,13 @@ public class MainActivity extends ActionBarActivity {
         drawMainView();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        drawMainView();
+    }
+
+
     public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
         //커스텀 어댑터 생성
         storyListAdapter = new StoryListAdapter(this);
@@ -92,6 +99,8 @@ public class MainActivity extends ActionBarActivity {
                 StoryListItem tempItem = new StoryListItem(folderList.get(i).getImage(),folderList.get(i).getName(),folderList.get(i).getId());
                 storyListAdapter.add(tempItem);
             }
+            storyListAdapter.notifyDataSetChanged() ;
+
         }
 
         /*
