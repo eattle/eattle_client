@@ -15,6 +15,7 @@ public class Media implements Parcelable {
     int day;            //일
     double latitude;       //위도
     double longitude;      //경도
+    String placeName;       //위도,경도에 따른 장소명(없으면 "")
 
     public Media() {
     }
@@ -28,9 +29,10 @@ public class Media implements Parcelable {
         day = in.readInt();
         latitude = in.readDouble();
         longitude = in.readDouble();
+        placeName = in.readString();
     }
 
-    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude) {
+    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String placeName) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
@@ -39,26 +41,16 @@ public class Media implements Parcelable {
         this.day = day;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.placeName = placeName;
     }
 
-    // 위치 정보가 존재할 경우
-    public Media(int folder_id, String name, int year, int month, int day, double latitude, double longitude) {
-        this.folder_id = folder_id;
-        this.name = name;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
 
-    // 위치 정보가 존재하지 않을 경우
-    public Media(int folder_id, String name, int year, int month, int day) {
-        this.folder_id = folder_id;
-        this.name = name;
-        this.year = year;
-        this.month = month;
-        this.day = day;
+    public String getPlaceName() {
+
+        return placeName;
     }
 
     public int getId() {
@@ -140,6 +132,7 @@ public class Media implements Parcelable {
         dest.writeInt(day);
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
+        dest.writeString(placeName);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

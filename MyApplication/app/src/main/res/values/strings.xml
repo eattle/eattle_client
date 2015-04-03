@@ -8,5 +8,6 @@
     <string name="title_activity_album_layout">AlbumLayout</string>
     <string name="title_activity_full_picture">FullPicture</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_popup_for_tag_addition">PopupForTagAddition</string>
 
 </resources>

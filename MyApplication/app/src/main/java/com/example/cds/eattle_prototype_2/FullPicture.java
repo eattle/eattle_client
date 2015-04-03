@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
@@ -67,6 +70,9 @@ public class FullPicture extends ActionBarActivity {
             TouchImageView img = new TouchImageView(container.getContext());
 
             final Media m = mMediaList.get(position);
+            Toast.makeText(getApplicationContext(),"장소명 : "+m.getPlaceName(),Toast.LENGTH_LONG).show();
+
+
 
             String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
             try {
@@ -99,6 +105,8 @@ public class FullPicture extends ActionBarActivity {
             img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+
                     FragmentManager fm = getFragmentManager();
                     //태그가 들어갈 레이아웃을 불러온다
                     Fragment fragment = fm.findFragmentById(R.id.tagLayout);
@@ -117,6 +125,26 @@ public class FullPicture extends ActionBarActivity {
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         tr.commit();
                         fm.executePendingTransactions();
+                    }
+                    //장소명이 존재하면 태그로 추가할지 묻는다
+                    if(!m.getPlaceName().equals("")){
+                        //일단 m.getPlaceName()이 태그 목록에 있는지 확인한다
+                        int tagId=db.getTagIdByTagName(m.getPlaceName());
+                        //1. 해당 장소명으로 태그가 아예 존재하지 않을 때 -> 묻는다
+                        if(tagId == 0) {
+                            Intent intent = new Intent(getApplicationContext(), PopupForTagAddition.class);
+                            DataForTagAddition tempData = new DataForTagAddition(tagId,m.getId(),m.getFolder_id(),m.getPlaceName());
+                            intent.putExtra("dataForTagAddition",tempData);
+                            startActivity(intent);
+                        }
+                        //2. 해당 장소명으로 태그가 존재하는데, 해당 폴더에 등록되어 있지 않을 때 -> 묻는다
+                        else if(db.getMediaTagByIds(tagId,m.getId()) == 0) {
+                            Intent intent = new Intent(getApplicationContext(), PopupForTagAddition.class);
+                            DataForTagAddition tempData = new DataForTagAddition(tagId,m.getId(),m.getFolder_id(),m.getPlaceName());
+                            intent.putExtra("dataForTagAddition",tempData);
+                            startActivity(intent);
+                        }
+                        //(한번 물어봤는데 아니요로 대답할 시에 다음부터 묻지 않는다 -> 추후구현(아니오라고 대답했을 때 태그-미디어 DB에 등록하고 추가적인 flag를 다는 방식으로)
                     }
                 }
             });
@@ -173,4 +201,6 @@ public class FullPicture extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

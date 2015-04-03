@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
 
     private static final String DATABASE_NAME = "FileManager";
 
@@ -40,9 +40,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_YEAR = "year";           //년
     private static final String KEY_MONTH = "month";          //월
     private static final String KEY_DAY = "day";            //일
-    private static final String KEY_LATITUDE = "latitude";       //위도도
-    private static final String KEY_LONGITUDE = "longitude";      //경
-
+    private static final String KEY_LATITUDE = "latitude";       //위도
+    private static final String KEY_LONGITUDE = "longitude";      //경도
+    private static final String KEY_PLACENAME = "placename";        //장소명
     //tag
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
@@ -71,7 +71,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_MONTH + " INTEGER NOT NULL, "
             + KEY_DAY + " INTEGER NOT NULL, "
             + KEY_LATITUDE + " DOUBLE, "
-            + KEY_LONGITUDE + " DOUBLE "
+            + KEY_LONGITUDE + " DOUBLE, "
+            + KEY_PLACENAME + " VARCHAR(100) "
             + ")";
 
     private static final String CREATE_TABLE_TAG =
@@ -260,6 +261,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_DAY, media.getDay());
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
+        values.put(KEY_PLACENAME, media.getPlaceName());
 
         return (int)db.insert(TABLE_MEDIA, null, values);
     }
@@ -283,6 +285,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
             media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
             media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+            media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
         }
 
         return media;
@@ -309,6 +312,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -338,6 +342,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -367,6 +372,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
 
                 media.add(m);
 
@@ -390,6 +396,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_DAY, media.getDay());
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
+        values.put(KEY_PLACENAME, media.getPlaceName());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
 

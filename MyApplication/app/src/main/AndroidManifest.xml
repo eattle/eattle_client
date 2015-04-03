@@ -35,6 +35,11 @@
             android:name=".FullPicture"
             android:label="@string/title_activity_full_picture" >
         </activity>
+        <activity
+            android:name=".PopupForTagAddition"
+            android:label="@string/title_activity_popup_for_tag_addition"
+            android:theme="@android:style/Theme.Dialog">
+        </activity>
     </application>
 
 </manifest>
