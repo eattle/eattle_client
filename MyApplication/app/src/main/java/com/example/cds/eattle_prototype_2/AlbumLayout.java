@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Folder;
 import com.example.cds.eattle_prototype_2.model.Media;
+import com.example.cds.eattle_prototype_2.model.Media_Tag;
+import com.example.cds.eattle_prototype_2.model.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,54 +58,36 @@ public class AlbumLayout extends ActionBarActivity {
         //인텐트로부터 사진 검색을 위한 (folderId) 초기화
         Intent intent=new Intent(this.getIntent());
         id = intent.getIntExtra("id", -1);
-        if(intent.getIntExtra("kind", 0) == CONSTANT.FOLDER){
+        if(intent.getIntExtra("kind", -1) == CONSTANT.FOLDER){
             Folder f = db.getFolder(id);
             mMediaList = db.getAllMediaByFolder(id);
 
             String[] tempName = f.getName().split("_");
             titleName = tempName[0]+"년 "+tempName[1]+"월 "+tempName[2].replace("의","일의");
             titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
+        } else {
+            Tag t = db.getTagByTagId(id);
+            Media m = db.getMediaById(intent.getIntExtra("mediaId", -1 ));
+            Folder f = db.getFolder(m.getFolder_id());
+            List<Media_Tag> temp = db.getAllMediaTag();
+            mMediaList = db.getAllMediaByTagId(id);
 
-//            titleText.setText(f.getName());
-/*            try {
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inSampleSize = 4;
-                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
-
-                Bitmap bm = BitmapFactory.decodeFile(path, opt);
-                titleImage.setImageBitmap(bm);
-            } catch (OutOfMemoryError e) {
-                Log.e("warning", "이미지가 너무 큽니다");
-            }*/
-        } else{
-
+            titleName = t.getName();
+            titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ m.getName()+".jpg";
         }
 
-//        mTagId = intent.getIntExtra("tagId", -1);
-
-//        if(mFolderId != -1) {
-//            Folder folderTemp = db.getFolder(mFolderId);
-//            mFolderName = folderTemp.getName();
-//        } else {
-//            mTagId = intent.getIntExtra("tagId", -1);
-
-//        }
 
         //폴더(스토리)의 제목 등록
-//        titleText = (TextView)findViewById(R.id.titleText);
         titleText.setText(titleName);
         //폴더(스토리)의 대표사진 등록
-//        titleImage = (ImageView)findViewById(R.id.titleImage);
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
-//        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+mFolderName+"/"+ folderTemp.getImage()+".jpg";
         Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath,opt);
         titleImage.setImageBitmap(bitmap);
         titleImage.setAlpha(0.4f);
 
         //그리드 뷰 등록
         mGrid = (GridView) findViewById(R.id.imagegrid);
-//        mMediaList = db.getAllMediaByFolder(mFolderId);
 
         ImageAdapter Adapter = new ImageAdapter(this);
         mGrid.setAdapter(Adapter);

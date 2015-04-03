@@ -104,35 +104,15 @@ public class FullPicture extends ActionBarActivity {
                     Fragment fragment = fm.findFragmentById(R.id.tagLayout);
                     if(fragment == null) {
                         FragmentTransaction tr = fm.beginTransaction();
-                        TabToTag ttt = TabToTag.newInstance(m.getId());//TODO , m.getYear()는 더미데이터
+                        TabToTag ttt = TabToTag.newInstance(m.getId());
                         tr.add(R.id.tagLayout, ttt, "TabToTag");
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         tr.commit();
-                        //Tag DB에서 해당 이미지의 아이디로 태그 목록들을 불러온다
-//                        long pictureID = Long.valueOf(m.getName());
-                        //TODO
-
-                        //반복문을 통해 모든 태그들을 등록한다
-//                        int numOfTag = 2;//TODO , 2는 더미데이터
-//                        for(int i=0;i<numOfTag;i++){
-                        //태그의 이름을 가져온다
-                        //TODO
-
-                        //TabToTag 객체를 생성한다
-//                            TabToTag ttt = TabToTag.newInstance(m.getYear());//TODO , m.getYear()는 더미데이터
-//                            tr.add(R.id.tagLayout, ttt, "TabToTag");
-
-                        //태그의 위치를 조정한다
-                        //TODO
-//                        }
-
                     }
                     else{
                         FragmentTransaction tr = fm.beginTransaction();
 
                         //tagArrayList에 있는 모든 태그들을 삭제한다
-                        //TODO
-
                         tr.remove(fragment);
                         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         tr.commit();
