@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String DATABASE_NAME = "FileManager";
 
@@ -43,6 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_LATITUDE = "latitude";       //위도
     private static final String KEY_LONGITUDE = "longitude";      //경도
     private static final String KEY_PLACENAME = "placename";        //장소명
+    private static final String KEY_PATH = "path";      //사진 경로
     //tag
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
@@ -56,6 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
     private static final String KEY_IMAGE = "image";
+    private static final String KEY_THUMBNAILID = "thumbNail_id";
 
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
@@ -72,7 +74,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_DAY + " INTEGER NOT NULL, "
             + KEY_LATITUDE + " DOUBLE, "
             + KEY_LONGITUDE + " DOUBLE, "
-            + KEY_PLACENAME + " VARCHAR(100) "
+            + KEY_PLACENAME + " VARCHAR(100), "
+            + KEY_PATH + " VARCHAR(255) "
             + ")";
 
     private static final String CREATE_TABLE_TAG =
@@ -92,7 +95,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             "CREATE TABLE " + TABLE_FOLDER + " ("
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_NAME + " VARCHAR(255) NOT NULL, "
-            + KEY_IMAGE + " VARCHAR(255) NOT NULL "
+            + KEY_IMAGE + " VARCHAR(255) NOT NULL, "
+            + KEY_THUMBNAILID + " VARCHAR(255) NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_MANAGER =
@@ -155,6 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_ID, folder.getId());
         values.put(KEY_NAME, folder.getName());
         values.put(KEY_IMAGE, folder.getImage());
+        values.put(KEY_THUMBNAILID, folder.getThumbNail_name());
 
         return (int)db.insert(TABLE_FOLDER, null, values);
     }
@@ -176,6 +181,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
                 f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+                f.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
                 folders.add(f);
             }while(c.moveToNext());
         }
@@ -196,6 +202,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             folder.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
             folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+            folder.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
         }
 
         return folder;
@@ -262,8 +269,34 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
         values.put(KEY_PLACENAME, media.getPlaceName());
+        values.put(KEY_PATH, media.getPath());
 
         return (int)db.insert(TABLE_MEDIA, null, values);
+    }
+
+    //Media 여러개를 넣는다(속도 향상을 위해)
+    //주고 받는 Media 배열의 크기가 커지면 복사하는 과정도 속도 저하의 요인
+    //insert를 할때 ContentValues를 통해 하는 것도 속도 저하의 요인
+    public int createSeveralMedia(ArrayList<Media> medias){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        for(int i=0;i<medias.size();i++){
+            ContentValues values = new ContentValues();
+            values.put(KEY_ID, medias.get(i).getId());
+            values.put(KEY_FOLDER_ID, medias.get(i).getFolder_id());
+            values.put(KEY_NAME, medias.get(i).getName());
+            values.put(KEY_YEAR, medias.get(i).getYear());
+            values.put(KEY_MONTH, medias.get(i).getMonth());
+            values.put(KEY_DAY, medias.get(i).getDay());
+            values.put(KEY_LATITUDE, medias.get(i).getLatitude());
+            values.put(KEY_LONGITUDE, medias.get(i).getLongitude());
+            values.put(KEY_PLACENAME, medias.get(i).getPlaceName());
+            values.put(KEY_PATH, medias.get(i).getPath());
+
+            db.insert(TABLE_MEDIA, null, values);
+        }
+
+        return 0;
     }
 
     /*
@@ -286,6 +319,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
             media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
             media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+            media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
         }
 
         return media;
@@ -313,6 +347,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -343,6 +378,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -373,6 +409,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
 
                 media.add(m);
 
@@ -397,6 +434,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_LATITUDE, media.getLatitude());
         values.put(KEY_LONGITUDE, media.getLongitude());
         values.put(KEY_PLACENAME, media.getPlaceName());
+        values.put(KEY_PATH, media.getPath());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
 

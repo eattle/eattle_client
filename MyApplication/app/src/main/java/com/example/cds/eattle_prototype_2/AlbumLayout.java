@@ -64,7 +64,8 @@ public class AlbumLayout extends ActionBarActivity {
 
             String[] tempName = f.getName().split("_");
             titleName = tempName[0]+"년 "+tempName[1]+"월 "+tempName[2].replace("의","일의");
-            titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
+            //titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ f.getImage()+".jpg";
+            titleImagePath = f.getImage();//대표 이미지의 경로를 얻는다
         } else {
             Tag t = db.getTagByTagId(id);
             Media m = db.getMediaById(intent.getIntExtra("mediaId", -1 ));
@@ -73,7 +74,8 @@ public class AlbumLayout extends ActionBarActivity {
             mMediaList = db.getAllMediaByTagId(id);
 
             titleName = t.getName();
-            titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ m.getName()+".jpg";
+            //titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ m.getName()+".jpg";
+            titleImagePath = f.getImage();//대표 이미지의 경로를 얻는다
         }
 
 

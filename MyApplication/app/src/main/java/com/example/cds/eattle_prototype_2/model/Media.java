@@ -16,6 +16,9 @@ public class Media implements Parcelable {
     double latitude;       //위도
     double longitude;      //경도
     String placeName;       //위도,경도에 따른 장소명(없으면 "")
+    String path;        //사진 경로
+
+
 
     public Media() {
     }
@@ -30,9 +33,10 @@ public class Media implements Parcelable {
         latitude = in.readDouble();
         longitude = in.readDouble();
         placeName = in.readString();
+        path = in.readString();
     }
 
-    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String placeName) {
+    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String placeName, String path) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
@@ -42,6 +46,7 @@ public class Media implements Parcelable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.placeName = placeName;
+        this.path = path;
     }
 
     public void setPlaceName(String placeName) {
@@ -117,6 +122,14 @@ public class Media implements Parcelable {
         this.longitude = longitude;
     }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+
+        return path;
+    }
     @Override
     public int describeContents() {
         return 0;
@@ -133,6 +146,7 @@ public class Media implements Parcelable {
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
         dest.writeString(placeName);
+        dest.writeString(path);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by CDS on 15. 3. 31..
  */
+
 //메인화면의 스토리 리스트를 출력하기 위한 Adapter
 public class StoryListAdapter extends BaseAdapter{
     private ArrayList<StoryListItem> items;//ListView에서 add하는 아이템들은 items에 담기게 된다
@@ -48,8 +49,20 @@ public class StoryListAdapter extends BaseAdapter{
 
             //스토리 이름을 등록한다
             TextView storyName = (TextView)convertView.findViewById(R.id.storyName);
-            String[] tempName = items.get(position).getName().split("_");
-            String name = tempName[0]+"년 "+tempName[1]+"월 "+tempName[2].replace("의","일의");
+            String temp = items.get(position).getName();
+            String name = "";
+            if(temp.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
+                String[] bigSplit = temp.split("~");
+                String[] tempName = bigSplit[0].split("_");
+                name += tempName[0] + "년 " + tempName[1] + "월 " + tempName[2] + "일 ~ ";
+                tempName = bigSplit[1].split("_");
+                name += tempName[1] + "월 " + tempName[2].replace("의", "일의");
+
+            }
+            else {//단일 날짜의 스토리일 경우
+                String[] tempName = temp.split("_");
+                name = tempName[0] + "년 " + tempName[1] + "월 " + tempName[2].replace("의", "일의");
+            }
             storyName.setText(name);
 
             //스토리 이미지를 설정한다

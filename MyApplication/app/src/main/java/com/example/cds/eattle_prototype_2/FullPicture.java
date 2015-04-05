@@ -70,11 +70,12 @@ public class FullPicture extends ActionBarActivity {
             TouchImageView img = new TouchImageView(container.getContext());
 
             final Media m = mMediaList.get(position);
-            Toast.makeText(getApplicationContext(),"장소명 : "+m.getPlaceName(),Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(),"장소명 : "+m.getPlaceName(),Toast.LENGTH_LONG).show();
 
 
+            //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
+            String path = db.getFolder(m.getFolder_id()).getImage();//대표 이미지의 경로를 가져온다
 
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
             try {
                 BitmapFactory.Options opt = new BitmapFactory.Options();
                 opt.inSampleSize = 4;

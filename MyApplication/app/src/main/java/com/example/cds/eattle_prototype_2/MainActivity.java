@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -104,7 +105,7 @@ public class MainActivity extends ActionBarActivity {
         }
         else {
             for (int i = 0; i < folderList.size(); i++) {
-                StoryListItem tempItem = new StoryListItem(folderList.get(i).getImage(),folderList.get(i).getName(),folderList.get(i).getId());
+                StoryListItem tempItem = new StoryListItem(folderList.get(i).getThumbNail_name(),folderList.get(i).getName(),folderList.get(i).getId());
                 storyListAdapter.add(tempItem);
             }
             storyListAdapter.notifyDataSetChanged() ;
@@ -165,6 +166,266 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     private void pictureClassification() throws IOException {//시간간격을 바탕으로 사진들을 분류하는 함수
+        /*
+        //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
+        String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
+        for(int i=0;i<folderList.length;i++){
+            if(!folderList[i].equals("Camera") && !folderList[i].equals("thumbnail"))
+                FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
+        }*/
+        //---------------------------------------------
+        ImageSetter = new AlbumImageSetter(this, 0, 0);
+        calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+        long averageInterval = totalInterval;
+        if (totalPictureNum != 0)
+            averageInterval /= totalPictureNum;
+        CONSTANT.TIMEINTERVAL=averageInterval;
+        //DB를 참조한다.
+        Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
+        db.createManager(_m);//Manager DB에 값들을 집어넣음
+        //DB에 있는 데이터들을 초기화한다
+        db.deleteAllFolder();
+        db.deleteAllMedia();
+        db.deleteAllTag();
+        db.deleteAllMediaTag();
+        //커서의 위치를 처음으로 이동시킨다.
+        ImageSetter.setCursor(0,0);
+        //File picture=null;
+        //File dir=null;
+
+        ArrayList<Media> medias = new ArrayList<Media>();//DB에 추가될 Media들의 목록(DB에 한꺼번에 넣기 위하여)
+        String startFolderID="";
+        String endFolderID="";
+        int folderIDForDB=0;//Folder DB에 들어가는 아이디
+        long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
+        String representativeImage="";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
+        String thumbNailID="";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
+        //String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
+        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/thumbnail/";
+        FolderManage.makeDirectory(folderThumbnailName);
+
+
+        while(ImageSetter.mCursor.moveToNext()){
+            String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+
+            Log.d("사진 분류",path);
+            //썸네일 사진들은 분류대상에서 제외한다
+            if(path.contains("thumbnail") || path.contains("스토리")) {
+                Log.d("pictureClassification","썸네일 및 기존 스토리는 분류 대상에서 제외");
+                continue;
+            }
+
+            //picture = new File(path);
+            //사진 ID
+            int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            //사진이 촬영된 날짜
+            long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
+            pictureTakenTime *= 1000; //second->millisecond
+            //millisecond -> Calendar
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(pictureTakenTime);
+            String folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
+            if(representativeImage.equals("")) {
+                //representativeImage = String.valueOf(pictureID);
+                representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
+                thumbNailID = String.valueOf(pictureID);
+            }
+
+
+            //썸네일 이미지를 생성한다
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
+            Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
+            createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID)+".jpg");
+
+            Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
+
+            //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
+            Log.d("MainActivity","pictureTakenTime-_pictureTakenTime = "+(pictureTakenTime-_pictureTakenTime));
+            if(pictureTakenTime-_pictureTakenTime > CONSTANT.TIMEINTERVAL){
+                //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
+                if(!startFolderID.equals("")) {
+                    //File new_name = null;
+                    String new_name;
+                    if (!startFolderID.equals(endFolderID))
+                        new_name = startFolderID + "~" + endFolderID + "의 스토리";
+                        //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "~" + endFolderID + "의 스토리");
+                    else
+                        new_name = startFolderID + "의 스토리";
+                        //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "의 스토리");
+
+                    //String _new_name=FolderManage.reNameFile(dir, new_name);
+                    //Folder DB에 넣는다.
+                    Folder f = new Folder(folderIDForDB,new_name,representativeImage,thumbNailID);
+                    db.createFolder(f);
+                    representativeImage="";
+                    //Log.d("MainActivity","tempEattle 폴더 이름 변경");
+                    Log.d("MainActivity","Folder DB 입력 완료");
+                }
+
+                //방금 읽은 사진의 folderID가 시작날짜가 된다.
+                startFolderID = folderID;
+                //tempEattle이라는 이름으로 임시 폴더를 만든다.
+                //dir = FolderManage.makeDirectory(folderName);
+
+                folderIDForDB++;
+            }
+            //사진에 위치 정보가 있으면 얻어온다
+            //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
+            double longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
+            double latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
+            //위치 정보를 토대로 지명이름을 가져온다
+            String placeName_ = "";
+            List<Address> placeName = null;
+            if(longitude != 0 && latitude != 0) {
+                try {
+                    placeName = mCoder.getFromLocation(latitude, longitude, 1);
+                } catch (IOException e) {
+                    Log.e("PictureClassification", e.getMessage());
+                }
+                //위치 정보가 없으면
+                if (placeName == null) {
+                    Log.e("PictureClassification", "위치 정보가 없습니다");
+                } else {
+                    //placeName_ = placeName.get(0).getLocality();//ex)강남구
+                    placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
+                    Log.e("PictureClassification", "~"+placeName.get(0).getAdminArea()+"~"+placeName.get(0).getCountryCode()+"~"+placeName.get(0).getFeatureName()+"~"+placeName.get(0).getLocality()+"~"+placeName.get(0).getSubAdminArea()+"~"+placeName.get(0).getSubLocality()+"~"+placeName.get(0).getSubThoroughfare()+"~"+placeName.get(0).getThoroughfare()+"~"+placeName.get(0).getMaxAddressLineIndex());
+                    //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
+                    //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
+                }
+
+            }
+
+            //사진을 새로운 폴더로 복사한다.
+            //FolderManage.copyFile(picture , folderName+String.valueOf(pictureID)+".jpg");
+
+            //DB에 사진 데이터를 넣는다.
+            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),latitude,longitude,placeName_,path);
+
+            //db.createMedia(m);
+            medias.add(m);
+
+            _pictureTakenTime = pictureTakenTime;
+            endFolderID = folderID;
+        }
+
+        //마지막 남은 폴더를 처리한다.
+        //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
+        if(!startFolderID.equals("")) {
+            //File new_name = null;
+            String new_name = null;
+            if (!startFolderID.equals(endFolderID)) {
+                new_name = startFolderID + "~" + endFolderID + "의 스토리";
+                //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "~" + endFolderID + "의 스토리");
+            } else
+                new_name = startFolderID + "의 스토리";
+                //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "의 스토리");
+            //String _new_name = FolderManage.reNameFile(dir, new_name);
+            //Folder DB에 넣는다.
+            Folder f = new Folder(folderIDForDB,new_name,representativeImage,thumbNailID);
+            db.createFolder(f);
+            representativeImage="";
+            Log.d("MainActivity","tempEattle 폴더 이름 변경");
+        }
+        db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
+
+        //메인화면의 스토리 목록을 갱신한다.
+        drawMainView();
+        Toast.makeText(getBaseContext(),"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
+        ImageSetter.mCursor.close();
+    }
+
+    // 외장 메모리 DCIM 전체 MediaScanning
+    // 킷캣 이후 버전 이후로 앱단에서 스캐닝 불가
+    public static void startExtMediaScan(Context mContext){
+        mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
+    }
+    //썸네일 생성 함수
+    public static void createThumbnail(Bitmap bitmap, String strFilePath, String filename) {
+
+        File file = new File(strFilePath);
+
+        if (!file.exists()) {
+            file.mkdirs();
+            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+        }
+        File fileCacheItem = new File(strFilePath + filename);
+        //strFilePath+filename이 이미 존재한다면, 썸네일을 만들 필요가 없다
+        if(fileCacheItem.exists()){
+            Log.d("createThumbnail","썸네일이 이미 존재합니다");
+            return;
+        }
+
+        OutputStream out = null;
+
+
+
+
+        try {
+            int height=bitmap.getHeight();
+            int width=bitmap.getWidth();
+
+            fileCacheItem.createNewFile();
+            out = new FileOutputStream(fileCacheItem);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+        AdapterView.OnItemClickListener mItemClickListener =
+            new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    ImageSetter.mCursor.moveToPosition(position);
+                    //사진들의 경로를 가져오는 부분
+                    String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                    try{
+                        BitmapFactory.Options opt = new BitmapFactory.Options();
+                        opt.inSampleSize=4;
+                        Bitmap bm = BitmapFactory.decodeFile(path,opt);
+                        mImage.setImageBitmap(bm);
+                    }
+                    catch(OutOfMemoryError e){
+                        Toast.makeText(getBaseContext(), "이미지가 너무 큽니다", Toast.LENGTH_LONG).show();
+                    }
+                }
+            };
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+}
+
+/*
+private void pictureClassification() throws IOException {//시간간격을 바탕으로 사진들을 분류하는 함수
         //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
         String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
         for(int i=0;i<folderList.length;i++){
@@ -273,8 +534,8 @@ public class MainActivity extends ActionBarActivity {
                 if (placeName == null) {
                     Log.e("PictureClassification", "위치 정보가 없습니다");
                 } else {
-                    placeName_ = placeName.get(0).getLocality();//ex)강남구
-                    //placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
+                    //placeName_ = placeName.get(0).getLocality();//ex)강남구
+                    placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
                     Log.e("PictureClassification", "~"+placeName.get(0).getAdminArea()+"~"+placeName.get(0).getCountryCode()+"~"+placeName.get(0).getFeatureName()+"~"+placeName.get(0).getLocality()+"~"+placeName.get(0).getSubAdminArea()+"~"+placeName.get(0).getSubLocality()+"~"+placeName.get(0).getSubThoroughfare()+"~"+placeName.get(0).getThoroughfare()+"~"+placeName.get(0).getMaxAddressLineIndex());
                     //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
                     //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
@@ -314,93 +575,6 @@ public class MainActivity extends ActionBarActivity {
         ImageSetter.mCursor.close();
     }
 
-    // 외장 메모리 DCIM 전체 MediaScanning
-    // 킷캣 이후 버전 이후로 앱단에서 스캐닝 불가
-    public static void startExtMediaScan(Context mContext){
-        mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
-    }
-    //썸네일 생성 함수
-    public static void createThumbnail(Bitmap bitmap, String strFilePath, String filename) {
 
-        File file = new File(strFilePath);
-
-        if (!file.exists()) {
-            file.mkdirs();
-            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-        }
-        File fileCacheItem = new File(strFilePath + filename);
-        //strFilePath+filename이 이미 존재한다면, 썸네일을 만들 필요가 없다
-        if(fileCacheItem.exists()){
-            Log.d("createThumbnail","썸네일이 이미 존재합니다");
-            return;
-        }
-
-        OutputStream out = null;
-
-
-
-
-        try {
-            int height=bitmap.getHeight();
-            int width=bitmap.getWidth();
-
-            fileCacheItem.createNewFile();
-            out = new FileOutputStream(fileCacheItem);
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-        AdapterView.OnItemClickListener mItemClickListener =
-            new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ImageSetter.mCursor.moveToPosition(position);
-                    //사진들의 경로를 가져오는 부분
-                    String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-                    try{
-                        BitmapFactory.Options opt = new BitmapFactory.Options();
-                        opt.inSampleSize=4;
-                        Bitmap bm = BitmapFactory.decodeFile(path,opt);
-                        mImage.setImageBitmap(bm);
-                    }
-                    catch(OutOfMemoryError e){
-                        Toast.makeText(getBaseContext(), "이미지가 너무 큽니다", Toast.LENGTH_LONG).show();
-                    }
-                }
-            };
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-}
-
+ */
 

@@ -7,6 +7,8 @@ public class Folder {
     int id;
     String name;
     String image;
+    String thumbNail_name;
+
 
     public Folder() {
     }
@@ -24,6 +26,13 @@ public class Folder {
     public Folder(String image, String name) {
         this.image = image;
         this.name = name;
+    }
+
+    public Folder(int id, String name, String image, String thumbNail_name) {
+        this.id = id;
+        this.name = name;
+        this.image = image;
+        this.thumbNail_name = thumbNail_name;
     }
 
     public int getId() {
@@ -48,5 +57,15 @@ public class Folder {
 
     public void setImage(String image){
         this.image = image;
+    }
+
+
+    public void setThumbNail_name(String thumbNail_name) {
+        this.thumbNail_name = thumbNail_name;
+    }
+
+    public String getThumbNail_name() {
+
+        return thumbNail_name;
     }
 }
