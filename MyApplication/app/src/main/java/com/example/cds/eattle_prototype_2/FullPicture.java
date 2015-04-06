@@ -74,8 +74,7 @@ public class FullPicture extends ActionBarActivity {
 
 
             //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
-            String path = db.getFolder(m.getFolder_id()).getImage();//대표 이미지의 경로를 가져온다
-
+            String path = m.getPath();//사진의 경로를 가져온다
             try {
                 BitmapFactory.Options opt = new BitmapFactory.Options();
                 opt.inSampleSize = 4;

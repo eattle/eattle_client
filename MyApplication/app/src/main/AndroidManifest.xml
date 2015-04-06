@@ -38,8 +38,14 @@
         <activity
             android:name=".PopupForTagAddition"
             android:label="@string/title_activity_popup_for_tag_addition"
-            android:theme="@android:style/Theme.Dialog">
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
+
+        <service
+            android:name=".ServiceOfPictureClassification"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>
