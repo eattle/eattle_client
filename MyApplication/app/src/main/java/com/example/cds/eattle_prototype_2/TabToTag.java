@@ -4,7 +4,9 @@ package com.example.cds.eattle_prototype_2;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MotionEventCompat;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -76,17 +78,10 @@ public class TabToTag extends Fragment {
                 }
             });
         }
-//        text.setText(tags_);
-
 
 
         final Button btn = (Button)root.findViewById(R.id.button);
-
-//        final TextView text = (TextView)root.findViewById(R.id.tags);
-
         btn.setText("태그 추가");
-
-
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override

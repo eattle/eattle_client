@@ -5,16 +5,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.LocationManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,26 +20,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.location.*;
-import android.os.*;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Folder;
-import com.example.cds.eattle_prototype_2.model.Manager;
-import com.example.cds.eattle_prototype_2.model.Media;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 
@@ -70,8 +57,15 @@ public class MainActivity extends ActionBarActivity {
         //데이터베이스 OPEN
         db = DatabaseHelper.getInstance(getApplicationContext());
 
+        //activity_main.xml에 있는 storyList 리스트뷰에 연결
+        storyList = (ListView)findViewById(R.id.storyList);
+        //커스텀 어댑터 생성
+        storyListAdapter = new StoryListAdapter(this);
+        //ListView에 어댑터 연결
+        storyList.setAdapter(storyListAdapter);
+
         //Folder DB를 기반으로 메인화면을 구성한다.
-        drawMainView();
+//        drawMainView();
 
         //서비스 시작
         //startService(new Intent(MainActivity.this, ServiceOfPictureClassification.class));
@@ -169,12 +163,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
-        //커스텀 어댑터 생성
-        storyListAdapter = new StoryListAdapter(this);
-        //activity_main.xml에 있는 storyList 리스트뷰에 연결
-        storyList = (ListView)findViewById(R.id.storyList);
-        //ListView에 어댑터 연결
-        storyList.setAdapter(storyListAdapter);
 
         //리스트뷰에 아이템 추가---------------------------
         //모든 폴더 목록들을 불러온다
@@ -188,6 +176,7 @@ public class MainActivity extends ActionBarActivity {
 //            storyList.addView(tempLayout);
         }
         else {
+            storyListAdapter.clear();
             for (int i = 0; i < folderList.size(); i++) {
                 StoryListItem tempItem = new StoryListItem(folderList.get(i).getThumbNail_name(),folderList.get(i).getName(),folderList.get(i).getId());
                 storyListAdapter.add(tempItem);

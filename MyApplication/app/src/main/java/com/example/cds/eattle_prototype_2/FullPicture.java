@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -19,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
@@ -105,8 +101,6 @@ public class FullPicture extends ActionBarActivity {
             img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-
                     FragmentManager fm = getFragmentManager();
                     //태그가 들어갈 레이아웃을 불러온다
                     Fragment fragment = fm.findFragmentById(R.id.tagLayout);
