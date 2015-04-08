@@ -88,7 +88,25 @@ public class TabToTag extends Fragment {
             public void onClick(View v) {
                 int tag_id = db.createTag(""+inputTag.getText().toString(), media_id);
 
-                List<Tag> tags= db.getAllTagsByMediaId(media_id);
+                if(tag_id != -1){
+                    Tag tag = db.getTagByTagId(tag_id);
+                    Button tagButton = new Button(getActivity());
+                    tagButton.setText(""+tag.getName());
+                    tagButton.setId(tag.getId());
+                    tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    layout.addView(tagButton);
+                    tagButton.setOnClickListener(new Button.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getActivity(), AlbumLayout.class);
+                            intent.putExtra("kind", CONSTANT.TAG);
+                            intent.putExtra("id", (((Button)v).getId()));
+                            intent.putExtra("mediaId", media_id);
+                            startActivity(intent);
+                        }
+                    });
+                }
+/*                List<Tag> tags= db.getAllTagsByMediaId(media_id);
                 int s = tags.size();
                 for(int i = 0; i < s; i++){
                     Button tagButton = new Button(getActivity());
@@ -106,7 +124,7 @@ public class TabToTag extends Fragment {
                             startActivity(intent);
                         }
                     });
-                }
+                }*/
             }
         });
 

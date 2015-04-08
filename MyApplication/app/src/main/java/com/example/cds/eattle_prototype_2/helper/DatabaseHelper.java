@@ -471,9 +471,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
             tag_id = (int)db.insert(TABLE_TAG, null, values);
         }
-        createMediaTag(tag_id, media_id);
 
-        return tag_id;
+        return (createMediaTag(tag_id, media_id) == -1)? -1 : tag_id;
     }
 
     /*
@@ -661,6 +660,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             values.put(KEY_MEDIA_ID, media_id);
 
             id = (int)db.insert(TABLE_MEDIA_TAG, null, values);
+        }else{
+            return -1;
         }
 
         return id;
