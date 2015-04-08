@@ -1,39 +1,40 @@
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.cds.eattle_prototype_2.TabToTag"
-    android:weightSum="1">
-
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.99"
-        android:id="@+id/tagLayout">
-    </LinearLayout>
+        tools:context="com.example.cds.eattle_prototype_2.TabToTag"
+        android:weightSum="1">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.01">
-
-        <EditText
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/editText"
-            android:layout_weight="0.8" />
+            android:layout_weight="0.99"
+            android:id="@+id/tagLayout">
+        </LinearLayout>
 
-        <Button
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button"
-            android:background="#ff0000"
-            android:layout_gravity="right"
-            android:layout_weight="0.2" />
-    </LinearLayout>
+            android:layout_weight="0.01"
+            android:clickable="false">
 
-</LinearLayout>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/editText"
+                android:layout_weight="0.8"
+                android:singleLine="true" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Button"
+                android:id="@+id/button"
+                android:background="#ff0000"
+                android:layout_gravity="right"
+                android:layout_weight="0.2" />
+        </FrameLayout>
+
+    </LinearLayout>

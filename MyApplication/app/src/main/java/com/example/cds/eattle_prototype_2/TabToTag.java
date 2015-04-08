@@ -4,12 +4,11 @@ package com.example.cds.eattle_prototype_2;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.MotionEventCompat;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
@@ -80,13 +79,14 @@ public class TabToTag extends Fragment {
         }
 
 
+        final EditText inputTag = (EditText)root.findViewById(R.id.editText);
         final Button btn = (Button)root.findViewById(R.id.button);
         btn.setText("태그 추가");
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int tag_id = db.createTag(""+(a++), media_id);
+                int tag_id = db.createTag(""+inputTag.getText().toString(), media_id);
 
                 List<Tag> tags= db.getAllTagsByMediaId(media_id);
                 int s = tags.size();
@@ -107,15 +107,6 @@ public class TabToTag extends Fragment {
                         }
                     });
                 }
-
-
-/*                int s = tags.size();
-                String tags_ = "";
-
-                for(int i = 0; i < s; i++){
-                    tags_ += " #"+ tags.get(i).getName();
-                }
-                text.setText(tags_);*/
             }
         });
 
