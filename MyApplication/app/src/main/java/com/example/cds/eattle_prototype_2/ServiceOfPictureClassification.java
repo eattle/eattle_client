@@ -279,7 +279,8 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //썸네일 이미지를 생성한다
-            if(ExistedMedia == null) {//새로운 사진
+            File ExisTedThumbNail = new File(folderThumbnailName+String.valueOf(pictureID)+".jpg");
+            if(!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
                 BitmapFactory.Options opt = new BitmapFactory.Options();
                 opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
                 Bitmap bitmap = BitmapFactory.decodeFile(path, opt);
