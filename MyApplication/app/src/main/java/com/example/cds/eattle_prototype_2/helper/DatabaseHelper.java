@@ -309,7 +309,10 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
+        if(c == null){//media_id에 해당하는 사진이 없을 때
+            media = null;
+        }
+        else if(c.moveToFirst()){//media_id에 해당하는 사진이 있을 때
             media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
             media.setName(c.getString(c.getColumnIndex(KEY_NAME)));

@@ -215,14 +215,6 @@ public class MainActivity extends ActionBarActivity {
 
 
 
-
-    // 외장 메모리 DCIM 전체 MediaScanning
-    // 킷캣 이후 버전 이후로 앱단에서 스캐닝 불가
-    public static void startExtMediaScan(Context mContext){
-        mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
-    }
-
-
     /*
     public void CheckIfServiceIsRunning(){
         if(ServiceOfPictureClassification.isRunning())

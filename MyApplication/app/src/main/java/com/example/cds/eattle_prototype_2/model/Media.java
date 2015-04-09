@@ -49,6 +49,19 @@ public class Media implements Parcelable {
         this.path = path;
     }
 
+    public Media(Media m){
+        this.id = m.getId();
+        this.folder_id = m.getFolder_id();
+        this.name = m.getName();
+        this.year = m.getYear();
+        this.month = m.getMonth();
+        this.day = m.getDay();
+        this.latitude = m.getLatitude();
+        this.longitude = m.getLongitude();
+        this.placeName = m.getPlaceName();
+        this.path = m.getPath();
+    }
+
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
     }

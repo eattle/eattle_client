@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.logging.Handler;
 
 //사진 분류, 백업 등을 담당하는 서비스
-public class ServiceOfPictureClassification extends Service{
+public class ServiceOfPictureClassification extends Service {
     String Tag = "Eattle_Service";
 
     private static boolean isRunning = false;
@@ -44,16 +44,17 @@ public class ServiceOfPictureClassification extends Service{
     static final int START_OF_PICTURE_CLASSIFICATION = 3;//MainActivity가 Service에게 사진 정리를 요청하는 메세지
     static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
 
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>();;
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    ;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
 
     //사진 정리와 관련된 변수들
-    int totalPictureNum=0;//사진들의 총 개수
+    int totalPictureNum = 0;//사진들의 총 개수
     long totalInterval;//사진 간격의 총합
-    long standardDerivation=0;//사진 간격의 표준편차
+    long standardDerivation = 0;//사진 간격의 표준편차
 
-    int folderID=0;//시간에 따라 할당될 폴더 아이디 (0부터 시작)
+    int folderID = 0;//시간에 따라 할당될 폴더 아이디 (0부터 시작)
     //앨범의 Image Setting(미디어 DB 연결)
     static AlbumImageSetter ImageSetter;
     //데이터베이스 관련 변수들
@@ -62,13 +63,14 @@ public class ServiceOfPictureClassification extends Service{
     LocationManager mLocMan;
     Geocoder mCoder;
     IncomingHandler incomingHandler = new IncomingHandler();
+
     public ServiceOfPictureClassification() {
     }
 
-    public void onCreate(){
+    public void onCreate() {
         super.onCreate();
 
-        Log.d(Tag,"서비스 onCreate() 호출");
+        Log.d(Tag, "서비스 onCreate() 호출");
         //쓰레드를 생성하여 사진 관련 서비스 시작
         //Thread serviceOfEattle = new Thread(incomingHandler);
         //serviceOfEattle.start();
@@ -77,14 +79,15 @@ public class ServiceOfPictureClassification extends Service{
 
     }
 
-    class PictureThread extends Thread{
+    class PictureThread extends Thread {
         android.os.Handler mHandler;
-        public PictureThread(android.os.Handler handler){
+
+        public PictureThread(android.os.Handler handler) {
             mHandler = handler;
         }
 
-        public void run(){
-            Log.d(Tag,"ServiceOfPictureClassification Run() 호출!!!");
+        public void run() {
+            Log.d(Tag, "ServiceOfPictureClassification Run() 호출!!!");
             db = DatabaseHelper.getInstance(getApplicationContext());
             isRunning = true;
             Looper.prepare();
@@ -98,15 +101,15 @@ public class ServiceOfPictureClassification extends Service{
         //isRunning = true;
     }*/
 
-    public static boolean isRunning(){
+    public static boolean isRunning() {
         return isRunning;
     }
 
     //MainActivity로 부터 온 메세지를 받는 부분
     class IncomingHandler extends android.os.Handler {
         @Override
-        public void handleMessage(Message msg){
-            switch (msg.what){
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_REGISTER_CLIENT || 'MainActivity가 연결을 요청하였습니다' ");
                     mClients.add(msg.replyTo);
@@ -126,7 +129,7 @@ public class ServiceOfPictureClassification extends Service{
                         public void run() {
                             try {//사진 정리를 시작한다
                                 pictureClassification();
-                            } catch(IOException e) {
+                            } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
                             }
                         }
@@ -144,7 +147,7 @@ public class ServiceOfPictureClassification extends Service{
     }
 
     //MainActivity에게 메세지를 보내는 함수
-    private void sendMessageToUI(int typeOfMessage,int intValueToSend){
+    private void sendMessageToUI(int typeOfMessage, int intValueToSend) {
         /*
         try {
             mMessenger.send(Message.obtain(null, typeOfMessage, intValueToSend, 0));
@@ -153,14 +156,13 @@ public class ServiceOfPictureClassification extends Service{
         }*/
 
 
-        for (int i=mClients.size()-1; i>=0; i--) {
+        for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 // Send data as an Integer
                 mClients.get(i).send(Message.obtain(null, typeOfMessage, intValueToSend, 0));
 
 
-            }
-            catch (RemoteException e) {
+            } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
                 mClients.remove(i);
             }
@@ -171,25 +173,25 @@ public class ServiceOfPictureClassification extends Service{
     //사진 정리와 관련된 함수들
 
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
-        totalInterval=0;
-        totalPictureNum=0;
-        ImageSetter.setCursor(0,0);//커서의 위치를 처음으로 이동시킨다.
-        long pictureTakenTime=0;
+        totalInterval = 0;
+        totalPictureNum = 0;
+        ImageSetter.setCursor(0, 0);//커서의 위치를 처음으로 이동시킨다.
+        long pictureTakenTime = 0;
         while (ImageSetter.mCursor.moveToNext()) {
             String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-            Log.d("MainActivity","!!"+path);
+            Log.d("MainActivity", "!!" + path);
             //썸네일 사진들은 계산대상에서 제외한다
-            if(path.contains("thumbnail") || path.contains("스토리")) {
-                Log.d("pictureClassification","썸네일 및 기존 스토리는 계산대상에서 제외");
+            if (path.contains("thumbnail") || path.contains("스토리")) {
+                Log.d("pictureClassification", "썸네일 및 기존 스토리는 계산대상에서 제외");
                 continue;
             }
             //사진이 촬영된 날짜
             long _pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             _pictureTakenTime *= 1000; //second->millisecond
-            if(pictureTakenTime == 0)
+            if (pictureTakenTime == 0)
                 pictureTakenTime = _pictureTakenTime;
 
-            totalInterval += _pictureTakenTime-pictureTakenTime;
+            totalInterval += _pictureTakenTime - pictureTakenTime;
             pictureTakenTime = _pictureTakenTime;
             totalPictureNum++;
         }
@@ -204,59 +206,70 @@ public class ServiceOfPictureClassification extends Service{
                 FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
         }*/
         //---------------------------------------------
+
+        //pictureClassification()의 속도 개선 방안
+        //1. 처음에 mediaDB를 전부 삭제하지 않는다
+        // -> folderIDForDB만 업데이트 한다
+        // -> 위치 정보가 있으면 새로 받지 않는다
+        // -> 사진의 경로가 변경되었는지 확인한다
+        //2. folderDB는 기존대로 전부 삭제한다
+        //3. 특정 사진에 있던 태그들은 삭제하지 않는다
+
+
         mCoder = new Geocoder(this);
         ImageSetter = new AlbumImageSetter(this, 0, 0);
         calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
         long averageInterval = totalInterval;
         if (totalPictureNum != 0)
             averageInterval /= totalPictureNum;
-        CONSTANT.TIMEINTERVAL=averageInterval;
+        CONSTANT.TIMEINTERVAL = averageInterval;
         //DB를 참조한다.
         Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
         db.createManager(_m);//Manager DB에 값들을 집어넣음
         //DB에 있는 데이터들을 초기화한다
         db.deleteAllFolder();
-        db.deleteAllMedia();
-        db.deleteAllTag();
-        db.deleteAllMediaTag();
+        //db.deleteAllMedia();
+        //db.deleteAllTag();
+        //db.deleteAllMediaTag();
         //커서의 위치를 처음으로 이동시킨다.
-        ImageSetter.setCursor(0,0);
+        ImageSetter.setCursor(0, 0);
         //File picture=null;
         //File dir=null;
 
         ArrayList<Media> medias = new ArrayList<Media>();//DB에 추가될 Media들의 목록(DB에 한꺼번에 넣기 위하여)
-        String startFolderID="";
-        String endFolderID="";
-        int folderIDForDB=0;//Folder DB에 들어가는 아이디
-        long _pictureTakenTime=0;//현재 읽고 있는 사진 이전의 찍힌 시간
-        String representativeImage="";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
-        String thumbNailID="";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
+        String startFolderID = "";
+        String endFolderID = "";
+        int folderIDForDB = 0;//Folder DB에 들어가는 아이디
+        long _pictureTakenTime = 0;//현재 읽고 있는 사진 이전의 찍힌 시간
+        String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
+        String thumbNailID = "";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         //String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
-        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/thumbnail/";
+        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/thumbnail/";
         FolderManage.makeDirectory(folderThumbnailName);
 
 
-        while(ImageSetter.mCursor.moveToNext()){
+        while (ImageSetter.mCursor.moveToNext()) {
             String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
 
-            Log.d("사진 분류",path);
+            Log.d("사진 분류", path);
             //썸네일 사진들은 분류대상에서 제외한다
-            if(path.contains("thumbnail") || path.contains("스토리")) {
-                Log.d("pictureClassification","썸네일 및 기존 스토리는 분류 대상에서 제외");
+            if (path.contains("thumbnail") || path.contains("스토리")) {
+                Log.d("pictureClassification", "썸네일 및 기존 스토리는 분류 대상에서 제외");
                 continue;
             }
 
             //picture = new File(path);
             //사진 ID
             int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+
             //사진이 촬영된 날짜
             long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             pictureTakenTime *= 1000; //second->millisecond
             //millisecond -> Calendar
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
-            String folderID=""+cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1)+"_"+cal.get(Calendar.DATE);
-            if(representativeImage.equals("")) {
+            String folderID = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE);
+            if (representativeImage.equals("")) {
                 //representativeImage = String.valueOf(pictureID);
                 representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
                 thumbNailID = String.valueOf(pictureID);
@@ -266,16 +279,17 @@ public class ServiceOfPictureClassification extends Service{
             //썸네일 이미지를 생성한다
             BitmapFactory.Options opt = new BitmapFactory.Options();
             opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
-            Bitmap bitmap = BitmapFactory.decodeFile(path,opt);
-            createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID)+".jpg");
+            Bitmap bitmap = BitmapFactory.decodeFile(path, opt);
+            createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
+
 
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
-            Log.d("MainActivity","pictureTakenTime-_pictureTakenTime = "+(pictureTakenTime-_pictureTakenTime));
-            if(pictureTakenTime-_pictureTakenTime > CONSTANT.TIMEINTERVAL){
+            Log.d("MainActivity", "pictureTakenTime-_pictureTakenTime = " + (pictureTakenTime - _pictureTakenTime));
+            if (pictureTakenTime - _pictureTakenTime > CONSTANT.TIMEINTERVAL) {
                 //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
-                if(!startFolderID.equals("")) {
+                if (!startFolderID.equals("")) {
                     //File new_name = null;
                     String new_name;
                     if (!startFolderID.equals(endFolderID))
@@ -287,11 +301,11 @@ public class ServiceOfPictureClassification extends Service{
 
                     //String _new_name=FolderManage.reNameFile(dir, new_name);
                     //Folder DB에 넣는다.
-                    Folder f = new Folder(folderIDForDB,new_name,representativeImage,thumbNailID);
+                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID);
                     db.createFolder(f);
-                    representativeImage="";
+                    representativeImage = "";
                     //Log.d("MainActivity","tempEattle 폴더 이름 변경");
-                    Log.d("MainActivity","Folder DB 입력 완료");
+                    Log.d("MainActivity", "Folder DB 입력 완료");
                 }
 
                 //방금 읽은 사진의 folderID가 시작날짜가 된다.
@@ -302,39 +316,55 @@ public class ServiceOfPictureClassification extends Service{
                 folderIDForDB++;
             }
             //사진에 위치 정보가 있으면 얻어온다
-            //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
-            double longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
-            double latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
-            //위치 정보를 토대로 지명이름을 가져온다
+            //mediaDB에 pictureID를 가진 사진이 있는지 확인한다
             String placeName_ = "";
-            List<Address> placeName = null;
-            if(longitude != 0 && latitude != 0) {
-                try {
-                    placeName = mCoder.getFromLocation(latitude, longitude, 1);
-                } catch (IOException e) {
-                    Log.e("PictureClassification", e.getMessage());
-                }
-                //위치 정보가 없으면
-                if (placeName == null) {
-                    Log.e("PictureClassification", "위치 정보가 없습니다");
-                } else {
-                    //placeName_ = placeName.get(0).getLocality();//ex)강남구
-                    placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
-                    Log.e("PictureClassification", "~"+placeName.get(0).getAdminArea()+"~"+placeName.get(0).getCountryCode()+"~"+placeName.get(0).getFeatureName()+"~"+placeName.get(0).getLocality()+"~"+placeName.get(0).getSubAdminArea()+"~"+placeName.get(0).getSubLocality()+"~"+placeName.get(0).getSubThoroughfare()+"~"+placeName.get(0).getThoroughfare()+"~"+placeName.get(0).getMaxAddressLineIndex());
-                    //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
-                    //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
-                }
+            double longitude = 0.0;
+            double latitude = 0.0;
+            Media tempMedia = db.getMediaById(pictureID);
+            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
+            if (tempMedia != null) {//해당 사진이 기존에 있었을 경우
+                Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
+                placeName_ = tempMedia.getPlaceName();
+            } else {//새로운 사진
+                //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
+                longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
+                latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
+                //위치 정보를 토대로 지명이름을 가져온다
+                List<Address> placeName = null;
+                if (longitude != 0 && latitude != 0) {
+                    try {
+                        placeName = mCoder.getFromLocation(latitude, longitude, 1);
+                    } catch (IOException e) {
+                        Log.e("PictureClassification", e.getMessage());
+                    }
+                    //위치 정보가 없으면
+                    if (placeName == null) {
+                        Log.e("PictureClassification", "위치 정보가 없습니다");
+                    } else {
+                        //placeName_ = placeName.get(0).getLocality();//ex)강남구
+                        placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
+                        Log.e("PictureClassification", "~" + placeName.get(0).getAdminArea() + "~" + placeName.get(0).getCountryCode() + "~" + placeName.get(0).getFeatureName() + "~" + placeName.get(0).getLocality() + "~" + placeName.get(0).getSubAdminArea() + "~" + placeName.get(0).getSubLocality() + "~" + placeName.get(0).getSubThoroughfare() + "~" + placeName.get(0).getThoroughfare() + "~" + placeName.get(0).getMaxAddressLineIndex());
+                        //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
+                        //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
+                    }
 
+                }
             }
 
-            //사진을 새로운 폴더로 복사한다.
-            //FolderManage.copyFile(picture , folderName+String.valueOf(pictureID)+".jpg");
 
             //DB에 사진 데이터를 넣는다.
-            Media m = new Media(pictureID,folderIDForDB,""+pictureID,cal.get(Calendar.YEAR),(cal.get(Calendar.MONTH)+1),cal.get(Calendar.DATE),latitude,longitude,placeName_,path);
+            if(tempMedia == null) {//새로운 사진
+                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
+                medias.add(m);
+                //db.createMedia(m);
+            }
+            else {//기존 사진
+                //업데이트만 한다
+                tempMedia.setFolder_id(folderIDForDB);
+                tempMedia.setPath(path);
+                db.updateMedia(tempMedia);
+            }
 
-            //db.createMedia(m);
-            medias.add(m);
 
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;
@@ -342,7 +372,7 @@ public class ServiceOfPictureClassification extends Service{
 
         //마지막 남은 폴더를 처리한다.
         //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
-        if(!startFolderID.equals("")) {
+        if (!startFolderID.equals("")) {
             //File new_name = null;
             String new_name = null;
             if (!startFolderID.equals(endFolderID)) {
@@ -353,17 +383,17 @@ public class ServiceOfPictureClassification extends Service{
             //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "의 스토리");
             //String _new_name = FolderManage.reNameFile(dir, new_name);
             //Folder DB에 넣는다.
-            Folder f = new Folder(folderIDForDB,new_name,representativeImage,thumbNailID);
+            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID);
             db.createFolder(f);
-            representativeImage="";
-            Log.d("MainActivity","tempEattle 폴더 이름 변경");
+            representativeImage = "";
+            Log.d("MainActivity", "tempEattle 폴더 이름 변경");
         }
         db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
 
         //메인화면의 스토리 목록을 갱신한다.
         //drawMainView();
         //MainActivity에 메세지를 보낸다
-        sendMessageToUI(ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION,1);
+        sendMessageToUI(ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION, 1);
 
         ImageSetter.mCursor.close();
     }
@@ -379,19 +409,17 @@ public class ServiceOfPictureClassification extends Service{
         }
         File fileCacheItem = new File(strFilePath + filename);
         //strFilePath+filename이 이미 존재한다면, 썸네일을 만들 필요가 없다
-        if(fileCacheItem.exists()){
-            Log.d("createThumbnail","썸네일이 이미 존재합니다");
+        if (fileCacheItem.exists()) {
+            Log.d("createThumbnail", "썸네일이 이미 존재합니다");
             return;
         }
 
         OutputStream out = null;
 
 
-
-
         try {
-            int height=bitmap.getHeight();
-            int width=bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int width = bitmap.getWidth();
 
             fileCacheItem.createNewFile();
             out = new FileOutputStream(fileCacheItem);
@@ -409,11 +437,12 @@ public class ServiceOfPictureClassification extends Service{
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
-        Log.d(Tag,"서비스 onDestroy() 호출");
+        Log.d(Tag, "서비스 onDestroy() 호출");
         isRunning = false;
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
