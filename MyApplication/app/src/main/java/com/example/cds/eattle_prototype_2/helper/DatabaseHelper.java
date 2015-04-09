@@ -304,15 +304,15 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     */
     public Media getMediaById(int media_id){
         Media media = new Media();
+        Log.d("MediaDB","media_id : "+media_id);
+
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_ID + " = " + media_id;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
 
-        if(c == null){//media_id에 해당하는 사진이 없을 때
-            media = null;
-        }
-        else if(c.moveToFirst()){//media_id에 해당하는 사진이 있을 때
+        if(c.moveToFirst()){//media_id에 해당하는 사진이 있을 때
+
             media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
             media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
@@ -324,6 +324,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
             media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
         }
+        else
+            media=null;
 
         return media;
     }

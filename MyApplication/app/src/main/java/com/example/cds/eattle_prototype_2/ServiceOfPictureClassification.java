@@ -261,7 +261,9 @@ public class ServiceOfPictureClassification extends Service {
             //picture = new File(path);
             //사진 ID
             int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
-
+            Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+            Log.d("Media","ExistedMedia == null : "+(ExistedMedia==null));
+            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
             //사진이 촬영된 날짜
             long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
             pictureTakenTime *= 1000; //second->millisecond
@@ -277,11 +279,12 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //썸네일 이미지를 생성한다
-            BitmapFactory.Options opt = new BitmapFactory.Options();
-            opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
-            Bitmap bitmap = BitmapFactory.decodeFile(path, opt);
-            createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
-
+            if(ExistedMedia == null) {//새로운 사진
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
+                Bitmap bitmap = BitmapFactory.decodeFile(path, opt);
+                createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
+            }
 
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
@@ -320,11 +323,10 @@ public class ServiceOfPictureClassification extends Service {
             String placeName_ = "";
             double longitude = 0.0;
             double latitude = 0.0;
-            Media tempMedia = db.getMediaById(pictureID);
-            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
-            if (tempMedia != null) {//해당 사진이 기존에 있었을 경우
+
+            if (ExistedMedia != null) {//해당 사진이 기존에 있었을 경우
                 Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
-                placeName_ = tempMedia.getPlaceName();
+                placeName_ = ExistedMedia.getPlaceName();
             } else {//새로운 사진
                 //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
                 longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
@@ -353,16 +355,17 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //DB에 사진 데이터를 넣는다.
-            if(tempMedia == null) {//새로운 사진
+            if(ExistedMedia == null) {//새로운 사진
                 Media m = new Media(pictureID, folderIDForDB, "" + pictureID, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
-                medias.add(m);
-                //db.createMedia(m);
+                //medias.add(m);
+                db.createMedia(m);
             }
             else {//기존 사진
                 //업데이트만 한다
-                tempMedia.setFolder_id(folderIDForDB);
-                tempMedia.setPath(path);
-                db.updateMedia(tempMedia);
+                ExistedMedia.setFolder_id(folderIDForDB);
+                ExistedMedia.setPath(path);
+                //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
+                db.updateMedia(ExistedMedia);
             }
 
 
@@ -388,7 +391,7 @@ public class ServiceOfPictureClassification extends Service {
             representativeImage = "";
             Log.d("MainActivity", "tempEattle 폴더 이름 변경");
         }
-        db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
+        //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
 
         //메인화면의 스토리 목록을 갱신한다.
         //drawMainView();
