@@ -106,25 +106,6 @@ public class TabToTag extends Fragment {
                         }
                     });
                 }
-/*                List<Tag> tags= db.getAllTagsByMediaId(media_id);
-                int s = tags.size();
-                for(int i = 0; i < s; i++){
-                    Button tagButton = new Button(getActivity());
-                    tagButton.setText(""+tags.get(i).getName());
-                    tagButton.setId(tags.get(i).getId());
-                    tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    layout.addView(tagButton);
-                    tagButton.setOnClickListener(new Button.OnClickListener(){
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getActivity(), AlbumLayout.class);
-                            intent.putExtra("kind", CONSTANT.TAG);
-                            intent.putExtra("id", (((Button)v).getId()));
-                            intent.putExtra("mediaId", media_id);
-                            startActivity(intent);
-                        }
-                    });
-                }*/
             }
         });
 

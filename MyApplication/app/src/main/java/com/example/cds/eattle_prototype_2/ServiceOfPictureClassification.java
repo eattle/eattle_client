@@ -4,11 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Picture;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Looper;
@@ -17,7 +15,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Folder;
@@ -31,7 +28,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Handler;
 
 //사진 분류, 백업 등을 담당하는 서비스
 public class ServiceOfPictureClassification extends Service {
@@ -277,15 +273,19 @@ public class ServiceOfPictureClassification extends Service {
                 thumbNailID = String.valueOf(pictureID);
             }
 
-
             //썸네일 이미지를 생성한다
-            File ExisTedThumbNail = new File(folderThumbnailName+String.valueOf(pictureID)+".jpg");
-            if(!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
-                Bitmap bitmap = BitmapFactory.decodeFile(path, opt);
+            File ExisTedThumbNail = new File(folderThumbnailName + String.valueOf(pictureID) + ".jpg");
+            if (!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
+                Bitmap bitmap;
+                if((bitmap = ImageSetter.getThumbnail(pictureID)) == null){
+                    BitmapFactory.Options opt = new BitmapFactory.Options();
+                    opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
+                    bitmap = BitmapFactory.decodeFile(path, opt);
+                    Log.e("asdad", "is here");
+                }
                 createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
             }
+
 
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 

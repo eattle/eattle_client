@@ -44,6 +44,10 @@ public class AlbumImageSetter {
         //mCursor.moveToFirst();
     }
 
+    Bitmap getThumbnail(long imageId){
+        return MediaStore.Images.Thumbnails.getThumbnail(mCr, imageId, MediaStore.Images.Thumbnails.MINI_KIND, null );
+    }
+
     boolean setImage(ImageView image){
         if(mCursor.isAfterLast())   return false;
         if(mCursor.isBeforeFirst()) return false;
