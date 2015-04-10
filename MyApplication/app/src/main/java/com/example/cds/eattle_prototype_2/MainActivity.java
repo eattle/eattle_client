@@ -88,10 +88,19 @@ public class MainActivity extends ActionBarActivity {
             switch (msg.what) {
                 case ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION://사진 정리가 완료 되었을 때 받게되는 메세지
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
-                    pictureDialog.dismiss();
+                    //pictureDialog.dismiss();
                     drawMainView();
+
                     Toast.makeText(MainActivity.this,"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
                     break;
+                case ServiceOfPictureClassification.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
+                    String thumbNailID = msg.getData().getString("thumbNailID");
+                    String new_name = msg.getData().getString("new_name");
+                    int folderIDForDB = msg.getData().getInt("folderIDForDB");
+                    StoryListItem tempItem = new StoryListItem(thumbNailID,new_name,folderIDForDB);
+                    storyListAdapter.add(tempItem);
+                    storyListAdapter.notifyDataSetChanged() ;//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
+
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);
@@ -164,6 +173,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
 
+        /*
         //리스트뷰에 아이템 추가---------------------------
         //모든 폴더 목록들을 불러온다
         List<Folder> folderList = db.getAllFolders();
@@ -183,19 +193,20 @@ public class MainActivity extends ActionBarActivity {
             }
             storyListAdapter.notifyDataSetChanged() ;
 
-        }
+        }*/
     }
 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.classification:
-                //Toast.makeText(this,"사진 정리 중",Toast.LENGTH_LONG).show();
+                Toast.makeText(this,"사진 정리 중입니다",Toast.LENGTH_LONG).show();
                 Button classification = (Button)findViewById(R.id.classification);
                 classification.setEnabled(false); // 클릭 무효화
-
+                storyListAdapter.clear();//메인 화면을 일단 전부 지운다
+                storyListAdapter.notifyDataSetChanged() ;//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
                 //서비스에게 사진 정리를 요청한다
                 sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION,1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
-                pictureDialog = ProgressDialog.show(MainActivity.this,"","사진을 정리하는 중입니다",true);
+                //pictureDialog = ProgressDialog.show(MainActivity.this,"","사진을 정리하는 중입니다",true);
                 classification.setEnabled(true); // 클릭 유효화
                 break;
 

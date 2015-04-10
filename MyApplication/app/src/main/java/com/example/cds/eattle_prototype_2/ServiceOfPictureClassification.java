@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Looper;
@@ -39,6 +40,7 @@ public class ServiceOfPictureClassification extends Service {
     static final int MSG_UNREGISTER_CLIENT = 2;//MainActivity와 Service가 bind를 중단하라는 메세지
     static final int START_OF_PICTURE_CLASSIFICATION = 3;//MainActivity가 Service에게 사진 정리를 요청하는 메세지
     static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
+    static final int END_OF_SINGLE_STORY = 5;//스토리가 정리되는대로 바로바로 보여주기 위하여 정의한 메세지,하나의 스토리가 정리될때마다 보낸다
 
     ArrayList<Messenger> mClients = new ArrayList<Messenger>();
     ;
@@ -103,12 +105,21 @@ public class ServiceOfPictureClassification extends Service {
 
     //MainActivity로 부터 온 메세지를 받는 부분
     class IncomingHandler extends android.os.Handler {
+        boolean isNew = true;
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_REGISTER_CLIENT || 'MainActivity가 연결을 요청하였습니다' ");
-                    mClients.add(msg.replyTo);
+                    //mClients에 이미 있다면 등록하지(add) 않는다
+                    for(int i=0;i<mClients.size();i++){
+                        if(mClients.get(i) == msg.replyTo) {
+                            isNew = false;
+                            break;
+                        }
+                    }
+                    if(isNew)
+                        mClients.add(msg.replyTo);
                     break;
 
                 case MSG_UNREGISTER_CLIENT:
@@ -117,7 +128,14 @@ public class ServiceOfPictureClassification extends Service {
 
                 case START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    mClients.add(msg.replyTo);
+                    for(int i=0;i<mClients.size();i++){
+                        if(mClients.get(i) == msg.replyTo) {
+                            isNew = false;
+                            break;
+                        }
+                    }
+                    if(isNew)
+                        mClients.add(msg.replyTo);
 
 
                     Thread pictureThread = new Thread(new Runnable() {
@@ -142,21 +160,32 @@ public class ServiceOfPictureClassification extends Service {
         }
     }
 
-    //MainActivity에게 메세지를 보내는 함수
+    //MainActivity에게 메세지를 보내는 함수(int값만 보낼 때)
     private void sendMessageToUI(int typeOfMessage, int intValueToSend) {
-        /*
-        try {
-            mMessenger.send(Message.obtain(null, typeOfMessage, intValueToSend, 0));
-        } catch(RemoteException e){
-            Log.d(Tag,e.getMessage());
-        }*/
-
-
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 // Send data as an Integer
                 mClients.get(i).send(Message.obtain(null, typeOfMessage, intValueToSend, 0));
 
+
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
+
+    //MainActivity에게 메세지를 보내는 함수(메인 화면 구성을 위한 여러 데이터를 보낼 때)
+    private void sendMessageToUI(int typeOfMessage, String thumbNailID, String new_name, int folderIDForDB) {
+        for (int i = mClients.size() - 1; i >= 0; i--) {
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putString("thumbNailID",thumbNailID);
+                bundle.putString("new_name",new_name);
+                bundle.putInt("folderIDForDB",folderIDForDB);
+                Message msg = Message.obtain(null, typeOfMessage);
+                msg.setData(bundle);
+                mClients.get(i).send(msg);
 
             } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
@@ -194,14 +223,6 @@ public class ServiceOfPictureClassification extends Service {
     }
 
     private void pictureClassification() throws IOException {//시간간격을 바탕으로 사진들을 분류하는 함수
-        /*
-        //DCIM 폴더의 Eattle이 만든 폴더를 다 삭제한다(추후 변경)
-        String[] folderList = FolderManage.getList(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"));
-        for(int i=0;i<folderList.length;i++){
-            if(!folderList[i].equals("Camera") && !folderList[i].equals("thumbnail"))
-                FolderManage.deleteFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+folderList[i]+"/"));
-        }*/
-        //---------------------------------------------
 
         //pictureClassification()의 속도 개선 방안
         //1. 처음에 mediaDB를 전부 삭제하지 않는다
@@ -277,7 +298,7 @@ public class ServiceOfPictureClassification extends Service {
             File ExisTedThumbNail = new File(folderThumbnailName + String.valueOf(pictureID) + ".jpg");
             if (!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
                 Bitmap bitmap;
-                if((bitmap = ImageSetter.getThumbnail(pictureID)) == null){
+                if((bitmap = ImageSetter.getThumbnail(pictureID)) == null){//안드로이드 자체의 썸네일도 없는 경우
                     BitmapFactory.Options opt = new BitmapFactory.Options();
                     opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
                     bitmap = BitmapFactory.decodeFile(path, opt);
@@ -307,6 +328,9 @@ public class ServiceOfPictureClassification extends Service {
                     //Folder DB에 넣는다.
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID);
                     db.createFolder(f);
+                    //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
+                    sendMessageToUI(ServiceOfPictureClassification.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB);
+
                     representativeImage = "";
                     //Log.d("MainActivity","tempEattle 폴더 이름 변경");
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -329,6 +353,7 @@ public class ServiceOfPictureClassification extends Service {
                 Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
                 placeName_ = ExistedMedia.getPlaceName();
             } else {//새로운 사진
+
                 //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
                 longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
                 latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
