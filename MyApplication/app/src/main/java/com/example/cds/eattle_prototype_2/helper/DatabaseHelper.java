@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
 
     private static final String DATABASE_NAME = "FileManager";
 
@@ -58,7 +58,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //private static final String KEY_NAME = "name";
     private static final String KEY_IMAGE = "image";
     private static final String KEY_THUMBNAILID = "thumbNail_id";
-
+    private static final String KEY_PICTURE_NUM_IN_STORY = "picture_num";
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
@@ -96,7 +96,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_NAME + " VARCHAR(255) NOT NULL, "
             + KEY_IMAGE + " VARCHAR(255) NOT NULL, "
-            + KEY_THUMBNAILID + " VARCHAR(255) NOT NULL "
+            + KEY_THUMBNAILID + " VARCHAR(255) NOT NULL, "
+            + KEY_PICTURE_NUM_IN_STORY + " INTEGER NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_MANAGER =
@@ -160,6 +161,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_NAME, folder.getName());
         values.put(KEY_IMAGE, folder.getImage());
         values.put(KEY_THUMBNAILID, folder.getThumbNail_name());
+        values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
 
         return (int)db.insert(TABLE_FOLDER, null, values);
     }
@@ -182,6 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
                 f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
                 f.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
+                f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
                 folders.add(f);
             }while(c.moveToNext());
         }
@@ -203,6 +206,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
             folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
             folder.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
+            folder.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
         }
 
         return folder;
@@ -217,7 +221,11 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(KEY_ID, folder.getId());
         values.put(KEY_NAME, folder.getName());
+        values.put(KEY_IMAGE, folder.getImage());
+        values.put(KEY_THUMBNAILID, folder.getThumbNail_name());
+        values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
 
         return db.update(TABLE_FOLDER, values, KEY_ID + " = ? ", new String[] {String.valueOf(folder.getId())});
     }

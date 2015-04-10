@@ -7,16 +7,27 @@ public class StoryListItem {
     private String imgID;//이미지 이름
     private String name;//스토리 이름
     private int folderID;//특정 스토리에 해당하는 폴더 아이디
+    private int pictureNumInStory;//특정 스토리에 있는 사진들의 개수
 
     public StoryListItem(){
 
     }
 
-    public StoryListItem(String imgID,String name,int folderID){
+    public StoryListItem(String imgID,String name,int folderID,int pictureNumInStory){
         this.imgID = imgID;
         this.name = name;
         this.folderID = folderID;
+        this.pictureNumInStory = pictureNumInStory;
     }
+
+    public int getPictureNumInStory(){
+        return pictureNumInStory;
+    }
+
+    public void setPictureNumInStory(int pictureNumInStory){
+        this.pictureNumInStory = pictureNumInStory;
+    }
+
     public void setFolderID(int folderID) {
         this.folderID = folderID;
     }

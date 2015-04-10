@@ -8,7 +8,7 @@ public class Folder {
     String name;
     String image;
     String thumbNail_name;
-
+    int picture_num;//특정 folder에 들어있는 사진의 개수
 
     public Folder() {
     }
@@ -28,11 +28,19 @@ public class Folder {
         this.name = name;
     }
 
-    public Folder(int id, String name, String image, String thumbNail_name) {
+    public Folder(int id, String name, String image, String thumbNail_name,int picture_num) {
         this.id = id;
         this.name = name;
         this.image = image;
         this.thumbNail_name = thumbNail_name;
+        this.picture_num = picture_num;
+    }
+    public int getPicture_num(){
+        return picture_num;
+    }
+
+    public void setPicture_num(int picture_num){
+        this.picture_num = picture_num;
     }
 
     public int getId() {
@@ -65,7 +73,6 @@ public class Folder {
     }
 
     public String getThumbNail_name() {
-
         return thumbNail_name;
     }
 }

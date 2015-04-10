@@ -97,7 +97,8 @@ public class MainActivity extends ActionBarActivity {
                     String thumbNailID = msg.getData().getString("thumbNailID");
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
-                    StoryListItem tempItem = new StoryListItem(thumbNailID,new_name,folderIDForDB);
+                    int pictureNumInStory = msg.getData().getInt("picture_num");
+                    StoryListItem tempItem = new StoryListItem(thumbNailID,new_name,folderIDForDB,pictureNumInStory);
                     storyListAdapter.add(tempItem);
                     storyListAdapter.notifyDataSetChanged() ;//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 

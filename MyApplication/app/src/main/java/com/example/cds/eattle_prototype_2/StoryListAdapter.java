@@ -1,9 +1,12 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +14,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.model.Media;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by CDS on 15. 3. 31..
@@ -22,13 +29,18 @@ public class StoryListAdapter extends BaseAdapter{
     ArrayList<StoryListItem> items;//ListView에서 add하는 아이템들은 items에 담기게 된다
     Context mContext;
     LayoutInflater Inflare;
-    int layout;
+    int defaultLayout;//기본 레이아웃
+    int secondLayout;//스토리에 속한 사진의 개수가 CONSTANT.BOUNDARY보다 적을때 사용할 레이아웃
+    DatabaseHelper db;
 
     public StoryListAdapter(Context context){
         mContext = context;
         Inflare = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         items = new ArrayList<StoryListItem>();
-        layout = R.layout.story_list;
+        defaultLayout = R.layout.story_list;
+        secondLayout = R.layout.story_list_daily;//스토리에 속한 사진의 개수가 CONSTANT.BOUNDARY보다 적을때 사용할 레이아웃
+        //데이터베이스 OPEN
+        db = DatabaseHelper.getInstance(mContext);
     }
 
     @Override
@@ -52,11 +64,63 @@ public class StoryListAdapter extends BaseAdapter{
     @Override
     public View getView(int position,View convertView,ViewGroup parent){
         final int pos = position;
+        int pictureNumInStory = items.get(position).getPictureNumInStory();
+        /*
+        if(pictureNumInStory <= CONSTANT.BOUNDARY){//스토리에 속한 사진의 개수가 CONSTANT.BOUNDARY보다 적을때 사용할 레이아웃
+            //if(convertView == null)
+                convertView = Inflare.inflate(secondLayout, parent, false);
+            //해당 스토리에 속한 사진들을 가져온다
+            List<Media> medias = db.getAllMediaByFolder(items.get(position).getFolderID());
+            for(int i=0;i<medias.size();i++) {
+                ImageView tempImage = null;
+                if(i==0)
+                    tempImage = (ImageView)convertView.findViewById(R.id.one);
+                else if(i==1)
+                    tempImage = (ImageView)convertView.findViewById(R.id.two);
+                Log.d("asdf",Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+medias.get(i).getName()+".jpg!~!");
+                tempImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+medias.get(i).getName()+".jpg"));
 
-        if(convertView == null){
-            convertView = Inflare.inflate(layout, parent, false);
+            }
+
         }
+        else if(pictureNumInStory > CONSTANT.BOUNDARY) {//default
+            //if(convertView == null)
+                convertView = Inflare.inflate(defaultLayout, parent, false);
+            TextView storyName = (TextView)convertView.findViewById(R.id.storyName);
+            String temp = items.get(position).getName();
+            String name = "";
+            if(temp.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
+                String[] bigSplit = temp.split("~");
+                String[] tempName = bigSplit[0].split("_");
+                name += tempName[0] + "년 " + tempName[1] + "월 " + tempName[2] + "일 ~ ";
+                tempName = bigSplit[1].split("_");
+                name += tempName[1] + "월 " + tempName[2].replace("의", "일의");
+            }
+            else {//단일 날짜의 스토리일 경우
+                String[] tempName = temp.split("_");
+                name = tempName[0] + "년 " + tempName[1] + "월 " + tempName[2].replace("의", "일의");
+            }
+            storyName.setText(name);
 
+            //스토리 이미지를 설정한다
+            ImageView storyImage = (ImageView)convertView.findViewById(R.id.storyImage);
+            storyImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+items.get(position).getImgID()+".jpg"));
+
+            //특정 아이템에 해당하는 폴더 아이디를 가져온다
+//          final int folderID = items.get(position).getFolderID();
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, AlbumLayout.class);
+                    intent.putExtra("kind", CONSTANT.FOLDER);
+                    intent.putExtra("id", items.get(pos).getFolderID());
+                    mContext.startActivity(intent);
+                }
+            });
+        }*/
+
+        if(convertView == null)
+            convertView = Inflare.inflate(defaultLayout, parent, false);
         TextView storyName = (TextView)convertView.findViewById(R.id.storyName);
         String temp = items.get(position).getName();
         String name = "";
@@ -71,6 +135,8 @@ public class StoryListAdapter extends BaseAdapter{
             String[] tempName = temp.split("_");
             name = tempName[0] + "년 " + tempName[1] + "월 " + tempName[2].replace("의", "일의");
         }
+        if(pictureNumInStory <= CONSTANT.BOUNDARY)
+            name = name.replace("스토리","일상");
         storyName.setText(name);
 
         //스토리 이미지를 설정한다
@@ -78,7 +144,7 @@ public class StoryListAdapter extends BaseAdapter{
         storyImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+items.get(position).getImgID()+".jpg"));
 
         //특정 아이템에 해당하는 폴더 아이디를 가져온다
-//        final int folderID = items.get(position).getFolderID();
+//          final int folderID = items.get(position).getFolderID();
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,46 +157,6 @@ public class StoryListAdapter extends BaseAdapter{
 
 
 
-/*        if(convertView == null){
-            //story_list.xml을 가져온다
-//            LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.story_list,parent,false);
-
-            //스토리 이름을 등록한다
-            TextView storyName = (TextView)convertView.findViewById(R.id.storyName);
-            String temp = items.get(position).getName();
-            String name = "";
-            if(temp.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
-                String[] bigSplit = temp.split("~");
-                String[] tempName = bigSplit[0].split("_");
-                name += tempName[0] + "년 " + tempName[1] + "월 " + tempName[2] + "일 ~ ";
-                tempName = bigSplit[1].split("_");
-                name += tempName[1] + "월 " + tempName[2].replace("의", "일의");
-
-            }
-            else {//단일 날짜의 스토리일 경우
-                String[] tempName = temp.split("_");
-                name = tempName[0] + "년 " + tempName[1] + "월 " + tempName[2].replace("의", "일의");
-            }
-            storyName.setText(name);
-
-            //스토리 이미지를 설정한다
-            ImageView storyImage = (ImageView)convertView.findViewById(R.id.storyImage);
-            storyImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ "thumbnail" +"/"+items.get(position).getImgID()+".jpg"));
-
-            //특정 아이템에 해당하는 폴더 아이디를 가져온다
-            final int folderID = items.get(position).getFolderID();
-            //리스트 클릭 리스너
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(mContext, AlbumLayout.class);
-                    intent.putExtra("kind", CONSTANT.FOLDER);
-                    intent.putExtra("id", folderID);
-                    mContext.startActivity(intent);
-                }
-            });
-        }*/
 
         return convertView;
     }

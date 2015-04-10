@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 메인화면 요소 중 하나
+    스토리에 묶인 사진이 적을 경우(3개 이하?)
+    보여줄 레이아웃 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <!-- CONSTANT.BOUDARY의 개수에 따라 ImageView 태그의 수도 조정해야 함 -->
+    <ImageView
+        android:id="@+id/one"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_margin="5dp"
+        android:layout_weight="1"/>
+    <ImageView
+        android:id="@+id/two"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_margin="5dp"
+        android:layout_weight="1"/>
+
+</LinearLayout>

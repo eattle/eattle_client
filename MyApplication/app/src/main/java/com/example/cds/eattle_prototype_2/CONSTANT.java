@@ -8,5 +8,5 @@ public class CONSTANT {
 
     public static int FOLDER = 0;
     public static int TAG = 1;
-
+    public static int BOUNDARY = 5; //스토리에 있는 사진의 개수가 BOUNDARY 이하일 경우, 다른 형식으로 보여지게 된다
 }

@@ -176,13 +176,15 @@ public class ServiceOfPictureClassification extends Service {
     }
 
     //MainActivity에게 메세지를 보내는 함수(메인 화면 구성을 위한 여러 데이터를 보낼 때)
-    private void sendMessageToUI(int typeOfMessage, String thumbNailID, String new_name, int folderIDForDB) {
+    private void sendMessageToUI(int typeOfMessage, String thumbNailID, String new_name, int folderIDForDB, int picture_num) {
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 Bundle bundle = new Bundle();
                 bundle.putString("thumbNailID",thumbNailID);
                 bundle.putString("new_name",new_name);
                 bundle.putInt("folderIDForDB",folderIDForDB);
+                bundle.putInt("picture_num",picture_num);
+
                 Message msg = Message.obtain(null, typeOfMessage);
                 msg.setData(bundle);
                 mClients.get(i).send(msg);
@@ -260,7 +262,7 @@ public class ServiceOfPictureClassification extends Service {
         long _pictureTakenTime = 0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String thumbNailID = "";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
-        //String folderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/tempEattle/";
+        int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
         String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/thumbnail/";
         FolderManage.makeDirectory(folderThumbnailName);
 
@@ -326,11 +328,11 @@ public class ServiceOfPictureClassification extends Service {
 
                     //String _new_name=FolderManage.reNameFile(dir, new_name);
                     //Folder DB에 넣는다.
-                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID);
+                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID,pictureNumInStory);
                     db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(ServiceOfPictureClassification.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB);
-
+                    sendMessageToUI(ServiceOfPictureClassification.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB,pictureNumInStory);
+                    pictureNumInStory = 0;
                     representativeImage = "";
                     //Log.d("MainActivity","tempEattle 폴더 이름 변경");
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -394,6 +396,7 @@ public class ServiceOfPictureClassification extends Service {
                 db.updateMedia(ExistedMedia);
             }
 
+            pictureNumInStory++;
 
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;
@@ -412,9 +415,8 @@ public class ServiceOfPictureClassification extends Service {
             //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "의 스토리");
             //String _new_name = FolderManage.reNameFile(dir, new_name);
             //Folder DB에 넣는다.
-            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID);
+            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID,pictureNumInStory);
             db.createFolder(f);
-            representativeImage = "";
             Log.d("MainActivity", "tempEattle 폴더 이름 변경");
         }
         //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
