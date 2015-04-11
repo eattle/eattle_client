@@ -45,7 +45,8 @@ public class AlbumImageSetter {
     }
 
     Bitmap getThumbnail(long imageId){
-        return MediaStore.Images.Thumbnails.getThumbnail(mCr, imageId, MediaStore.Images.Thumbnails.MINI_KIND, null );
+//        return null; //1.23초. 화질이 안좋음 7mb정도 321장 기준
+        return MediaStore.Images.Thumbnails.getThumbnail(mCr, imageId, MediaStore.Images.Thumbnails.MINI_KIND, null ); //57초 화질이 좋음 24mb정도 321장 기준
     }
 
     boolean setImage(ImageView image){
