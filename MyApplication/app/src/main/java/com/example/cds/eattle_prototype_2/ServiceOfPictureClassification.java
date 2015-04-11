@@ -404,9 +404,9 @@ public class ServiceOfPictureClassification extends Service {
 
         //마지막 남은 폴더를 처리한다.
         //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
+        String new_name = null;
         if (!startFolderID.equals("")) {
             //File new_name = null;
-            String new_name = null;
             if (!startFolderID.equals(endFolderID)) {
                 new_name = startFolderID + "~" + endFolderID + "의 스토리";
                 //new_name = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + startFolderID + "~" + endFolderID + "의 스토리");
@@ -424,6 +424,7 @@ public class ServiceOfPictureClassification extends Service {
         //메인화면의 스토리 목록을 갱신한다.
         //drawMainView();
         //MainActivity에 메세지를 보낸다
+        sendMessageToUI(ServiceOfPictureClassification.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB,pictureNumInStory);
         sendMessageToUI(ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION, 1);
 
         ImageSetter.mCursor.close();
