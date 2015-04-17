@@ -42,7 +42,7 @@ public class TabToTag extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         db = DatabaseHelper.getInstance(getActivity());
@@ -61,10 +61,11 @@ public class TabToTag extends Fragment {
         int s = tags.size();
 
         for(int i = 0; i < s; i++){
-            Button tagButton = new Button(getActivity());
-            tagButton.setText(""+tags.get(i).getName());
+            //Button tagButton = new Button(getActivity());
+            Button tagButton = (Button) inflater.inflate(R.layout.tag,null);
+            tagButton.setText("" + tags.get(i).getName());
             tagButton.setId(tags.get(i).getId());
-            tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
             layout.addView(tagButton);
             tagButton.setOnClickListener(new Button.OnClickListener(){
                 @Override
@@ -81,19 +82,20 @@ public class TabToTag extends Fragment {
 
         final EditText inputTag = (EditText)root.findViewById(R.id.editText);
         final Button btn = (Button)root.findViewById(R.id.button);
-        btn.setText("태그 추가");
+        btn.setText("모멘트 추가");
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 int tag_id = db.createTag(""+inputTag.getText().toString(), media_id);
 
                 if(tag_id != -1){
                     Tag tag = db.getTagByTagId(tag_id);
-                    Button tagButton = new Button(getActivity());
+                    Button tagButton = (Button) inflater.inflate(R.layout.tag,null);
                     tagButton.setText(""+tag.getName());
                     tagButton.setId(tag.getId());
-                    tagButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
                     layout.addView(tagButton);
                     tagButton.setOnClickListener(new Button.OnClickListener(){
                         @Override
@@ -106,6 +108,8 @@ public class TabToTag extends Fragment {
                         }
                     });
                 }
+                inputTag.clearFocus();
+                inputTag.setText(null);
             }
         });
 

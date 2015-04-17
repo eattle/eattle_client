@@ -1,10 +1,14 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +20,7 @@ import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,16 +31,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.cds.eattle_prototype_2.device.BlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
+import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
+import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
 import com.example.cds.eattle_prototype_2.model.Folder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity {
-    private String Tag="MainActivity";
+    private String Tag = "MainActivity";
     //데이터베이스 관련 변수들
     DatabaseHelper db;
+    FileSystem fileSystem;
 
     ImageView mImage;
 
@@ -43,43 +53,94 @@ public class MainActivity extends ActionBarActivity {
     private StoryListAdapter storyListAdapter;//리스트뷰를 위한 어댑터
 
 
-
     Messenger mService = null;
     boolean mIsBound;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     ProgressDialog pictureDialog;
+
+    private UsbDeviceHost usbDeviceHost;
+    private BlockDevice blockDevice;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
+            //password 창을 띄운다
+            Intent intent = new Intent(this, Password.class);
+            startActivity(intent);
+        }
+
         //데이터베이스 OPEN
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         //activity_main.xml에 있는 storyList 리스트뷰에 연결
-        storyList = (ListView)findViewById(R.id.storyList);
+        storyList = (ListView) findViewById(R.id.storyList);
         //커스텀 어댑터 생성
         storyListAdapter = new StoryListAdapter(this);
         //ListView에 어댑터 연결
         storyList.setAdapter(storyListAdapter);
-
-        //Folder DB를 기반으로 메인화면을 구성한다.
-//        drawMainView();
+        //drawMainView();
 
         //서비스 시작
         //startService(new Intent(MainActivity.this, ServiceOfPictureClassification.class));
         doBindService();
 
-        //test
-        //sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION,1);
+
+        fileSystem = FileSystem.getInstance();
+
+        usbDeviceHost = new UsbDeviceHost();
+        usbDeviceHost.start(this, new BlockDeviceApp() {
+            @Override
+            public void onConnected(BlockDevice blockDevice) {
+                fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
+                setBlockDevice(blockDevice);
+                //USB가 스마트폰에 연결되었을 떄
+                CONSTANT.ISUSBCONNECTED = 1;
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         drawMainView();
+        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
+            //password 창을 띄운다
+            Intent intent = new Intent(this, Password.class);
+            startActivity(intent);
+        }
     }
+    @Override
+    protected void onStart(){
+        super.onStart();
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                new AlertDialog.Builder(this)
+                        .setTitle("CaPic")
+                        .setMessage("종료 하시겠어요?")
+                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                moveTaskToBack(true);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("아니요", null).show();
+                return false;
+        }
+        return true;
+    }
+
+
 
     //서비스로부터 메세지를 받는 부분
     class IncomingHandler extends Handler {
@@ -89,18 +150,17 @@ public class MainActivity extends ActionBarActivity {
                 case ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION://사진 정리가 완료 되었을 때 받게되는 메세지
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
-                    drawMainView();
 
-                    Toast.makeText(MainActivity.this,"사진 정리가 완료되었습니다",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "사진 정리가 완료되었습니다", Toast.LENGTH_SHORT).show();
                     break;
                 case ServiceOfPictureClassification.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
                     String thumbNailID = msg.getData().getString("thumbNailID");
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
                     int pictureNumInStory = msg.getData().getInt("picture_num");
-                    StoryListItem tempItem = new StoryListItem(thumbNailID,new_name,folderIDForDB,pictureNumInStory);
+                    StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
                     storyListAdapter.add(tempItem);
-                    storyListAdapter.notifyDataSetChanged() ;//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
+                    storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
@@ -112,35 +172,35 @@ public class MainActivity extends ActionBarActivity {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d("ServiceConnection()","onServiceConnected() 함수 호출");
+            Log.d("ServiceConnection()", "onServiceConnected() 함수 호출");
             mService = new Messenger(service);
-            try{
+            try {
                 Message msg = Message.obtain(null, ServiceOfPictureClassification.MSG_REGISTER_CLIENT);
                 msg.replyTo = mMessenger;//'답장은 mMessenger로 받겠습니다'라는 의미
                 mService.send(msg);//메세지를 보낸다
-            } catch(RemoteException e){
+            } catch (RemoteException e) {
 
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d("ServiceConnection()","onServiceDisconnected() 함수 호출");
+            Log.d("ServiceConnection()", "onServiceDisconnected() 함수 호출");
             mService = null;
         }
     };
 
     //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
     //메세지의 형태는 ServiceOfPictureClassification에 정의된 상수를 통해서
-    private void sendMessageToService(int typeOfMessage, int intValueToSend){
-        if(mIsBound){
-            if(mService != null){
-                try{
+    private void sendMessageToService(int typeOfMessage, int intValueToSend) {
+        if (mIsBound) {
+            if (mService != null) {
+                try {
                     //START_OF_PICTURE_CLASSIFICATION은 '메세지의 유형'을 정의하는 것
-                    Message msg = Message.obtain(null, typeOfMessage, intValueToSend,0);
+                    Message msg = Message.obtain(null, typeOfMessage, intValueToSend, 0);
                     msg.replyTo = mMessenger;//'답장은 mMessenger로 받겠습니다'라는 의미
                     mService.send(msg);//서비스로 메세지를 보낸다
-                } catch(RemoteException e){
+                } catch (RemoteException e) {
 
                 }
             }
@@ -148,7 +208,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     void doBindService() {
-        Log.d(Tag,"doBindService() 호출");
+        Log.d(Tag, "doBindService() 호출");
         bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
     }
@@ -161,8 +221,7 @@ public class MainActivity extends ActionBarActivity {
                     Message msg = Message.obtain(null, ServiceOfPictureClassification.MSG_UNREGISTER_CLIENT);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
-                }
-                catch (RemoteException e) {
+                } catch (RemoteException e) {
                     // There is nothing special we need to do if the service has crashed.
                 }
             }
@@ -172,8 +231,21 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public void drawMainView(){//폴더를 기반으로 스토리의 목록을 보여준다.
+    public void drawMainView() {//폴더를 기반으로 스토리의 목록을 보여준다.
+        /*
+        storyListAdapter.clear();
+        for (int i = 0; i < folderList.size(); i++) {
+            StoryListItem tempItem = new StoryListItem(folderList.get(i).getThumbNail_name(),folderList.get(i).getName(),folderList.get(i).getId());
+            storyListAdapter.add(tempItem);
+        }
 
+        ArrayList<StoryListItem> listItems = storyListAdapter.getAllItems();
+        storyListAdapter.clear();
+        for(int i=0;i<listItems.size();i++){
+            storyListAdapter.add(listItems.get(i));
+            storyListAdapter.notifyDataSetChanged() ;
+
+        }*/
         /*
         //리스트뷰에 아이템 추가---------------------------
         //모든 폴더 목록들을 불러온다
@@ -200,13 +272,25 @@ public class MainActivity extends ActionBarActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.classification:
-                Toast.makeText(this,"사진 정리 중입니다",Toast.LENGTH_LONG).show();
-                Button classification = (Button)findViewById(R.id.classification);
+                Toast.makeText(this, "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
+                Button classification = (Button) findViewById(R.id.classification);
                 classification.setEnabled(false); // 클릭 무효화
                 storyListAdapter.clear();//메인 화면을 일단 전부 지운다
-                storyListAdapter.notifyDataSetChanged() ;//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
+                storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
+
+                if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되었을 떄
+                    String thumbNailID = "";
+                    String new_name = "";
+                    int folderIDForDB = -1;
+                    int pictureNumInStory = -1;
+                    StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory, blockDevice);
+                    storyListAdapter.add(tempItem);
+                    storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
+
+                }
+
                 //서비스에게 사진 정리를 요청한다
-                sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION,1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
+                sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
                 //pictureDialog = ProgressDialog.show(MainActivity.this,"","사진을 정리하는 중입니다",true);
                 classification.setEnabled(true); // 클릭 유효화
                 break;
@@ -233,6 +317,22 @@ public class MainActivity extends ActionBarActivity {
             doBindService();
     }*/
 
+    public FileSystem getFileSystem() {
+        return this.fileSystem;
+    }
+
+    public void setFileSystem(FileSystem fileSystem) {
+        this.fileSystem = fileSystem;
+    }
+
+    public BlockDevice getBlockDevice() {
+        return blockDevice;
+    }
+
+    public void setBlockDevice(BlockDevice blockDevice) {
+        this.blockDevice = blockDevice;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -254,6 +354,7 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }
 
