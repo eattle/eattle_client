@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         //startService(new Intent(MainActivity.this, ServiceOfPictureClassification.class));
         doBindService();
 
-
+/*
         fileSystem = FileSystem.getInstance();
 
         usbDeviceHost = new UsbDeviceHost();
@@ -102,7 +103,7 @@ public class MainActivity extends ActionBarActivity {
                 //USB가 스마트폰에 연결되었을 떄
                 CONSTANT.ISUSBCONNECTED = 1;
             }
-        });
+        });*/
     }
 
     @Override
@@ -125,7 +126,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
-                new AlertDialog.Builder(this)
+                /*new AlertDialog.Builder(this)
                         .setTitle("CaPic")
                         .setMessage("종료 하시겠어요?")
                         .setPositiveButton("예", new DialogInterface.OnClickListener() {
@@ -134,7 +135,27 @@ public class MainActivity extends ActionBarActivity {
                                 finish();
                             }
                         })
-                        .setNegativeButton("아니요", null).show();
+                        .setNegativeButton("아니요", null).show();*/
+                AlertDialog.Builder d = new AlertDialog.Builder(this);
+                d.setTitle("종료하시겠습니까?");
+                final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.capic_usb_dialog,null);
+                d.setView(r);
+                DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                moveTaskToBack(true);
+                                finish();
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+
+                        }
+                    }
+                };
+                d.setPositiveButton("Yes",l);
+                d.setNegativeButton("No",l);
+                d.show();
                 return false;
         }
         return true;
