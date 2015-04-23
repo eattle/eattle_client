@@ -28,6 +28,7 @@ public class UsbMassStorageBlockDevice implements BlockDevice {
 
     @Override
     public void readBlock(int lba, byte[] buffer) {
+        lba+=13;
         Read10ScsiCommand command = new Read10ScsiCommand();
         command.setLba(lba);
         usbSerialDevice.write(command.generateCommand());
@@ -41,6 +42,7 @@ public class UsbMassStorageBlockDevice implements BlockDevice {
 
     @Override
     public void writeBlock(int lba, byte[] buffer) {
+        lba+=13;
         Write10ScsiCommand command = new Write10ScsiCommand();
         command.setLba(lba);
         usbSerialDevice.write(command.generateCommand());

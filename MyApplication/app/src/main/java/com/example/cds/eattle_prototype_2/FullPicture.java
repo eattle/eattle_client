@@ -81,9 +81,10 @@ public class FullPicture extends ActionBarActivity {
 
             //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+ db.getFolder(m.getFolder_id()).getName()+"/"+m.getName()+".jpg";
             String path = m.getPath();//사진의 경로를 가져온다
+            //TODO 사진 경로에 사진이 없을 경우를 체크한다
             try {
                 BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inSampleSize = 4;
+                opt.inSampleSize = 2;
                 Bitmap bm = BitmapFactory.decodeFile(path, opt);
                 img.setImageBitmap(bm);
             } catch (OutOfMemoryError e) {
@@ -125,7 +126,7 @@ public class FullPicture extends ActionBarActivity {
     void setTabToTag(Media m){
         if(isThereTabToTagHere() != null){
             FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TabToTag ttt = TabToTag.newInstance(m.getId());
+            TabToTag ttt = TabToTag.newInstance(m);
             tr.replace(R.id.tagLayout, ttt, "TabToTag");
             tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             tr.commit();
@@ -143,7 +144,7 @@ public class FullPicture extends ActionBarActivity {
         }
         else{
             FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TabToTag ttt = TabToTag.newInstance(m.getId());
+            TabToTag ttt = TabToTag.newInstance(m);
             tr.add(R.id.tagLayout, ttt, "TabToTag");
             tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             tr.commit();

@@ -23,6 +23,7 @@ import com.example.cds.eattle_prototype_2.model.Media;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by CDS on 15. 3. 31..
@@ -124,22 +125,22 @@ public class StoryListAdapter extends BaseAdapter{
             ImageView storyImage = (ImageView) convertView.findViewById(R.id.storyImage);
             //storyImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + items.get(position).getImgID() + ".jpg"));
             if(tempFromUSB == null){
-                tempFromUSB = fileoutimage("D",items.get(position).getBlockDevice());
+                tempFromUSB = fileoutimage("India.png",items.get(position).getBlockDevice());
             }
             storyImage.setImageBitmap(tempFromUSB);
 
             TextView storyName = (TextView) convertView.findViewById(R.id.storyName);
             storyName.setText("USB에서 온 사진");
-            /*
+            final BlockDevice tempBlockDevice = items.get(position).getBlockDevice();
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(mContext, AlbumLayout.class);
-                    intent.putExtra("kind", CONSTANT.FOLDER);
-                    intent.putExtra("id", items.get(pos).getFolderID());
+                    intent.putExtra("kind", -1);
+                    intent.putExtra("id", -1);
                     mContext.startActivity(intent);
                 }
-            });*/
+            });
         }
 
 

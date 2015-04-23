@@ -433,6 +433,98 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     }
 
     /*
+     * getting all media by year
+     */
+    public List<Media> getAllMediaByYear(int year){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_YEAR + " = " + year;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+
+    /*
+     * getting all media by month
+     */
+    public List<Media> getAllMediaByMonth(int month){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_MONTH + " = " + month;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+
+    /*
+     * getting all media by day
+     */
+    public List<Media> getAllMediaByDay(int day){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_DAY + " = " + day;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+    /*
      * updating media
      */
     public int updateMedia(Media media){

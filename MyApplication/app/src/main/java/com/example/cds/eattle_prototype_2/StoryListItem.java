@@ -1,5 +1,8 @@
 package com.example.cds.eattle_prototype_2;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
 
 /**
@@ -72,4 +75,6 @@ public class StoryListItem {
     public String getName() {
         return name;
     }
+
+
 }

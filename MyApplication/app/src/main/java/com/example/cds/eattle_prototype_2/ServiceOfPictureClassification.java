@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -424,6 +425,7 @@ public class ServiceOfPictureClassification extends Service {
         //메인화면의 스토리 목록을 갱신한다.
         //drawMainView();
         //MainActivity에 메세지를 보낸다
+
         sendMessageToUI(ServiceOfPictureClassification.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB,pictureNumInStory);
         sendMessageToUI(ServiceOfPictureClassification.END_OF_PICTURE_CLASSIFICATION, 1);
 

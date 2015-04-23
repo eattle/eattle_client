@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -52,13 +53,12 @@ public class MainActivity extends ActionBarActivity {
 
     private ListView storyList;//메인화면의 스토리 목록들이 들어가는 리스트뷰
     private StoryListAdapter storyListAdapter;//리스트뷰를 위한 어댑터
+    Button classification;
 
 
     Messenger mService = null;
     boolean mIsBound;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
-
-    ProgressDialog pictureDialog;
 
     private UsbDeviceHost usbDeviceHost;
     private BlockDevice blockDevice;
@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        classification = (Button) findViewById(R.id.classification);
         if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
             Intent intent = new Intent(this, Password.class);
@@ -91,24 +91,35 @@ public class MainActivity extends ActionBarActivity {
         //startService(new Intent(MainActivity.this, ServiceOfPictureClassification.class));
         doBindService();
 
-/*
+
         fileSystem = FileSystem.getInstance();
 
         usbDeviceHost = new UsbDeviceHost();
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice blockDevice) {
+                //Toast.makeText(getApplicationContext(),"USB",Toast.LENGTH_SHORT).show();
                 fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
+                CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
                 //USB가 스마트폰에 연결되었을 떄
                 CONSTANT.ISUSBCONNECTED = 1;
+
+                String thumbNailID = "";
+                String new_name = "";
+                int folderIDForDB = -1;
+                int pictureNumInStory = -1;
+                StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
+                storyListAdapter.add(tempItem);
+                //storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
             }
-        });*/
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         drawMainView();
         if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
@@ -126,40 +137,12 @@ public class MainActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
-                /*new AlertDialog.Builder(this)
-                        .setTitle("CaPic")
-                        .setMessage("종료 하시겠어요?")
-                        .setPositiveButton("예", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                moveTaskToBack(true);
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("아니요", null).show();*/
-                AlertDialog.Builder d = new AlertDialog.Builder(this);
-                d.setTitle("종료하시겠습니까?");
-                final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.capic_usb_dialog,null);
-                d.setView(r);
-                DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case DialogInterface.BUTTON_POSITIVE:
-                                moveTaskToBack(true);
-                                finish();
-                                break;
-                            case DialogInterface.BUTTON_NEGATIVE:
-                                break;
-
-                        }
-                    }
-                };
-                d.setPositiveButton("Yes",l);
-                d.setNegativeButton("No",l);
-                d.show();
+                wantCapicUSB();
                 return false;
         }
         return true;
     }
+
 
 
 
@@ -172,7 +155,8 @@ public class MainActivity extends ActionBarActivity {
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
 
-                    Toast.makeText(MainActivity.this, "사진 정리가 완료되었습니다", Toast.LENGTH_SHORT).show();
+                    wantBackUp();
+                    classification.setEnabled(true); // 클릭 유효화
                     break;
                 case ServiceOfPictureClassification.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
                     String thumbNailID = msg.getData().getString("thumbNailID");
@@ -294,7 +278,6 @@ public class MainActivity extends ActionBarActivity {
         switch (v.getId()) {
             case R.id.classification:
                 Toast.makeText(this, "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
-                Button classification = (Button) findViewById(R.id.classification);
                 classification.setEnabled(false); // 클릭 무효화
                 storyListAdapter.clear();//메인 화면을 일단 전부 지운다
                 storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
@@ -313,7 +296,7 @@ public class MainActivity extends ActionBarActivity {
                 //서비스에게 사진 정리를 요청한다
                 sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
                 //pictureDialog = ProgressDialog.show(MainActivity.this,"","사진을 정리하는 중입니다",true);
-                classification.setEnabled(true); // 클릭 유효화
+
                 break;
 
             /*
@@ -332,11 +315,50 @@ public class MainActivity extends ActionBarActivity {
 
 
 
-    /*
-    public void CheckIfServiceIsRunning(){
-        if(ServiceOfPictureClassification.isRunning())
-            doBindService();
-    }*/
+    public void wantCapicUSB(){//앱을 종료하려 할때, USB 구매의사를 묻는다.
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setTitle("종료하시겠습니까?");
+        final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.capic_usb_dialog,null);
+        d.setView(r);
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        moveTaskToBack(true);
+                        finish();
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+
+                }
+            }
+        };
+        d.setPositiveButton("Yes",l);
+        d.setNegativeButton("No",l);
+        d.show();
+    }
+    public void wantBackUp(){//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setTitle("백업이 완료되었습니다!");
+        final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.complete_classify_picture_dialog,null);
+        d.setView(r);
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //스마트폰에서 사진들을 삭제한다
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //스마트폰에서 사진들을 삭제하지 않는다
+                        break;
+
+                }
+            }
+        };
+        d.setPositiveButton("Yes",l);
+        d.setNegativeButton("No",l);
+        d.show();
+    }
 
     public FileSystem getFileSystem() {
         return this.fileSystem;
