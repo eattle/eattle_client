@@ -36,10 +36,10 @@ public class AlbumImageSetter {
         //startTime과 endTime을 0으로 주면 스마트폰의 모든 사진을 가져온다.
         if(startTime == 0 && endTime == 0)
             //mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_ADDED+" DESC");
-            mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
+            mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN+" ASC");
 
         else
-            mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.ImageColumns.DATA}, MediaStore.Images.ImageColumns.DATE_ADDED + " BETWEEN " + startTime + " AND " + endTime, null, MediaStore.Images.ImageColumns.DATE_ADDED+" ASC");
+            mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.Images.ImageColumns.DATA}, MediaStore.Images.ImageColumns.DATE_TAKEN + " BETWEEN " + startTime + " AND " + endTime, null, MediaStore.Images.ImageColumns.DATE_ADDED+" ASC");
 
         //mCursor.moveToFirst();
     }

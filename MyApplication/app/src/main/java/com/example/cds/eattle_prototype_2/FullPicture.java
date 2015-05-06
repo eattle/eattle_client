@@ -84,10 +84,11 @@ public class FullPicture extends ActionBarActivity {
             //TODO 사진 경로에 사진이 없을 경우를 체크한다
             try {
                 BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inSampleSize = 2;
+                opt.inSampleSize = 4;
                 Bitmap bm = BitmapFactory.decodeFile(path, opt);
                 img.setImageBitmap(bm);
             } catch (OutOfMemoryError e) {
+
                 Log.e("warning", "이미지가 너무 큽니다");
             }
 

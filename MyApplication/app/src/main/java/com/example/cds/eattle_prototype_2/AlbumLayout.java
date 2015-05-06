@@ -74,14 +74,16 @@ public class AlbumLayout extends ActionBarActivity {
         Intent intent=new Intent(this.getIntent());
         id = intent.getIntExtra("id", -1);
         kind = intent.getIntExtra("kind",-1);
+
         if(kind == -1 && id == -1) {//USB에서 읽어온 사진들일 경우(임시)
+        /*
             titleName = "USB에서 온 사진";
             //폴더(스토리)의 제목 등록
             titleText.setText(titleName);
 
             //폴더(스토리)의 대표사진 등록
             //Ireland.png
-            titleImage.setImageBitmap(fileoutimage("India.png",CONSTANT.BLOCKDEVICE));
+            titleImage.setImageBitmap(fileoutimage("1.jpg", CONSTANT.BLOCKDEVICE));
             titleImage.setAlpha(0.4f);
 
             //그리드 뷰 등록
@@ -89,11 +91,11 @@ public class AlbumLayout extends ActionBarActivity {
             //mGrid.setOnItemClickListener(mItemClickListener);
 
             mMediaList = new ArrayList<Media>();
-            Media tempMedia =  new Media(-1,-1,"India.png",-1,-1,-1,-1,-1,"","");
+            Media tempMedia =  new Media(-1,-1,"2.jpg",-1,-1,-1,-1,-1,"","");
             mMediaList.add(tempMedia);
-            tempMedia =  new Media(-1,-1,"Indonesia.png",-1,-1,-1,-1,-1,"","");
+            tempMedia =  new Media(-1,-1,"3.jpg",-1,-1,-1,-1,-1,"","");
             mMediaList.add(tempMedia);
-            tempMedia =  new Media(-1,-1,"Ireland.png",-1,-1,-1,-1,-1,"","");
+            tempMedia =  new Media(-1,-1,"4.jpg",-1,-1,-1,-1,-1,"","");
             mMediaList.add(tempMedia);
 
 
@@ -191,6 +193,7 @@ public class AlbumLayout extends ActionBarActivity {
         }
     };
 
+    /*
     public Bitmap fileoutimage(String outString, BlockDevice blockDevice){//USB->스마트폰 내보내기
         //D  S   X
         //1220879 1870864 2133464
@@ -251,6 +254,77 @@ public class AlbumLayout extends ActionBarActivity {
             //Bitmap bitmap1 = BitmapFactory.decodeFile("/storage/emulated/0/DCIM/Camera/1.jpg");
             //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
 
+        }
+
+    }*/
+
+    private Bitmap fileoutimage(String outString, BlockDevice blockDevice){//내보내기
+        //D  S   X
+        //1220879 1870864 2133464
+
+        int result[] = fileSystem.stringSearch(outString);
+        byte[] dummyBuffer = new byte[(int) fileSystem.CLUSTERSPACESIZE];
+        //1866136
+        //result[0] = 4096;
+        //result[0] = 6505;
+        Log.d("xxxxxx","result[0] " + result[0]);
+        if(result[0] == -1) {
+            Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        else{
+
+            byte resultbyte[] = new byte[result[4]];
+            //int resultstringaddress = 6085;
+            int resultstringaddress = result[0];
+            //int resultaddress = readIntToBinary(result[0],result[1]+80,LOCATIONSIZE);
+
+            int limit =0;
+            int bytecnt =0;
+
+
+            blockDevice.readBlock(resultstringaddress, dummyBuffer);
+
+            while(resultstringaddress != 0){
+
+                int originalbyteAddress =  fileSystem.readIntToBinary(resultstringaddress, limit, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
+
+                blockDevice.readBlock(originalbyteAddress, fileSystem.buffer);
+                for(int i=0; i<fileSystem.CLUSTERSPACESIZE; i++){
+                    if(bytecnt < result[4]) {
+                        resultbyte[bytecnt++] = fileSystem.buffer[i];
+                    }
+                    else
+                        break;
+                }
+                if(bytecnt >= result[4])
+                    break;
+
+                limit += fileSystem.LOCATIONSIZE;
+
+                if(limit >= fileSystem.SPACELOCATION){
+                    resultstringaddress =  fileSystem.readIntToBinary(resultstringaddress, fileSystem.NEXTLOCATION, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
+                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
+                    limit =0;
+                }
+
+            }
+
+
+            Log.d("xxxxxx","xxxxxxxxxxxx " + resultbyte);
+            Log.d("xxxxxx","xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
+
+            Toast.makeText(this, "1 " + resultbyte, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();
+
+            Bitmap byteimage = BitmapFactory.decodeByteArray( resultbyte , 0 , resultbyte.length);
+            //imageView.setImageBitmap(byteimage);
+
+            //imageView.setImageBitmap(resizeBitmapImageFn(byteimage,540));
+
+            //Bitmap bitmap1 = BitmapFactory.decodeFile("/storage/emulated/0/DCIM/Camera/1.jpg");
+            //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
+            return byteimage;
         }
 
     }

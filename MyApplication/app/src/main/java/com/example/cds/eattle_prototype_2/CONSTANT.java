@@ -17,4 +17,6 @@ public class CONSTANT {
     public static int PASSWORD_TRIAL = 5; //비밀번호가 PASSWORD_TRIAL보다 많이 틀릴 경우 앱 종료
     public static BlockDevice BLOCKDEVICE;
 
+    public static final String PACKAGENAME="com.example.cds.eattle_prototype_2";
+
 }

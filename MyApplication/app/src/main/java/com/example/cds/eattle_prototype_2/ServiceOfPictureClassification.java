@@ -63,6 +63,9 @@ public class ServiceOfPictureClassification extends Service {
     Geocoder mCoder;
     IncomingHandler incomingHandler = new IncomingHandler();
 
+    //파일시스템
+    FileSystem fileSystem;
+
     public ServiceOfPictureClassification() {
     }
 
@@ -75,6 +78,8 @@ public class ServiceOfPictureClassification extends Service {
         //serviceOfEattle.start();
         PictureThread serviceOfEattle = new PictureThread(incomingHandler);
         serviceOfEattle.start();
+
+        fileSystem = FileSystem.getInstance();
 
     }
 
@@ -214,8 +219,8 @@ public class ServiceOfPictureClassification extends Service {
                 continue;
             }
             //사진이 촬영된 날짜
-            long _pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
-            _pictureTakenTime *= 1000; //second->millisecond
+            long _pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
+            //_pictureTakenTime *= 1000; //second->millisecond
             if (pictureTakenTime == 0)
                 pictureTakenTime = _pictureTakenTime;
 
@@ -269,7 +274,7 @@ public class ServiceOfPictureClassification extends Service {
 
 
         while (ImageSetter.mCursor.moveToNext()) {
-            String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+            final String path = ImageSetter.mCursor.getString(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
 
             Log.d("사진 분류", path);
             //썸네일 사진들은 분류대상에서 제외한다
@@ -280,13 +285,13 @@ public class ServiceOfPictureClassification extends Service {
 
             //picture = new File(path);
             //사진 ID
-            int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            final int pictureID = ImageSetter.mCursor.getInt(ImageSetter.mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
             Log.d("Media","ExistedMedia == null : "+(ExistedMedia==null));
             //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
             //사진이 촬영된 날짜
-            long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_ADDED));
-            pictureTakenTime *= 1000; //second->millisecond
+            long pictureTakenTime = ImageSetter.mCursor.getLong(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
+            //pictureTakenTime *= 1000; //second->millisecond
             //millisecond -> Calendar
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
@@ -355,8 +360,9 @@ public class ServiceOfPictureClassification extends Service {
             if (ExistedMedia != null) {//해당 사진이 기존에 있었을 경우
                 Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
                 placeName_ = ExistedMedia.getPlaceName();
-            } else {//새로운 사진
-
+            }
+            else {//새로운 사진
+        /*
                 //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
                 longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
                 latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
@@ -380,14 +386,16 @@ public class ServiceOfPictureClassification extends Service {
                     }
 
                 }
+        */
             }
 
 
             //DB에 사진 데이터를 넣는다.
             if(ExistedMedia == null) {//새로운 사진
-                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
+                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
                 //medias.add(m);
                 db.createMedia(m);
+
             }
             else {//기존 사진
                 //업데이트만 한다
@@ -396,6 +404,15 @@ public class ServiceOfPictureClassification extends Service {
                 //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
                 db.updateMedia(ExistedMedia);
             }
+            //USB에 사진을 백업
+            //1. 이미 USB에 있는 사진일 경우
+            //2. 새로운 사진
+            if(CONSTANT.ISUSBCONNECTED == 1) {
+                //fileSystem.addElementPush(pictureID + ".jpg", CONSTANT.BLOCKDEVICE, path);
+                Log.d("service",pictureID+".jpg 백업 완료");
+
+            }
+
 
             pictureNumInStory++;
 

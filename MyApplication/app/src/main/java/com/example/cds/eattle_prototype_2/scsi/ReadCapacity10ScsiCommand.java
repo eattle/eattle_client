@@ -23,3 +23,4 @@ public class ReadCapacity10ScsiCommand implements ScsiCommand {
         return buffer;
     }
 }
+

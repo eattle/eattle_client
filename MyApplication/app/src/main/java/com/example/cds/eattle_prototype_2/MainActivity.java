@@ -39,6 +39,11 @@ import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
 import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
 import com.example.cds.eattle_prototype_2.model.Folder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
     //데이터베이스 관련 변수들
     DatabaseHelper db;
     FileSystem fileSystem;
+    static final String DATABASE_NAME="";
 
     ImageView mImage;
 
@@ -85,10 +91,6 @@ public class MainActivity extends ActionBarActivity {
         storyListAdapter = new StoryListAdapter(this);
         //ListView에 어댑터 연결
         storyList.setAdapter(storyListAdapter);
-        //drawMainView();
-
-        //서비스 시작
-        //startService(new Intent(MainActivity.this, ServiceOfPictureClassification.class));
         doBindService();
 
 
@@ -98,19 +100,19 @@ public class MainActivity extends ActionBarActivity {
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice blockDevice) {
-                //Toast.makeText(getApplicationContext(),"USB",Toast.LENGTH_SHORT).show();
-                fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
+                //fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
                 //USB가 스마트폰에 연결되었을 떄
                 CONSTANT.ISUSBCONNECTED = 1;
 
+                /*
                 String thumbNailID = "";
                 String new_name = "";
                 int folderIDForDB = -1;
                 int pictureNumInStory = -1;
                 StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
-                storyListAdapter.add(tempItem);
+                storyListAdapter.add(tempItem);*/
                 //storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
             }
         });
@@ -156,6 +158,7 @@ public class MainActivity extends ActionBarActivity {
                     //pictureDialog.dismiss();
 
                     wantBackUp();
+                    exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
                     classification.setEnabled(true); // 클릭 유효화
                     break;
                 case ServiceOfPictureClassification.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
@@ -376,6 +379,34 @@ public class MainActivity extends ActionBarActivity {
         this.blockDevice = blockDevice;
     }
 
+    private void exportDB(){
+        if(CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
+            //App data -> Environment.getExternalStorageDirectory()
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+            FileChannel source = null;
+            FileChannel destination = null;
+            String currentDBPath = "/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;
+            String backupDBPath = DatabaseHelper.DATABASE_NAME;
+            File currentDB = new File(data, currentDBPath);
+            File backupDB = new File(sd, backupDBPath);
+            try {
+                source = new FileInputStream(currentDB).getChannel();
+                destination = new FileOutputStream(backupDB).getChannel();
+                destination.transferFrom(source, 0, source.size());
+                source.close();
+                destination.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //Environment.getExternalStorageDirectory() -> USB
+            //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
+            fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, Environment.getExternalStoragePublicDirectory("/") +"/"+ DatabaseHelper.DATABASE_NAME);
+            Toast.makeText(this, "DB Exported To USB!", Toast.LENGTH_LONG).show();
+
+        }
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

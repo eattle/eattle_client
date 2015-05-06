@@ -218,22 +218,22 @@ public class StoryListAdapter extends BaseAdapter{
     }
 
 
-    public Bitmap fileoutimage(String outString, BlockDevice blockDevice){//USB->스마트폰 내보내기
+    private Bitmap fileoutimage(String outString, BlockDevice blockDevice){//내보내기
         //D  S   X
         //1220879 1870864 2133464
 
-
         int result[] = fileSystem.stringSearch(outString);
-
+        byte[] dummyBuffer = new byte[(int) fileSystem.CLUSTERSPACESIZE];
         //1866136
         //result[0] = 4096;
         //result[0] = 6505;
         Log.d("xxxxxx","result[0] " + result[0]);
         if(result[0] == -1) {
-            Toast.makeText(mContext, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
+            Log.d("AlbumImageSetter","값이 잘못 들어왔습니다");
             return null;
         }
         else{
+
             byte resultbyte[] = new byte[result[4]];
             //int resultstringaddress = 6085;
             int resultstringaddress = result[0];
@@ -243,9 +243,11 @@ public class StoryListAdapter extends BaseAdapter{
             int bytecnt =0;
 
 
+            blockDevice.readBlock(resultstringaddress, dummyBuffer);
+
             while(resultstringaddress != 0){
 
-                int originalbyteAddress =  fileSystem.readIntToBinary(resultstringaddress, limit, fileSystem.LOCATIONSIZE, blockDevice);
+                int originalbyteAddress =  fileSystem.readIntToBinary(resultstringaddress, limit, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
 
                 blockDevice.readBlock(originalbyteAddress, fileSystem.buffer);
                 for(int i=0; i<fileSystem.CLUSTERSPACESIZE; i++){
@@ -261,25 +263,32 @@ public class StoryListAdapter extends BaseAdapter{
                 limit += fileSystem.LOCATIONSIZE;
 
                 if(limit >= fileSystem.SPACELOCATION){
-                    resultstringaddress =  fileSystem.readIntToBinary(resultstringaddress, fileSystem.NEXTLOCATION, fileSystem.LOCATIONSIZE, blockDevice);
+                    resultstringaddress =  fileSystem.readIntToBinary(resultstringaddress, fileSystem.NEXTLOCATION, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
+                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
                     limit =0;
                 }
 
             }
 
 
-
             Log.d("xxxxxx","xxxxxxxxxxxx " + resultbyte);
             Log.d("xxxxxx","xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
 
-            Bitmap byteimage = BitmapFactory.decodeByteArray(resultbyte, 0, resultbyte.length);
+            /*
+            Toast.makeText(this, "1 " + resultbyte, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();*/
 
-            return byteimage;
+            Bitmap byteimage = BitmapFactory.decodeByteArray( resultbyte , 0 , resultbyte.length);
+            //imageView.setImageBitmap(byteimage);
+
+            //imageView.setImageBitmap(resizeBitmapImageFn(byteimage,540));
+
             //Bitmap bitmap1 = BitmapFactory.decodeFile("/storage/emulated/0/DCIM/Camera/1.jpg");
             //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
-
+            return byteimage;
         }
 
     }
+
 
 }
