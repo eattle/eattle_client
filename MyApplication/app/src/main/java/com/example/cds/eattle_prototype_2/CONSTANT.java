@@ -1,6 +1,7 @@
 package com.example.cds.eattle_prototype_2;
 
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
+import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 
 /**
  * Created by CDS on 15. 3. 21..
@@ -18,5 +19,6 @@ public class CONSTANT {
     public static BlockDevice BLOCKDEVICE;
 
     public static final String PACKAGENAME="com.example.cds.eattle_prototype_2";
+    public static final String appDBPath="/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;//스마트폰 앱단의 DB 경로
 
 }

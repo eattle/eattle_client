@@ -735,7 +735,7 @@ public class FileSystem {
 
 
         bytearray = binaryDataImport(file);
-/*
+
         int emptyCoreAdressSpace = emptySpaceSearch(blockDevice);
 
         // '0'번지 정렬 새롭게 빌드
@@ -796,7 +796,7 @@ public class FileSystem {
         blockDevice.readBlock(0, buffer);
         buffer[ISCOMPLETELOCATION] = 1;
         blockDevice.writeBlock(0, buffer);
-        */
+
     }
 
     public int lastReturn(int last, BlockDevice blockDevice) { //값없어도 되는 마지막 값 호출

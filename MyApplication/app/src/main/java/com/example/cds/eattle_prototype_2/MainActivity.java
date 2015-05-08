@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -39,6 +40,7 @@ import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
 import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
 import com.example.cds.eattle_prototype_2.model.Folder;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -53,7 +55,7 @@ public class MainActivity extends ActionBarActivity {
     //데이터베이스 관련 변수들
     DatabaseHelper db;
     FileSystem fileSystem;
-    static final String DATABASE_NAME="";
+    static final String DATABASE_NAME = "";
 
     ImageView mImage;
 
@@ -74,7 +76,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Log.d(Tag, "onCreate 호출");
         classification = (Button) findViewById(R.id.classification);
         if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
@@ -100,7 +102,7 @@ public class MainActivity extends ActionBarActivity {
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice blockDevice) {
-                //fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
+                //fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
                 //USB가 스마트폰에 연결되었을 떄
@@ -129,8 +131,9 @@ public class MainActivity extends ActionBarActivity {
             startActivity(intent);
         }
     }
+
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
     }
 
@@ -144,8 +147,6 @@ public class MainActivity extends ActionBarActivity {
         }
         return true;
     }
-
-
 
 
     //서비스로부터 메세지를 받는 부분
@@ -286,6 +287,7 @@ public class MainActivity extends ActionBarActivity {
                 storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 
                 if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되었을 떄
+                    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
                     String thumbNailID = "";
                     String new_name = "";
                     int folderIDForDB = -1;
@@ -317,11 +319,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-
-    public void wantCapicUSB(){//앱을 종료하려 할때, USB 구매의사를 묻는다.
+    public void wantCapicUSB() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("종료하시겠습니까?");
-        final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.capic_usb_dialog,null);
+        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.capic_usb_dialog, null);
         d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -336,14 +337,15 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         };
-        d.setPositiveButton("Yes",l);
-        d.setNegativeButton("No",l);
+        d.setPositiveButton("Yes", l);
+        d.setNegativeButton("No", l);
         d.show();
     }
-    public void wantBackUp(){//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
+
+    public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("백업이 완료되었습니다!");
-        final LinearLayout r = (LinearLayout)View.inflate(this,R.layout.complete_classify_picture_dialog,null);
+        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.complete_classify_picture_dialog, null);
         d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -358,8 +360,8 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         };
-        d.setPositiveButton("Yes",l);
-        d.setNegativeButton("No",l);
+        d.setPositiveButton("Yes", l);
+        d.setNegativeButton("No", l);
         d.show();
     }
 
@@ -379,34 +381,158 @@ public class MainActivity extends ActionBarActivity {
         this.blockDevice = blockDevice;
     }
 
-    private void exportDB(){
-        if(CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
-            //App data -> Environment.getExternalStorageDirectory()
+    //[DB] 앱 -> USB
+    private void exportDB() {
+        // TODO Auto-generated method stub
+        if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
+            String middlePoint = "/CaPic/" + DatabaseHelper.DATABASE_NAME;
             File sd = Environment.getExternalStorageDirectory();
             File data = Environment.getDataDirectory();
-            FileChannel source = null;
-            FileChannel destination = null;
-            String currentDBPath = "/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;
-            String backupDBPath = DatabaseHelper.DATABASE_NAME;
-            File currentDB = new File(data, currentDBPath);
-            File backupDB = new File(sd, backupDBPath);
+            FileChannel src = null;
+            FileChannel dst = null;
             try {
-                source = new FileInputStream(currentDB).getChannel();
-                destination = new FileOutputStream(backupDB).getChannel();
-                destination.transferFrom(source, 0, source.size());
-                source.close();
-                destination.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                if (sd.canWrite()) {
+
+                    FolderManage.makeDirectory(sd + "/CaPic/");//스마트폰 최상단 폴더에 CaPic 폴더를 만든다-DB 저장을 위해(기존에 있으면 안만듬)
+                    File currentDB = new File(data, CONSTANT.appDBPath);
+                    File backupDB = new File(sd, middlePoint);
+
+                    src = new FileInputStream(currentDB).getChannel();
+                    dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                    //Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_SHORT).show();
+                    Log.d(Tag,"[exportDB]"+backupDB.toString());
+
+                }
+            } catch (Exception e) {
+                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_SHORT).show();
+            }
+            //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
+            fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
+            Log.d(Tag,"[exportDB] APP->USB 성공");
+            Toast.makeText(this, "[exportDB] APP->USB 성공", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //[DB] USB -> 앱
+    private void importDB() {
+        // TODO Auto-generated method stub
+        if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 import
+            //기존의 APP DB를 삭제한다
+            getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+            //일단 USB -> 스마트폰 /CaPic 폴더
+            File middlePointFile = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
+            Log.d(Tag,"[importDB]middlePointFile 값? " + middlePointFile);
+
+            byte tempDBArray[] = getDBFromUSB(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
+            if (tempDBArray == null) {
+                Log.d(Tag, "[importDB]tempDBArray == null 에러! importDB 중단");
+                return;
+            }
+            else
+                Log.d(Tag, "[importDB]tempDBArray != null, tempDBArray Length " + tempDBArray.length);
+
+            try{
+                if(middlePointFile != null && tempDBArray != null) {
+                    FileOutputStream fos = new FileOutputStream(middlePointFile);
+                    fos.write(tempDBArray);
+                    fos.close();
+                    Log.d(Tag, "[importDB]FileOutputStream Success ! ");
+                }
+            } catch(IOException e){
+                Log.d(Tag,"[importDB]FileOutputStream Error ! " + e.toString());
             }
 
-            //Environment.getExternalStorageDirectory() -> USB
-            //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
-            fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, Environment.getExternalStoragePublicDirectory("/") +"/"+ DatabaseHelper.DATABASE_NAME);
-            Toast.makeText(this, "DB Exported To USB!", Toast.LENGTH_LONG).show();
+            // /CaPic/에서 앱 DB로
+            try {
+                if (sd.canWrite()) {
+                    File backupDB = new File(data, CONSTANT.appDBPath);
+                    File currentDB = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
+
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                    Log.d(Tag,"[importDB] USB->APP 성공");
+                    Toast.makeText(getBaseContext(), "[importDB] USB->APP 성공", Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
+            }
 
         }
     }
+
+    private byte[] getDBFromUSB(String outString, BlockDevice blockDevice) {//내보내기
+        //D  S   X
+        //1220879 1870864 2133464
+
+        int result[] = fileSystem.stringSearch(outString);
+        byte[] dummyBuffer = new byte[(int) fileSystem.CLUSTERSPACESIZE];
+        //1866136
+        //result[0] = 4096;
+        //result[0] = 6505;
+        Log.d("xxxxxx", "result[0] " + result[0]);
+        if (result[0] == -1) {
+            Log.d(Tag,"[getDBFromUSB]값이 잘못들어왔습니다");
+            //Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
+            return null;
+        } else {
+
+            byte resultbyte[] = new byte[result[4]];
+            //int resultstringaddress = 6085;
+            int resultstringaddress = result[0];
+            //int resultaddress = readIntToBinary(result[0],result[1]+80,LOCATIONSIZE);
+
+            int limit = 0;
+            int bytecnt = 0;
+
+
+            blockDevice.readBlock(resultstringaddress, dummyBuffer);
+
+            while (resultstringaddress != 0) {
+
+                int originalbyteAddress = fileSystem.readIntToBinary(resultstringaddress, limit, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
+
+                blockDevice.readBlock(originalbyteAddress, fileSystem.buffer);
+                for (int i = 0; i < fileSystem.CLUSTERSPACESIZE; i++) {
+                    if (bytecnt < result[4]) {
+                        resultbyte[bytecnt++] = fileSystem.buffer[i];
+                    } else
+                        break;
+                }
+                if (bytecnt >= result[4])
+                    break;
+
+                limit += fileSystem.LOCATIONSIZE;
+
+                if (limit >= fileSystem.SPACELOCATION) {
+                    resultstringaddress = fileSystem.readIntToBinary(resultstringaddress, fileSystem.NEXTLOCATION, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
+                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
+                    limit = 0;
+                }
+
+            }
+
+
+            Log.d("xxxxxx", "xxxxxxxxxxxx " + resultbyte);
+            Log.d("xxxxxx", "xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
+
+            //Toast.makeText(this, "1 " + resultbyte, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();
+
+            return resultbyte;
+        }
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
