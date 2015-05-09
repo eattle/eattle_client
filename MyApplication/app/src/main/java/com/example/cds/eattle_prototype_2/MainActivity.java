@@ -77,6 +77,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(Tag, "onCreate 호출");
+
         classification = (Button) findViewById(R.id.classification);
         if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
@@ -84,6 +85,25 @@ public class MainActivity extends ActionBarActivity {
             startActivity(intent);
         }
 
+        fileSystem = FileSystem.getInstance();
+
+        usbDeviceHost = new UsbDeviceHost();
+        usbDeviceHost.start(this, new BlockDeviceApp() {
+            @Override
+            public void onConnected(BlockDevice blockDevice) {
+                fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
+                CONSTANT.BLOCKDEVICE = blockDevice;//temp
+                setBlockDevice(blockDevice);
+                //USB가 스마트폰에 연결되었을 떄
+                CONSTANT.ISUSBCONNECTED = 1;
+                //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
+                //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
+
+            }
+        });
+        /*
+        if(CONSTANT.ISUSBCONNECTED == 1)
+            importDB();*/
         //데이터베이스 OPEN
         db = DatabaseHelper.getInstance(getApplicationContext());
 
@@ -94,30 +114,6 @@ public class MainActivity extends ActionBarActivity {
         //ListView에 어댑터 연결
         storyList.setAdapter(storyListAdapter);
         doBindService();
-
-
-        fileSystem = FileSystem.getInstance();
-
-        usbDeviceHost = new UsbDeviceHost();
-        usbDeviceHost.start(this, new BlockDeviceApp() {
-            @Override
-            public void onConnected(BlockDevice blockDevice) {
-                //fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
-                CONSTANT.BLOCKDEVICE = blockDevice;//temp
-                setBlockDevice(blockDevice);
-                //USB가 스마트폰에 연결되었을 떄
-                CONSTANT.ISUSBCONNECTED = 1;
-
-                /*
-                String thumbNailID = "";
-                String new_name = "";
-                int folderIDForDB = -1;
-                int pictureNumInStory = -1;
-                StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
-                storyListAdapter.add(tempItem);*/
-                //storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
-            }
-        });
     }
 
     @Override
@@ -286,17 +282,9 @@ public class MainActivity extends ActionBarActivity {
                 storyListAdapter.clear();//메인 화면을 일단 전부 지운다
                 storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 
-                if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되었을 떄
+                if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
                     importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
-                    String thumbNailID = "";
-                    String new_name = "";
-                    int folderIDForDB = -1;
-                    int pictureNumInStory = -1;
-                    StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory, blockDevice);
-                    storyListAdapter.add(tempItem);
-                    storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 
-                }
 
                 //서비스에게 사진 정리를 요청한다
                 sendMessageToService(ServiceOfPictureClassification.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
