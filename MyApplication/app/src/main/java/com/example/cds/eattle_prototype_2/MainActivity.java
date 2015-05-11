@@ -38,6 +38,8 @@ import com.example.cds.eattle_prototype_2.device.BlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
 import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
+import com.example.cds.eattle_prototype_2.device.CachedBlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedUsbMassStorageBlockDevice;
 import com.example.cds.eattle_prototype_2.model.Folder;
 
 import java.io.BufferedOutputStream;
@@ -69,7 +71,7 @@ public class MainActivity extends ActionBarActivity {
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     private UsbDeviceHost usbDeviceHost;
-    private BlockDevice blockDevice;
+    private CachedBlockDevice blockDevice;
 
 
     @Override
@@ -90,7 +92,10 @@ public class MainActivity extends ActionBarActivity {
         usbDeviceHost = new UsbDeviceHost();
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
-            public void onConnected(BlockDevice blockDevice) {
+            public void onConnected(BlockDevice originalBlockDevice) {
+
+                CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
+
                 fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
@@ -361,11 +366,11 @@ public class MainActivity extends ActionBarActivity {
         this.fileSystem = fileSystem;
     }
 
-    public BlockDevice getBlockDevice() {
+    public CachedBlockDevice getBlockDevice() {
         return blockDevice;
     }
 
-    public void setBlockDevice(BlockDevice blockDevice) {
+    public void setBlockDevice(CachedBlockDevice blockDevice) {
         this.blockDevice = blockDevice;
     }
 
@@ -458,7 +463,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private byte[] getDBFromUSB(String outString, BlockDevice blockDevice) {//내보내기
+    private byte[] getDBFromUSB(String outString, CachedBlockDevice blockDevice) {//내보내기
         //D  S   X
         //1220879 1870864 2133464
 
