@@ -23,9 +23,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 15;
 
-    private static final String DATABASE_NAME = "FileManager";
+    public static final String DATABASE_NAME = "CaPicDB";
 
     private static final String TABLE_MEDIA = "media";
     private static final String TABLE_FOLDER = "folder";
@@ -37,6 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_ID = "id";             //전체에서의 사진 id **primary key**
     private static final String KEY_FOLDER_ID = "folder_id";   //폴더 id (속한 스토리의 id)
     private static final String KEY_NAME = "name";        //사진 경로
+    private static final String KEY_PICTURETAKEN = "picturetaken";      //사진이 촬영된 시간
     private static final String KEY_YEAR = "year";           //년
     private static final String KEY_MONTH = "month";          //월
     private static final String KEY_DAY = "day";            //일
@@ -69,6 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_FOLDER_ID + " INTEGER NOT NULL, "
             + KEY_NAME + " VARCHAR(100) NOT NULL, "
+            + KEY_PICTURETAKEN + " LONG NOT NULL, "
             + KEY_YEAR + " INTEGER NOT NULL, "
             + KEY_MONTH + " INTEGER NOT NULL, "
             + KEY_DAY + " INTEGER NOT NULL, "
@@ -271,6 +273,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_ID, media.getId());
         values.put(KEY_FOLDER_ID, media.getFolder_id());
         values.put(KEY_NAME, media.getName());
+        values.put(KEY_PICTURETAKEN, media.getPictureTaken());
         values.put(KEY_YEAR, media.getYear());
         values.put(KEY_MONTH, media.getMonth());
         values.put(KEY_DAY, media.getDay());
@@ -293,6 +296,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             values.put(KEY_ID, medias.get(i).getId());
             values.put(KEY_FOLDER_ID, medias.get(i).getFolder_id());
             values.put(KEY_NAME, medias.get(i).getName());
+            values.put(KEY_PICTURETAKEN, medias.get(i).getPictureTaken());
             values.put(KEY_YEAR, medias.get(i).getYear());
             values.put(KEY_MONTH, medias.get(i).getMonth());
             values.put(KEY_DAY, medias.get(i).getDay());
@@ -324,6 +328,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
             media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            media.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
             media.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
             media.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
             media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
@@ -354,6 +359,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
                 m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
                 m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
                 m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
@@ -385,6 +391,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
                 m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
                 m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
                 m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
@@ -416,6 +423,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
                 m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
                 m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
                 m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
                 m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
@@ -433,6 +441,101 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     }
 
     /*
+     * getting all media by year
+     */
+    public List<Media> getAllMediaByYear(int year){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_YEAR + " = " + year;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+
+    /*
+     * getting all media by month
+     */
+    public List<Media> getAllMediaByMonth(int month){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_MONTH + " = " + month;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+
+    /*
+     * getting all media by day
+     */
+    public List<Media> getAllMediaByDay(int day){
+        List<Media> media = new ArrayList<Media>();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_DAY + " = " + day;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Media m = new Media();
+                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                media.add(m);
+            }while(c.moveToNext());
+        }
+
+        return media;
+    }
+    /*
      * updating media
      */
     public int updateMedia(Media media){
@@ -441,6 +544,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         values.put(KEY_FOLDER_ID, media.getFolder_id());
         values.put(KEY_NAME, media.getName());
+        values.put(KEY_PICTURETAKEN, media.getPictureTaken());
         values.put(KEY_YEAR, media.getYear());
         values.put(KEY_MONTH, media.getMonth());
         values.put(KEY_DAY, media.getDay());

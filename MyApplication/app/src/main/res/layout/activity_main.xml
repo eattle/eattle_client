@@ -43,8 +43,7 @@
         android:id="@+id/storyList"
         android:layout_below="@+id/buttons"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layoutAnimation="@anim/layout_bottom_top_slide"></ListView>
+        android:layout_height="match_parent"></ListView>
 
 
     <!--

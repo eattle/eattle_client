@@ -10,6 +10,7 @@ public class Media implements Parcelable {
     int id;             //전체에서의 사진 id **primary key**(media DB의 사진 ID와 관련 없음)
     int folder_id;   //폴더 id (속한 스토리의 id)
     String name;        //사진ID(media DB의 ID).jpg
+    Long pictureTaken;      //사진이 촬영된 시간
     int year;           //년
     int month;          //월
     int day;            //일
@@ -27,6 +28,7 @@ public class Media implements Parcelable {
         id = in.readInt();
         folder_id = in.readInt();
         name = in.readString();
+        pictureTaken = in.readLong();
         year = in.readInt();
         month = in.readInt();
         day = in.readInt();
@@ -36,10 +38,11 @@ public class Media implements Parcelable {
         path = in.readString();
     }
 
-    public Media(int id, int folder_id, String name, int year, int month, int day, double latitude, double longitude, String placeName, String path) {
+    public Media(int id, int folder_id, String name, Long pictureTaken, int year, int month, int day, double latitude, double longitude, String placeName, String path) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
+        this.pictureTaken = pictureTaken;
         this.year = year;
         this.month = month;
         this.day = day;
@@ -53,6 +56,7 @@ public class Media implements Parcelable {
         this.id = m.getId();
         this.folder_id = m.getFolder_id();
         this.name = m.getName();
+        this.pictureTaken = m.getPictureTaken();
         this.year = m.getYear();
         this.month = m.getMonth();
         this.day = m.getDay();
@@ -62,6 +66,12 @@ public class Media implements Parcelable {
         this.path = m.getPath();
     }
 
+    public void setPictureTaken(Long pictureTaken){
+        this.pictureTaken = pictureTaken;
+    }
+    public Long getPictureTaken(){
+        return this.pictureTaken;
+    }
     public void setPlaceName(String placeName) {
         this.placeName = placeName;
     }
@@ -153,6 +163,7 @@ public class Media implements Parcelable {
         dest.writeInt(id);
         dest.writeInt(folder_id);
         dest.writeString(name);
+        dest.writeLong(pictureTaken);
         dest.writeInt(year);
         dest.writeInt(month);
         dest.writeInt(day);

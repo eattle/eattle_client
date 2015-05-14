@@ -1,6 +1,6 @@
-
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.cds.eattle_prototype_2.FullPicture">
 
@@ -8,17 +8,20 @@
     <com.example.cds.eattle_prototype_2.ExtendedViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
     </com.example.cds.eattle_prototype_2.ExtendedViewPager>
 
-    <!-- Tag들이 들어갈 Layout -->
+    <!-- Tag & Tag 추가란이 들어가는 Layout -->
+
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/tagLayout">
-    </FrameLayout>
-    <!--
+        android:id="@+id/tagLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        ></FrameLayout>
+
+            <!--
     <fragment
         android:id="@+id/frame"
         android:layout_width="match_parent"
