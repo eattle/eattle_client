@@ -482,3 +482,4 @@ public class ServiceOfPictureClassification extends Service {
         return mMessenger.getBinder();
     }
 }
+
