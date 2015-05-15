@@ -1,0 +1,32 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.eattle.phoket.FullPicture">
+
+
+    <com.eattle.phoket.ExtendedViewPager
+        android:id="@+id/albumFull"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.eattle.phoket.ExtendedViewPager>
+
+    <!-- Tag & Tag 추가란이 들어가는 Layout -->
+
+    <FrameLayout
+        android:id="@+id/tagLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        ></FrameLayout>
+
+    <!--
+<fragment
+android:id="@+id/frame"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+class="com.example.cds.eattle_prototype_2.TabToTag"/>-->
+
+
+</FrameLayout>
