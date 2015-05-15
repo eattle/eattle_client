@@ -612,7 +612,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         for(int i = 0, n = media.size(); i < n; i++){
             createMediaTag(tag_id, media.get(i).getId());
         }
-
         return tag_id;
     }
 

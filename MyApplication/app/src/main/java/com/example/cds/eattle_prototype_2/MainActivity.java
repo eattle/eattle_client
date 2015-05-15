@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
@@ -77,6 +78,9 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(Tag, "onCreate 호출");
+        final Button toUSB = (Button)findViewById(R.id.toUSB);
+        toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
+
 
         classification = (Button) findViewById(R.id.classification);
         if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
@@ -91,21 +95,21 @@ public class MainActivity extends ActionBarActivity {
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice blockDevice) {
-                fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
+
+                //fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
                 //USB가 스마트폰에 연결되었을 떄
                 CONSTANT.ISUSBCONNECTED = 1;
+                toUSB.setVisibility(View.VISIBLE);//USB가 연결되었으면 하단에 USB 버튼을 보여준다
                 //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
                 //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
 
             }
         });
-        /*
-        if(CONSTANT.ISUSBCONNECTED == 1)
-            importDB();*/
+
         //데이터베이스 OPEN
-        db = DatabaseHelper.getInstance(getApplicationContext());
+        db = DatabaseHelper.getInstance(this);
 
         //activity_main.xml에 있는 storyList 리스트뷰에 연결
         storyList = (ListView) findViewById(R.id.storyList);
@@ -282,8 +286,7 @@ public class MainActivity extends ActionBarActivity {
                 storyListAdapter.clear();//메인 화면을 일단 전부 지운다
                 storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다
 
-                if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
-                    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
+                importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함 - USB가 꽂혀있을 때만 실행함)
 
 
                 //서비스에게 사진 정리를 요청한다
@@ -292,17 +295,12 @@ public class MainActivity extends ActionBarActivity {
 
                 break;
 
-            /*
-            case R.id.intervalOk:
-                EditText editText = (EditText)findViewById(R.id.intervalText);
-                String text = editText.getText().toString();
-                if(text!=null) {//시간간격을 입력했으면
-                    CONSTANT.TIMEINTERVAL = Long.parseLong(text);
-                    pictureClassification();
-                }
-                else
-                    Toast.makeText(getBaseContext(),"시간 간격을 입력하세요",Toast.LENGTH_SHORT).show();
-                editText.clearFocus();*/
+            case R.id.toUSB:
+                importDB();//USB가 꽂혀있을 때만 실행함
+                Intent intent = new Intent(MainActivity.this, USBMainActivity.class);
+                intent.putExtra("check", 1);
+                startActivity(intent);
+                break;
         }
     }
 
@@ -370,20 +368,22 @@ public class MainActivity extends ActionBarActivity {
     }
 
     //[DB] 앱 -> USB
+    File sd = Environment.getExternalStorageDirectory();
+    File data = Environment.getDataDirectory();
     private void exportDB() {
         // TODO Auto-generated method stub
         if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
             String middlePoint = "/CaPic/" + DatabaseHelper.DATABASE_NAME;
-            File sd = Environment.getExternalStorageDirectory();
-            File data = Environment.getDataDirectory();
+
             FileChannel src = null;
             FileChannel dst = null;
+            File currentDB = null;
             try {
 
                 if (sd.canWrite()) {
 
                     FolderManage.makeDirectory(sd + "/CaPic/");//스마트폰 최상단 폴더에 CaPic 폴더를 만든다-DB 저장을 위해(기존에 있으면 안만듬)
-                    File currentDB = new File(data, CONSTANT.appDBPath);
+                    currentDB = new File(data, CONSTANT.appDBPath);
                     File backupDB = new File(sd, middlePoint);
 
                     src = new FileInputStream(currentDB).getChannel();
@@ -396,11 +396,13 @@ public class MainActivity extends ActionBarActivity {
 
                 }
             } catch (Exception e) {
-                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "[exportDB]"+e.toString(), Toast.LENGTH_LONG).show();
             }
             //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
             fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
             Log.d(Tag,"[exportDB] APP->USB 성공");
+            Toast.makeText(getBaseContext(), "[exportDB] export후 APP DB 존재여부 "+currentDB.exists(), Toast.LENGTH_LONG).show();
+
             Toast.makeText(this, "[exportDB] APP->USB 성공", Toast.LENGTH_SHORT).show();
         }
     }
@@ -410,7 +412,7 @@ public class MainActivity extends ActionBarActivity {
         // TODO Auto-generated method stub
         if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 import
             //기존의 APP DB를 삭제한다
-            getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+            getBaseContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
 
             File sd = Environment.getExternalStorageDirectory();
             File data = Environment.getDataDirectory();
@@ -441,7 +443,11 @@ public class MainActivity extends ActionBarActivity {
             try {
                 if (sd.canWrite()) {
                     File backupDB = new File(data, CONSTANT.appDBPath);
+                    if(!backupDB.exists())
+                        FolderManage.makeFile(backupDB,data+CONSTANT.appDBPath);
+                    Toast.makeText(getBaseContext(), "[importDB] backupDB 존재여부 "+backupDB.exists(), Toast.LENGTH_LONG).show();
                     File currentDB = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
+                    Toast.makeText(getBaseContext(), "[importDB] currentDB 존재여부 "+currentDB.exists(), Toast.LENGTH_LONG).show();
 
                     FileChannel src = new FileInputStream(currentDB).getChannel();
                     FileChannel dst = new FileOutputStream(backupDB).getChannel();
@@ -452,7 +458,7 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getBaseContext(), "[importDB] USB->APP 성공", Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
-                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "[importDB]"+e.toString(), Toast.LENGTH_LONG).show();
             }
 
         }

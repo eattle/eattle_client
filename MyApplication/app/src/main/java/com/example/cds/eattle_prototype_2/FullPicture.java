@@ -22,6 +22,7 @@ import com.example.cds.eattle_prototype_2.device.BlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,8 +91,23 @@ public class FullPicture extends ActionBarActivity {
                 opt.inSampleSize = 4;
                 Bitmap bm = BitmapFactory.decodeFile(path, opt);
                 img.setImageBitmap(bm);*/
-                Bitmap bm = fileoutimage(m.getName()+".jpg",CONSTANT.BLOCKDEVICE);
-                img.setImageBitmap(bm);
+                if(CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때
+                    Bitmap bm = fileoutimage(m.getName() + ".jpg", CONSTANT.BLOCKDEVICE);
+                    img.setImageBitmap(bm);
+                }
+                else{
+                    File isExist = new File(path);
+                    if(!isExist.exists()){
+                        //사진 파일이 로컬에 존재하지 않고 USB에만 있다고 판단될 때
+                        Toast.makeText(getApplicationContext(),"사진이 존재하지 않습니다. USB를 연결하세요",Toast.LENGTH_SHORT).show();
+                        return null;
+                    }
+
+                    BitmapFactory.Options opt = new BitmapFactory.Options();
+                    opt.inSampleSize = 4;
+                    Bitmap bm = BitmapFactory.decodeFile(path, opt);
+                    img.setImageBitmap(bm);
+                }
 
             } catch (OutOfMemoryError e) {
                 Log.e("warning", "이미지가 너무 큽니다");

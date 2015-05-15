@@ -240,28 +240,19 @@ public class ServiceOfPictureClassification extends Service {
         //2. folderDB는 기존대로 전부 삭제한다
         //3. 특정 사진에 있던 태그들은 삭제하지 않는다
 
-
         mCoder = new Geocoder(this);
         ImageSetter = new AlbumImageSetter(this, 0, 0);
         calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-        long averageInterval = totalInterval;
         if (totalPictureNum != 0)
-            averageInterval /= totalPictureNum;
-        CONSTANT.TIMEINTERVAL = averageInterval;
+            CONSTANT.TIMEINTERVAL = totalInterval/totalPictureNum;
         //DB를 참조한다.
-        Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
+        Manager _m = new Manager(totalPictureNum, CONSTANT.TIMEINTERVAL, standardDerivation);
         db.createManager(_m);//Manager DB에 값들을 집어넣음
         //DB에 있는 데이터들을 초기화한다
         db.deleteAllFolder();
-        //db.deleteAllMedia();
-        //db.deleteAllTag();
-        //db.deleteAllMediaTag();
         //커서의 위치를 처음으로 이동시킨다.
         ImageSetter.setCursor(0, 0);
-        //File picture=null;
-        //File dir=null;
 
-        ArrayList<Media> medias = new ArrayList<Media>();//DB에 추가될 Media들의 목록(DB에 한꺼번에 넣기 위하여)
         String startFolderID = "";
         String endFolderID = "";
         int folderIDForDB = 0;//Folder DB에 들어가는 아이디
@@ -296,7 +287,7 @@ public class ServiceOfPictureClassification extends Service {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
             String folderID = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE);
-            if (representativeImage.equals("")) {
+            if (representativeImage.equals("")) {//첫번째 스토리(폴더)를 만들 때
                 //representativeImage = String.valueOf(pictureID);
                 representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
                 thumbNailID = String.valueOf(pictureID);
