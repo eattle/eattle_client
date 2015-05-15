@@ -93,3 +93,4 @@ public class UsbDeviceHost {
         activity.unregisterReceiver(mUsbReceiver);
     }
 }
+

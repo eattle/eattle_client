@@ -11,22 +11,16 @@ public class UsbMassStorageBlockDevice implements BlockDevice {
 
     final private UsbSerialDevice usbSerialDevice;
     final private long lastLogicalBlockAddress, blockLength;
-    final private byte[] csw;
-
-    private void readCsw() {
-        usbSerialDevice.read(csw);
-    }
 
     public UsbMassStorageBlockDevice(UsbSerialDevice usbSerialDevice) {
         this.usbSerialDevice = usbSerialDevice;
-        csw = new byte[512];
-
         ReadCapacity10ScsiCommand command = new ReadCapacity10ScsiCommand();
         usbSerialDevice.write(command.generateCommand());
         byte[] readBuffer = new byte[512];
         usbSerialDevice.read(readBuffer);
 
-        readCsw();
+        byte[] csw = new byte[512];
+        usbSerialDevice.read(csw);
 
         lastLogicalBlockAddress = ((((int) readBuffer[0]) & 0xff) << 24) + ((((int) readBuffer[1]) & 0xff) << 16) + ((((int) readBuffer[2]) & 0xff) << 8) + (((int) readBuffer[3]) & 0xff);
         blockLength = (readBuffer[4] << 24) + (readBuffer[5] << 16) + (readBuffer[6] << 8) + readBuffer[7];
@@ -39,7 +33,8 @@ public class UsbMassStorageBlockDevice implements BlockDevice {
         command.setLba(lba);
         usbSerialDevice.write(command.generateCommand());
         usbSerialDevice.read(buffer);
-        readCsw();
+        byte[] csw = new byte[512];
+        usbSerialDevice.read(csw);
     }
 
     @Override
@@ -49,7 +44,8 @@ public class UsbMassStorageBlockDevice implements BlockDevice {
         command.setLba(lba);
         usbSerialDevice.write(command.generateCommand());
         usbSerialDevice.write(buffer);
-        readCsw();
+        byte[] csw = new byte[512];
+        usbSerialDevice.read(csw);
     }
 
     @Override
