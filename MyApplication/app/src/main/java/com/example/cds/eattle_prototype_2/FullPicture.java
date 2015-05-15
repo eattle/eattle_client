@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedBlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
 
@@ -197,7 +198,7 @@ public class FullPicture extends ActionBarActivity {
 
     }
 
-    private Bitmap fileoutimage(String outString, BlockDevice blockDevice) {//USB -> 스마트폰
+    private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X
         //1220879 1870864 2133464
 

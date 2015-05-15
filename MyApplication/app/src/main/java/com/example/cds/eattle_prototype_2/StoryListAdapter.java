@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedBlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.model.Media;
 
@@ -218,7 +219,7 @@ public class StoryListAdapter extends BaseAdapter {
     }
 
 
-    private Bitmap fileoutimage(String outString, BlockDevice blockDevice) {//내보내기
+    private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//내보내기
         //D  S   X
         //1220879 1870864 2133464
 

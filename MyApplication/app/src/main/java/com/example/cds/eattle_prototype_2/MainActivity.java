@@ -36,6 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedBlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedUsbMassStorageBlockDevice;
 import com.example.cds.eattle_prototype_2.helper.DatabaseHelper;
 import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
 import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
@@ -70,7 +72,7 @@ public class MainActivity extends ActionBarActivity {
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     private UsbDeviceHost usbDeviceHost;
-    private BlockDevice blockDevice;
+    private CachedBlockDevice blockDevice;
 
 
     @Override
@@ -95,8 +97,9 @@ public class MainActivity extends ActionBarActivity {
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice originalBlockDevice) {
-                fileSystem.incaseSearchTable(blockDevice);
                 CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
+
+                fileSystem.incaseSearchTable(blockDevice);
 
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
@@ -360,11 +363,11 @@ public class MainActivity extends ActionBarActivity {
         this.fileSystem = fileSystem;
     }
 
-    public BlockDevice getBlockDevice() {
+    public CachedBlockDevice getBlockDevice() {
         return blockDevice;
     }
 
-    public void setBlockDevice(BlockDevice blockDevice) {
+    public void setBlockDevice(CachedBlockDevice blockDevice) {
         this.blockDevice = blockDevice;
     }
 
@@ -400,6 +403,7 @@ public class MainActivity extends ActionBarActivity {
                 Toast.makeText(getBaseContext(), "[exportDB]"+e.toString(), Toast.LENGTH_LONG).show();
             }
             //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
+            fileSystem.delete(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
             fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
             Log.d(Tag,"[exportDB] APP->USB 성공");
             Toast.makeText(getBaseContext(), "[exportDB] export후 APP DB 존재여부 "+currentDB.exists(), Toast.LENGTH_LONG).show();
@@ -427,7 +431,7 @@ public class MainActivity extends ActionBarActivity {
                 return;
             }
             else
-                Log.d(Tag, "[importDB]tempDBArray != null, tempDBArray Length " + tempDBArray.length);
+                Log.d(Tag, "[importDB]tempDBArray != null import 성공!, tempDBArray Length " + tempDBArray.length);
 
             try{
                 if(middlePointFile != null && tempDBArray != null) {
@@ -465,7 +469,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private byte[] getDBFromUSB(String outString, BlockDevice blockDevice) {//내보내기
+    private byte[] getDBFromUSB(String outString, CachedBlockDevice blockDevice) {//내보내기
         //D  S   X
         //1220879 1870864 2133464
 

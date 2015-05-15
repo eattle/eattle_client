@@ -3,14 +3,12 @@ package com.example.cds.eattle_prototype_2;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.example.cds.eattle_prototype_2.device.BlockDevice;
+import com.example.cds.eattle_prototype_2.device.CachedBlockDevice;
 import com.example.cds.eattle_prototype_2.host.BlockDeviceApp;
 import com.example.cds.eattle_prototype_2.host.UsbDeviceHost;
 
@@ -28,6 +26,7 @@ public class FileSystem {
     final int STRINGLENSIZE = 3; //문자길이 블럭 크기
     final int SPACESIZE = 2; //공간위치 블럭 크기
     final int LOCATIONSIZE = 4; //주소 블럭 크기
+
     byte[] buffer = new byte[(int) CLUSTERSPACESIZE];
 
     int dummycnt = 1;
@@ -37,7 +36,6 @@ public class FileSystem {
     int endpoint = 0;
 
     private static FileSystem Instance;
-
     //비트맵 이미지 리사이징
     public Bitmap resizeBitmapImageFn(Bitmap bmpSource, int maxResolution) {
         int iWidth = bmpSource.getWidth();      //비트맵이미지의 넓이
@@ -64,94 +62,55 @@ public class FileSystem {
         return Bitmap.createScaledBitmap(bmpSource, newWidth, newHeight, true);
     }
 
-    private void passwardInput(int passward, BlockDevice blockDevice) {//암호넣기
-        pushBinary(2, passward, 4, 0, blockDevice);
+    private void passwardInput(int passward, CachedBlockDevice blockDevice){//암호넣기
+        pushBinary(2,passward,4,0,blockDevice);
+        blockDevice.flush();
     }
 
-    private int passwardOutput(BlockDevice blockDevice) {//암호빼기
+    private int passwardOutput(CachedBlockDevice blockDevice){//암호빼기
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         blockDevice.readBlock(2, dummyBuffer);
-        int passward = readIntToBinary(2, 0, 4, dummyBuffer, blockDevice);
+        int passward = readIntToBinary(2,0,4,dummyBuffer,blockDevice);
         return passward;
     }
 
-    private int emptySpaceSearch(BlockDevice blockDevice) {//빈공간 반환
+    private int emptySpaceSearch(CachedBlockDevice blockDevice){//빈공간 반환
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
-        int num = 0;
+        int num=0;
         int i;
 
 
         blockDevice.readBlock(3, dummyBuffer);
-        for (i = 0; i < CLUSTERSPACESIZE; i++) {
-            if ((dummyBuffer[i] & 0x80) == 0) {
-                num = 0;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x40) == 0) {
-                num = 1;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x20) == 0) {
-                num = 2;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x10) == 0) {
-                num = 3;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x08) == 0) {
-                num = 4;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x04) == 0) {
-                num = 5;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x02) == 0) {
-                num = 6;
-                break;
-            }
-            if ((dummyBuffer[i] & 0x01) == 0) {
-                num = 7;
-                break;
-            }
+        for(i=0;i<CLUSTERSPACESIZE;i++){
+            if( (dummyBuffer[i] & 0x80) == 0 ){ num = 0; break; }
+            if( (dummyBuffer[i] & 0x40) == 0 ){ num = 1; break; }
+            if( (dummyBuffer[i] & 0x20) == 0 ){ num = 2; break; }
+            if( (dummyBuffer[i] & 0x10) == 0 ){ num = 3; break; }
+            if( (dummyBuffer[i] & 0x08) == 0 ){ num = 4; break; }
+            if( (dummyBuffer[i] & 0x04) == 0 ){ num = 5; break; }
+            if( (dummyBuffer[i] & 0x02) == 0 ){ num = 6; break; }
+            if( (dummyBuffer[i] & 0x01) == 0 ){ num = 7; break; }
         }
 
         // (i * 8) + num ->몇번째 인지
         int addressnum = (i * 8) + num;
         blockDevice.readBlock(addressnum + 4, dummyBuffer);
 
-        for (i = 0; i < CLUSTERSPACESIZE; i++) {
-            if ((dummyBuffer[i] & 0x80) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 0 + 4;
-            }
-            if ((dummyBuffer[i] & 0x40) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 1 + 4;
-            }
-            if ((dummyBuffer[i] & 0x20) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 2 + 4;
-            }
-            if ((dummyBuffer[i] & 0x10) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 3 + 4;
-            }
-            if ((dummyBuffer[i] & 0x08) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 4 + 4;
-            }
-            if ((dummyBuffer[i] & 0x04) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 5 + 4;
-            }
-            if ((dummyBuffer[i] & 0x02) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 6 + 4;
-            }
-            if ((dummyBuffer[i] & 0x01) == 0) {
-                return (4096 * (addressnum + 1)) + (i * 8) + 7 + 4;
-            }
+        for(i=0;i<CLUSTERSPACESIZE;i++){
+            if( (dummyBuffer[i] & 0x80) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 0 + 4; }
+            if( (dummyBuffer[i] & 0x40) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 1 + 4; }
+            if( (dummyBuffer[i] & 0x20) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 2 + 4; }
+            if( (dummyBuffer[i] & 0x10) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 3 + 4; }
+            if( (dummyBuffer[i] & 0x08) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 4 + 4; }
+            if( (dummyBuffer[i] & 0x04) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 5 + 4; }
+            if( (dummyBuffer[i] & 0x02) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 6 + 4; }
+            if( (dummyBuffer[i] & 0x01) == 0 ){ return (4096 * (addressnum +1)) + (i * 8) + 7 + 4; }
         }
 
         return 0;
 
 		/*
-        for(int i=2; i<CLUSTERCNT ;i++){
+		for(int i=2; i<CLUSTERCNT ;i++){
 			if(BLOCK[i][ISEMPTYLOCATION] == (byte)0)
 				return i;
 		}
@@ -160,108 +119,61 @@ public class FileSystem {
     }
 
 
-    private void clusterWriteCheck(int location, BlockDevice blockDevice) { //클러스터 쓰고 표시
+
+    private void clusterWriteCheck(int location, CachedBlockDevice blockDevice){ //클러스터 쓰고 표시
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         boolean flag = true;
-        location = location - 4;
+        location = location -4;
 
-        blockDevice.readBlock((location >> 12) - 1 + 4, dummyBuffer);
+        blockDevice.readBlock((location >> 12) -1 + 4, dummyBuffer);
 
-        if (((location & 0x0FFF) & 0x07) == 0) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x80;
-        }
-        if (((location & 0x0FFF) & 0x07) == 1) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x40;
-        }
-        if (((location & 0x0FFF) & 0x07) == 2) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x20;
-        }
-        if (((location & 0x0FFF) & 0x07) == 3) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x10;
-        }
-        if (((location & 0x0FFF) & 0x07) == 4) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x08;
-        }
-        if (((location & 0x0FFF) & 0x07) == 5) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x04;
-        }
-        if (((location & 0x0FFF) & 0x07) == 6) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x02;
-        }
-        if (((location & 0x0FFF) & 0x07) == 7) {
-            dummyBuffer[(location & 0x0FFF) >> 3] |= 0x01;
-        }
+        if(((location & 0x0FFF) & 0x07)  == 0){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x80; }
+        if(((location & 0x0FFF) & 0x07)  == 1){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x40; }
+        if(((location & 0x0FFF) & 0x07)  == 2){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x20; }
+        if(((location & 0x0FFF) & 0x07)  == 3){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x10; }
+        if(((location & 0x0FFF) & 0x07)  == 4){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x08; }
+        if(((location & 0x0FFF) & 0x07)  == 5){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x04; }
+        if(((location & 0x0FFF) & 0x07)  == 6){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x02; }
+        if(((location & 0x0FFF) & 0x07)  == 7){ dummyBuffer[(location & 0x0FFF) >> 3] |= 0x01; }
 
-        blockDevice.writeBlock((location >> 12) - 1 + 4, dummyBuffer);
+        blockDevice.writeBlock((location >> 12) -1 + 4, dummyBuffer);
 
-        for (int i = 0; i < CLUSTERSPACESIZE; i++) {
-            if (dummyBuffer[i] != -1) {
+        for(int i=0; i<CLUSTERSPACESIZE;i++){
+            if(dummyBuffer[i] != -1) {
                 flag = false;
                 break;
             }
         }
 
-        if (flag) {
+        if(flag){
             blockDevice.readBlock(3, dummyBuffer);
-            if ((((location >> 12) - 1) & 0x07) == 0) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x80;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 1) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x40;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 2) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x20;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 3) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x10;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 4) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x08;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 5) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x04;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 6) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x02;
-            }
-            if ((((location >> 12) - 1) & 0x07) == 7) {
-                dummyBuffer[((location >> 12) - 1) >> 3] |= 0x01;
-            }
+            if((((location >> 12) -1) & 0x07)  == 0){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x80; }
+            if((((location >> 12) -1) & 0x07)  == 1){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x40; }
+            if((((location >> 12) -1) & 0x07)  == 2){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x20; }
+            if((((location >> 12) -1) & 0x07)  == 3){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x10; }
+            if((((location >> 12) -1) & 0x07)  == 4){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x08; }
+            if((((location >> 12) -1) & 0x07)  == 5){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x04; }
+            if((((location >> 12) -1) & 0x07)  == 6){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x02; }
+            if((((location >> 12) -1) & 0x07)  == 7){ dummyBuffer[((location >> 12) -1) >> 3] |= 0x01; }
             blockDevice.writeBlock(3, dummyBuffer);
         }
     }
 
-    private void clusterWriteUnCheck(int location, BlockDevice blockDevice) { //클러스터 쓰고 표시
+    private void clusterWriteUnCheck(int location, CachedBlockDevice blockDevice){ //클러스터 쓰고 표시
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
-        location = location - 4;
-        blockDevice.readBlock((location >> 12) - 1 + 4, dummyBuffer);
+        location = location -4;
+        blockDevice.readBlock((location >> 12) -1 + 4, dummyBuffer);
 
-        if (((location & 0x0FFF) & 0x07) == 0) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x80;
-        }
-        if (((location & 0x0FFF) & 0x07) == 1) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x40;
-        }
-        if (((location & 0x0FFF) & 0x07) == 2) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x20;
-        }
-        if (((location & 0x0FFF) & 0x07) == 3) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x10;
-        }
-        if (((location & 0x0FFF) & 0x07) == 4) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x08;
-        }
-        if (((location & 0x0FFF) & 0x07) == 5) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x04;
-        }
-        if (((location & 0x0FFF) & 0x07) == 6) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x02;
-        }
-        if (((location & 0x0FFF) & 0x07) == 7) {
-            dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x01;
-        }
+        if(((location & 0x0FFF) & 0x07)  == 0){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x80; }
+        if(((location & 0x0FFF) & 0x07)  == 1){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x40; }
+        if(((location & 0x0FFF) & 0x07)  == 2){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x20; }
+        if(((location & 0x0FFF) & 0x07)  == 3){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x10; }
+        if(((location & 0x0FFF) & 0x07)  == 4){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x08; }
+        if(((location & 0x0FFF) & 0x07)  == 5){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x04; }
+        if(((location & 0x0FFF) & 0x07)  == 6){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x02; }
+        if(((location & 0x0FFF) & 0x07)  == 7){ dummyBuffer[(location & 0x0FFF) >> 3] &= ~0x01; }
 
-        blockDevice.writeBlock((location >> 12) - 1 + 4, dummyBuffer);
+        blockDevice.writeBlock((location >> 12) -1 + 4, dummyBuffer);
 
     }
 
@@ -277,13 +189,12 @@ public class FileSystem {
             e.printStackTrace();
         }
 
-
         try {
             numberBytes = fileinputstream.available();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("xxxxxx", "numberBytes " + numberBytes);
+        //Log.d("xxxxxx", "numberBytes " + numberBytes);
 
         byte bytearray[] = new byte[numberBytes];
 
@@ -294,10 +205,9 @@ public class FileSystem {
         }
 
         return bytearray;
-
     }
 
-    public void incaseSearchTable(BlockDevice blockDevice) {//파일테이블 메모리에 넣기
+    public void incaseSearchTable(CachedBlockDevice blockDevice) {//파일테이블 메모리에 넣기
         int location = 0;
         endpoint = 0;
         int startaddress = 0;
@@ -305,7 +215,9 @@ public class FileSystem {
         int stringaddresslocation = STRINGSIZE + STRINGLENSIZE;
 
 
+
         blockDevice.readBlock(location, buffer);
+
 
         while (true) { //0번지 파일테이블 끝날때까지
             //for (int i = 0; i < 3; i++) {);
@@ -313,8 +225,9 @@ public class FileSystem {
             Log.d("xxxxxx", " location " + location + "  startaddress " + startaddress);
 
             String dummystring = readStringToBinary(location, startaddress, STRINGSIZE, buffer, blockDevice); //문자
-            if (dummystring.equals("0"))
+            if(dummystring.equals("0"))
                 break;
+
             int dummyfilelen = readIntToBinary(location, startaddress + STRINGSIZE, STRINGLENSIZE, buffer, blockDevice); //파일내용길이
             int dummystringaddress = readIntToBinary(location, stringaddresslocation + startaddress, LOCATIONSIZE, buffer, blockDevice); //번지
 
@@ -334,7 +247,7 @@ public class FileSystem {
 
             if (startaddress >= readIntToBinary(location, SPACELOCATION, SPACESIZE, buffer, blockDevice)) {
                 location = readIntToBinary(location, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
-                if (location == 0)
+                if(location == 0)
                     break;
                 blockDevice.readBlock(location, buffer);
                 startaddress = 0;
@@ -342,13 +255,14 @@ public class FileSystem {
 
         }
 
-        for (int i = 0; i < endpoint; i++) {
-            Log.d("xxxxxx", " 0] " + searchtable[i][0] + "  1] " + searchtable[i][1] + " 2] " + searchtable[i][2] + " 3] " + searchtable[i][3] + " 4] " + searchtable[i][4]);
+        //for (int i = 0; i < endpoint; i++) {
+        //Log.d("xxxxxx", " 0] " + searchtable[i][0] + "  1] " + searchtable[i][1] + " 2] " + searchtable[i][2] + " 3] " + searchtable[i][3] + " 4] " + searchtable[i][4]);
 
-        }
+        //}
+
     }
 
-    public void dropfiletable(int last, int result, BlockDevice blockDevice) {
+    public void dropfiletable(int last, int result, CachedBlockDevice blockDevice) {
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         while (true) {
             blockDevice.readBlock(last, dummyBuffer);
@@ -363,7 +277,7 @@ public class FileSystem {
         }
     }
 
-    public void filetablecopy(BlockDevice blockDevice) {//예상치 못하게 빠젓을 시 백업본 백업
+    public void filetablecopy(CachedBlockDevice blockDevice) {//예상치 못하게 빠젓을 시 백업본 백업
 
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         byte[] resultlittleBuffer = new byte[(int) CLUSTERSPACESIZE];
@@ -396,7 +310,7 @@ public class FileSystem {
 
                 //0번지
                 String dummystring = readStringToBinary(last, i, STRINGSIZE, buffer, blockDevice); //문자
-                int dummyfilelen = readIntToBinary(last, i + STRINGSIZE, STRINGLENSIZE, buffer, blockDevice); //파일내용길이
+                int dummyfilelen = readIntToBinary(last, i+STRINGSIZE, STRINGLENSIZE, buffer, blockDevice); //파일내용길이
                 addresslocation = emptySpaceSearch(blockDevice);
 
                 ////////////여기 dummystring////////////////
@@ -408,7 +322,7 @@ public class FileSystem {
                     int dummySpace = emptySpaceSearch(blockDevice);
                     pushBinary(taketablelocation, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
                     taketablelocation = dummySpace;
-                    clusterWriteCheck(taketablelocation, blockDevice);//비어있는공간 찾고 표시
+                    clusterWriteCheck(taketablelocation,blockDevice);//비어있는공간 찾고 표시
                 }
 
 
@@ -422,7 +336,7 @@ public class FileSystem {
                     blockDevice.readBlock(littlelast, dummyBuffer);
                     blockDevice.writeBlock(addresslocation, dummyBuffer);
 
-                    clusterWriteCheck(addresslocation, blockDevice);//비어있는공간 찾고 표시
+                    clusterWriteCheck(addresslocation,blockDevice);//비어있는공간 찾고 표시
 
                     littlelast = littleresult;
                     if (littleresult == 0)
@@ -449,9 +363,11 @@ public class FileSystem {
         //바뀐 0번지로 서치테이블 완성
         incaseSearchTable(blockDevice);
 
+        blockDevice.flush();
+
     }
 
-    public void copytableinit(BlockDevice blockDevice) {//원본데이터 복사 처음초기화
+    public void copytableinit(CachedBlockDevice blockDevice) {//원본데이터 복사 처음초기화
         int tablelocation = 1;
         int addresslocation;
 
@@ -500,7 +416,7 @@ public class FileSystem {
                 blockDevice.readBlock(result, buffer);
                 blockDevice.writeBlock(addresslocation, buffer);
 
-                clusterWriteCheck(addresslocation, blockDevice);//비어있는공간 찾고 표시
+                clusterWriteCheck(addresslocation,blockDevice);//비어있는공간 찾고 표시
 
                 result = readIntToBinary(result, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
                 if (result == 0)
@@ -509,7 +425,7 @@ public class FileSystem {
                 int dummySpace = emptySpaceSearch(blockDevice);
                 pushBinary(addresslocation, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
                 addresslocation = dummySpace;
-                clusterWriteCheck(addresslocation, blockDevice);//비어있는공간 찾고 표시
+                clusterWriteCheck(addresslocation,blockDevice);//비어있는공간 찾고 표시
             }
 
             //1번째
@@ -522,12 +438,14 @@ public class FileSystem {
                 int dummySpace = emptySpaceSearch(blockDevice);
                 pushBinary(tablelocation, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
                 tablelocation = dummySpace;
-                clusterWriteCheck(tablelocation, blockDevice);//비어있는공간 찾고 표시
+                clusterWriteCheck(tablelocation,blockDevice);//비어있는공간 찾고 표시
             }
         }
+
+        blockDevice.flush();
     }
 
-    public void fileInit(String content[], BlockDevice blockDevice) {//파일 처음 초기화
+    public void fileInit(String content[], CachedBlockDevice blockDevice) {//파일 처음 초기화
         int allAddressSpace = 0;
 
         for (int i = 1; i <= 2; i++) { //content.length
@@ -545,14 +463,14 @@ public class FileSystem {
             pushAddress(bytearray.length, STRINGLENSIZE, allAddressSpace, "0", blockDevice); //길이
             int limit = pushAddress(emptyCoreAdressSpace, LOCATIONSIZE, allAddressSpace, "0", blockDevice); //번지
 
-            clusterWriteCheck(emptyCoreAdressSpace, blockDevice);//비어있는공간 찾고 표시
+            clusterWriteCheck(emptyCoreAdressSpace,blockDevice);//비어있는공간 찾고 표시
 
 
             if (limit >= SPACELOCATION) {
                 int dummySpace = emptySpaceSearch(blockDevice);
                 pushBinary(allAddressSpace, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
                 allAddressSpace = dummySpace;
-                clusterWriteCheck(allAddressSpace, blockDevice);//비어있는공간 찾고 표시
+                clusterWriteCheck(allAddressSpace,blockDevice);//비어있는공간 찾고 표시
             }
 
             int cnt = 0;
@@ -566,7 +484,7 @@ public class FileSystem {
                 }
                 blockDevice.writeBlock(emptyCoreSpace, buffer);
 
-                clusterWriteCheck(emptyCoreSpace, blockDevice);//비어있는공간 찾고 표시
+                clusterWriteCheck(emptyCoreSpace,blockDevice);//비어있는공간 찾고 표시
 
                 //주소들 값 넣기
                 limit = pushAddress(emptyCoreSpace, LOCATIONSIZE, emptyCoreAdressSpace, "0", blockDevice);
@@ -575,15 +493,17 @@ public class FileSystem {
                     int dummySpace = emptySpaceSearch(blockDevice);
                     pushBinary(emptyCoreAdressSpace, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice);
                     emptyCoreAdressSpace = dummySpace;
-                    clusterWriteCheck(emptyCoreAdressSpace, blockDevice);//비어있는공간 찾고 표시
+                    clusterWriteCheck(emptyCoreAdressSpace,blockDevice);//비어있는공간 찾고 표시
                 }
 
             }
+            blockDevice.flush();
         }
+
 
     }
 
-    public String readStringToBinary(int location, int address, int currentlocationsize, byte[] resultbuffer, BlockDevice blockDevice) {
+    public String readStringToBinary(int location, int address, int currentlocationsize, byte[] resultbuffer, CachedBlockDevice blockDevice) {
         //byte -> string
 
         int cnt = 0;
@@ -595,7 +515,8 @@ public class FileSystem {
                 break;
             cnt++;
         }
-        if (cnt == 0)
+
+        if (cnt ==  0)
             return "0";
 
         byte[] binaryByte = new byte[cnt];
@@ -607,10 +528,11 @@ public class FileSystem {
         String binary = new String(binaryByte);
 
 
+
         return binary;
     }
 
-    public int readIntToBinary(int location, int address, int currentlocationsize, byte[] resultbuffer, BlockDevice blockDevice) {
+    public int readIntToBinary(int location, int address, int currentlocationsize, byte[] resultbuffer, CachedBlockDevice blockDevice ) {
         //byte -> int
         int result = 0;
         //blockDevice.readBlock(location, buffer);
@@ -620,15 +542,16 @@ public class FileSystem {
         return result;
     }
 
-    public void pushStringBinary(int location, String conversion, int currentlocationsize, int address, BlockDevice blockDevice) { //넣어줄 위치 , 바꿔줄 숫자, 크기, 넣어줄 위치안에주소
+    public void pushStringBinary(int location, String conversion, int currentlocationsize, int address, CachedBlockDevice blockDevice) { //넣어줄 위치 , 바꿔줄 숫자, 크기, 넣어줄 위치안에주소
         //int -> string
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         blockDevice.readBlock(location, dummyBuffer);
-        if (conversion.equals("0")) {
+        if (conversion.equals("0")){
             for (int i = 0; i < currentlocationsize; i++)
                 dummyBuffer[address + i] = 0;
             blockDevice.writeBlock(location, dummyBuffer);
-        } else {
+        }
+        else {
 
             byte[] binaryByte = conversion.getBytes();
             for (int i = 0; i < currentlocationsize; i++) {
@@ -642,7 +565,7 @@ public class FileSystem {
         }
     }
 
-    public void pushBinary(int location, int conversion, int currentlocationsize, int address, BlockDevice blockDevice) { //넣어줄 위치 , 바꿔줄 숫자, 크기, 넣어줄 위치안에주소
+    public void pushBinary(int location, int conversion, int currentlocationsize, int address, CachedBlockDevice blockDevice) { //넣어줄 위치 , 바꿔줄 숫자, 크기, 넣어줄 위치안에주소
         //int -> byte
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         blockDevice.readBlock(location, dummyBuffer);
@@ -650,14 +573,15 @@ public class FileSystem {
             for (int i = 0; i < currentlocationsize; i++)
                 dummyBuffer[address + i] = 0;
             blockDevice.writeBlock(location, dummyBuffer);
-        } else {
+        }
+        else {
             for (int i = 0; i < currentlocationsize; i++)
                 dummyBuffer[address + currentlocationsize - i - 1] = (byte) (conversion >> 8 * i);
             blockDevice.writeBlock(location, dummyBuffer);
         }
     }
 
-    public int pushAddress(int conversion, int currentlocationsize, int location, String stringconversion, BlockDevice blockDevice) {//위치에 계산하여 넣어주기
+    public int pushAddress(int conversion, int currentlocationsize, int location, String stringconversion, CachedBlockDevice blockDevice) {//위치에 계산하여 넣어주기
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         blockDevice.readBlock(location, dummyBuffer);
         int address = readIntToBinary(location, SPACELOCATION, SPACESIZE, dummyBuffer, blockDevice);
@@ -673,7 +597,7 @@ public class FileSystem {
         return address + currentlocationsize;
     }
 
-    public void addElementPushCopy(BlockDevice blockDevice) {
+    public void addElementPushCopy(CachedBlockDevice blockDevice) {
         //0번지 백업
         int last = lastHaveSpaceReturn(1, blockDevice);
         String dummystring = searchtable[endpoint - 1][0];
@@ -691,7 +615,7 @@ public class FileSystem {
             int dummySpace = emptySpaceSearch(blockDevice);
             pushBinary(last, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
             last = dummySpace;
-            clusterWriteCheck(last, blockDevice);//비어있는공간 찾고 표시
+            clusterWriteCheck(last,blockDevice);//비어있는공간 찾고 표시
         }
 
 
@@ -701,7 +625,7 @@ public class FileSystem {
             blockDevice.readBlock(result, buffer);
             blockDevice.writeBlock(addresslocation, buffer);
 
-            clusterWriteCheck(addresslocation, blockDevice);//비어있는공간 찾고 표시
+            clusterWriteCheck(addresslocation,blockDevice);//비어있는공간 찾고 표시
 
             result = readIntToBinary(result, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
             if (result == 0)
@@ -710,16 +634,18 @@ public class FileSystem {
             int dummySpace = emptySpaceSearch(blockDevice);
             pushBinary(addresslocation, dummySpace, LOCATIONSIZE, NEXTLOCATION, blockDevice); //마지막 위치 넣어주기
             addresslocation = dummySpace;
-            clusterWriteCheck(addresslocation, blockDevice);//비어있는공간 찾고 표시
+            clusterWriteCheck(addresslocation,blockDevice);//비어있는공간 찾고 표시
         }
 
         //완료 표시
         blockDevice.readBlock(1, buffer);
         buffer[ISCOMPLETELOCATION] = 1;
         blockDevice.writeBlock(1, buffer);
+
+        blockDevice.flush();
     }
 
-    public void addElementPush(String content, BlockDevice blockDevice, String file) {//새로운 입력
+    public void addElementPush(String content, CachedBlockDevice blockDevice,String file) {//새로운 입력
 
         //넣기전에 표시
         blockDevice.readBlock(0, buffer);
@@ -731,9 +657,6 @@ public class FileSystem {
         blockDevice.writeBlock(1, buffer);
 
         byte[] bytearray;
-        //String file = "/storage/emulated/0/DCIM/Camera/1.jpg";
-
-
         bytearray = binaryDataImport(file);
 
         int emptyCoreAdressSpace = emptySpaceSearch(blockDevice);
@@ -751,6 +674,8 @@ public class FileSystem {
         int limit = pushAddress(emptyCoreAdressSpace, LOCATIONSIZE, last, "0", blockDevice);//번지
 
         clusterWriteCheck(emptyCoreAdressSpace,blockDevice);//비어있는공간 찾고 표시
+
+
         int fristemptyCoreAdressSpace = emptyCoreAdressSpace;
 
         if (limit >= SPACELOCATION) {
@@ -797,9 +722,11 @@ public class FileSystem {
         buffer[ISCOMPLETELOCATION] = 1;
         blockDevice.writeBlock(0, buffer);
 
+        blockDevice.flush();
+
     }
 
-    public int lastReturn(int last, BlockDevice blockDevice) { //값없어도 되는 마지막 값 호출
+    public int lastReturn(int last, CachedBlockDevice blockDevice) { //값없어도 되는 마지막 값 호출
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         blockDevice.readBlock(last, dummyBuffer);
         int result = readIntToBinary(last, NEXTLOCATION, LOCATIONSIZE, dummyBuffer, blockDevice);
@@ -811,7 +738,7 @@ public class FileSystem {
         return last;
     }
 
-    public int lastHaveSpaceReturn(int last, BlockDevice blockDevice) { //값이 있는 마지막 값 호출
+    public int lastHaveSpaceReturn(int last, CachedBlockDevice blockDevice) { //값이 있는 마지막 값 호출
         byte[] dummyBuffer = new byte[(int) CLUSTERSPACESIZE];
         int sublast = last;
         blockDevice.readBlock(last, dummyBuffer);
@@ -831,7 +758,7 @@ public class FileSystem {
         return last;
     }
 
-    public void deleteCopy(String delString, BlockDevice blockDevice) {
+    public void deleteCopy(String delString, CachedBlockDevice blockDevice) {
         int blocksize = LOCATIONSIZE + STRINGLENSIZE + STRINGSIZE;
         int last = 1;
         int result;
@@ -869,7 +796,7 @@ public class FileSystem {
             int dummy = readIntToBinary(dummystringaddress, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
 
             blockDevice.writeBlock(dummystringaddress, deleteBuffer);
-            clusterWriteUnCheck(dummystringaddress, blockDevice); //비어있는 체크된것 해제하기
+            clusterWriteUnCheck(dummystringaddress,blockDevice); //비어있는 체크된것 해제하기
             dummystringaddress = dummy;
         }
 
@@ -899,9 +826,11 @@ public class FileSystem {
         blockDevice.readBlock(1, buffer);
         buffer[ISCOMPLETELOCATION] = 1;
         blockDevice.writeBlock(1, buffer);
+
+        blockDevice.flush();
     }
 
-    public void delete(String delString, BlockDevice blockDevice) {
+    public void delete(String delString, CachedBlockDevice blockDevice) {
 
         //넣기전에 표시
         blockDevice.readBlock(0, buffer);
@@ -918,13 +847,17 @@ public class FileSystem {
 
         int[] result = stringSearch(delString);
         if (result[0] == -1)
-            Log.d("xxxxxx", "값이 잘못들어왔습니다");
+            Log.d("xxxxxx", "값이1 잘못들어왔습니다");
             //Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
+
         else {
             int resultstringaddress = result[0];
             //int result = readIntToBinary(resultAdress[0],resultAdress[1]+80,LOCATIONSIZE);
 
+
             blockDevice.readBlock(resultstringaddress, buffer);
+            Log.d("xxxxxx", "1 "+buffer);
+
             //실제파일과 주소값 삭제
             while (resultstringaddress != 0) {
                 int endlocation = readIntToBinary(resultstringaddress, SPACELOCATION, SPACESIZE, buffer, blockDevice);
@@ -932,12 +865,12 @@ public class FileSystem {
                     int deleteSpace = readIntToBinary(resultstringaddress, i, LOCATIONSIZE, buffer, blockDevice);
 
                     blockDevice.writeBlock(deleteSpace, deleteBuffer);//실제파일 지우기
-                    clusterWriteUnCheck(deleteSpace, blockDevice); //비어있는 체크된것 해제하기
+                    clusterWriteUnCheck(deleteSpace,blockDevice); //비어있는 체크된것 해제하기
                 }
                 int dummy = readIntToBinary(resultstringaddress, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
 
                 blockDevice.writeBlock(resultstringaddress, deleteBuffer);
-                clusterWriteUnCheck(resultstringaddress, blockDevice); //비어있는 체크된것 해제하기
+                clusterWriteUnCheck(resultstringaddress,blockDevice); //비어있는 체크된것 해제하기
 
                 resultstringaddress = dummy;
                 blockDevice.readBlock(resultstringaddress, buffer);
@@ -962,10 +895,6 @@ public class FileSystem {
                 buffer[j] = 0;
             blockDevice.writeBlock(last, buffer);
 
-            Log.d("xxxxxx", "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-            pushBinary(last, lastResult - (STRINGSIZE + STRINGLENSIZE + LOCATIONSIZE), SPACESIZE, SPACELOCATION, blockDevice); //지우고 SPACELOCATION번쨰값 그전으로 변
-
-
             //탐색테이블 삭제
             searchtable[result[1]][0] = searchtable[endpoint - 1][0]; // 마지막 문자열
             searchtable[result[1]][1] = searchtable[endpoint - 1][1]; // 마지막 번지
@@ -979,9 +908,13 @@ public class FileSystem {
             searchtable[endpoint - 1][4] = "0";
             endpoint--;
 
+            Log.d("xxxxxx", "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+            pushBinary(last, lastResult - (STRINGSIZE + STRINGLENSIZE + LOCATIONSIZE), SPACESIZE, SPACELOCATION, blockDevice); //지우고 SPACELOCATION번쨰값 그전으로 변
+
+
 
             if (changeString.equals(delString)) { //마지막값과 찾는값과 같으면 끝낸다 (1개남은상태)
-                return;
+                Log.d("xxxxxx", "");
             } else {
                 //변경할값 실제 넣어주기
                 ////////////여기 changeString////////////////
@@ -989,12 +922,16 @@ public class FileSystem {
                 pushBinary(result[2], changelen, STRINGLENSIZE, result[3] + STRINGSIZE, blockDevice);//길이
                 pushBinary(result[2], changelocation, LOCATIONSIZE, result[3] + STRINGSIZE + STRINGLENSIZE, blockDevice);//번지
             }
+            //완료 표시
+            blockDevice.readBlock(0, buffer);
+            buffer[ISCOMPLETELOCATION] = 1;
+            blockDevice.writeBlock(0, buffer);
+
+            blockDevice.flush();
+
         }
 
-        //완료 표시
-        blockDevice.readBlock(0, buffer);
-        buffer[ISCOMPLETELOCATION] = 1;
-        blockDevice.writeBlock(0, buffer);
+
     }
 
     public int[] stringSearch(String delString) {
@@ -1003,8 +940,8 @@ public class FileSystem {
 
 
         for (int i = 0; i < endpoint; i++) {
-            Log.d("xxxxxx", "delString " + delString);
-            Log.d("xxxxxx", "searchtable[i][0] " + searchtable[i][0]);
+            //Log.d("xxxxxx", "delString " + delString);
+            //Log.d("xxxxxx", "searchtable[i][0] " + searchtable[i][0]);
             if (searchtable[i][0].equals(delString)) {
                 result[0] = Integer.parseInt(searchtable[i][1]); //번지수
                 result[1] = i; //탐색테이블 문자열 위치
@@ -1062,7 +999,7 @@ public class FileSystem {
         return result;
     }
     */
-    public void printAllBlock(int last, BlockDevice blockDevice) { //해당 값 출력
+    public void printAllBlock(int last, CachedBlockDevice blockDevice) { //해당 값 출력
 
         blockDevice.readBlock(last, buffer);
         int result = readIntToBinary(last, NEXTLOCATION, LOCATIONSIZE, buffer, blockDevice);
@@ -1096,7 +1033,6 @@ public class FileSystem {
         }
 
     }
-
     public static FileSystem getInstance(){
         if(Instance == null)
             Instance = new FileSystem();
