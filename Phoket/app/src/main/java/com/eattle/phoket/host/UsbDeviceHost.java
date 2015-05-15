@@ -18,6 +18,7 @@ import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.device.MyUsbSerialDevice;
 import com.eattle.phoket.device.UsbMassStorageBlockDevice;
 import com.eattle.phoket.device.UsbSerialDevice;
+import com.eattle.phoket.host.BlockDeviceApp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,4 +94,3 @@ public class UsbDeviceHost {
         activity.unregisterReceiver(mUsbReceiver);
     }
 }
-

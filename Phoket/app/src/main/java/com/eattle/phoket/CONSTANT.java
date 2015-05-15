@@ -1,6 +1,7 @@
 package com.eattle.phoket;
 
 import com.eattle.phoket.device.BlockDevice;
+import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 
 /**
@@ -16,7 +17,7 @@ public class CONSTANT {
     public static int ISUSBCONNECTED = 0; //USB가 연결되어 있으면 1, 아니면 0
     public static int PASSWORD = 0;//비밀번호 해제 안됬으면 0, 해제 됬으면 1
     public static int PASSWORD_TRIAL = 5; //비밀번호가 PASSWORD_TRIAL보다 많이 틀릴 경우 앱 종료
-    public static BlockDevice BLOCKDEVICE;
+    public static CachedBlockDevice BLOCKDEVICE;
 
     public static final String PACKAGENAME="com.example.cds.eattle_prototype_2";
     public static final String appDBPath="/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;//스마트폰 앱단의 DB 경로

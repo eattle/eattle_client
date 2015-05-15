@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.BlockDevice;
+import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
 
@@ -181,7 +182,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     }
 
-    private Bitmap fileoutimage(String outString, BlockDevice blockDevice) {//USB -> 스마트폰
+    private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X
         //1220879 1870864 2133464
 
