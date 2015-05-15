@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.eattle.phoket" >
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".SplashActivity"
+            android:label="@string/title_activity_splash" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main" >
+        </activity>
+        <activity
+            android:name=".PasswordActivity"
+            android:clearTaskOnLaunch="true"
+            android:label="@string/title_activity_password"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" >
+            >
+        </activity>
+
+        <service
+            android:name=".ServiceOfPictureClassification"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <activity
+            android:name=".AlbumGridActivity"
+            android:label="@string/title_activity_album_grid"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.eattle.phoket.MainActivity" />
+        </activity>
+        <activity
+            android:name=".AlbumFullActivity"
+            android:label="@string/title_activity_album_full"
+            android:parentActivityName=".AlbumGridActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.eattle.phoket.AlbumGridActivity" />
+        </activity>
+        <activity
+            android:name=".PopupForTagAddition"
+            android:label="@string/title_activity_popup_for_tag_addition" >
+        </activity>
+    </application>
+
+</manifest>
