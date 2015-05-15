@@ -12,3 +12,4 @@ public interface BlockDevice {
 
     public abstract long getBlockLength();
 }
+
