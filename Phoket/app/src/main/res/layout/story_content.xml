@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+
+    <!-- 스토리 보기 종료 -->
+    <ImageView
+        android:id="@+id/storyContentExit"
+        android:background="@mipmap/close"
+        android:layout_margin="10dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="right|top"/>
+
+
+</FrameLayout>

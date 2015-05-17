@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
@@ -24,9 +25,27 @@ import java.util.List;
 public class TagsOverAlbum extends Fragment {
     DatabaseHelper db;
     private static int media_id;
+    private static int position;
+    private static int totalPictureNum;
     private static Media m;
     int a = 0;
 
+    //pushTabToTag를 위해
+    public static TagsOverAlbum newInstance(Media m,int position,int totalPictureNum) {
+        setMedia(m);
+        setMedia_id(m.getId());
+
+        TagsOverAlbum ttt = new TagsOverAlbum();
+
+        Bundle args = new Bundle();
+        args.putInt("id", m.getId());
+        args.putInt("position", position);
+        args.putInt("totalPictureNum", totalPictureNum);
+        ttt.setArguments(args);
+
+        return ttt;
+    }
+    //setTabToTag를 위해
     public static TagsOverAlbum newInstance(Media m) {
         setMedia(m);
         setMedia_id(m.getId());
@@ -56,6 +75,7 @@ public class TagsOverAlbum extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             media_id = args.getInt("id");
+            position = args.getInt("position",0);
         }
 
         final LinearLayout layout = (LinearLayout) root.findViewById(R.id.tagLayout);
@@ -176,6 +196,11 @@ public class TagsOverAlbum extends Fragment {
         });
 
 
+
+        //스토리의 몇번째 사진인지
+        /*
+        TextView storyContentOrderText = (TextView)root.findViewById(R.id.storyContentOrderText);
+        storyContentOrderText.setText(position+"/"+totalPictureNum);*/
         return root;
     }
 
