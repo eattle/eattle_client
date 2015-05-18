@@ -14,8 +14,8 @@
         android:id="@+id/storyStartExit"
         android:background="@mipmap/close"
         android:layout_margin="10dp"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="right|top"/>
 
     <!--스토리 제목-->

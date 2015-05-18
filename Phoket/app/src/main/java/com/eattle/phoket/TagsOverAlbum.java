@@ -4,18 +4,25 @@ package com.eattle.phoket;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,10 +37,17 @@ public class TagsOverAlbum extends Fragment {
     private static Media m;
     int a = 0;
 
+    //파일 시스템 관련 변수
+    static FileSystem fileSystem;
+
     //pushTabToTag를 위해
     public static TagsOverAlbum newInstance(Media m,int position,int totalPictureNum) {
         setMedia(m);
         setMedia_id(m.getId());
+        setPosition(position);
+        setTotalPictureNum(totalPictureNum);
+
+        fileSystem = FileSystem.getInstance();
 
         TagsOverAlbum ttt = new TagsOverAlbum();
 
@@ -49,6 +63,8 @@ public class TagsOverAlbum extends Fragment {
     public static TagsOverAlbum newInstance(Media m) {
         setMedia(m);
         setMedia_id(m.getId());
+
+        fileSystem = FileSystem.getInstance();
 
         TagsOverAlbum ttt = new TagsOverAlbum();
 
@@ -164,7 +180,7 @@ public class TagsOverAlbum extends Fragment {
 
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);
         final Button btn = (Button) root.findViewById(R.id.button);
-        btn.setText("모멘트 추가");
+        //btn.setText("추가");
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -198,9 +214,41 @@ public class TagsOverAlbum extends Fragment {
 
 
         //스토리의 몇번째 사진인지
-        /*
         TextView storyContentOrderText = (TextView)root.findViewById(R.id.storyContentOrderText);
-        storyContentOrderText.setText(position+"/"+totalPictureNum);*/
+        storyContentOrderText.setText((position+1)+"/"+totalPictureNum);
+
+        //휴지통(사진 삭제)
+        ImageView storyContentDelete = (ImageView)root.findViewById(R.id.storyContentDelete);
+        storyContentDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*//TODO
+                //해당 사진을 삭제한다
+                //로컬(USB)에서 삭제
+                if(CONSTANT.ISUSBCONNECTED == 0) {//USB에 연결되지 않았을 때
+                    Log.d("asdfasdf", "USB 낫 연결 "+m.getPath());
+                    File tempFile = new File(m.getPath());
+                    FolderManage.deleteFile(tempFile);
+                }
+                else if(CONSTANT.ISUSBCONNECTED == 1){//USB에 연결되었을 때
+                    Log.d("asdfasdf", "USB  연결");
+                    fileSystem.delete(m.getId()+".jpg",CONSTANT.BLOCKDEVICE);
+                }
+                //DB에서 해당 사진 삭제
+                db.deleteMedia(m.getId());
+                Log.d("asdfasdf", "DB 삭제 완료");
+
+                //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
+                int folderId = m.getFolder_id();
+                if(db.getAllMediaByFolder(folderId).size() == 0)
+                    db.deleteFolder(folderId, true);
+                Log.d("asdfasdf", "폴더 삭제 완료");
+                Folder folder = db.getFolder(folderId);
+
+                //TODO 뷰를 새로 그린다.
+*/
+            }
+        });
         return root;
     }
 
@@ -219,5 +267,16 @@ public class TagsOverAlbum extends Fragment {
     public static void setMedia(Media m) {
         TagsOverAlbum.m = m;
     }
-
+    public static void setPosition(int position){
+        TagsOverAlbum.position = position;
+    }
+    public static int getPosition(){
+        return TagsOverAlbum.position;
+    }
+    public static void setTotalPictureNum(int totalPictureNum){
+        TagsOverAlbum.totalPictureNum = totalPictureNum;
+    }
+    public static int getTotalPictureNum(){
+        return TagsOverAlbum.totalPictureNum;
+    }
 }

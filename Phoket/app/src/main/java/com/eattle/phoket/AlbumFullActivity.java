@@ -11,6 +11,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,7 +36,7 @@ import java.util.List;
 public class AlbumFullActivity extends ActionBarActivity {
 
     DatabaseHelper db;
-    List<Media> mMediaList;
+    static List<Media> mMediaList;
     int initialMediaPosition;
     //USB에서 사진을 불러오기 위한 변수
     FileSystem fileSystem;
@@ -44,7 +45,9 @@ public class AlbumFullActivity extends ActionBarActivity {
     //'스토리 시작'을 통해 들어왔을 경우
     String titleName;
     String titleImagePath;
-
+    static ExtendedViewPager mViewPager;
+    static TouchImageAdapter touchImageAdapter;
+    int isTagAppeared = 0;//태그가 띄워져 있으면 1, 아니면 0
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         db = DatabaseHelper.getInstance(getApplicationContext());
@@ -64,20 +67,36 @@ public class AlbumFullActivity extends ActionBarActivity {
         fileSystem = FileSystem.getInstance();
 
         //뷰페이저 생성
-        ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.albumFull);
-        mViewPager.setAdapter(new TouchImageAdapter());//뷰페이저 어댑터 설정
+        mViewPager = (ExtendedViewPager) findViewById(R.id.albumFull);
+        touchImageAdapter = new TouchImageAdapter();
+        mViewPager.setAdapter(touchImageAdapter);//뷰페이저 어댑터 설정
         if (initialMediaPosition != -1)//-1이면 스토리 처음부터 시작(제목화면부터)
             mViewPager.setCurrentItem(initialMediaPosition);
-
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                if (initialMediaPosition == -1) {  //스토리 제목부터 시작해야 하는 경우
+                if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해.
-                    if (position == -1)
+                    if (position == -1) {
+                        Fragment f;
+                        if((f = isThereTabToTagHere()) != null) {//만약 태그들이 띄워져 있었으면 삭제한다
+                            FragmentTransaction tr = getFragmentManager().beginTransaction();
+                            //tagArrayList에 있는 모든 태그들을 삭제한다
+                            tr.remove(f);
+                            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                            tr.commit();
+                        }
                         return;
+                    }
+
                 }
-                setTabToTag(mMediaList.get(position));
+                if(isTagAppeared == 1) {//태그들이 띄워져 있어야 하는데
+                    Fragment f;
+                    if((f = isThereTabToTagHere()) == null){//스토리 제목(타이틀 화면)에 도달해서 잠시 안보였던 경우
+                        pushTabToTag(mMediaList.get(position),position);//다시 보이게 한다
+                    }
+                }
+                setTabToTag(mMediaList.get(position),position);
             }
 
             @Override
@@ -146,6 +165,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 }
             }
 
+            FrameLayout frameLayout = new FrameLayout(getApplicationContext());
             TouchImageView img = new TouchImageView(container.getContext());
 
             final Media m = mMediaList.get(position);
@@ -180,24 +200,30 @@ public class AlbumFullActivity extends ActionBarActivity {
             } catch (OutOfMemoryError e) {
                 Log.e("warning", "이미지가 너무 큽니다");
             }
+            frameLayout.addView(img,LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            //container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 
-            container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-
-
+            final int _position = position;
             //태그를 불러오기 위한 클릭 리스너
             img.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    pushTabToTag(m);
+                    pushTabToTag(m,_position);
                     setPlacePopup(m);
+                    if(isTagAppeared == 1)
+                        isTagAppeared = 0;
+                    else if(isTagAppeared == 0)
+                        isTagAppeared = 1;
                 }
             });
 
-            return img;
-            /*
             //종료 버튼(x)
             ImageView storyContentExit = new ImageView(getApplicationContext());
-            storyContentExit.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+            float scale = getResources().getDisplayMetrics().density;//종료 버튼의 DP 설정을 위해
+            FrameLayout.LayoutParams exitParams = new FrameLayout.LayoutParams((int)(40.0f*scale), (int)(40.0f*scale));//width:40dp,height:40dp
+            exitParams.gravity = Gravity.RIGHT | Gravity.TOP;
+            exitParams.setMargins((int)(10.0f*scale),(int)(10.0f*scale),(int)(10.0f*scale),(int)(10.0f*scale));//10dp margin
+            storyContentExit.setLayoutParams(exitParams);
             storyContentExit.setBackgroundResource(R.mipmap.close);
             storyContentExit.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -205,7 +231,12 @@ public class AlbumFullActivity extends ActionBarActivity {
                     finish();
                 }
             });
-            container.addView(storyContentExit);*/
+            frameLayout.addView(storyContentExit);
+
+            container.addView(frameLayout,LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            return frameLayout;
+
+
         }
 
         @Override
@@ -235,8 +266,16 @@ public class AlbumFullActivity extends ActionBarActivity {
             tr.commit();
         }
     }
-
-    void pushTabToTag(Media m){
+    void setTabToTag(Media m,int position){
+        if(isThereTabToTagHere() != null){
+            FragmentTransaction tr = getFragmentManager().beginTransaction();
+            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m,position,totalPictureNum);
+            tr.replace(R.id.tagLayout, ttt, "TabToTag");
+            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            tr.commit();
+        }
+    }
+    void pushTabToTag(Media m,int position){
         Fragment f;
         if((f = isThereTabToTagHere()) != null) {
             FragmentTransaction tr = getFragmentManager().beginTransaction();
@@ -247,7 +286,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
         else{
             FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m);
+            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m,position,totalPictureNum);
             tr.add(R.id.tagLayout, ttt, "TabToTag");
             tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             tr.commit();
