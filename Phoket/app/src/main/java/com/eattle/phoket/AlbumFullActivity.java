@@ -4,6 +4,7 @@ package com.eattle.phoket;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +30,7 @@ import android.widget.Toast;
 import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 
 import java.io.File;
@@ -42,14 +45,16 @@ public class AlbumFullActivity extends ActionBarActivity {
     int initialMediaPosition;
     //USB에서 사진을 불러오기 위한 변수
     FileSystem fileSystem;
-    int totalPictureNum;
+    static int totalPictureNum;
 
     //'스토리 시작'을 통해 들어왔을 경우
-    String titleName;
-    String titleImagePath;
+    static String titleName;
+    static String titleImagePath;
+    static String titleImageId;
+
     static ExtendedViewPager mViewPager;
     static TouchImageAdapter touchImageAdapter;
-    int isTagAppeared = 0;//태그가 띄워져 있으면 1, 아니면 0
+    static int isTagAppeared = 0;//태그가 띄워져 있으면 1, 아니면 0
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,19 +64,27 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         Intent intent = getIntent();
         mMediaList = intent.getParcelableArrayListExtra("mediaList");
-//        int folderId = intent.getIntExtra("folderId", 0);
+        int folderId = intent.getIntExtra("folderID", 0);
         initialMediaPosition = intent.getIntExtra("position", 0);
+        Folder folder = db.getFolder(folderId);
+        totalPictureNum = folder.getPicture_num();
+        titleName = folder.getName();
+        titleImagePath = folder.getImage();
+        titleImageId = folder.getThumbNail_name();
+        /*
         totalPictureNum = intent.getIntExtra("totalPictureNum", 0);
         if (initialMediaPosition == -1) {//'스토리 시작'버튼으로 들어왔을 경우
             titleName = intent.getStringExtra("titleName");
             titleImagePath = intent.getStringExtra("titleImagePath");
-            Log.d("testestestest", titleName + "!!" + titleImagePath);
         }
+        titleImageId = intent.getStringExtra("titleImageId");
+        */
+
         fileSystem = FileSystem.getInstance();
 
         //뷰페이저 생성
         mViewPager = (ExtendedViewPager) findViewById(R.id.albumFull);
-        touchImageAdapter = new TouchImageAdapter();
+        touchImageAdapter = new TouchImageAdapter(this,mMediaList);
         mViewPager.setAdapter(touchImageAdapter);//뷰페이저 어댑터 설정
         if (initialMediaPosition != -1)//-1이면 스토리 처음부터 시작(제목화면부터)
             mViewPager.setCurrentItem(initialMediaPosition);
@@ -117,14 +130,37 @@ public class AlbumFullActivity extends ActionBarActivity {
     class TouchImageAdapter extends PagerAdapter {
 
         //하나의 이미지에 하나 이상의 태그가 있기 때문에 ArrayList를 선언한다
-        ArrayList<TagsOverAlbum> tagArrayList = new ArrayList<TagsOverAlbum>();
+        //ArrayList<TagsOverAlbum> tagArrayList = new ArrayList<TagsOverAlbum>();
+        ArrayList<View> views = new ArrayList<View>();//뷰페이저 업데이트를 위해 선언
+        Context context;
+        List<Media> mediaList;
+        public TouchImageAdapter(Context context,List<Media> mediaList){
+            this.context = context;
+            this.mediaList = mediaList;
+        }
 
+        @Override
+        public int getItemPosition(Object object){//뷰페이저 업데이트를 위해 반드시 있어야 함
+            Log.d("TouchImageAdapter","getItemPosition 호출 : "+object);
+            return POSITION_NONE;
+        }
+        @Override
+        public boolean isViewFromObject(View view,Object object){//원래 있었음
+            return view == object;
+        }
+
+        public void removeView(int position){//뷰페이저 업데이트를 위해 선언
+            Log.d("touchImageAdapter","지우려는 viewpager 포지션 : "+position);
+            mediaList.remove(position);
+            this.notifyDataSetChanged();
+        }
+        //-----------------------------------------------
         @Override
         public int getCount() {
             if (initialMediaPosition != -1)//default
-                return mMediaList.size();
+                return mediaList.size();
             else//-1이면 스토리 처음부터 시작(제목화면부터)
-                return mMediaList.size() + 1;//하나가 더 추가됨
+                return mediaList.size() + 1;//하나가 더 추가됨
         }
 
         @Override
@@ -170,7 +206,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             FrameLayout frameLayout = new FrameLayout(getApplicationContext());
             TouchImageView img = new TouchImageView(container.getContext());
 
-            final Media m = mMediaList.get(position);
+            final Media m = mediaList.get(position);
 
             String path = m.getPath();//사진의 경로를 가져온다
             //TODO 사진 경로에 사진이 없을 경우를 체크한다
@@ -236,20 +272,20 @@ public class AlbumFullActivity extends ActionBarActivity {
 
             container.addView(frameLayout, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             return frameLayout;
-
-
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             if (initialMediaPosition == -1)  //스토리 제목부터 시작해야 하는 경우
                 position--;//첫화면에 제목화면을 넣기 위해.
-            container.removeView((View) object);
+            container.removeView((View)object);
         }
 
+
+
         @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
+        public void notifyDataSetChanged(){
+            super.notifyDataSetChanged();
         }
 
     }

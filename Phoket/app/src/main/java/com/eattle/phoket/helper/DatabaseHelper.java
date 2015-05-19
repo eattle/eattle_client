@@ -575,6 +575,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
      * Deleting media by id
      */
     public void deleteMedia(int id){
+        Log.d("DatabaseHelper","deleteMedia(id) 호출");
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
         deleteMediaTagByMediaId(id);

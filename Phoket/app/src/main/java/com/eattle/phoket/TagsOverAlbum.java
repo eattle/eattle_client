@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -37,13 +38,14 @@ public class TagsOverAlbum extends Fragment {
     private static int position;
     private static int totalPictureNum;
     private static Media m;
+
     int a = 0;
 
     //파일 시스템 관련 변수
     static FileSystem fileSystem;
 
     //pushTabToTag를 위해
-    public static TagsOverAlbum newInstance(Media m,int position,int totalPictureNum) {
+    public static TagsOverAlbum newInstance(Media m, int position, int totalPictureNum) {
         setMedia(m);
         setMedia_id(m.getId());
         setPosition(position);
@@ -61,6 +63,7 @@ public class TagsOverAlbum extends Fragment {
 
         return ttt;
     }
+
     //setTabToTag를 위해
     public static TagsOverAlbum newInstance(Media m) {
         setMedia(m);
@@ -93,7 +96,7 @@ public class TagsOverAlbum extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             media_id = args.getInt("id");
-            position = args.getInt("position",0);
+            position = args.getInt("position", 0);
         }
 
         final LinearLayout layout = (LinearLayout) root.findViewById(R.id.tagLayout);
@@ -102,8 +105,8 @@ public class TagsOverAlbum extends Fragment {
 
         int s = tags.size();
 
-        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(4,4,4,4);//태그들 간에 margin을 지정하는 부분
+        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(4, 4, 4, 4);//태그들 간에 margin을 지정하는 부분
 
         //사용자가 직접 추가한 태그
         for (int i = 0; i < s; i++) {
@@ -127,11 +130,11 @@ public class TagsOverAlbum extends Fragment {
         }
         //기본적으로 추가하는 태그(날짜 등)
         //'년','월','일' 태그
-        for(int i=0;i<3;i++) {
+        for (int i = 0; i < 3; i++) {
             Button defaultTagButton = (Button) inflater.inflate(R.layout.view_default_tag_button, null);
             defaultTagButton.setLayoutParams(params);
 
-            if(i==0) {
+            if (i == 0) {
                 final String tagName = Integer.toString(m.getYear()) + "년";
                 defaultTagButton.setText(tagName);
                 defaultTagButton.setOnClickListener(new View.OnClickListener() {
@@ -140,13 +143,12 @@ public class TagsOverAlbum extends Fragment {
                         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                         intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                         //intent.putExtra("id", -1);
-                        intent.putExtra("tagName",tagName);//기본 태그에서는 tagName을 넘겨준다
+                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
                         intent.putExtra("mediaId", m.getId());
                         startActivity(intent);
                     }
                 });
-            }
-            else if(i==1) {
+            } else if (i == 1) {
                 final String tagName = Integer.toString(m.getMonth()) + "월";
                 defaultTagButton.setText(tagName);
                 defaultTagButton.setOnClickListener(new View.OnClickListener() {
@@ -155,13 +157,12 @@ public class TagsOverAlbum extends Fragment {
                         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                         intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                         //intent.putExtra("id", -1);
-                        intent.putExtra("tagName",tagName);//기본 태그에서는 tagName을 넘겨준다
+                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
                         intent.putExtra("mediaId", m.getId());
                         startActivity(intent);
                     }
                 });
-            }
-            else if(i==2) {
+            } else if (i == 2) {
                 final String tagName = Integer.toString(m.getDay()) + "일";
                 defaultTagButton.setText(tagName);
                 defaultTagButton.setOnClickListener(new View.OnClickListener() {
@@ -170,7 +171,7 @@ public class TagsOverAlbum extends Fragment {
                         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                         intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                         //intent.putExtra("id", -1);
-                        intent.putExtra("tagName",tagName);//기본 태그에서는 tagName을 넘겨준다
+                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
                         intent.putExtra("mediaId", m.getId());
                         startActivity(intent);
                     }
@@ -214,13 +215,12 @@ public class TagsOverAlbum extends Fragment {
         });
 
 
-
         //스토리의 몇번째 사진인지
-        TextView storyContentOrderText = (TextView)root.findViewById(R.id.storyContentOrderText);
-        storyContentOrderText.setText((position+1)+"/"+totalPictureNum);
+        TextView storyContentOrderText = (TextView) root.findViewById(R.id.storyContentOrderText);
+        storyContentOrderText.setText((position + 1) + "/" + totalPictureNum);
 
         //휴지통(사진 삭제)
-        ImageView storyContentDelete = (ImageView)root.findViewById(R.id.storyContentDelete);
+        ImageView storyContentDelete = (ImageView) root.findViewById(R.id.storyContentDelete);
         storyContentDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,7 +237,7 @@ public class TagsOverAlbum extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        pictureDelete();
+                        deletePicture();
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         break;
@@ -248,33 +248,73 @@ public class TagsOverAlbum extends Fragment {
         d.setNegativeButton("No", l);
         d.show();
     }
-    public void pictureDelete(){
-        /*//TODO
-                //해당 사진을 삭제한다
-                //로컬(USB)에서 삭제
-                if(CONSTANT.ISUSBCONNECTED == 0) {//USB에 연결되지 않았을 때
-                    Log.d("asdfasdf", "USB 낫 연결 "+m.getPath());
-                    File tempFile = new File(m.getPath());
-                    FolderManage.deleteFile(tempFile);
-                }
-                else if(CONSTANT.ISUSBCONNECTED == 1){//USB에 연결되었을 때
-                    Log.d("asdfasdf", "USB  연결");
-                    fileSystem.delete(m.getId()+".jpg",CONSTANT.BLOCKDEVICE);
-                }
-                //DB에서 해당 사진 삭제
-                db.deleteMedia(m.getId());
-                Log.d("asdfasdf", "DB 삭제 완료");
 
-                //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
-                int folderId = m.getFolder_id();
-                if(db.getAllMediaByFolder(folderId).size() == 0)
-                    db.deleteFolder(folderId, true);
-                Log.d("asdfasdf", "폴더 삭제 완료");
-                Folder folder = db.getFolder(folderId);
+    public void deletePicture() {
+        //데이터베이스 OPEN
+        if(db == null)
+            db = DatabaseHelper.getInstance(getActivity());
+        //해당 사진을 삭제한다
+        //로컬(USB)에서 삭제
+        if (CONSTANT.ISUSBCONNECTED == 0) {//USB에 연결되지 않았을 때
+            Log.d("asdfasdf", "USB 낫 연결 " + m.getPath());
+            File tempFile = new File(m.getPath());
+            tempFile.delete();
+        } else if (CONSTANT.ISUSBCONNECTED == 1) {//USB에 연결되었을 때
+            Log.d("asdfasdf", "USB  연결");
+            fileSystem.delete(m.getId() + ".jpg", CONSTANT.BLOCKDEVICE);
+        }
 
-                //TODO 뷰를 새로 그린다.
-*/
+        int folderId = m.getFolder_id();
+        List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
+        Folder folder = db.getFolder(folderId);
+
+        //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
+        if(media_id == Integer.parseInt(AlbumFullActivity.titleImageId)) {
+            for (int i = 0; i < allMediaByFolder.size(); i++) {
+                if (allMediaByFolder.get(i).getId() == media_id) {
+                    //TODO 일단 그 다음 혹은 이전 사진을 대표사진으로 변경한다 -> 대표 사진 선정 방식 고민
+                    if (i != allMediaByFolder.size() - 1) {
+                        String path = allMediaByFolder.get(i + 1).getPath();
+                        folder.setImage(path);
+                        AlbumFullActivity.titleImagePath = path;
+
+                        String id = String.valueOf(allMediaByFolder.get(i + 1).getId());
+                        folder.setThumbNail_name(id);
+                        AlbumFullActivity.titleImageId = id;
+                    } else {
+                        String path = allMediaByFolder.get(i - 1).getPath();
+
+                        folder.setImage(path);
+                        AlbumFullActivity.titleImagePath = path;
+
+                        String id = String.valueOf(allMediaByFolder.get(i - 1).getId());
+                        folder.setThumbNail_name(id);
+                        AlbumFullActivity.titleImageId = id;
+
+                    }
+                }
+            }
+        }
+        folder.setPicture_num(--AlbumFullActivity.totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
+        db.updateFolder(folder);//DB에 업데이트
+
+
+
+        //DB에서 해당 사진 삭제
+        db.deleteMedia(m.getId());
+        Log.d("TagsOverAlbum", "DB 삭제 완료");
+
+        //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
+        if (allMediaByFolder.size() == 0)
+            db.deleteFolder(folderId, true);
+        Log.d("TagsOverAlbum", "폴더 삭제 완료");
+
+
+        Toast.makeText(getActivity(),"사진이 삭제되었습니다",Toast.LENGTH_SHORT).show();
+        //뷰를 새로 그린다.
+        AlbumFullActivity.touchImageAdapter.removeView(position);
     }
+
     public int getMedia_id() {
         return media_id;
     }
@@ -290,16 +330,20 @@ public class TagsOverAlbum extends Fragment {
     public static void setMedia(Media m) {
         TagsOverAlbum.m = m;
     }
-    public static void setPosition(int position){
+
+    public static void setPosition(int position) {
         TagsOverAlbum.position = position;
     }
-    public static int getPosition(){
+
+    public static int getPosition() {
         return TagsOverAlbum.position;
     }
-    public static void setTotalPictureNum(int totalPictureNum){
+
+    public static void setTotalPictureNum(int totalPictureNum) {
         TagsOverAlbum.totalPictureNum = totalPictureNum;
     }
-    public static int getTotalPictureNum(){
+
+    public static int getTotalPictureNum() {
         return TagsOverAlbum.totalPictureNum;
     }
 }
