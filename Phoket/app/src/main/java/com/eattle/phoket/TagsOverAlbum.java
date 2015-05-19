@@ -1,7 +1,9 @@
 package com.eattle.phoket;
 
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -101,7 +103,7 @@ public class TagsOverAlbum extends Fragment {
         int s = tags.size();
 
         final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(4,4,4,4);
+        params.setMargins(4,4,4,4);//태그들 간에 margin을 지정하는 부분
 
         //사용자가 직접 추가한 태그
         for (int i = 0; i < s; i++) {
@@ -222,7 +224,32 @@ public class TagsOverAlbum extends Fragment {
         storyContentDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*//TODO
+                wantPictureDeleted();
+            }
+        });
+        return root;
+    }
+
+    public void wantPictureDeleted() {//사진을 삭제할지
+        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+        d.setTitle("사진을 완전히 삭제하시겠습니까?");
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        pictureDelete();
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+                }
+            }
+        };
+        d.setPositiveButton("Yes", l);
+        d.setNegativeButton("No", l);
+        d.show();
+    }
+    public void pictureDelete(){
+        /*//TODO
                 //해당 사진을 삭제한다
                 //로컬(USB)에서 삭제
                 if(CONSTANT.ISUSBCONNECTED == 0) {//USB에 연결되지 않았을 때
@@ -247,11 +274,7 @@ public class TagsOverAlbum extends Fragment {
 
                 //TODO 뷰를 새로 그린다.
 */
-            }
-        });
-        return root;
     }
-
     public int getMedia_id() {
         return media_id;
     }

@@ -7,9 +7,10 @@
         android:id="@+id/storyStartImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scaleType="centerCrop"
         android:alpha="0.4"/>
 
-    <!-- 스토리 보기 종료 -->
+    <!-- 스토리 보기 종료 (x버튼)-->
     <ImageView
         android:id="@+id/storyStartExit"
         android:background="@mipmap/close"
