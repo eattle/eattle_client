@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:background="#77ffffff"
     android:orientation="vertical"
     android:weightSum="1"
     tools:context="com.example.cds.eattle_prototype_2.TabToTag">
@@ -9,33 +10,46 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none"
-        >
+        android:scrollbars="none">
+
         <LinearLayout
             android:id="@+id/tagLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-        </LinearLayout>
+            android:orientation="horizontal"></LinearLayout>
     </HorizontalScrollView>
     <!--android:layout_weight="0.01"         android:layout_weight="0.99"         android:gravity="bottom"
 
 -->
+    <!-- 선 -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:background="@mipmap/line"
+        android:alpha="0.4"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
         android:orientation="horizontal">
 
+        <ImageView
+            android:background="@mipmap/ic_launcher"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
 
         <EditText
             android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
+            android:textSize="12dp"
+            android:textColorHint="#77000000"
             android:hint="소중한 사진에 모멘트를 달아주세요"
-            android:singleLine="true" />
+            android:layout_marginTop="15dp"
+            android:singleLine="true" /><!--hint size는 textSize를 따라간다-->
 
         <Button
             android:id="@+id/button"
@@ -45,8 +59,52 @@
             android:layout_margin="5dp"
             android:layout_weight="0.2"
             android:background="@layout/view_button_shape"
-            android:text="New Button"
+            android:text="추가"
             android:textSize="10dp" />
-    </LinearLayout>
 
+
+    </LinearLayout>
+    <!-- 선 -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:background="@mipmap/line"
+        android:alpha="0.4"/>
+
+    <!--스토리의 몇번째 사진인지-->
+
+    <RelativeLayout
+        android:id="@+id/storyContentOrder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
+
+        <!--휴지통-->
+        <ImageView
+            android:id="@+id/storyContentDelete"
+            android:layout_alignParentLeft="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@mipmap/trash" />
+
+
+        <LinearLayout
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right">
+            <!-- 네모 4개 있는 이미지-->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@mipmap/ic_launcher" />
+            <TextView
+                android:id="@+id/storyContentOrderText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

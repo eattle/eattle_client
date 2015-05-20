@@ -24,6 +24,19 @@
             android:textSize="20dp"
             android:layout_gravity="center" />
 
+        <Button
+            android:id="@+id/storyStart"
+            android:layout_margin="15dp"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:text="스토리 시작"
+            android:textSize="12dp"
+            android:background="#FFFFFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:onClick="onClick"/>
+
     </FrameLayout>
 
     <GridView

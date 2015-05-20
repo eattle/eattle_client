@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     public static final String DATABASE_NAME = "CaPicDB";
 
@@ -249,6 +249,20 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         }
 
         db.delete(TABLE_MEDIA, KEY_ID + " = ? ", new String[]{String.valueOf(folder.getId())});
+    }
+    public void deleteFolder(int folderId, boolean should_delete_all_media_in_that_folder){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //check if media in that folder should also be deleted
+        if(should_delete_all_media_in_that_folder){
+            List<Media> allMedia =  getAllMediaByFolder(folderId);
+
+            for(Media m : allMedia){
+                deleteMedia(m.getId());
+            }
+        }
+
+        db.delete(TABLE_MEDIA, KEY_ID + " = ? ", new String[]{String.valueOf(folderId)});
     }
 
     public void deleteAllFolder(){
@@ -561,6 +575,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
      * Deleting media by id
      */
     public void deleteMedia(int id){
+        Log.d("DatabaseHelper","deleteMedia(id) 호출");
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
         deleteMediaTagByMediaId(id);

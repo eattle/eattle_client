@@ -42,6 +42,7 @@
     <ListView
         android:id="@+id/storyList"
         android:layout_below="@+id/buttons"
+        android:layout_above="@+id/toUSB"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
 
@@ -68,4 +69,13 @@
             android:layout_weight="1"
             android:onClick="onClick"/>
     </LinearLayout>-->
+    <Button
+        android:id="@+id/toUSB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="USB"
+        android:textSize="15dp"
+        android:background="@layout/button_shape"
+        android:onClick="onClick"/>
 </RelativeLayout>

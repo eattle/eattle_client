@@ -21,4 +21,5 @@
     <string name="title_activity_album_grid">AlbumGridActivity</string>
     <string name="title_activity_album_full">AlbumFullActivity</string>
     <string name="title_activity_popup_for_tag_addition">PopupForTagAddition</string>
+    <string name="title_activity_usbmain">USBMainActivity</string>
 </resources>

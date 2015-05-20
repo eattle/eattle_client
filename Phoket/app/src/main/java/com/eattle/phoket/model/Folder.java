@@ -7,7 +7,7 @@ public class Folder {
     int id;
     String name;
     String image;
-    String thumbNail_name;
+    String thumbNail_name;//폴더 대표 이미지의 'ID'임.
     int picture_num;//특정 folder에 들어있는 사진의 개수
 
     public Folder() {

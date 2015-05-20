@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:shape="rectangle">
             <solid android:color="#FFFFFF"/>
+
             <padding android:left="3dp" android:right="3dp" />
             <corners android:radius="3dp" />
             <!--

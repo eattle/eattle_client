@@ -392,9 +392,10 @@ public class ServiceOfPictureClassification extends Service {
             //1. 이미 USB에 있는 사진일 경우
             //2. 새로운 사진
             if(CONSTANT.ISUSBCONNECTED == 1) {
-                //fileSystem.addElementPush(pictureID + ".jpg", CONSTANT.BLOCKDEVICE, path);
-                Log.d("service",pictureID+".jpg 백업 완료");
+                if(fileSystem.stringSearch(pictureID+".jpg")[0] == -1) //USB에 없는 사진이면
+                    fileSystem.addElementPush(pictureID + ".jpg", CONSTANT.BLOCKDEVICE, path);//USB로 백업
 
+                Log.d("service",pictureID+".jpg 백업 완료");
             }
 
 

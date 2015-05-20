@@ -27,10 +27,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.BlockDevice;
+import com.eattle.phoket.device.CachedBlockDevice;
+import com.eattle.phoket.device.CachedUsbMassStorageBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.host.BlockDeviceApp;
 import com.eattle.phoket.host.UsbDeviceHost;
@@ -64,7 +67,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     //파일 시스템 관련 변수
     FileSystem fileSystem;
     private UsbDeviceHost usbDeviceHost;
-    private BlockDevice blockDevice;
+    private CachedBlockDevice blockDevice;
 
     //DB관련 변수
     DatabaseHelper db;
@@ -78,17 +81,24 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final Button toUSB = (Button)findViewById(R.id.toUSB);
+        toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
+
         fileSystem = FileSystem.getInstance();
 
         usbDeviceHost = new UsbDeviceHost();
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
-            public void onConnected(BlockDevice blockDevice) {
-                fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화(USB에 데이터가 있을때만 해야됨)
+            public void onConnected(BlockDevice originalBlockDevice) {
+                CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
+
+                fileSystem.incaseSearchTable(blockDevice);
+
                 CONSTANT.BLOCKDEVICE = blockDevice;//temp
                 setBlockDevice(blockDevice);
                 //USB가 스마트폰에 연결되었을 떄
                 CONSTANT.ISUSBCONNECTED = 1;
+                toUSB.setVisibility(View.VISIBLE);//USB가 연결되었으면 하단에 USB 버튼을 보여준다
                 //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
                 //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
 
@@ -325,29 +335,31 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         this.fileSystem = fileSystem;
     }
 
-    public BlockDevice getBlockDevice() {
+    public CachedBlockDevice getBlockDevice() {
         return blockDevice;
     }
 
-    public void setBlockDevice(BlockDevice blockDevice) {
+    public void setBlockDevice(CachedBlockDevice blockDevice) {
         this.blockDevice = blockDevice;
     }
 
     //[DB] 앱 -> USB
+    File sd = Environment.getExternalStorageDirectory();
+    File data = Environment.getDataDirectory();
     private void exportDB() {
         // TODO Auto-generated method stub
         if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
             String middlePoint = "/CaPic/" + DatabaseHelper.DATABASE_NAME;
-            File sd = Environment.getExternalStorageDirectory();
-            File data = Environment.getDataDirectory();
+
             FileChannel src = null;
             FileChannel dst = null;
+            File currentDB = null;
             try {
 
                 if (sd.canWrite()) {
 
                     FolderManage.makeDirectory(sd + "/CaPic/");//스마트폰 최상단 폴더에 CaPic 폴더를 만든다-DB 저장을 위해(기존에 있으면 안만듬)
-                    File currentDB = new File(data, CONSTANT.appDBPath);
+                    currentDB = new File(data, CONSTANT.appDBPath);
                     File backupDB = new File(sd, middlePoint);
 
                     src = new FileInputStream(currentDB).getChannel();
@@ -360,11 +372,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
                 }
             } catch (Exception e) {
-                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "[exportDB]"+e.toString(), Toast.LENGTH_LONG).show();
             }
             //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
+            fileSystem.delete(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
             fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
             Log.d(Tag,"[exportDB] APP->USB 성공");
+            Toast.makeText(getBaseContext(), "[exportDB] export후 APP DB 존재여부 "+currentDB.exists(), Toast.LENGTH_LONG).show();
+
             Toast.makeText(this, "[exportDB] APP->USB 성공", Toast.LENGTH_SHORT).show();
         }
     }
@@ -374,7 +389,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // TODO Auto-generated method stub
         if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 import
             //기존의 APP DB를 삭제한다
-            getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+            getBaseContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
 
             File sd = Environment.getExternalStorageDirectory();
             File data = Environment.getDataDirectory();
@@ -388,7 +403,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 return;
             }
             else
-                Log.d(Tag, "[importDB]tempDBArray != null, tempDBArray Length " + tempDBArray.length);
+                Log.d(Tag, "[importDB]tempDBArray != null import 성공!, tempDBArray Length " + tempDBArray.length);
 
             try{
                 if(middlePointFile != null && tempDBArray != null) {
@@ -405,7 +420,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             try {
                 if (sd.canWrite()) {
                     File backupDB = new File(data, CONSTANT.appDBPath);
+                    if(!backupDB.exists())
+                        FolderManage.makeFile(backupDB,data+CONSTANT.appDBPath);
+                    Toast.makeText(getBaseContext(), "[importDB] backupDB 존재여부 "+backupDB.exists(), Toast.LENGTH_LONG).show();
                     File currentDB = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
+                    Toast.makeText(getBaseContext(), "[importDB] currentDB 존재여부 "+currentDB.exists(), Toast.LENGTH_LONG).show();
 
                     FileChannel src = new FileInputStream(currentDB).getChannel();
                     FileChannel dst = new FileOutputStream(backupDB).getChannel();
@@ -416,13 +435,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     Toast.makeText(getBaseContext(), "[importDB] USB->APP 성공", Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
-                Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "[importDB]"+e.toString(), Toast.LENGTH_LONG).show();
             }
 
         }
     }
 
-    private byte[] getDBFromUSB(String outString, BlockDevice blockDevice) {//내보내기
+    private byte[] getDBFromUSB(String outString, CachedBlockDevice blockDevice) {//내보내기
         //D  S   X
         //1220879 1870864 2133464
 

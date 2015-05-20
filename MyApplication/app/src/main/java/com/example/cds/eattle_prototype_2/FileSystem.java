@@ -35,6 +35,7 @@ public class FileSystem {
     String[][] searchtable = new String[100][5];
     int endpoint = 0;
 
+    private static FileSystem Instance;
     //비트맵 이미지 리사이징
     public Bitmap resizeBitmapImageFn(Bitmap bmpSource, int maxResolution) {
         int iWidth = bmpSource.getWidth();      //비트맵이미지의 넓이
@@ -644,7 +645,7 @@ public class FileSystem {
         blockDevice.flush();
     }
 
-    public void addElementPush(String content, CachedBlockDevice blockDevice) {//새로운 입력
+    public void addElementPush(String content, CachedBlockDevice blockDevice,String file) {//새로운 입력
 
         //넣기전에 표시
         blockDevice.readBlock(0, buffer);
@@ -656,7 +657,6 @@ public class FileSystem {
         blockDevice.writeBlock(1, buffer);
 
         byte[] bytearray;
-        String file = "/storage/emulated/0/DCIM/Camera/" + content;
         bytearray = binaryDataImport(file);
 
         int emptyCoreAdressSpace = emptySpaceSearch(blockDevice);
@@ -1032,6 +1032,11 @@ public class FileSystem {
 
         }
 
+    }
+    public static FileSystem getInstance(){
+        if(Instance == null)
+            Instance = new FileSystem();
+        return Instance;
     }
 }
 

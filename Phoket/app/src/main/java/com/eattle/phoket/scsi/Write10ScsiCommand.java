@@ -1,5 +1,4 @@
 package com.eattle.phoket.scsi;
-
 import java.util.Random;
 
 /**
