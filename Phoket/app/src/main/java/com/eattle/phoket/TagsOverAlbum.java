@@ -134,61 +134,36 @@ public class TagsOverAlbum extends Fragment {
             Button defaultTagButton = (Button) inflater.inflate(R.layout.view_default_tag_button, null);
             defaultTagButton.setLayoutParams(params);
 
-            if (i == 0) {
-                final String tagName = Integer.toString(m.getYear()) + "년";
-                defaultTagButton.setText(tagName);
-                defaultTagButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
-                        intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
-                        //intent.putExtra("id", -1);
-                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
-                        intent.putExtra("mediaId", m.getId());
-                        startActivity(intent);
-                    }
-                });
-            } else if (i == 1) {
-                final String tagName = Integer.toString(m.getMonth()) + "월";
-                defaultTagButton.setText(tagName);
-                defaultTagButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
-                        intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
-                        //intent.putExtra("id", -1);
-                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
-                        intent.putExtra("mediaId", m.getId());
-                        startActivity(intent);
-                    }
-                });
-            } else if (i == 2) {
-                final String tagName = Integer.toString(m.getDay()) + "일";
-                defaultTagButton.setText(tagName);
-                defaultTagButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
-                        intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
-                        //intent.putExtra("id", -1);
-                        intent.putExtra("tagName", tagName);//기본 태그에서는 tagName을 넘겨준다
-                        intent.putExtra("mediaId", m.getId());
-                        startActivity(intent);
-                    }
-                });
-            }
+            String tagName="";
+            if (i == 0)
+                tagName = Integer.toString(m.getYear()) + "년";
+            else if (i == 1)
+                tagName = Integer.toString(m.getMonth()) + "월";
+            else if (i == 2)
+                tagName = Integer.toString(m.getDay()) + "일";
+
+            defaultTagButton.setText(tagName);
+            final String tagName_ = tagName;
+            defaultTagButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
+                    intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
+                    intent.putExtra("tagName", tagName_);//기본 태그에서는 tagName을 넘겨준다
+                    intent.putExtra("mediaId", m.getId());
+                    startActivity(intent);
+                }
+            });
             layout.addView(defaultTagButton);
         }
 
 
-        final EditText inputTag = (EditText) root.findViewById(R.id.editText);
-        final Button btn = (Button) root.findViewById(R.id.button);
-        //btn.setText("추가");
+        final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
+        final Button btn = (Button) root.findViewById(R.id.button);//태그 추가 버튼
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
 
                 if (tag_id != -1) {

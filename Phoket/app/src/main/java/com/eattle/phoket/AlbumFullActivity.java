@@ -32,6 +32,7 @@ import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
+import com.eattle.phoket.model.Tag;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,6 +52,10 @@ public class AlbumFullActivity extends ActionBarActivity {
     static String titleName;
     static String titleImagePath;
     static String titleImageId;
+    static int kind;
+    static int Id;
+    static int mediaId;
+    String tagName="";
 
     static ExtendedViewPager mViewPager;
     static TouchImageAdapter touchImageAdapter;
@@ -64,13 +69,45 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         Intent intent = getIntent();
         mMediaList = intent.getParcelableArrayListExtra("mediaList");
-        int folderId = intent.getIntExtra("folderID", 0);
+        Id = intent.getIntExtra("IDForStoryOrTag", 0);
+        mediaId = intent.getIntExtra("mediaId", -1);
+        kind = intent.getIntExtra("kind",0);
+        tagName = intent.getStringExtra("tagName");
         initialMediaPosition = intent.getIntExtra("position", 0);
-        Folder folder = db.getFolder(folderId);
-        totalPictureNum = folder.getPicture_num();
-        titleName = folder.getName();
-        titleImagePath = folder.getImage();
-        titleImageId = folder.getThumbNail_name();
+        Log.d("AlbumFullPicture",Id+" "+mediaId+" "+kind+" "+initialMediaPosition+"!!!!");
+        if(kind == CONSTANT.FOLDER) {//스토리를 타고 들어왔을 경우
+            Folder folder = db.getFolder(Id);
+            totalPictureNum = folder.getPicture_num();
+            titleName = folder.getName();
+            titleImagePath = folder.getImage();
+            titleImageId = folder.getThumbNail_name();
+        }
+        else if(kind == CONSTANT.DEFAULT_TAG){//디폴트 태그 그리드뷰에서 들어왔을 경우
+            Media mediaByTag = db.getMediaById(mediaId);
+            //기본태그를 타고 들어왔을 때는 tag의 id가 -1이다. -> tagName을 통해서 검색해야 함
+
+            if (tagName.contains("년")) {
+                mMediaList = db.getAllMediaByYear(mediaByTag.getYear());
+            } else if (tagName.contains("월")) {
+                mMediaList = db.getAllMediaByMonth(mediaByTag.getMonth());
+            } else if (tagName.contains("일")) {
+                mMediaList = db.getAllMediaByDay(mediaByTag.getDay());
+            }
+            titleName = tagName + "의 추억";
+            titleImagePath = mMediaList.get(0).getPath();
+            titleImageId = String.valueOf(mMediaList.get(0).getId());
+            totalPictureNum = mMediaList.size();
+        }
+        else if(kind == CONSTANT.TAG){//사용자 태그 그리드뷰에서 들어왔을 경우
+            Tag t = db.getTagByTagId(Id);
+            //Media mediaByTag = db.getMediaById(intent.getIntExtra("mediaId", -1));
+            mMediaList = db.getAllMediaByTagId(Id);
+
+            titleName = t.getName();
+            titleImagePath = mMediaList.get(0).getPath();
+            titleImageId = String.valueOf(mMediaList.get(0).getId());
+            totalPictureNum = mMediaList.size();
+        }
         /*
         totalPictureNum = intent.getIntExtra("totalPictureNum", 0);
         if (initialMediaPosition == -1) {//'스토리 시작'버튼으로 들어왔을 경우

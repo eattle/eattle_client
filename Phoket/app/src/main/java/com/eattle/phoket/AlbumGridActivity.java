@@ -25,16 +25,14 @@ import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
-import com.eattle.phoket.model.Media_Tag;
 import com.eattle.phoket.model.Tag;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class AlbumGridActivity extends ActionBarActivity {
-
+    String Tag="AlbumGridActivity";
     DatabaseHelper db;
 
     TextView titleText;
@@ -44,104 +42,118 @@ public class AlbumGridActivity extends ActionBarActivity {
     ImageAdapter Adapter;
     List<Media> mMediaList;
 
-    int Id;
+    int Id;//folderId가 될수도 있고 TagId가 될수도 있다
     int kind;
     String titleName;
     String titleImagePath;
     String titleImageId;
-
-    int totalPictureNum;
+    Media mediaByTag;//태그가 눌려진 사진
+    int mediaId;//태그가 눌려진 사진의 아이디
+    String tagName;//태그
 
     private BlockDevice blockDevice;
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //grid view를 업데이트 한다
-        if (kind == CONSTANT.FOLDER) {//스토리(폴더)로 보고있을 때
-            Log.d("AlbumGridActivity", "Grid onResume() 호출");
-            Folder f = db.getFolder(Id);
-            titleName = f.getName();
-            titleImagePath = f.getImage();
-            titleImageId = f.getThumbNail_name();
-            totalPictureNum = f.getPicture_num();
-
-            //폴더(스토리)의 제목 등록
-            titleText.setText(titleName);
-            //폴더(스토리)의 대표사진 등록
-            BitmapFactory.Options opt = new BitmapFactory.Options();
-            opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
-            Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath, opt);
-            titleImage.setImageBitmap(bitmap);
-            titleImage.setAlpha(0.4f);
-
-            mMediaList = db.getAllMediaByFolder(Id);
-
-            Adapter.notifyDataSetChanged();
-        }
-        else{//태그로 보고 있을 때
-
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_grid);
-        Log.d("asdf","Grid onCreate() 호출");
-
-        // fileSystem.incaseSearchTable(blockDevice);//탐색테이블 만듬 초기화
+        Log.d(Tag,"AlbumGridActivity onCreate() 호출");
 
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         titleText = (TextView) findViewById(R.id.titleText);
         titleImage = (ImageView) findViewById(R.id.titleImage);
 
-
         Intent intent = new Intent(this.getIntent());
-        //인텐트로부터 사진 검색을 위한 (folderId) 초기화
+
         Id = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
         kind = intent.getIntExtra("kind", -1);
+        if(kind == CONSTANT.DEFAULT_TAG){
+            mediaId = intent.getIntExtra("mediaId", -1);
+            mediaByTag = db.getMediaById(mediaId);
+            tagName = intent.getStringExtra("tagName");
+        }
 
-        if (kind == CONSTANT.FOLDER) {
+        refreshGrid();
+
+        //그리드 뷰 등록
+        mGrid = (GridView) findViewById(R.id.imagegrid);
+        Adapter = new ImageAdapter(this);
+        mGrid.setAdapter(Adapter);
+        mGrid.setOnItemClickListener(mItemClickListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshGrid();
+        //변경사항 적용
+        Adapter.notifyDataSetChanged();
+    }
+
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.storyStart://스토리 시작
+                Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
+                intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
+                intent.putExtra("position",-1);//-1을 넘겨주면 스토리 '맨 처음'부터 시작(제목화면부터)
+                intent.putExtra("IDForStoryOrTag", Id);// folder ID
+                intent.putExtra("tagName",tagName);//디폴트 태그는 tag이름을 통해서 작동
+                intent.putExtra("mediaId",mediaId);// 태그클릭->그리드뷰->풀픽쳐 인 경우에 필요
+                intent.putExtra("kind", kind);// 그리드 종류(스토리,디폴트태그,태그)
+                startActivity(intent);
+                break;
+        }
+    }
+
+    //그리드 뷰 아이템 클릭
+    AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
+            intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
+            intent.putExtra("position", position);//어디에서 시작할지
+            intent.putExtra("IDForStoryOrTag", Id);// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
+            intent.putExtra("tagName",tagName);// 디폴트 태그를 위한 tagName
+            intent.putExtra("mediaId",mediaId);// 태그클릭->그리드뷰->풀픽쳐 인 경우에 필요
+            intent.putExtra("kind", kind);// 그리드 종류(스토리,디폴트태그,태그)
+
+            startActivity(intent);
+        }
+    };
+
+    public void refreshGrid() {
+        //grid view를 업데이트 한다(백버튼 또는 x버튼으로 들어왔을 때)
+        //1. CONSTANT.FOLDER 2. CONSTANT.DEFAULT_TAG 3.CONSTANT.TAG
+        if (kind == CONSTANT.FOLDER) {//스토리(폴더)로 보고있을 때
+            Log.d("onResume()", "스토리(폴더)");
             Folder f = db.getFolder(Id);
             mMediaList = db.getAllMediaByFolder(Id);
 
             titleName = CONSTANT.convertFolderNameToStoryName(f.getName());
             titleImagePath = f.getImage();//대표 이미지의 경로를 얻는다
             titleImageId = f.getThumbNail_name();//대표 사진의 아이디를 얻는다
-            totalPictureNum = f.getPicture_num();//폴더(스토리)의 총 사진 개수
-        } else if (intent.getIntExtra("kind", -1) == CONSTANT.DEFAULT_TAG) {//기본 태그(날짜, 장소)를 타고 들어왔을 경우
-            Log.d("asdf","2번째 else");
-            Media m = db.getMediaById(intent.getIntExtra("mediaId", -1));
-            String tagName = intent.getStringExtra("tagName");
+
+        } else if (kind == CONSTANT.DEFAULT_TAG) {//기본 태그(날짜, 장소)를 타고 들어왔을 경우
+            Log.d("onResume()", "디폴트 태그");
             if (tagName.contains("년")) {
-                mMediaList = db.getAllMediaByYear(m.getYear());
+                mMediaList = db.getAllMediaByYear(mediaByTag.getYear());
             } else if (tagName.contains("월")) {
-                mMediaList = db.getAllMediaByMonth(m.getMonth());
+                mMediaList = db.getAllMediaByMonth(mediaByTag.getMonth());
             } else if (tagName.contains("일")) {
-                mMediaList = db.getAllMediaByDay(m.getDay());
+                mMediaList = db.getAllMediaByDay(mediaByTag.getDay());
             }
             titleName = tagName + "의 추억";
             titleImagePath = mMediaList.get(0).getPath();
-            totalPictureNum = mMediaList.size();
-        } else {
-            Log.d("asdf","세번째 else");
+
+        } else if (kind == CONSTANT.TAG) {
+            Log.d("onResume()", "사용자가 등록한 태그");
             Tag t = db.getTagByTagId(Id);
-            Media m = db.getMediaById(intent.getIntExtra("mediaId", -1));
-            Folder f = db.getFolder(m.getFolder_id());
-            List<Media_Tag> temp = db.getAllMediaTag();
+            //Media mediaByTag = db.getMediaById(intent.getIntExtra("mediaId", -1));
             mMediaList = db.getAllMediaByTagId(Id);
 
             titleName = t.getName();
             titleImagePath = mMediaList.get(0).getPath();
-            totalPictureNum = mMediaList.size();
-            //titleImagePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/"+f.getName()+"/"+ m.getName()+".jpg";
-            //titleImagePath = f.getImage();//대표 이미지의 경로를 얻는다
-            //titleImageId = f. getThumbNail_name();//대표 이미지의 아이디
-            //totalPictureNum = f.getPicture_num();//폴더(스토리)의 총 사진 개수를 얻는다
-        }
 
+        }
         //폴더(스토리)의 제목 등록
         titleText.setText(titleName);
         //폴더(스토리)의 대표사진 등록
@@ -150,52 +162,7 @@ public class AlbumGridActivity extends ActionBarActivity {
         Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath, opt);
         titleImage.setImageBitmap(bitmap);
         titleImage.setAlpha(0.4f);
-
-        //그리드 뷰 등록
-        mGrid = (GridView) findViewById(R.id.imagegrid);
-
-        Adapter = new ImageAdapter(this);
-        mGrid.setAdapter(Adapter);
-
-        mGrid.setOnItemClickListener(mItemClickListener);
-
-//        Animation animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
-//        LinearLayout albumLayout = (LinearLayout) findViewById(R.id.albumLayout);
-//        albumLayout.startAnimation(animationFadeIn);
-
-        //스토리 시작 버튼
-        Button storyStart = (Button)findViewById(R.id.storyStart);
-        storyStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
-                intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
-                intent.putExtra("position",-1);//-1을 넘겨주면 스토리 '맨 처음'부터 시작(제목화면부터)
-                intent.putExtra("folderID", Id);// folder ID
-                //intent.putExtra("titleName",titleName);//대표사진의 이름
-                //intent.putExtra("titleImagePath",titleImagePath);//대표사진의 경로
-                //intent.putExtra("titleImageId",titleImageId);//대표사진의 ID
-                //intent.putExtra("totalPictureNum",totalPictureNum);//총 사진 개수
-                startActivity(intent);
-            }
-        });
     }
-
-    AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
-            intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
-            intent.putExtra("position", position);//어디에서 시작할지
-            intent.putExtra("folderID", Id);// folder ID
-
-            //intent.putExtra("titleName",titleName);//대표사진의 이름
-            //intent.putExtra("titleImagePath",titleImagePath);//대표사진의 경로
-            //intent.putExtra("titleImageId",titleImageId);//대표사진의 ID
-            //intent.putExtra("totalPictureNum",totalPictureNum);//총 사진 개수
-            startActivity(intent);
-        }
-    };
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -258,4 +225,7 @@ public class AlbumGridActivity extends ActionBarActivity {
             return imageView;
         }
     }
+    //        Animation animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
+//        LinearLayout albumLayout = (LinearLayout) findViewById(R.id.albumLayout);
+//        albumLayout.startAnimation(animationFadeIn);
 }
