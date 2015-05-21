@@ -10,15 +10,6 @@
         android:scaleType="centerCrop"
         android:alpha="0.4"/>
 
-    <!-- 스토리 보기 종료 (x버튼)-->
-    <ImageView
-        android:id="@+id/storyStartExit"
-        android:background="@mipmap/close"
-        android:layout_margin="10dp"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="right|top"/>
-
     <!--스토리 제목-->
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -35,7 +26,7 @@
              />
         <!--찌아찌아와 함께-->
         <TextView
-            android:id="@+id/storystartTitle"
+            android:id="@+id/storyStartTitle"
             android:layout_below="@id/storyStartDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
