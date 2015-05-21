@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     tools:context="com.eattle.phoket.FullPicture">
 
+    <!-- '스토리 시작'을 눌렀을 때 첫 화면 -->
+    <FrameLayout
+        android:id="@+id/storyStart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
 
     <com.eattle.phoket.ExtendedViewPager
         android:id="@+id/albumFull"
@@ -12,21 +19,17 @@
 
     </com.eattle.phoket.ExtendedViewPager>
 
+    <!-- 스토리 종료 버튼(x)가 들어가는 Layout -->
+    <FrameLayout
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"></FrameLayout>
     <!-- Tag & Tag 추가란이 들어가는 Layout -->
-
     <FrameLayout
         android:id="@+id/tagLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        ></FrameLayout>
-
-    <!--
-<fragment
-android:id="@+id/frame"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-class="com.example.cds.eattle_prototype_2.TabToTag"/>-->
-
+        android:layout_gravity="bottom"></FrameLayout>
 
 </FrameLayout>

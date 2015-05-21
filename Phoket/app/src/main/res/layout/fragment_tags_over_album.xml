@@ -84,8 +84,8 @@
         <ImageView
             android:id="@+id/storyContentDelete"
             android:layout_alignParentLeft="true"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@mipmap/trash" />
 
 
@@ -96,9 +96,10 @@
             android:gravity="right">
             <!-- 네모 4개 있는 이미지-->
             <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@mipmap/ic_launcher" />
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="5dp"
+                android:background="@mipmap/currentpage" />
             <TextView
                 android:id="@+id/storyContentOrderText"
                 android:layout_width="wrap_content"
