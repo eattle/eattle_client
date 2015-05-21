@@ -196,7 +196,10 @@ public class Section1 extends Fragment {
         SimpleCard card;
         CardData data;
         if(pictureNum <= CONSTANT.BOUNDARY){
-            //일상
+            //card = new DailyCard(mContext);
+            //data = new CardData();
+            //card.setTag();
+//            ((DailyCard)card).setDailyImage1();
 
         }else {
             card = new BigStoryCard(mContext);

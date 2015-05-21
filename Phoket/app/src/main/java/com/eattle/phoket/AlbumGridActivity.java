@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -205,19 +204,19 @@ public class AlbumGridActivity extends ActionBarActivity {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView;
+            SquareImageView imageView;
             if (convertView == null) {
-                imageView = new ImageView(mContext);
+                imageView = new SquareImageView(mContext);
             } else {
-                imageView = (ImageView) convertView;
+                imageView = (SquareImageView) convertView;
             }
 
             String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mMediaList.get(position).getName() + ".jpg";
 
             imageView.setImageURI(Uri.parse(path));
             //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, GridView.AUTO_FIT);
-            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT, 400);
-            imageView.setLayoutParams(params);
+//            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT, 400);
+//            imageView.setLayoutParams(params);
 
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
