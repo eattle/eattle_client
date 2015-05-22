@@ -229,7 +229,11 @@ public class AlbumFullActivity extends ActionBarActivity {
                     return null;
                 }
             }
+            if(position == mediaList.size()){ // 스토리 추천 화면
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+            }
             FrameLayout frameLayout = new FrameLayout(getApplicationContext());
             TouchImageView img = new TouchImageView(container.getContext());
 
