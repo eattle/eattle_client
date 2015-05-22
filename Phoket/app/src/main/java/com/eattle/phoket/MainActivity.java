@@ -570,9 +570,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 case 0:
                     return Section1.newInstance();
                 case 1:
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return Section2.newInstance();
                 case 2:
-                    return PlaceholderFragment.newInstance(position + 1);
+                    return Section3.newInstance();
                 case 3:
                     return PlaceholderFragment.newInstance(position + 1);
             }

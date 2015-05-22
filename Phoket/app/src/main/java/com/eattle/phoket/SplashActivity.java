@@ -8,7 +8,7 @@ import android.os.Handler;
 
 public class SplashActivity extends Activity {
 
-    static final int SPLASH_DISPLAY_LENGTH = 1;
+    static final int SPLASH_DISPLAY_LENGTH = 3;
 
 
     @Override

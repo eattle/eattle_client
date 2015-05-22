@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.eattle.phoket.Card.SmallStoryCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/MainLayout">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+
+        <ImageView
+            android:id="@+id/smallStoryImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="#aa0000"
+            android:alpha="0.8"/>
+
+        <TextView
+            android:id="@+id/smallStoryName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="15dp"
+            android:textColor="#ffffff"
+            android:textSize="20dp"
+            android:layout_gravity="top|left" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/smallStoryDate"
+            android:textColor="#ffffff"
+            android:layout_gravity="right|bottom" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/smallStoryItemNum"
+            android:layout_gravity="left|bottom" />
+
+
+    </FrameLayout>
+
+</com.eattle.phoket.Card.SmallStoryCardView>
