@@ -8,84 +8,82 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="wrap_content">
 
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ff0000">
-            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:id="@+id/tagimage1"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="asdads"
-                android:layout_gravity="center" />
-
+                android:layout_gravity="center"
+                android:id="@+id/tagtext1"/>
         </FrameLayout>
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ff0000">
-            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:id="@+id/tagimage2"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="asdads"
-                android:gravity="center|fill_vertical" />
+                android:layout_gravity="center"
+                android:id="@+id/tagtext2"/>
 
         </FrameLayout>
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ff0000">
-            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:id="@+id/tagimage3"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="asdads"
-                android:gravity="center|fill_vertical" />
+                android:layout_gravity="center"
+                android:id="@+id/tagtext3"/>
 
         </FrameLayout>
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ff0000">
-            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:id="@+id/tagimage4"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="asdads"
-                android:gravity="center|fill_vertical" />
+                android:layout_gravity="center"
+                android:id="@+id/tagtext4"/>
 
         </FrameLayout>
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#ff0000">
-            <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:id="@+id/tagimage5"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="asdads"
-                android:gravity="center|fill_vertical" />
+                android:layout_gravity="center"
+                android:id="@+id/tagtext5"/>
 
         </FrameLayout>
-
 
     </LinearLayout>
 </com.eattle.phoket.Card.TagsCardView>

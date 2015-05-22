@@ -3,51 +3,37 @@ package com.eattle.phoket.Card;
 import android.content.Context;
 
 import com.dexafree.materialList.cards.SimpleCard;
+import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.R;
 
 /**
  * Created by GA on 2015. 5. 14..
  */
 public class DailyCard extends SimpleCard {
-    String dailyImage1;
-    String dailyImage2;
-    String dailyImage3;
-    String count;
+    String[] dailyImage;
+    int count;
 
 
     public DailyCard(Context context) {
         super(context);
+        dailyImage = new String[CONSTANT.BOUNDARY];
+        count = 0;
     }
 
-    public String getDailyImage1() {
-        return dailyImage1;
+    public String getDailyImage(int n) {
+        return dailyImage[n];
     }
 
-    public void setDailyImage1(String dailyImage1) {
-        this.dailyImage1 = dailyImage1;
+    public void setDailyImage(String dailyImage, int n) {
+        count++;
+        this.dailyImage[n] = dailyImage;
     }
 
-    public String getDailyImage2() {
-        return dailyImage2;
-    }
-
-    public void setDailyImage2(String dailyImage2) {
-        this.dailyImage2 = dailyImage2;
-    }
-
-    public String getDailyImage3() {
-        return dailyImage3;
-    }
-
-    public void setDailyImage3(String dailyImage3) {
-        this.dailyImage3 = dailyImage3;
-    }
-
-    public String getCount() {
+    public int getCount() {
         return count;
     }
 
-    public void setCount(String count) {
+    public void setCount(int count) {
         this.count = count;
     }
 

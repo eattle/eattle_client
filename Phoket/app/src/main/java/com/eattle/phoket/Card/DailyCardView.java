@@ -29,13 +29,22 @@ public class DailyCardView extends CardItemView<DailyCard> {
     @Override
     public void build(DailyCard card) {
         super.build(card);
-        ImageView dailyImage1 = (ImageView)findViewById(R.id.dailyImage1);
-        ImageView dailyImage2 = (ImageView)findViewById(R.id.dailyImage2);
-        ImageView dailyImage3 = (ImageView)findViewById(R.id.dailyImage3);
+        switch (card.getCount()) {
+            case 3:
+                ImageView dailyImage3 = (ImageView) findViewById(R.id.dailyImage3);
+                dailyImage3.setImageURI(Uri.parse(card.getDailyImage(2)));
 
-        dailyImage1.setImageURI(Uri.parse(card.getDailyImage1()));
-        dailyImage2.setImageURI(Uri.parse(card.getDailyImage2()));
-        dailyImage3.setImageURI(Uri.parse(card.getDailyImage3()));
+            case 2:
+                ImageView dailyImage2 = (ImageView) findViewById(R.id.dailyImage2);
+                dailyImage2.setImageURI(Uri.parse(card.getDailyImage(1)));
+
+            case 1:
+                ImageView dailyImage1 = (ImageView) findViewById(R.id.dailyImage1);
+                dailyImage1.setImageURI(Uri.parse(card.getDailyImage(0)));
+                break;
+            default:
+                break;
+        }
     }
 
 }

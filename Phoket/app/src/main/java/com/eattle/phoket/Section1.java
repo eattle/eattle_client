@@ -23,6 +23,8 @@ import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.CardData;
 import com.eattle.phoket.model.Folder;
+import com.eattle.phoket.model.Media;
+import com.eattle.phoket.model.Tag;
 
 import java.util.List;
 
@@ -196,10 +198,14 @@ public class Section1 extends Fragment {
         SimpleCard card;
         CardData data;
         if(pictureNum <= CONSTANT.BOUNDARY){
-            //card = new DailyCard(mContext);
+            List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
+            card = new DailyCard(mContext);
             //data = new CardData();
-            //card.setTag();
-//            ((DailyCard)card).setDailyImage1();
+            card.setTag("dailyCard");
+            for(int i = 0; i < pictureNum; i++){
+                ((DailyCard)card).setDailyImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg", i);
+            }
+            mListView.add(card);
 
         }else {
             card = new BigStoryCard(mContext);
@@ -210,6 +216,20 @@ public class Section1 extends Fragment {
             ((BigStoryCard)card).setDate(CONSTANT.convertFolderNameToDate(storyName));
             ((BigStoryCard)card).setItemNum(pictureNum);
             mListView.add(card);
+
+            List<Tag> storyTags = db.getAllTagsByFolderId(folderID);
+            int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
+            if(storyTagsSize > 0) {
+                card = new TagsCard(mContext);
+                //data = new CardData();
+                card.setTag("tagsCard");
+                for (int i = 0; i < storyTagsSize; i++) {
+                    ((TagsCard) card).setTagText(storyTags.get(i).getName(), i);
+                }
+                mListView.add(card);
+            }
+
+
 
             //TODO:folder id로 db검색해서 폴더에 걸린 tag 찾아오기
 
