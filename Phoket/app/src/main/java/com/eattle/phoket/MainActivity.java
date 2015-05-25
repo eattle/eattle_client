@@ -521,16 +521,21 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
-                importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
+        switch (id){
+            case R.id.action_alarm:
+                if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
+                    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
 
 
-            Toast.makeText(this, "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
-            //서비스에게 사진 정리를 요청한다
-            sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
-            return true;
+                //서비스에게 사진 정리를 요청한다
+                sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
+                break;
+            case R.id.action_search:
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(intent);
+                break;
         }
 
         return super.onOptionsItemSelected(item);

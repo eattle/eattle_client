@@ -13,7 +13,9 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tag1"
+            >
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -27,7 +29,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tag2">
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -42,7 +45,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tag3">
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -57,7 +61,9 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tag4">
+
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -72,7 +78,9 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/tag5">
+
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

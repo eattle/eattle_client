@@ -9,8 +9,19 @@ import com.eattle.phoket.R;
  * Created by GA on 2015. 5. 14..
  */
 public class ToPhoketCard extends SimpleCard {
+    String image;
+
+
     public ToPhoketCard(Context context) {
         super(context);
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @Override

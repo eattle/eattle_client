@@ -1,12 +1,10 @@
 package com.eattle.phoket;
 
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,20 +13,14 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
@@ -64,6 +56,8 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        CONSTANT.actList.add(this);
+
         db = DatabaseHelper.getInstance(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_full);
@@ -251,7 +245,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                     }
 
                     BitmapFactory.Options opt = new BitmapFactory.Options();
-                    opt.inSampleSize = 1;
+                    opt.inSampleSize = 8;
                     Bitmap bm = BitmapFactory.decodeFile(path, opt);
                     img.setImageBitmap(bm);
                 }

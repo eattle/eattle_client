@@ -422,6 +422,34 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     }
 
     /*
+    * getting Media by Tag id
+    */
+    public Media getMediaByFolderRandomly(int folder_id){
+        Media m = new Media();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id + " ORDER BY RANDOM() LIMIT 1";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+            m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+            m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+            m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+            m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+            m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+            m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+            m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+            m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+        }
+
+        return m;
+    }
+
+
+    /*
      * getting Media by Tag id
      */
     public List<Media> getAllMediaByTagId(int tag_id){

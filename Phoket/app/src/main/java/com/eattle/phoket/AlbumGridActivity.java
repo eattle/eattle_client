@@ -1,5 +1,6 @@
 package com.eattle.phoket;
 
+import android.support.v7.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.eattle.phoket.device.BlockDevice;
@@ -53,8 +56,10 @@ public class AlbumGridActivity extends ActionBarActivity {
     private BlockDevice blockDevice;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        CONSTANT.actList.add(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_grid);
+
         Log.d(Tag,"AlbumGridActivity onCreate() 호출");
 
         db = DatabaseHelper.getInstance(getApplicationContext());
@@ -79,6 +84,53 @@ public class AlbumGridActivity extends ActionBarActivity {
         Adapter = new ImageAdapter(this);
         mGrid.setAdapter(Adapter);
         mGrid.setOnItemClickListener(mItemClickListener);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+        LinearLayout actionBarLayout = (LinearLayout)getLayoutInflater().inflate(R.layout.actionbar_album, null);
+        TextView actionBarTitle = (TextView)actionBarLayout.findViewById(R.id.actionbar_title);
+        switch (kind){
+            case CONSTANT.FOLDER:
+                actionBarTitle.setText(getString(R.string.title_section2));
+                break;
+            case CONSTANT.TAG:
+            case CONSTANT.DEFAULT_TAG:
+                actionBarTitle.setText(getString(R.string.title_section3));
+                break;
+        }
+        ActionBar.LayoutParams params = new ActionBar.LayoutParams(
+                ActionBar.LayoutParams.MATCH_PARENT,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                Gravity.LEFT);
+
+        ImageView drawerImageView = (ImageView)actionBarLayout.findViewById(R.id.home_icon);
+
+        drawerImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int actSize = CONSTANT.actList.size();
+                for(int i = 0; i < actSize; i++)
+                    CONSTANT.actList.get(i).finish();
+//                Intent intent = new Intent(C.this, A.class);
+//                startActivity(intent);
+//                finish();
+            }
+        });
+
+        ImageView drawerImageViewCheck = (ImageView)actionBarLayout.findViewById(R.id.search_icon);
+
+        drawerImageViewCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { Log.d("search", "click"); }
+        });
+
+        actionBar.setCustomView(actionBarLayout, params);
+        actionBar.setDisplayHomeAsUpEnabled(false);
+
+
+
     }
 
     @Override
@@ -166,7 +218,7 @@ public class AlbumGridActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_album_grid, menu);
+//        getMenuInflater().inflate(R.menu.menu_album_grid, menu);
         return true;
     }
 
