@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    tools:context="com.eattle.phoket.PopupPictureActivity">
+
+    <FrameLayout
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+
+        android:layout_width="300dp"
+        android:layout_height="534dp">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/picture"
+            android:scaleType="center" />
+        <!-- Tag & Tag 추가란이 들어가는 Layout -->
+        <FrameLayout
+            android:id="@+id/tagLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"></FrameLayout>
+
+
+
+    </FrameLayout>
+
+</RelativeLayout>

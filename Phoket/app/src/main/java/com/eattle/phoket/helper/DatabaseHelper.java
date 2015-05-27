@@ -268,7 +268,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public void deleteAllFolder(){
         Log.d("DatabaseHelper","deleteAllFolder() 호출");
         SQLiteDatabase db=this.getWritableDatabase();
-        db.execSQL("DELETE FROM "+TABLE_FOLDER);
+        db.execSQL("DELETE FROM " + TABLE_FOLDER);
     }
 
 
@@ -420,6 +420,34 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         return media;
     }
+
+    /*
+    * getting Media by Tag id
+    */
+    public Media getMediaByFolderRandomly(int folder_id){
+        Media m = new Media();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id + " ORDER BY RANDOM() LIMIT 1";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+            m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+            m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+            m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+            m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+            m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+            m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+            m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+            m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+        }
+
+        return m;
+    }
+
 
     /*
      * getting Media by Tag id
@@ -575,7 +603,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
      * Deleting media by id
      */
     public void deleteMedia(int id){
-        Log.d("DatabaseHelper","deleteMedia(id) 호출");
+        Log.d("DatabaseHelper", "deleteMedia(id) 호출");
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
         deleteMediaTagByMediaId(id);
@@ -680,6 +708,40 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         List<Tag> tags = new ArrayList<Tag>();
 //        List<Tag> tags = new ArrayList<Tag>();
         String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Tag t = new Tag();
+                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+
+                tags.add(t);
+            }while(c.moveToNext());
+        }
+
+        return tags;
+    }
+
+    /*
+* getting Tags by Media id
+*/
+    public List<Tag> getAllTagsByFolderId(int folder_id){
+        List<Media> medias = getAllMediaByFolder(folder_id);
+
+        List<Tag> tags = new ArrayList<Tag>();
+//        List<Tag> tags = new ArrayList<Tag>();
+        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
+
+        int mediaSize = medias.size();
+        for(int i = 0; i < mediaSize; i++){
+            selectQuery += medias.get(i).getId();
+            if(i != mediaSize -1)
+                selectQuery += ", ";
+        }
+        selectQuery += ")";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);

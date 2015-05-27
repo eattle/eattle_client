@@ -7,34 +7,27 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp">
+        android:layout_height="100dp">
 
 
         <ImageView
-            android:id="@+id/bigStoryImage"
+            android:id="@+id/toPhoketImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:background="#aa0000"
-            android:alpha="0.8"/>
+            android:alpha="0.5"/>
 
         <TextView
-            android:id="@+id/bigStoryName"
+            android:id="@+id/toPhoketText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="15dp"
+            android:text="이 사진을 포켓에 담아주세요"
             android:textColor="#ffffff"
             android:textSize="20dp"
             android:layout_gravity="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bigStoryDate"
-            android:textColor="#ffffff"
-            android:layout_gravity="right|bottom" />
-
 
     </FrameLayout>
 

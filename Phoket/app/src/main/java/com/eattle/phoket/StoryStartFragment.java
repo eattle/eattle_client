@@ -45,11 +45,11 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
         //날짜
         TextView storyStartDate = (TextView) root.findViewById(R.id.storyStartDate);
-        storyStartDate.setText("");
+        storyStartDate.setText(CONSTANT.convertFolderNameToDate(titleName));
 
         //제목
         TextView storyStartTitle = (TextView) root.findViewById(R.id.storyStartTitle);
-        storyStartTitle.setText(titleName);
+        storyStartTitle.setText(CONSTANT.convertFolderNameToStoryName(titleName));
 
 
         return root;

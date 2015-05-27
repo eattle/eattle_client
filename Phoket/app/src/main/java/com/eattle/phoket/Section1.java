@@ -1,19 +1,30 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
 import com.dexafree.materialList.cards.WelcomeCard;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
+import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.BigStoryCard;
@@ -23,7 +34,10 @@ import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.CardData;
 import com.eattle.phoket.model.Folder;
+import com.eattle.phoket.model.Media;
+import com.eattle.phoket.model.Tag;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -106,14 +120,27 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
-
                 CardData data = (CardData)view.getTag();
-                Intent intent = new Intent(mContext, AlbumGridActivity.class);
-                intent.putExtra("kind", data.getType());
-                intent.putExtra("id", data.getData());
-                mContext.startActivity(intent);
+                Intent intent;
+                switch (data.getType()){
+                    case CONSTANT.NOTHING:
+                        break;
+                    case CONSTANT.TOPHOKET:
+                        intent = new Intent(mContext, PopupPictureActivity.class);
+                        intent.putExtra("id", data.getData());
+                        mContext.startActivity(intent);
+                        break;
+                    case CONSTANT.DAILY:
+                        break;
+                    case CONSTANT.FOLDER:
+                    case CONSTANT.TAG:
+                        intent = new Intent(mContext, AlbumGridActivity.class);
+                        intent.putExtra("kind", data.getType());
+                        intent.putExtra("id", data.getData());
+                        mContext.startActivity(intent);
 
-//                Log.d("CARD_TYPE", view.getTag().toString());
+                        break;
+                }
             }
 
             @Override
@@ -196,10 +223,48 @@ public class Section1 extends Fragment {
         SimpleCard card;
         CardData data;
         if(pictureNum <= CONSTANT.BOUNDARY){
-            //card = new DailyCard(mContext);
-            //data = new CardData();
-            //card.setTag();
-//            ((DailyCard)card).setDailyImage1();
+            //daily card 추가
+            final List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
+            final int folderId_ = folderID;
+            card = new DailyCard(mContext);
+            data = new CardData(CONSTANT.NOTHING, -1);
+            card.setTag(data);
+            for(int i = 0; i < pictureNum; i++){
+                ((DailyCard)card).setDailyImage(i, dailyMedia.get(i).getId(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
+            }
+            ((DailyCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
+                @Override
+                public void onButtonPressedListener(View view, Card card) {
+                    Intent intent = new Intent(mContext, AlbumFullActivity.class);
+                    intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
+                    intent.putExtra("IDForStoryOrTag", folderId_);// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
+                    intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
+
+
+                    switch (view.getId()) {
+                        case R.id.dailyImage3:
+                            intent.putExtra("position", 2);//어디에서 시작할지
+
+
+                            mContext.startActivity(intent);
+                            break;
+                        case R.id.dailyImage2:
+                            intent.putExtra("position", 1);//어디에서 시작할지
+
+                            mContext.startActivity(intent);
+
+                            break;
+                        case R.id.dailyImage1:
+                            intent.putExtra("position", 0);//어디에서 시작할지
+
+                            mContext.startActivity(intent);
+
+                            break;
+                    }
+                }
+            });
+
+            mListView.add(card);
 
         }else {
             card = new BigStoryCard(mContext);
@@ -211,7 +276,64 @@ public class Section1 extends Fragment {
             ((BigStoryCard)card).setItemNum(pictureNum);
             mListView.add(card);
 
-            //TODO:folder id로 db검색해서 폴더에 걸린 tag 찾아오기
+            List<Tag> storyTags = db.getAllTagsByFolderId(folderID);
+            int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
+            if(storyTagsSize > 0) {
+                card = new TagsCard(mContext);
+                data = new CardData(CONSTANT.NOTHING, -1);
+                card.setTag(data);
+                for (int i = 0; i < storyTagsSize; i++) {
+                    ((TagsCard) card).setTag(i, storyTags.get(i).getId(), storyTags.get(i).getName());
+                }
+                ((TagsCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
+                    @Override
+                    public void onButtonPressedListener(View view, Card card) {
+                        Intent intent = new Intent(mContext, AlbumGridActivity.class);
+
+                        switch (view.getId()) {
+                            case R.id.tag1:
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", ((TagsCard) card).getTagId(0));
+                                mContext.startActivity(intent);
+                                break;
+                            case R.id.tag2:
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", ((TagsCard) card).getTagId(1));
+                                mContext.startActivity(intent);
+
+                                break;
+                            case R.id.tag3:
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", ((TagsCard) card).getTagId(2));
+                                mContext.startActivity(intent);
+
+                                break;
+                            case R.id.tag4:
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", ((TagsCard) card).getTagId(3));
+                                mContext.startActivity(intent);
+
+                                break;
+                            case R.id.tag5:
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", ((TagsCard) card).getTagId(4));
+                                mContext.startActivity(intent);
+
+                                break;
+                        }
+                    }
+                });
+
+                mListView.add(card);
+            }
+
+            int randomMediaId = db.getMediaByFolderRandomly(folderID).getId();
+            card = new ToPhoketCard(mContext);
+            data = new CardData(CONSTANT.TOPHOKET, randomMediaId);
+            card.setTag(data);
+            ((ToPhoketCard)card).setImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + randomMediaId + ".jpg");
+            mListView.add(card);
+            //TODO: 포켓에 넣어달라고 추천할만한 사진 걸러내기
 
         }
     }

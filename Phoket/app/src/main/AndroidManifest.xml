@@ -13,8 +13,7 @@
         <activity
             android:name=".SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/NoActionBarTheme">
-
+            android:theme="@style/NoActionBarTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +30,7 @@
             android:label="@string/title_activity_password"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/NoActionBarTheme">
+            android:theme="@style/NoActionBarTheme" >
         </activity>
 
         <service
@@ -52,7 +51,7 @@
             android:name=".AlbumFullActivity"
             android:label="@string/title_activity_album_full"
             android:parentActivityName=".AlbumGridActivity"
-            android:theme="@style/NoActionBarTheme">
+            android:theme="@style/NoActionBarTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.eattle.phoket.AlbumGridActivity" />
@@ -60,12 +59,22 @@
         <activity
             android:name=".PopupForTagAddition"
             android:label="@string/title_activity_popup_for_tag_addition"
-            android:theme="@style/NoActionBarTheme">
-
+            android:theme="@style/NoActionBarTheme" >
         </activity>
         <activity
             android:name=".USBMainActivity"
             android:label="@string/title_activity_usbmain" >
+        </activity>
+        <activity
+            android:name=".PopupPictureActivity"
+            android:label="@string/title_activity_popup_picture"
+            android:theme="@style/NoActionBarTranslucentTheme" >
+        </activity>
+        <activity
+            android:name=".SearchActivity"
+            android:label="@string/title_activity_search"
+            android:theme="@style/ActionBarTranslucentTheme"
+            android:windowSoftInputMode="stateVisible" >
         </activity>
     </application>
 

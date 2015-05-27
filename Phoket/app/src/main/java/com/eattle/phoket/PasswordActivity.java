@@ -125,8 +125,8 @@ public class PasswordActivity extends ActionBarActivity {
             case R.id.star:
                 input += "*";
                 break;
-            case R.id.sharp:
-                input += "#";
+            case R.id.deletePassword:
+
                 break;
             default:
                 break;
