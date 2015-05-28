@@ -138,7 +138,6 @@ public class Section1 extends Fragment {
                         intent.putExtra("kind", data.getType());
                         intent.putExtra("id", data.getData());
                         mContext.startActivity(intent);
-
                         break;
                 }
             }

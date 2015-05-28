@@ -117,7 +117,15 @@ public class StoryRecommendFragment extends Fragment {
                     storyRecommendTitle = (TextView) root.findViewById(R.id.fourthText);
                     break;
             }
+            /*
             storyRecommendImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg"));
+            storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
+            */
+            BitmapFactory.Options opt = new BitmapFactory.Options();
+            opt.inSampleSize = 1;
+            Bitmap bm = BitmapFactory.decodeFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg", opt);
+            //bm = CONSTANT.blur(getActivity(), bm, 5f);//blur효과
+            storyRecommendImage.setImageBitmap(bm);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
 
             final int i_ = i;

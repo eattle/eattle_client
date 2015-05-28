@@ -1,6 +1,12 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -77,6 +83,23 @@ public class CONSTANT {
 
         return name;
 
+    }
+
+    //blur함수
+    public static Bitmap blur(Context context, Bitmap bitmap, float radius) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            RenderScript rs = RenderScript.create(context);
+
+            final Allocation input = Allocation.createFromBitmap(rs, bitmap);
+            final Allocation output = Allocation.createTyped(rs, input.getType());
+            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+            script.setRadius(radius);
+            script.setInput(input);
+            script.forEach(output);
+            output.copyTo(bitmap);
+        }
+
+        return bitmap;
     }
 
 

@@ -149,6 +149,10 @@ public class AlbumFullActivity extends ActionBarActivity {
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if(position == mMediaList.size()){
+                    if (isTagAppeared == 1){
+                        pushTabToTag(mMediaList.get(position-1), position-1);
+                        setPlacePopup(mMediaList.get(position-1));
+                    }
                     storyRecommendFragment = StoryRecommendFragment.newInstance(mMediaList.get(0).getFolder_id());
                     fragmentTransaction.add(R.id.frameForStoryRecommend, storyRecommendFragment, "storyRecommendFragment");
                     fragmentTransaction.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -159,6 +163,9 @@ public class AlbumFullActivity extends ActionBarActivity {
                     fragmentTransaction.remove(storyRecommendFragment);
                     fragmentTransaction.commit();
                 }
+
+
+
                 //------------------------------------------------------------------------------
                 if (isTagAppeared == 1) {//태그들이 띄워져 있어야 하는데
                     Fragment f;
@@ -229,9 +236,10 @@ public class AlbumFullActivity extends ActionBarActivity {
                 position--;//첫화면에 제목화면을 넣기 위해.
             //---------------------------------------------------------------------------
             if (storyStartFragment == null) {//항상 뒤에 배경사진을 깔아둔다
+
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName);
+                storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName, kind);
 
                 fragmentTransaction.add(R.id.storyStart, storyStartFragment, "StoryStartFragment");
                 fragmentTransaction.commit();
