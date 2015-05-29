@@ -7,9 +7,11 @@
         android:id="@+id/storyStartImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:alpha="0.4"/>
-
+        android:scaleType="centerCrop"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#77000000"/>
     <!--스토리 제목-->
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -23,14 +25,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13dp"
-             />
-        <!--찌아찌아와 함께-->
+            android:textColor="#ffffff" />
+        <!--스토리 제목-->
         <TextView
             android:id="@+id/storyStartTitle"
             android:layout_below="@id/storyStartDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20dp"
+            android:textColor="#ffffff"
             android:textStyle="bold"/>
         </RelativeLayout>
 

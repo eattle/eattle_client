@@ -13,14 +13,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/titleImage"
-            android:alpha="1200"
             android:scaleType="centerCrop" />
-
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#55000000"/>
         <TextView
             android:id="@+id/titleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:textColor="#ffffff"
             android:textSize="20dp"
             android:layout_gravity="center" />
 
