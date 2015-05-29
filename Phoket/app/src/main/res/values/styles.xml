@@ -2,7 +2,16 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="actionBarTabTextStyle">@style/tabTextStyle</item>
+        <item name="actionBarTabStyle">@style/tabStyle</item>
+    </style>
+
+    <style name="tabTextStyle" parent="@style/Widget.AppCompat.Light.ActionBar.TabText">
+        <item name="android:textColor">@color/tab_indicator_text</item>
+    </style>
+
+    <style name="tabStyle" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@color/tab_indicator_ab</item>
     </style>
 
     <style name="NoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
