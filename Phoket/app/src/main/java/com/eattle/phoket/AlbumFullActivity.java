@@ -187,8 +187,11 @@ public class AlbumFullActivity extends ActionBarActivity {
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (initialMediaPosition == -1)  //스토리 제목부터 시작해야 하는 경우
+                if (initialMediaPosition == -1)   //스토리 제목부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해
+                if(position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null){
+                    ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(positionOffset);
+                }
             }
 
             @Override

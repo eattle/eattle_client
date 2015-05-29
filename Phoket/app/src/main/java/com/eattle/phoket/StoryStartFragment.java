@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -100,7 +101,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     private void blur(Bitmap bkg, View view) {
         long startMs = System.currentTimeMillis();
         float scaleFactor = 8;
-        float radius = 2;
+        float radius = 10;
 
         Bitmap overlay = Bitmap.createBitmap((int) (view.getMeasuredWidth() / scaleFactor),
                 (int) (view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
@@ -113,8 +114,18 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
         overlay = FastBlur.doBlur(overlay, (int)radius, true);
         view.setBackground(new BitmapDrawable(getResources(), overlay));
-        //view.setBackgroundColor(0x00000000);
+        view.setAlpha(0.0f);
         Log.d("Blur", System.currentTimeMillis() - startMs + "ms");
+    }
+
+    public void showBlur(float positionOffset){
+        if(blurImage.getAlpha() >= 1.0f)
+            return;
+
+        blurImage.setAlpha(1.0f*positionOffset);
+    }
+    public void showBlur(){
+        blurImage.setAlpha(1.0f);
     }
 
 }

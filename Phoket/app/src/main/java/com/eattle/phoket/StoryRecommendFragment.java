@@ -78,7 +78,7 @@ public class StoryRecommendFragment extends Fragment {
         randomFolder = new int[recommendNum];
         Random random = new Random();
         for (int count = 0; count < recommendNum; ) {
-            int select = random.nextInt(totalFolderNum - 1);
+            int select = random.nextInt(totalFolderNum);
             int isOverlapped = 0;
             for (int i = 0; i < count; i++) {//추천 스토리가 중복되지 않도록 한다
                 if (select == randomFolder[i] || select == folderID) {//기존에 뽑은것과 중복되거나, 현재 스토리와 동일하면
