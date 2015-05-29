@@ -31,6 +31,6 @@
         android:layout_weight="0.5"
         android:layout_gravity="center"
         android:id="@+id/search_icon"
-        android:background="#00ff00"/>
+        android:src="@mipmap/search" />
 
 </LinearLayout>

@@ -107,11 +107,12 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         ImageView drawerImageView = (ImageView)actionBarLayout.findViewById(R.id.home_icon);
 
+
         drawerImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int actSize = CONSTANT.actList.size();
-                for(int i = 0; i < actSize; i++)
+                for (int i = 0; i < actSize; i++)
                     CONSTANT.actList.get(i).finish();
 //                Intent intent = new Intent(C.this, A.class);
 //                startActivity(intent);
@@ -123,7 +124,10 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         drawerImageViewCheck.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { Log.d("search", "click"); }
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(intent);
+            }
         });
 
         actionBar.setCustomView(actionBarLayout, params);

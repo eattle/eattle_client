@@ -282,7 +282,7 @@ public class Section1 extends Fragment {
                 data = new CardData(CONSTANT.NOTHING, -1);
                 card.setTag(data);
                 for (int i = 0; i < storyTagsSize; i++) {
-                    ((TagsCard) card).setTag(i, storyTags.get(i).getId(), storyTags.get(i).getName());
+                    ((TagsCard) card).setTag(i, storyTags.get(i).getId(), storyTags.get(i).getName(), storyTags.get(i).getColor());
                 }
                 ((TagsCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
                     @Override

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.BitmapFactory;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 
 import com.eattle.phoket.model.Folder;
@@ -23,7 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 18;
 
     public static final String DATABASE_NAME = "CaPicDB";
 
@@ -48,6 +50,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //tag
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
+    private static final String KEY_COLOR = "color";
+
 
     //media_tag
     //private static final String KEY_ID = "id";
@@ -83,7 +87,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String CREATE_TABLE_TAG =
             "CREATE TABLE " + TABLE_TAG + " ("
                     + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                    + KEY_NAME + " VARCHAR(100) NOT NULL "
+                    + KEY_NAME + " VARCHAR(100) NOT NULL, "
+                    + KEY_COLOR + " INTEGER NOT NULL "
                     + ")";
 
     private static final String CREATE_TABLE_MEDIA_TAG =
@@ -626,8 +631,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         int tag_id = getTagIdByTagName(tag_name);
         if(tag_id == 0) {
+
+            Palette p = Palette.generate(BitmapFactory.decodeFile(this.getMediaById(media_id).getPath()));
+
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, tag_name);
+            values.put(KEY_COLOR, p.getDarkVibrantColor(0x000000));
+
 
             tag_id = (int)db.insert(TABLE_TAG, null, values);
         }
@@ -638,7 +648,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     /*
     * creating tag at folder_id
     */
-    public int createTagByFolder(String tag_name, int folder_id){
+    public int createTagByFolder(String tag_name, int folder_id, int color){
         List<Media> media = getAllMediaByFolder(folder_id);
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -648,6 +658,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         if(tag_id == 0) {
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, tag_name);
+            values.put(KEY_COLOR, color);
 
             tag_id = (int)db.insert(TABLE_TAG, null, values);
         }
@@ -674,6 +685,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 Tag t = new Tag();
                 t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+
 
                 tags.add(t);
             }while(c.moveToNext());
@@ -696,6 +709,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         if(c.moveToFirst()){
             tag.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             tag.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+            tag.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+
         }
 
         return tag;
@@ -717,6 +732,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 Tag t = new Tag();
                 t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
                 tags.add(t);
             }while(c.moveToNext());
@@ -733,7 +749,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         List<Tag> tags = new ArrayList<Tag>();
 //        List<Tag> tags = new ArrayList<Tag>();
-        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
+        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR +" FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
 
         int mediaSize = medias.size();
         for(int i = 0; i < mediaSize; i++){
@@ -751,6 +767,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 Tag t = new Tag();
                 t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
                 tags.add(t);
             }while(c.moveToNext());
@@ -788,6 +805,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
         values.put(KEY_ID, tag.getId());
         values.put(KEY_NAME, tag.getName());
+        values.put(KEY_COLOR, tag.getColor());
+
 
         return  db.update(TABLE_TAG, values, KEY_ID + " = ? ", new String[] {String.valueOf(tag.getId())});
     }

@@ -63,7 +63,7 @@ public class Section3 extends Fragment {
 
         int storiesNum = tags.size();
         for(int i = 0; i < storiesNum; i++){
-            selectCard(tags.get(i).getId(), tags.get(i).getName());
+            selectCard(tags.get(i).getId(), tags.get(i).getName(), tags.get(i).getColor());
         }
 
 
@@ -108,7 +108,7 @@ public class Section3 extends Fragment {
 //        mListener = null;
     }
 
-    void selectCard(int tagId, String tagName){
+    void selectCard(int tagId, String tagName, int color){
         //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정
 
         SimpleCard card;
@@ -117,6 +117,8 @@ public class Section3 extends Fragment {
         data = new CardData(CONSTANT.TAG, tagId);
         card.setTag(data);
         ((TagButtonCard)card).setTagName(tagName);
+        ((TagButtonCard)card).setTagColor(color);
+
         mListView.add(card);
 
     }

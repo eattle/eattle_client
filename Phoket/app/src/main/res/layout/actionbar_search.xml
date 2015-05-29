@@ -7,12 +7,13 @@
 
     <ImageView
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="0.5"
         android:layout_gravity="left|center"
         android:gravity="left"
         android:id="@+id/exit_icon"
-        android:background="#ff0000"/>
+        android:background="@mipmap/close"
+        android:scaleType="center" />
 
     <EditText
         android:id="@+id/editText"
