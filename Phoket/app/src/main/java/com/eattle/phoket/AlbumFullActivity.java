@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -17,7 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -55,6 +60,8 @@ public class AlbumFullActivity extends ActionBarActivity {
     static int isTagAppeared = 0;//태그가 띄워져 있으면 1, 아니면 0
     StoryStartFragment storyStartFragment;
     StoryRecommendFragment storyRecommendFragment;
+
+    ImageView blurImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CONSTANT.actList.add(this);
@@ -62,6 +69,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         db = DatabaseHelper.getInstance(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_full);
+
 
         Intent intent = getIntent();
         mMediaList = intent.getParcelableArrayListExtra("mediaList");
@@ -187,6 +195,8 @@ public class AlbumFullActivity extends ActionBarActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
+
+
     }
 
     class TouchImageAdapter extends PagerAdapter {
@@ -469,6 +479,8 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
 
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

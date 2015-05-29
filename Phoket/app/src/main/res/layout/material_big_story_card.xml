@@ -14,9 +14,12 @@
             android:id="@+id/bigStoryImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:background="#aa0000"
-            android:alpha="0.8"/>
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gradient_y"/>
 
         <TextView
             android:id="@+id/bigStoryName"
@@ -40,7 +43,8 @@
             android:layout_height="wrap_content"
             android:text="New Text"
             android:id="@+id/bigStoryItemNum"
-            android:layout_gravity="left|bottom" />
+            android:layout_gravity="left|bottom"
+            android:textColor="#ffffff" />
 
 
     </FrameLayout>

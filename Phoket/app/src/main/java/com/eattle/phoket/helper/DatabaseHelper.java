@@ -722,7 +722,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public List<Tag> getAllTagsByMediaId(int media_id){
         List<Tag> tags = new ArrayList<Tag>();
 //        List<Tag> tags = new ArrayList<Tag>();
-        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
+        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
