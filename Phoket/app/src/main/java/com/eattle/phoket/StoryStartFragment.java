@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
     ImageView blurImage;
     ImageView backImage;
+    ImageView filterImage;
 
     public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind) {
         StoryStartFragment fragment = new StoryStartFragment();
@@ -78,8 +81,10 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         }
 
         blurImage = (ImageView)root.findViewById(R.id.blurImage);
+        setGrayScale(blurImage);
         backImage = (ImageView)root.findViewById(R.id.storyStartImage);
         applyBlur();
+        filterImage = (ImageView)root.findViewById(R.id.filterImage);
 
         return root;
     }
@@ -98,31 +103,42 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         });
     }
 
-    private void blur(Bitmap bkg, View view) {
+    private void blur(Bitmap bkg, ImageView view) {
         long startMs = System.currentTimeMillis();
         float scaleFactor = 8;
-        float radius = 10;
+        float radius = 6;
 
         Bitmap overlay = Bitmap.createBitmap((int) (view.getMeasuredWidth() / scaleFactor),
                 (int) (view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(overlay);
-        canvas.translate(-view.getLeft()/scaleFactor, -view.getTop()/scaleFactor);
+        canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
         canvas.scale(1 / scaleFactor, 1 / scaleFactor);
         Paint paint = new Paint();
         paint.setFlags(Paint.FILTER_BITMAP_FLAG);
         canvas.drawBitmap(bkg, 0, 0, paint);
 
         overlay = FastBlur.doBlur(overlay, (int)radius, true);
-        view.setBackground(new BitmapDrawable(getResources(), overlay));
+        view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
         view.setAlpha(0.0f);
+
+
         Log.d("Blur", System.currentTimeMillis() - startMs + "ms");
     }
+
+    public void setGrayScale(ImageView v){
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0);                        //0이면 grayscale
+        ColorMatrixColorFilter cf = new ColorMatrixColorFilter(matrix);
+        v.setColorFilter(cf);
+    }
+
 
     public void showBlur(float positionOffset){
         if(blurImage.getAlpha() >= 1.0f)
             return;
 
         blurImage.setAlpha(1.0f*positionOffset);
+        filterImage.setAlpha(0.5f*positionOffset + 0.2f);
     }
     public void showBlur(){
         blurImage.setAlpha(1.0f);

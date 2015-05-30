@@ -11,7 +11,7 @@
     </style>
 
     <style name="tabStyle" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@color/tab_indicator_ab</item>
+        <item name="android:background">@drawable/tab_indicator_shape</item>
     </style>
 
     <style name="NoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
