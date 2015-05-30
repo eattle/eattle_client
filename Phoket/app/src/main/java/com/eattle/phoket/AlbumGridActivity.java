@@ -11,11 +11,13 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -133,9 +135,8 @@ public class AlbumGridActivity extends ActionBarActivity {
         actionBar.setCustomView(actionBarLayout, params);
         actionBar.setDisplayHomeAsUpEnabled(false);
 
-
-
     }
+
 
     @Override
     protected void onResume() {
@@ -216,7 +217,6 @@ public class AlbumGridActivity extends ActionBarActivity {
         opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
         Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath, opt);
         titleImage.setImageBitmap(bitmap);
-        titleImage.setAlpha(0.4f);
     }
 
     @Override

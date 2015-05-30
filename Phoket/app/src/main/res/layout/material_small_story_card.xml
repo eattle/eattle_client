@@ -14,9 +14,13 @@
             android:id="@+id/smallStoryImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:background="#aa0000"
-            android:alpha="0.8"/>
+            android:scaleType="centerCrop"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gradient_y"/>
+
 
         <TextView
             android:id="@+id/smallStoryName"
@@ -33,14 +37,19 @@
             android:layout_height="wrap_content"
             android:id="@+id/smallStoryDate"
             android:textColor="#ffffff"
-            android:layout_gravity="right|bottom" />
+            android:layout_gravity="right|bottom"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New Text"
             android:id="@+id/smallStoryItemNum"
-            android:layout_gravity="left|bottom" />
+            android:layout_gravity="left|bottom"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:textColor="#ffffff" />
 
 
     </FrameLayout>
