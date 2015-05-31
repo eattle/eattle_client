@@ -47,6 +47,7 @@
             android:layout_weight="0.8"
             android:textSize="12dp"
             android:textColorHint="#ffffff"
+            android:textColor="#ffffff"
             android:hint="소중한 사진에 모멘트를 달아주세요"
             android:layout_marginTop="15dp"
             android:singleLine="true" /><!--hint size는 textSize를 따라간다-->

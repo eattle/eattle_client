@@ -68,7 +68,8 @@ public class StoryRecommendFragment extends Fragment {
         Log.d("asdfasdf", "asdfasdfasdfasdfasdf   " + recommendNum);
 
         TextView noRecommend = (TextView) root.findViewById(R.id.noRecommend);
-        if (recommendNum == 0) {//추천할 스토리가 없을 때
+        //if (recommendNum == 0) {//추천할 스토리가 없을 때
+        if(recommendNum < 4){//추천 스토리가 4개가 안되면 (추후변경)
             Log.d("asdfasdf", "asdfasdfasdfasdfasdf");
             noRecommend.setVisibility(View.VISIBLE);
             return root;
@@ -88,8 +89,8 @@ public class StoryRecommendFragment extends Fragment {
             }
             if (isOverlapped == 0) {//중복되지 않으면
                 //TODO 실제로는 없는 스토리인데 folderDB에 등록된 것이 있는듯!!
-                Folder temp = db.getFolder(select);//오류가 있는 folderID인지 확인한다
-                if (temp.getName() != null) {
+                Folder temp = db.getFolder(select);
+                if (temp.getName() != null && temp.getPicture_num() > 3) {////오류가 있는 folderID || 일상이 아니면
                     randomFolder[count] = select;
                     count++;
                 }
@@ -117,15 +118,8 @@ public class StoryRecommendFragment extends Fragment {
                     storyRecommendTitle = (TextView) root.findViewById(R.id.fourthText);
                     break;
             }
-            /*
-            storyRecommendImage.setImageURI(Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg"));
-            storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
-            */
-            BitmapFactory.Options opt = new BitmapFactory.Options();
-            opt.inSampleSize = 1;
-            Bitmap bm = BitmapFactory.decodeFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg", opt);
-            //bm = CONSTANT.blur(getActivity(), bm, 5f);//blur효과
-            storyRecommendImage.setImageBitmap(bm);
+
+            ((AlbumFullActivity)getActivity()).loadBitmap(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg",storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
 
             final int i_ = i;

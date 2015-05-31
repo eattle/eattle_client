@@ -12,12 +12,12 @@
     </FrameLayout>
 
 
-    <com.eattle.phoket.ExtendedViewPager
-        android:id="@+id/albumFull"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/albumFullViewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </com.eattle.phoket.ExtendedViewPager>
+    </android.support.v4.view.ViewPager>
 
     <!-- 스토리 종료 버튼(x)가 들어가는 Layout -->
     <FrameLayout
