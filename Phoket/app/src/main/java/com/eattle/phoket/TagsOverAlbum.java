@@ -9,26 +9,25 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -114,11 +113,10 @@ public class TagsOverAlbum extends Fragment {
         //사용자가 직접 추가한 태그
         for (int i = 0; i < s; i++) {
             //Button tagButton = new Button(getActivity());
-            Button tagButton = (Button) inflater.inflate(R.layout.view_tag_button, null);
-            tagButton.setText("" + tags.get(i).getName());
-            tagButton.setId(tags.get(i).getId());
-            tagButton.setLayoutParams(params);
+            FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
+            ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tags.get(i).getName());
             layout.addView(tagButton);
+            final int id = tags.get(i).getId();
 
             tagButton.setOnClickListener(new Button.OnClickListener() {
                 @Override
@@ -128,7 +126,7 @@ public class TagsOverAlbum extends Fragment {
 
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.TAG);
-                    intent.putExtra("id", (((Button) v).getId()));
+                    intent.putExtra("id", id);
                     intent.putExtra("mediaId", media_id);
                     startActivity(intent);
                 }
@@ -137,8 +135,7 @@ public class TagsOverAlbum extends Fragment {
         //기본적으로 추가하는 태그(날짜 등)
         //'년','월','일' 태그
         for (int i = 0; i < 3; i++) {
-            Button defaultTagButton = (Button) inflater.inflate(R.layout.view_default_tag_button, null);
-            defaultTagButton.setLayoutParams(params);
+            FrameLayout defaultTagButton = (FrameLayout) inflater.inflate(R.layout.view_default_tag_button, null);
 
             String tagName="";
             if (i == 0)
@@ -148,7 +145,7 @@ public class TagsOverAlbum extends Fragment {
             else if (i == 2)
                 tagName = Integer.toString(m.getDay()) + "일";
 
-            defaultTagButton.setText(tagName);
+            ((TextView)defaultTagButton.findViewById(R.id.tagName)).setText("" + tagName);
             final String tagName_ = tagName;
             defaultTagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -168,24 +165,60 @@ public class TagsOverAlbum extends Fragment {
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
         final Button btn = (Button) root.findViewById(R.id.button);//태그 추가 버튼
 
+        inputTag.setOnKeyListener(new View.OnKeyListener(){
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP){
+                    int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
+                    if (tag_id != -1) {
+                        Tag tag = db.getTagByTagId(tag_id);
+                        FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
+                        ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
+                        layout.addView(tagButton);
+                        final int id = tag.getId();
+
+                        tagButton.setOnClickListener(new Button.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
+                                intent.putExtra("kind", CONSTANT.TAG);
+                                intent.putExtra("id", id);
+                                intent.putExtra("mediaId", media_id);
+                                startActivity(intent);
+                            }
+                        });
+                    }
+                    inputTag.clearFocus();
+                    inputTag.setText(null);
+                    return true;
+
+                }
+                return false;
+
+
+            }
+
+        });
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
 
                 if (tag_id != -1) {
+
                     Tag tag = db.getTagByTagId(tag_id);
-                    Button tagButton = (Button) inflater.inflate(R.layout.view_tag_button, null);
-                    tagButton.setText("" + tag.getName());
-                    tagButton.setId(tag.getId());
-                    tagButton.setLayoutParams(params);
+
+                    FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
+                    ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
                     layout.addView(tagButton);
+                    final int id = tag.getId();
+
                     tagButton.setOnClickListener(new Button.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                             intent.putExtra("kind", CONSTANT.TAG);
-                            intent.putExtra("id", (((Button) v).getId()));
+                            intent.putExtra("id", id);
                             intent.putExtra("mediaId", media_id);
                             startActivity(intent);
                         }

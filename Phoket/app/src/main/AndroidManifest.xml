@@ -68,7 +68,9 @@
         <activity
             android:name=".PopupPictureActivity"
             android:label="@string/title_activity_popup_picture"
-            android:theme="@style/NoActionBarTranslucentTheme" >
+            android:theme="@style/ActionBarTranslucentTheme"
+            android:windowSoftInputMode="stateVisible" >
+
         </activity>
         <activity
             android:name=".SearchActivity"

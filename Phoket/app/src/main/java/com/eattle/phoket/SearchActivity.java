@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +23,6 @@ public class SearchActivity extends ActionBarActivity {
     DatabaseHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        CONSTANT.actList.add(this);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -53,11 +54,39 @@ public class SearchActivity extends ActionBarActivity {
         final EditText inputTag = (EditText) findViewById(R.id.editText);//태그 입력 창
         final TextView btn = (TextView) findViewById(R.id.searchButton);//태그 검색 버튼
 
+        inputTag.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                Log.d("asdad", ""+hasFocus);
+            }
+        });
+
+        inputTag.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    int tag_id = db.getTagIdByTagName(inputTag.getText().toString());
+                    if (tag_id == 0) {
+                        Toast.makeText(getApplicationContext(), "입력하신 포켓은 존재하지 않습니다", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    Intent intent = new Intent(getApplicationContext(), AlbumGridActivity.class);
+                    intent.putExtra("kind", CONSTANT.TAG);
+                    intent.putExtra("id", tag_id);
+                    startActivity(intent);
+                    finish();
+                    return true;
+
+                }
+                return false;
+            }
+        });
+
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int tag_id = db.getTagIdByTagName(inputTag.getText().toString());
-                if(tag_id == 0) {
+                if (tag_id == 0) {
                     Toast.makeText(getApplicationContext(), "입력하신 포켓은 존재하지 않습니다", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -65,15 +94,9 @@ public class SearchActivity extends ActionBarActivity {
                 intent.putExtra("kind", CONSTANT.TAG);
                 intent.putExtra("id", tag_id);
                 startActivity(intent);
+                finish();
             }
         });
-
-//        EditText editText = (EditText)findViewById(R.id.editText);
-//        editText.requestFocus();
-
-
-
-
 
     }
 

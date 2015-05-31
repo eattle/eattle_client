@@ -33,35 +33,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:background="@mipmap/inputtag"
-            android:layout_width="40dp"
-            android:layout_height="40dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <EditText
             android:id="@+id/editText"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.8"
+            android:layout_weight="2"
             android:textSize="12dp"
             android:textColorHint="#ffffff"
-            android:textColor="#ffffff"
-            android:hint="소중한 사진에 모멘트를 달아주세요"
-            android:layout_marginTop="15dp"
-            android:singleLine="true" /><!--hint size는 textSize를 따라간다-->
+            android:drawableLeft="@mipmap/phoket"
+            android:drawablePadding="10dp"
 
+            android:hint="어떤 포켓에 넣으실 건가요?"
+            android:singleLine="true"
+            android:layout_marginLeft="10dp"
+            android:textColor="#ffffff"
+            android:layout_marginRight="10dp" /><!--hint size는 textSize를 따라간다-->
         <Button
             android:id="@+id/button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:layout_margin="5dp"
-            android:layout_weight="0.2"
+            android:layout_weight="0.3"
             android:background="@layout/view_button_shape"
             android:text="추가"
-            android:textSize="10dp" />
+            android:textSize="10dp"
+            android:layout_marginRight="20dp" />
 
 
     </LinearLayout>
@@ -85,9 +84,9 @@
         <ImageView
             android:id="@+id/storyContentDelete"
             android:layout_alignParentLeft="true"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@mipmap/trash" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_delete_white_24dp"/>
 
 
         <LinearLayout
@@ -97,10 +96,10 @@
             android:gravity="right">
             <!-- 네모 4개 있는 이미지-->
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
-                android:background="@mipmap/currentpage" />
+                android:src="@mipmap/ic_widgets_white_24dp" />
             <TextView
                 android:id="@+id/storyContentOrderText"
                 android:layout_width="wrap_content"

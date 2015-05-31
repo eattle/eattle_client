@@ -6,16 +6,18 @@
     tools:context="com.eattle.phoket.PopupPictureActivity">
 
     <FrameLayout
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
 
-        android:layout_width="300dp"
-        android:layout_height="534dp">
+        android:layout_width="match_parent"
+        android:layout_height="280dp">
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/picture"
-            android:scaleType="center" />
+            android:scaleType="centerCrop" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gradient_y"/>
         <!-- Tag & Tag 추가란이 들어가는 Layout -->
         <FrameLayout
             android:id="@+id/tagLayout"
