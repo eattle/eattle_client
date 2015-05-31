@@ -15,12 +15,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/tagImage"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView2"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="25dp"
+            android:src="@mipmap/phoket"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="asdads"
-            android:layout_gravity="center"
-            android:id="@+id/tagName"/>
+            android:layout_gravity="center_horizontal|bottom"
+            android:id="@+id/tagName"
+            android:layout_marginBottom="30dp"
+            android:textColor="#ffffff" />
 
     </FrameLayout>
 </com.eattle.phoket.Card.TagButtonCardView>

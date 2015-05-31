@@ -9,9 +9,13 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
+
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+
 import android.os.Bundle;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -23,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -68,10 +73,13 @@ public class AlbumFullActivity extends ActionBarActivity {
     StoryStartFragment storyStartFragment;
     StoryRecommendFragment storyRecommendFragment;
 
+
     private LruCache<String, Bitmap> mMemoryCache;
     private Bitmap mPlaceHolderBitmap = null;//이미지를 처리하는 동안 보여줄 이미지
     //Set<SoftReference<Bitmap>> mReusableBitmaps;//이미지 재활용
     //private LruCache<String, BitmapDrawable> mMemoryCache;//캐시
+    ImageView blurImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CONSTANT.actList.add(this);
@@ -93,6 +101,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         db = DatabaseHelper.getInstance(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_full);
+
 
         Intent intent = getIntent();
         mMediaList = intent.getParcelableArrayListExtra("mediaList");
@@ -160,6 +169,9 @@ public class AlbumFullActivity extends ActionBarActivity {
                     FragmentManager fragmentManager = getFragmentManager();
                     FragmentTransaction tr = fragmentManager.beginTransaction();
                     if (position == -1) {
+                        // ~년~월~일의 스토리 -> 보임
+                        storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.VISIBLE);
+                        storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.VISIBLE);
 
                         Fragment f;
                         if ((f = isThereTabToTagHere()) != null) {//만약 태그들이 띄워져 있었으면 삭제한다
@@ -172,11 +184,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                     }
                 }
 
-                if(position == -1){
-                    storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.VISIBLE);
-                    storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.VISIBLE);
-                }
-                else{// ~년~월~일의 스토리 -> 없앰
+                if(position != -1){// ~년~월~일의 스토리 -> 없앰
                     storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.INVISIBLE);
                     storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.INVISIBLE);
                 }
@@ -214,14 +222,19 @@ public class AlbumFullActivity extends ActionBarActivity {
 
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (initialMediaPosition == -1)  //스토리 제목부터 시작해야 하는 경우
+                if (initialMediaPosition == -1)   //스토리 제목부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해
+                if(position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null){
+                    ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(positionOffset);
+                }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
             }
         });
+
+
     }
 
     //class TouchImageAdapter extends PagerAdapter {
@@ -279,7 +292,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 fragmentTransaction.commit();
             }
             if (position == -1 || position == mediaList.size())//스토리 시작 화면 또는 추천스토리 부분
-                return StoryMainFragment.newInstance(null,position,mediaList.size());
+                return StoryMainFragment.newInstance(null,position,mediaList.size());//결과적으로 아무것도 반환되지 않도록 한다
             return StoryMainFragment.newInstance(mediaList.get(position),position,mediaList.size());
         }
 
@@ -574,6 +587,8 @@ public class AlbumFullActivity extends ActionBarActivity {
             return byteimage;
         }
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

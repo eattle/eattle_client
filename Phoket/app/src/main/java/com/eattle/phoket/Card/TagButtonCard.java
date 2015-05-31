@@ -12,6 +12,7 @@ public class TagButtonCard extends SimpleCard {
 
     String tagName;
     String tagImage;
+    int tagColor;
 
     public TagButtonCard(Context context) {
         super(context);
@@ -31,6 +32,14 @@ public class TagButtonCard extends SimpleCard {
 
     public void setTagImage(String tagImage) {
         this.tagImage = tagImage;
+    }
+
+    public int getTagColor() {
+        return tagColor;
+    }
+
+    public void setTagColor(int tagColor) {
+        this.tagColor = tagColor;
     }
 
     @Override

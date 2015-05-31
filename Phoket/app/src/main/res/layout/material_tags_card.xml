@@ -20,78 +20,137 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage1"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/phoket"
+                android:id="@+id/tagIcon1"
+                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tagtext1"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:id="@+id/tagtext1"
+                android:layout_marginBottom="12dp"
+                android:textColor="#ffffff" />
+
         </FrameLayout>
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/tag2">
+            android:id="@+id/tag2"
+            >
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage2"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/phoket"
+                android:id="@+id/tagIcon2"
+                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tagtext2"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:id="@+id/tagtext2"
+                android:layout_marginBottom="12dp"
+                android:textColor="#ffffff" />
 
         </FrameLayout>
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/tag3">
+            android:id="@+id/tag3"
+            >
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage3"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/phoket"
+                android:id="@+id/tagIcon3"
+                android:visibility="invisible"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tagtext3"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:id="@+id/tagtext3"
+                android:layout_marginBottom="12dp"
+                android:textColor="#ffffff" />
 
         </FrameLayout>
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/tag4">
-
+            android:id="@+id/tag4"
+            >
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage4"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/phoket"
+                android:id="@+id/tagIcon4"
+                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tagtext4"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:id="@+id/tagtext4"
+                android:layout_marginBottom="12dp"
+                android:textColor="#ffffff" />
 
         </FrameLayout>
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/tag5">
-
+            android:id="@+id/tag5"
+            >
             <com.eattle.phoket.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage5"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/phoket"
+                android:id="@+id/tagIcon5"
+                android:visibility="invisible"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:id="@+id/tagtext5"/>
+                android:layout_gravity="center_horizontal|bottom"
+                android:id="@+id/tagtext5"
+                android:layout_marginBottom="12dp"
+                android:textColor="#ffffff" />
 
         </FrameLayout>
-
     </LinearLayout>
 </com.eattle.phoket.Card.TagsCardView>

@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -50,7 +51,7 @@ public class SearchActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(false);
 
         final EditText inputTag = (EditText) findViewById(R.id.editText);//태그 입력 창
-        final Button btn = (Button) findViewById(R.id.searchButton);//태그 검색 버튼
+        final TextView btn = (TextView) findViewById(R.id.searchButton);//태그 검색 버튼
 
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override

@@ -1,41 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:weightSum="3.5"
+    android:layout_height="match_parent"
+    android:weightSum="3"
     android:orientation="horizontal">
 
-    <ImageView
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.5"
-        android:layout_gravity="left|center"
-        android:gravity="left"
-        android:id="@+id/exit_icon"
-        android:background="#ff0000"/>
+        android:layout_weight="0.3"
+        android:gravity="center_vertical">
 
-    <EditText
-        android:id="@+id/editText"
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/exit_icon"
+            android:scaleType="center"
+            android:src="@mipmap/ic_arrow_back_white_24dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:layout_weight="2.5"
-        android:layout_gravity="left|center"
-        android:textColorHint="#ffffff"
-        android:hint="포켓 입력 plz"
-        android:singleLine="true"
-        android:textColor="#ffffff" /><!--hint size는 textSize를 따라간다-->
+        android:layout_height="match_parent"
+        android:layout_weight="2.7"
+        android:gravity="center_vertical|left">
 
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_margin="5dp"
-        android:layout_weight="0.5"
-        android:background="@layout/view_button_shape"
-        android:text="검색"
-        android:textSize="10dp" />
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:drawableLeft="@mipmap/ic_search_white_24dp"
+            android:textColorHint="#ffffff"
+            android:hint=""
+            android:singleLine="true"
+            android:textColor="#ffffff"
+            android:layout_weight="5"
+            android:drawablePadding="10dp"
+            />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchButton"
+            android:layout_weight="1"
+            android:textSize="15sp"
+            android:textColor="#ffffff"
+            android:text="검색"
+            />
+
+    </LinearLayout>
+
+    <!--hint size는 textSize를 따라간다-->
 
 
 </LinearLayout>

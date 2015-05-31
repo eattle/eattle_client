@@ -12,6 +12,7 @@ import com.eattle.phoket.R;
 public class TagsCard extends SimpleCard {
     private String[] tagText;
     private int[] tagId;
+    private int[] tagColor;
     private int count;
     private OnButtonPressListener mListener;
 
@@ -20,6 +21,7 @@ public class TagsCard extends SimpleCard {
         super(context);
         tagText = new String[5];
         tagId = new int[5];
+        tagColor = new int[5];
         count = 0;
 
     }
@@ -30,11 +32,16 @@ public class TagsCard extends SimpleCard {
     public int getTagId(int n) {
         return tagId[n];
     }
+    public int getTagColor(int n) {
+        return tagColor[n];
+    }
 
-    public void setTag(int n, int tagId, String tagText) {
+
+    public void setTag(int n, int tagId, String tagText, int tagColor) {
         count++;
         this.tagId[n] = tagId;
         this.tagText[n] = tagText;
+        this.tagColor[n] = tagColor;
     }
 
     public int getCount() {

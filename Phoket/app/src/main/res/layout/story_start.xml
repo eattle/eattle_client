@@ -9,9 +9,15 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>
     <ImageView
+        android:id="@+id/blurImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#77000000"/>
+        android:background="#000000"
+        android:alpha="0.2"
+        android:id="@+id/filterImage"/>
     <!--스토리 제목-->
     <RelativeLayout
         android:layout_width="wrap_content"

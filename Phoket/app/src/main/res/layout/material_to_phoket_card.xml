@@ -14,9 +14,12 @@
             android:id="@+id/toPhoketImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:background="#aa0000"
-            android:alpha="0.5"/>
+            android:scaleType="centerCrop"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gradient_y"/>
 
         <TextView
             android:id="@+id/toPhoketText"
@@ -26,8 +29,10 @@
             android:padding="15dp"
             android:text="이 사진을 포켓에 담아주세요"
             android:textColor="#ffffff"
-            android:textSize="20dp"
-            android:layout_gravity="center" />
+            android:textSize="15dp"
+            android:layout_gravity="center"
+            android:drawableLeft="@mipmap/tophoket"
+            android:drawablePadding="5dp"/>
 
     </FrameLayout>
 

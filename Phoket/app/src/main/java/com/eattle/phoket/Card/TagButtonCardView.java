@@ -31,8 +31,7 @@ public class TagButtonCardView extends CardItemView<TagButtonCard> {
         super.build(card);
         ImageView tagImage = (ImageView)findViewById(R.id.tagImage);
         TextView tagName = (TextView) findViewById(R.id.tagName);
-
-//        tagImage.setImageURI(Uri.parse(card.getTagImage()));
+        tagImage.setBackgroundColor(card.getTagColor());
         tagName.setText(card.getTagName());
     }
 

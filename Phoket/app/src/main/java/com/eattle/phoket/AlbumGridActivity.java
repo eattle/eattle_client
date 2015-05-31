@@ -11,11 +11,13 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -107,11 +109,12 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         ImageView drawerImageView = (ImageView)actionBarLayout.findViewById(R.id.home_icon);
 
+
         drawerImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int actSize = CONSTANT.actList.size();
-                for(int i = 0; i < actSize; i++)
+                for (int i = 0; i < actSize; i++)
                     CONSTANT.actList.get(i).finish();
 //                Intent intent = new Intent(C.this, A.class);
 //                startActivity(intent);
@@ -123,15 +126,17 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         drawerImageViewCheck.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { Log.d("search", "click"); }
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(intent);
+            }
         });
 
         actionBar.setCustomView(actionBarLayout, params);
         actionBar.setDisplayHomeAsUpEnabled(false);
 
-
-
     }
+
 
     @Override
     protected void onResume() {
@@ -212,7 +217,6 @@ public class AlbumGridActivity extends ActionBarActivity {
         opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
         Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath, opt);
         titleImage.setImageBitmap(bitmap);
-        titleImage.setAlpha(0.4f);
     }
 
     @Override
