@@ -1,5 +1,7 @@
 package com.eattle.phoket;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -140,15 +143,17 @@ public class AlbumGridActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
         refreshGrid();
         //변경사항 적용
         Adapter.notifyDataSetChanged();
+        super.onResume();
     }
 
     public void onClick(View v){
         switch(v.getId()){
             case R.id.storyStart://스토리 시작
+                clearMemory();
+
                 Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
                 intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
                 intent.putExtra("position",-1);//-1을 넘겨주면 스토리 '맨 처음'부터 시작(제목화면부터)
@@ -164,6 +169,8 @@ public class AlbumGridActivity extends ActionBarActivity {
     //그리드 뷰 아이템 클릭
     AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            clearMemory();
+
             Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
             intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
             intent.putExtra("position", position);//어디에서 시작할지
@@ -240,7 +247,57 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    //백버튼을 눌렀을 때, 메모리 정리를 한다
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                //불필요한 메모리 정리---------------------------------------------------------------
+                clearMemory();
+                Adapter = null;
+                finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+                return false;
+        }
+        return true;
+    }
+    //불필요한 메모리 정리---------------------------------------------------------------
+    private void clearMemory() {
+        mGrid = null;
+        //Adapter = null;
+        if (titleImage != null) {
+            Drawable d = titleImage.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if (bitmap != null) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            titleImage.setImageBitmap(null);
+        }
+        /*
+        for(int i= 0;i<mMediaList.size();i++){
+            ImageView gridItem = (ImageView)Adapter.getView(i);
+            if (gridItem != null) {
+                Drawable d = gridItem.getDrawable();
+                if (d instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                    if (bitmap != null) {
+                        Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                        bitmap.recycle();
+                        bitmap = null;
+                    }
+                }
+                d.setCallback(null);
+                gridItem.setImageBitmap(null);
+            }
+        }*/
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        //-----------------------------------------------------------------------------------
+    }
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
         public ImageAdapter(Context context) {

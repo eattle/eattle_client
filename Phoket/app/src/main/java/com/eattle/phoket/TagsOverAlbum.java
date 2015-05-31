@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -120,6 +123,9 @@ public class TagsOverAlbum extends Fragment {
             tagButton.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //불필요한 메모리 정리---------------------------------------------------------------
+                    clearMemory();
+
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.TAG);
                     intent.putExtra("id", (((Button) v).getId()));
@@ -147,6 +153,7 @@ public class TagsOverAlbum extends Fragment {
             defaultTagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    clearMemory();//불필요한 메모리 정리
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                     intent.putExtra("tagName", tagName_);//기본 태그에서는 tagName을 넘겨준다
@@ -288,6 +295,44 @@ public class TagsOverAlbum extends Fragment {
         Toast.makeText(getActivity(),"사진이 삭제되었습니다",Toast.LENGTH_SHORT).show();
         //뷰를 새로 그린다.
         AlbumFullActivity.touchImageAdapter.removeView(position);
+    }
+
+    //불필요한 메모리 정리---------------------------------------------------------------
+    private void clearMemory() {
+        AlbumFullActivity.mViewPager = null;
+        AlbumFullActivity.touchImageAdapter = null;
+        ImageView storyStartImage = (ImageView) getActivity().findViewById(R.id.storyStartImage);
+        ImageView blurImage = (ImageView)getActivity().findViewById(R.id.blurImage);
+        if (storyStartImage != null) {
+            Drawable d = storyStartImage.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if (bitmap != null) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            storyStartImage.setImageBitmap(null);
+        }
+        if (blurImage != null) {
+            Drawable d = blurImage.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if (bitmap != null) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            blurImage.setImageBitmap(null);
+        }
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+        //-----------------------------------------------------------------------------------
     }
 
     public int getMedia_id() {

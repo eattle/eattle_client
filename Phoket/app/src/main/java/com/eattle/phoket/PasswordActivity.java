@@ -73,6 +73,12 @@ public class PasswordActivity extends ActionBarActivity {
     }
     public void changeCircle(){
         switch(count){
+            case 0:
+                firstDot.setBackgroundResource(R.mipmap.dot_before);
+                secondDot.setBackgroundResource(R.mipmap.dot_before);
+                thirdDot.setBackgroundResource(R.mipmap.dot_before);
+                fourthDot.setBackgroundResource(R.mipmap.dot_before);
+                break;
             case 1:
                 firstDot.setBackgroundResource(R.mipmap.dot_after);
                 secondDot.setBackgroundResource(R.mipmap.dot_before);

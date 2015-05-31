@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,8 +137,46 @@ public class StoryRecommendFragment extends Fragment {
 
         return root;
     }
+    //백버튼을 눌렀을 때, 메모리 정리를 한다
 
     public void onRecommendClick(int num) {
+        //불필요한 메모리 정리---------------------------------------------------------------
+        AlbumFullActivity.mViewPager = null;
+        AlbumFullActivity.touchImageAdapter = null;
+        System.gc();
+        Runtime.getRuntime().gc();
+        ImageView storyStartImage = (ImageView)getActivity().findViewById(R.id.storyStartImage);
+        ImageView blurImage = (ImageView)getActivity().findViewById(R.id.blurImage);
+        if(storyStartImage != null) {
+            Drawable d = storyStartImage.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if(bitmap != null) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            storyStartImage.setImageBitmap(null);
+        }
+        if( blurImage != null ){
+            Drawable d = blurImage.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if(bitmap != null) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            blurImage.setImageBitmap(null);
+        }
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+        //-----------------------------------------------------------------------------------
         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
         intent.putExtra("kind", CONSTANT.FOLDER);
         switch (num) {
