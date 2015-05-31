@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -83,6 +84,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //스마트폰 화면 크기를 구한다(이미지 최적화-out of memory 방지를 위해)
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        CONSTANT.screenWidth = metrics.widthPixels;
+        CONSTANT.screenHeight = metrics.heightPixels;
 
         final Button toUSB = (Button)findViewById(R.id.toUSB);
         toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다

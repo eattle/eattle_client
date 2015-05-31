@@ -29,17 +29,18 @@ import android.widget.TextView;
  * Created by dh_st_000 on 2015-05-21.
  */
 public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀을 때 맨처음 화면
-
     ImageView blurImage;
     ImageView backImage;
     ImageView filterImage;
 
-    public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind) {
+    public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind, int position) {
+
         StoryStartFragment fragment = new StoryStartFragment();
         Bundle args = new Bundle();
         args.putString("titleImagePath", titleImagePath);
         args.putString("titleName", titleName);
         args.putInt("kind", kind);
+        args.putInt("position", position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,18 +52,19 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         String titleImagePath = args.getString("titleImagePath");
         String titleName = args.getString("titleName");
         int kind = args.getInt("kind");
+        int position = args.getInt("position");
         //대표 이미지
         try {
             ImageView storyStartImage = (ImageView) root.findViewById(R.id.storyStartImage);
-            BitmapFactory.Options opt = new BitmapFactory.Options();
-            opt.inSampleSize = 1;
-            Bitmap bm = BitmapFactory.decodeFile(titleImagePath, opt);
-            //bm = CONSTANT.blur(getActivity(), bm, 25.0f);//blur효과
-            storyStartImage.setImageBitmap(bm);
+
+            //화면 크기, 사진 크기에 따라 사진을 최적화 한다
+            Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
+            storyStartImage.setImageBitmap(changedBitmap);
 
         } catch (OutOfMemoryError e) {
             Log.e("warning", "이미지가 너무 큽니다");
         }
+
 
         //날짜
         TextView storyStartDate = (TextView) root.findViewById(R.id.storyStartDate);
@@ -71,13 +73,18 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         //제목
         TextView storyStartTitle = (TextView) root.findViewById(R.id.storyStartTitle);
 
-        if(kind == CONSTANT.FOLDER){
+        if (kind == CONSTANT.FOLDER) {
             storyStartDate.setText(CONSTANT.convertFolderNameToDate(titleName));
             storyStartTitle.setText(CONSTANT.convertFolderNameToStoryName(titleName));
-        }
-        else if(kind == CONSTANT.DEFAULT_TAG || kind == CONSTANT.TAG) {
+        } else if (kind == CONSTANT.DEFAULT_TAG || kind == CONSTANT.TAG) {
             storyStartDate.setText("");
             storyStartTitle.setText(titleName);
+        }
+
+
+        if(position != -1){
+            storyStartDate.setVisibility(View.INVISIBLE);
+            storyStartTitle.setVisibility(View.INVISIBLE);
         }
 
         blurImage = (ImageView)root.findViewById(R.id.blurImage);

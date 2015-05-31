@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -65,24 +66,36 @@ public class PasswordActivity extends ActionBarActivity {
     public void passwordInit(){
         count = 0;
         input = "";
-        firstDot.setBackgroundResource(R.mipmap.dotbefore);
-        secondDot.setBackgroundResource(R.mipmap.dotbefore);
-        thirdDot.setBackgroundResource(R.mipmap.dotbefore);
-        fourthDot.setBackgroundResource(R.mipmap.dotbefore);
+        firstDot.setBackgroundResource(R.mipmap.dot_before);
+        secondDot.setBackgroundResource(R.mipmap.dot_before);
+        thirdDot.setBackgroundResource(R.mipmap.dot_before);
+        fourthDot.setBackgroundResource(R.mipmap.dot_before);
     }
     public void changeCircle(){
         switch(count){
             case 1:
-                firstDot.setBackgroundResource(R.mipmap.dotafter);
+                firstDot.setBackgroundResource(R.mipmap.dot_after);
+                secondDot.setBackgroundResource(R.mipmap.dot_before);
+                thirdDot.setBackgroundResource(R.mipmap.dot_before);
+                fourthDot.setBackgroundResource(R.mipmap.dot_before);
                 break;
             case 2:
-                secondDot.setBackgroundResource(R.mipmap.dotafter);
+                firstDot.setBackgroundResource(R.mipmap.dot_after);
+                secondDot.setBackgroundResource(R.mipmap.dot_after);
+                thirdDot.setBackgroundResource(R.mipmap.dot_before);
+                fourthDot.setBackgroundResource(R.mipmap.dot_before);
                 break;
             case 3:
-                thirdDot.setBackgroundResource(R.mipmap.dotafter);
+                firstDot.setBackgroundResource(R.mipmap.dot_after);
+                secondDot.setBackgroundResource(R.mipmap.dot_after);
+                thirdDot.setBackgroundResource(R.mipmap.dot_after);
+                fourthDot.setBackgroundResource(R.mipmap.dot_before);
                 break;
             case 4:
-                fourthDot.setBackgroundResource(R.mipmap.dotafter);
+                firstDot.setBackgroundResource(R.mipmap.dot_after);
+                secondDot.setBackgroundResource(R.mipmap.dot_after);
+                thirdDot.setBackgroundResource(R.mipmap.dot_after);
+                fourthDot.setBackgroundResource(R.mipmap.dot_after);
                 break;
             default:
                 break;
@@ -91,6 +104,7 @@ public class PasswordActivity extends ActionBarActivity {
     }
 
     public void onPasswordClick(View v){
+        int delete=0;
         switch(v.getId()){
             case R.id.one:
                 input += "1";
@@ -126,13 +140,17 @@ public class PasswordActivity extends ActionBarActivity {
                 input += "*";
                 break;
             case R.id.deletePassword:
-
+                delete = 1;
+                if(input.length() > 0) {
+                    input = input.substring(0, input.length() - 1);
+                    count--;
+                }
                 break;
             default:
                 break;
         }
-        Button one  = (Button)findViewById(R.id.one);
-        count++;
+        if(delete == 0)
+            count++;
         changeCircle();
         check();
     }

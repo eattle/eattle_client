@@ -2,15 +2,21 @@ package com.eattle.phoket;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.util.Log;
+import android.widget.ImageView;
 
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -49,6 +55,9 @@ public class CONSTANT {
     public static final int START_OF_PICTURE_CLASSIFICATION = 3;//MainActivity가 Service에게 사진 정리를 요청하는 메세지
     public static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
     public static final int END_OF_SINGLE_STORY = 5;//스토리가 정리되는대로 바로바로 보여주기 위하여 정의한 메세지,하나의 스토리가 정리될때마다 보낸다
+
+    public static int screenWidth;//스마트폰 화면 너비
+    public static int screenHeight;//스마트폰 화면 높이
 
     public static String convertFolderNameToStoryName(String folderName){
         String name = "";
@@ -100,6 +109,48 @@ public class CONSTANT {
         }
 
         return bitmap;
+    }
+
+    /**
+        사진 최적화를 위한 함수들 -----------------------------------------------------------------
+     **/
+    //화면 크기,사진 크기에 따라 Options.inSampleSize 값을 어떻게 해야하는지 알려주는 함수
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize+1;//더 줄인다
+    }
+
+    //상황에 따른 적절한 사진을 얻는다
+    public static Bitmap decodeSampledBitmapFromPath(String path, int reqWidth, int reqHeight) {
+
+        //사진 크기를 알기 위해 inJustDecodeBounds=true 를 설정한다
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        // inSampleSize를 계산한다
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        Log.d("CONSTANT","inSampleSize : "+options.inSampleSize);
+        // 비트맵 생성 후 반환
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
     }
 
 
