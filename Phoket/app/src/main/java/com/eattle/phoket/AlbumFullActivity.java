@@ -9,29 +9,19 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-
 import android.os.Bundle;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.LruCache;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.CachedBlockDevice;
@@ -40,12 +30,9 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
-import java.io.File;
-import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
 public class AlbumFullActivity extends ActionBarActivity {
@@ -284,6 +271,8 @@ public class AlbumFullActivity extends ActionBarActivity {
                 position--;//첫화면에 제목화면을 넣기 위해.
             }
             if (storyStartFragment == null) {//항상 뒤에 배경사진을 깔아둔다
+
+
 
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

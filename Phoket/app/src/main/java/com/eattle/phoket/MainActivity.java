@@ -16,6 +16,7 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -25,14 +26,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.BlockDevice;
@@ -246,6 +244,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
                     int pictureNumInStory = msg.getData().getInt("picture_num");
+                    mSectionsPagerAdapter.notifyDataSetChanged();
 
 //                    Section1 fragment = (Section1)getFragmentManager().findFragmentById(R.id.section1);
 
@@ -575,11 +574,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
+        @Override
+        public int getItemPosition(Object item) {
+            return POSITION_NONE;
+        }
+
 
         @Override
         public Fragment getItem(int position) {
