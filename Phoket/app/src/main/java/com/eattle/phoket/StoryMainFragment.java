@@ -3,6 +3,8 @@ package com.eattle.phoket;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +26,8 @@ import java.io.File;
  */
 
 public class StoryMainFragment extends android.support.v4.app.Fragment {
-
+    private TouchImageView img;
+    private int position;
     public static StoryMainFragment newInstance(Media m,int position,int mediaListSize) {
         final StoryMainFragment fragment = new StoryMainFragment();
         Bundle args = new Bundle();
@@ -42,12 +45,12 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
         Bundle args = getArguments();
         final Media m = args.getParcelable("m");
-        final int position = args.getInt("position");
+        position = args.getInt("position");
         final int mediaListSize = args.getInt("mediaListSize");
         if (position == -1 || position == mediaListSize)//제목화면 또는 추천스토리 부분은 아무것도 안함(onPageSelected에서 해줌)
             return root;//아무것도 설정하지 않은 fragment를 반환(//배경사진 fragment만 보이게 한다 또는 추천스토리 fragment만 보이게 한다)
         FrameLayout frameLayout = (FrameLayout) root.findViewById(R.id.storyMain);
-        TouchImageView img = (TouchImageView)root.findViewById(R.id.pagerImage);
+        img = (TouchImageView)root.findViewById(R.id.pagerImage);
 
         String path = m.getPath();//사진의 경로를 가져온다
 
@@ -95,7 +98,27 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
 
+    @Override
+    public void onDestroy(){
+        Log.d("StoryMainFragment","onDestroy 호출!!!!");
+        if(img != null) {
+            Drawable d = img.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if(bitmap != null) {
+                    Log.d("StoryMainFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+            }
+            d.setCallback(null);
+            img.setImageBitmap(null);
+        }
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        super.onDestroy();
     }
 
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰

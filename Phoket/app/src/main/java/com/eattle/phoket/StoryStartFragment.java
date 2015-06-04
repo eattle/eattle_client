@@ -32,6 +32,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     ImageView blurImage;
     ImageView backImage;
     ImageView filterImage;
+    private int position;
 
     public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind, int position) {
 
@@ -52,7 +53,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         String titleImagePath = args.getString("titleImagePath");
         String titleName = args.getString("titleName");
         int kind = args.getInt("kind");
-        int position = args.getInt("position");
+        position = args.getInt("position");
         //대표 이미지
         try {
             ImageView storyStartImage = (ImageView) root.findViewById(R.id.storyStartImage);
@@ -95,7 +96,11 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
         return root;
     }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
+    }
     private void applyBlur() {
         backImage.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override

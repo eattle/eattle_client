@@ -18,6 +18,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.LruCache;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,7 +56,7 @@ public class AlbumFullActivity extends ActionBarActivity {
     String tagName = "";
 
     //static ExtendedViewPager mViewPager;
-    private ViewPager mViewPager;
+    static ViewPager mViewPager;
     static TouchImageAdapter touchImageAdapter;
     static int isTagAppeared = 0;//태그가 띄워져 있으면 1, 아니면 0
     StoryStartFragment storyStartFragment;
@@ -66,11 +68,11 @@ public class AlbumFullActivity extends ActionBarActivity {
     //Set<SoftReference<Bitmap>> mReusableBitmaps;//이미지 재활용
     //private LruCache<String, BitmapDrawable> mMemoryCache;//캐시
     ImageView blurImage;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        CONSTANT.actList.add(this);
 
+        CONSTANT.actList.add(this);
+/*
         //이미지 캐싱을 위한 과정
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         //MaxMemory에서 1/8을 사용한다
@@ -81,7 +83,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 // The cache size will be measured in kilobytes rather than number of items.
                 return bitmap.getByteCount() / 1024;
             }
-        };
+        };*/
 
         //mPlaceHolderBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
 
@@ -150,7 +152,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-
+                Log.d("asdf","onpageselected호출 "+position);
                 if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해.
                     FragmentManager fragmentManager = getFragmentManager();
@@ -224,11 +226,9 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     }
 
-    //class TouchImageAdapter extends PagerAdapter {
+    //뷰페이저
     class TouchImageAdapter extends FragmentStatePagerAdapter {
-        //하나의 이미지에 하나 이상의 태그가 있기 때문에 ArrayList를 선언한다
-        //ArrayList<TagsOverAlbum> tagArrayList = new ArrayList<TagsOverAlbum>();
-        ArrayList<View> views = new ArrayList<View>();//뷰페이저 업데이트를 위해 선언
+
         Context context;
         List<Media> mediaList;
 
@@ -244,15 +244,6 @@ public class AlbumFullActivity extends ActionBarActivity {
             Log.d("TouchImageAdapter", "getItemPosition 호출 : " + object);
             return POSITION_NONE;
         }
-
-        public void removeView(int position) {//뷰페이저 업데이트를 위해 선언
-            Log.d("touchImageAdapter", "지우려는 viewpager 포지션 : " + position);
-            mediaList.remove(position);
-            this.notifyDataSetChanged();
-        }
-
-        //-----------------------------------------------
-
         @Override
         public int getCount() {
             if (initialMediaPosition != -1) //default
@@ -279,26 +270,42 @@ public class AlbumFullActivity extends ActionBarActivity {
                 storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName, kind,position);
                 fragmentTransaction.add(R.id.storyStart, storyStartFragment, "StoryStartFragment");
                 fragmentTransaction.commit();
+
             }
             if (position == -1 || position == mediaList.size())//스토리 시작 화면 또는 추천스토리 부분
                 return StoryMainFragment.newInstance(null,position,mediaList.size());//결과적으로 아무것도 반환되지 않도록 한다
             return StoryMainFragment.newInstance(mediaList.get(position),position,mediaList.size());
         }
+        public void removeView(int position) {//뷰페이저 업데이트를 위해 선언
+            Log.d("touchImageAdapter", "지우려는 viewpager 포지션 : " + position);
+            mediaList.remove(position);
+            this.notifyDataSetChanged();
+        }
 
 /*
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            if (initialMediaPosition == -1)  //스토리 제목부터 시작해야 하는 경우
-                position--;//첫화면에 제목화면을 넣기 위해.
-            container.removeView((View) object);
-        }*/
 
-/*
-        @Override
-        public void notifyDataSetChanged() {
-            super.notifyDataSetChanged();
-        }*/
+            if(initialMediaPosition == -1)
+                position--;
+            BitmapDrawable d = (BitmapDrawable)((ImageView)findViewById(R.id.pagerImage)).getDrawable();
+            if(d != null) {
+                Bitmap b = d.getBitmap();
+                b.recycle();
+                System.gc();
+            }
+            super.destroyItem(container,position,object);
 
+            if(initialMediaPosition == -1)
+                position--;
+            Log.d("AlbumFullActivity",position+" 에 대한 destroyItem 호출");
+            if(position != -1) {
+                android.support.v4.app.FragmentManager manager = ((StoryMainFragment)object).getFragmentManager();
+                android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
+                trans.remove((StoryMainFragment) object);
+                trans.commit();
+            }
+        }*/
     }
 
     Fragment isThereTabToTagHere() {
@@ -315,6 +322,52 @@ public class AlbumFullActivity extends ActionBarActivity {
             tr.commit();
         }
     }*/
+
+    //백버튼을 눌렀을 때, 메모리 정리를 한다
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                //불필요한 메모리 정리---------------------------------------------------------------
+                AlbumFullActivity.mViewPager = null;
+                AlbumFullActivity.touchImageAdapter = null;
+                System.gc();
+                Runtime.getRuntime().gc();
+                ImageView storyStartImage = (ImageView)findViewById(R.id.storyStartImage);
+                ImageView blurImage = (ImageView)findViewById(R.id.blurImage);
+                if(storyStartImage != null) {
+                    Drawable d = storyStartImage.getDrawable();
+                    if (d instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                        if(bitmap != null) {
+                            Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                            bitmap.recycle();
+                            bitmap = null;
+                        }
+                    }
+                    d.setCallback(null);
+                    storyStartImage.setImageBitmap(null);
+                }
+                if(blurImage != null) {
+                    Drawable d = blurImage.getDrawable();
+                    if (d instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                        if(bitmap != null) {
+                            Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                            bitmap.recycle();
+                            bitmap = null;
+                        }
+                    }
+                    d.setCallback(null);
+                    blurImage.setImageBitmap(null);
+                }
+                System.gc();//garbage collector
+                Runtime.getRuntime().gc();//garbage collector
+                finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+                return false;
+        }
+        return true;
+    }
 
     void setTabToTag(Media m, int position) {
         if (isThereTabToTagHere() != null) {
@@ -389,7 +442,6 @@ public class AlbumFullActivity extends ActionBarActivity {
     }
 
 
-
     //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
@@ -403,7 +455,6 @@ public class AlbumFullActivity extends ActionBarActivity {
         @Override
         protected Bitmap doInBackground(String... params) {
             final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
-            addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
             return bitmap;
         }
 
@@ -416,15 +467,13 @@ public class AlbumFullActivity extends ActionBarActivity {
 
             if (imageViewReference != null && bitmap != null) {
                 final ImageView imageView = imageViewReference.get();
-                final BitmapWorkerTask bitmapWorkerTask =
-                        getBitmapWorkerTask(imageView);
+                final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
                     imageView.setImageBitmap(bitmap);
                 }
             }
         }
     }
-
 
     //Concurrency 문제를 다루기 위한 클래스
     static class AsyncDrawable extends BitmapDrawable {
@@ -440,7 +489,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             return bitmapWorkerTaskReference.get();
         }
     }
-    /*
+
     public void loadBitmap(String path, ImageView imageView) {
         if (cancelPotentialWork(path, imageView)) {
             final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
@@ -448,7 +497,8 @@ public class AlbumFullActivity extends ActionBarActivity {
             imageView.setImageDrawable(asyncDrawable);
             task.execute(path);
         }
-    }*/
+    }
+    /*
     public void loadBitmap(String path, ImageView imageView) {
         Log.d("AlbumFullActivity","loadBitmap 호출");
         final String imageKey = String.valueOf(path);
@@ -464,7 +514,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 task.execute(path);
             }
         }
-    }
+    }*/
     //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
     public static boolean cancelPotentialWork(String path, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
@@ -498,6 +548,7 @@ public class AlbumFullActivity extends ActionBarActivity {
     /**
      이미지 캐싱을 통한 부드러운 스와이핑 제공
      */
+    /*
     public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         if (getBitmapFromMemCache(key) == null) {
             mMemoryCache.put(key, bitmap);
@@ -506,6 +557,8 @@ public class AlbumFullActivity extends ActionBarActivity {
     public Bitmap getBitmapFromMemCache(String key) {
         return mMemoryCache.get(key);
     }
+*/
+
 
 
 
@@ -603,3 +656,94 @@ public class AlbumFullActivity extends ActionBarActivity {
 
 
 }
+/*
+
+    class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
+        private final WeakReference<ImageView> imageViewReference;
+        private int data = 0;
+
+        public BitmapWorkerTask(ImageView imageView) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
+            imageViewReference = new WeakReference<ImageView>(imageView);
+        }
+
+        // Decode image in background.
+
+        // Decode image in background.
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
+            return bitmap;
+        }
+
+        // Once complete, see if ImageView is still around and set bitmap.
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (isCancelled()) {
+                bitmap = null;
+            }
+
+            if (imageViewReference != null && bitmap != null) {
+                final ImageView imageView = imageViewReference.get();
+                final BitmapWorkerTask bitmapWorkerTask =
+                        getBitmapWorkerTask(imageView);
+                if (this == bitmapWorkerTask && imageView != null) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            }
+        }
+    }
+    public void loadBitmap(String path, ImageView imageView) {
+        if (cancelPotentialWork(path, imageView)) {
+            final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            final AsyncDrawable asyncDrawable =
+                    new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+            imageView.setImageDrawable(asyncDrawable);
+            task.execute(path);
+        }
+    }
+
+    //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
+    public static boolean cancelPotentialWork(String path, ImageView imageView) {
+        final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+        if (bitmapWorkerTask != null) {
+            final String bitmapData = bitmapWorkerTask.path;
+            // If bitmapData is not yet set or it differs from the new data
+            if (!bitmapData.equals("") || bitmapData.equals(path)) {
+                // Cancel previous task
+                bitmapWorkerTask.cancel(true);
+            } else {
+                // The same work is already in progress
+                return false;
+            }
+        }
+        // No task associated with the ImageView, or an existing task was cancelled
+        return true;
+    }
+    private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
+        if (imageView != null) {
+            final Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof AsyncDrawable) {
+                final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+                return asyncDrawable.getBitmapWorkerTask();
+            }
+        }
+        return null;
+    }
+
+    static class AsyncDrawable extends BitmapDrawable {
+        private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
+
+        public AsyncDrawable(Resources res, Bitmap bitmap,
+                             BitmapWorkerTask bitmapWorkerTask) {
+            super(res, bitmap);
+            bitmapWorkerTaskReference =
+                    new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+        }
+
+        public BitmapWorkerTask getBitmapWorkerTask() {
+            return bitmapWorkerTaskReference.get();
+        }
+    }
+ */
