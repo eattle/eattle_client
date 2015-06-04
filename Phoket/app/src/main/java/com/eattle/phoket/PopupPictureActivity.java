@@ -33,7 +33,7 @@ public class PopupPictureActivity extends ActionBarActivity {
         Media m = db.getMediaById(mediaId);
         ImageView picture = (ImageView)findViewById(R.id.picture);
         BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inSampleSize = 8;
+        opt.inSampleSize = 4;
         Bitmap bm = BitmapFactory.decodeFile(m.getPath(), opt);
         picture.setImageBitmap(bm);
 
@@ -84,15 +84,16 @@ public class PopupPictureActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(false);
 
 
-
     }
 
     void setTabToTag(Media m) {
         FragmentTransaction tr = getFragmentManager().beginTransaction();
-        TagsOverAlbum ttt = TagsOverAlbum.newInstance(m);
+        TagsOverAlbum ttt = TagsOverAlbum.newInstance(m,1);
         tr.replace(R.id.tagLayout, ttt, "TabToTag");
         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         tr.commit();
+
     }
+
 
 }

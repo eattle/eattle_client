@@ -234,6 +234,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 case CONSTANT.END_OF_PICTURE_CLASSIFICATION://사진 정리가 완료 되었을 때 받게되는 메세지
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
+                    mSectionsPagerAdapter.notifyDataSetChanged();
 
                     wantBackUp();
                     exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
@@ -244,7 +245,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
                     int pictureNumInStory = msg.getData().getInt("picture_num");
-                    mSectionsPagerAdapter.notifyDataSetChanged();
 
 //                    Section1 fragment = (Section1)getFragmentManager().findFragmentById(R.id.section1);
 

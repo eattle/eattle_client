@@ -36,7 +36,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <EditText
+        <com.eattle.phoket.ExEditText
             android:id="@+id/editText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -60,7 +60,8 @@
             android:background="@layout/view_button_shape"
             android:text="추가"
             android:textSize="10dp"
-            android:layout_marginRight="20dp" />
+            android:layout_marginRight="20dp"
+            android:textColor="#ffffff" />
 
 
     </LinearLayout>

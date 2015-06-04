@@ -9,8 +9,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="#ff0000">
+        android:layout_weight="1">
         <com.eattle.phoket.SquareImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"

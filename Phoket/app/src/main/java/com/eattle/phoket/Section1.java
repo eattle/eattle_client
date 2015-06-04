@@ -186,35 +186,6 @@ public class Section1 extends Fragment {
      */
 
 
-    SimpleCard getCard(int cardNum){
-        SimpleCard card;
-
-        switch (cardNum){
-            case CONSTANT.BIGSTORYCARD:
-                card = new BigStoryCard(mContext);
-                card.setTag("BIG_STORY_CARD");
-                return card;
-            case CONSTANT.DAILYCARD:
-                card = new DailyCard(mContext);
-                card.setTag("DAILY_CARD");
-                return card;
-            case CONSTANT.TAGSCARD:
-                card = new TagsCard(mContext);
-                card.setTag("TAGS_CARD");
-                return card;
-            case CONSTANT.TOPHOKETCARD:
-                card = new ToPhoketCard(mContext);
-                card.setTag("TO_PHOKET_CARD");
-                return card;
-            case CONSTANT.NOTIFICARD:
-                card = new WelcomeCard(mContext);
-                card.setTag("WELCOME_CARD");
-            default:
-                card = new BigStoryCard(mContext);
-                card.setTag("BIG_STORY_CARD");
-                return card;
-        }
-    }
 
     void selectCard(String thumbNailID, String storyName, int folderID, int pictureNum){
         //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정

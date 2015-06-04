@@ -9,7 +9,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,7 +50,8 @@ public class SearchActivity extends ActionBarActivity {
         actionBar.setCustomView(actionBarLayout, params);
         actionBar.setDisplayHomeAsUpEnabled(false);
 
-        final EditText inputTag = (EditText) findViewById(R.id.editText);//태그 입력 창
+        final ExEditText inputTag = (ExEditText) findViewById(R.id.editText);//태그 입력 창
+        inputTag.setOnBackPressListener(onBackPressListener);
         final TextView btn = (TextView) findViewById(R.id.searchButton);//태그 검색 버튼
 
         inputTag.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -99,5 +99,20 @@ public class SearchActivity extends ActionBarActivity {
         });
 
     }
+
+    private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener()
+    {
+        @Override
+        public void onBackPress()
+        {
+            didBackPressOnEditText();
+        }
+    };
+
+    private void didBackPressOnEditText()
+    {
+        finish();
+    }
+
 
 }
