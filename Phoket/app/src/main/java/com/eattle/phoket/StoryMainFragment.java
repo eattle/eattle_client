@@ -34,6 +34,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     private Media m;
     private int isBitmapTaskExecuted = 0;//1이면 bitmapWorkerTask.execute()가 실행된것
     private int smallOrLarge = 0;//0이면 작은 이미지가 로드된 상태, 1이면 큰 이미지가 로드된 상태
+    private int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
     AlbumFullActivity.BitmapWorkerTask bitmapWorkerTask;
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
         Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
@@ -165,18 +166,18 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
                             isBitmapTaskExecuted = 1;//execute는 한번만 실행될 수 있다
                             smallOrLarge = 1;
-                            Log.d("asdf"," 인덱스? : "+CONSTANT.currentLoadingImage.indexOf(img));
-                            if(CONSTANT.currentLoadingImage.indexOf(img) == -1) {//중복 execute를 방지하기 위해 필요하다!)
+                            Log.d("asdf"," 인덱스? : "+CONSTANT.currentLoadingImage.indexOf(imageIdForTaskExecute));
+                            if(CONSTANT.currentLoadingImage.indexOf(new Integer(imageIdForTaskExecute)) == -1) {//중복 execute를 방지하기 위해 필요하다!)
                                 bitmapWorkerTask.execute(path);//큰 이미지 로드 시작
-                                CONSTANT.currentLoadingImage.add(img);//중복 execute를 방지하기 위해 필요하다!
-                                Log.d("asdf"," 인덱스! : "+CONSTANT.currentLoadingImage.indexOf(img));
+                                CONSTANT.currentLoadingImage.add(imageIdForTaskExecute);//중복 execute를 방지하기 위해 필요하다!
+                                Log.d("asdf"," 인덱스! : "+CONSTANT.currentLoadingImage.indexOf(imageIdForTaskExecute));
 
                             }
 
                         }
                     }
                 }
-            },350);// 0.5초 정도 딜레이를 준 후 시작
+            },100);// 0.5초 정도 딜레이를 준 후 시작
 
         } else {
 // fragment is no longer visible
@@ -198,8 +199,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         //recycle()을 하기 전에 imageView에 null을 할당한다(이전의 비트맵에 참조하는 것을 방지)
                         bitmapWorkerTask = null;//참조될 가능성이 있는 모든 객체를 해제한다
                         //img.setImageBitmap(null);
-                        CONSTANT.currentLoadingImage.remove(img);//중복 execute를 방지하기 위해 필요하다!
-                        //작은 이미지로 대체한다
+
                         bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId());
 
 
@@ -210,6 +210,10 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         System.gc();
                         isBitmapTaskExecuted = 0;
                         d.setCallback(null);
+                        //작은 이미지로 대체한다
+
+                        //CONSTANT.currentLoadingImage.remove(new Integer(imageIdForTaskExecute));//중복 execute를 방지하기 위해 필요하다!
+
                         //img.setImageBitmap(CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth/6, CONSTANT.screenHeight/6));
                     }
                 }
@@ -235,8 +239,9 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     public void onPause(){
         super.onPause();
     }*/
+
     @Override
-    public void onDestroy() {
+    public void onStop() {
         //CONSTANT.currentImageInfo에서 해당 뷰에 관련된 아이템을 삭제한다
         //CONSTANT.ImagePathAndImageView tempInfo = new CONSTANT.ImagePathAndImageView(path,img);
         //CONSTANT.currentImageInfo.remove(tempInfo);//이미지 로딩을 위한 배열에서 삭제한다

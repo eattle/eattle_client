@@ -62,7 +62,8 @@ public class CONSTANT {
     public static int screenHeight;//스마트폰 화면 높이
 
     public static ImageView currentImageView;
-    public static ArrayList<ImageView> currentLoadingImage = new ArrayList<ImageView>();//현재 execute()되고 있는 것들을 가리키는 배열
+    public static int COUNTIMAGE=0;
+    public static ArrayList<Integer> currentLoadingImage = new ArrayList<Integer>();//현재 execute()되고 있는 것들을 가리키는 배열
     /*
     public static class ImagePathAndImageView{
         private String path;

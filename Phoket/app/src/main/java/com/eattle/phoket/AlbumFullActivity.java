@@ -519,9 +519,11 @@ public class AlbumFullActivity extends ActionBarActivity {
                 }
                 final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
-                    imageView.setImageBitmap(bitmap);//큰 사진을 로드한다
+                    if(!bitmap.isRecycled()) {//이미 recycle된 사진은 쓰지 않는다!
+                        imageView.setImageBitmap(bitmap);//큰 사진을 로드한다
+                    }
+                    //!!!!여기 !!!!
                 }
-                CONSTANT.currentLoadingImage.remove(imageView);//중복 execute를 방지하기 위해 필요하다!
                 if (bitmap_ != null && !bitmap_.isRecycled()) {
                     Log.d("StoryRecommendFragment", "기존의 작은 이미지 삭제]" + bitmap_.getByteCount() + " recycle() & gc() 호출");
                     bitmap_.recycle();
@@ -530,6 +532,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                     bitmap_ = null;
                     d.setCallback(null);
                 }
+                CONSTANT.currentLoadingImage.remove(imageView);//중복 execute를 방지하기 위해 필요하다!
 
             }
         }
