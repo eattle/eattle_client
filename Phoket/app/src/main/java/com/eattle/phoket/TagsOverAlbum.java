@@ -334,34 +334,24 @@ public class TagsOverAlbum extends Fragment {
     private void clearMemory() {
         AlbumFullActivity.mViewPager = null;
         AlbumFullActivity.touchImageAdapter = null;
-        ImageView storyStartImage = (ImageView) getActivity().findViewById(R.id.storyStartImage);
-        ImageView blurImage = (ImageView)getActivity().findViewById(R.id.blurImage);
-        if (storyStartImage != null) {
-            Drawable d = storyStartImage.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if (bitmap != null) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    bitmap.recycle();
-                    bitmap = null;
-                }
+
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
+        CONSTANT.releaseImageMemory((ImageView)getActivity().findViewById(R.id.blurImage));
+
+        //아직 스토리에 남아있는 사진 삭제
+        while(AlbumFullActivity.viewPagerImage.size() > 0){
+            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
+            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+            AlbumFullActivity.viewPagerImage.remove(0);
+            CONSTANT.releaseImageMemory(temp);
+
+            if(AlbumFullActivity.viewPagerImage.size() == 0) {
+                Log.d("TagsOverAlbum","break!");
+
+                break;
             }
-            d.setCallback(null);
-            storyStartImage.setImageBitmap(null);
         }
-        if (blurImage != null) {
-            Drawable d = blurImage.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if (bitmap != null) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    bitmap.recycle();
-                    bitmap = null;
-                }
-            }
-            d.setCallback(null);
-            blurImage.setImageBitmap(null);
-        }
+
         System.gc();//garbage collector
         Runtime.getRuntime().gc();//garbage collector
         getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)

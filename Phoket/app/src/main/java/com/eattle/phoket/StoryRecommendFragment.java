@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -26,6 +27,7 @@ import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +40,8 @@ public class StoryRecommendFragment extends Fragment {
     int folderID;//현재 보고 있는 스토리의 ID
     static FileSystem fileSystem;
     int randomFolder[];//추천 스토리의 폴더 ID가 들어갈 배열
-
+    int recommendNum = 4;//추천할 스토리의 개수(개수 추가할 경우 story_recommend에 추가해야 함)
+    LinearLayout storyRecommend;
     public static StoryRecommendFragment newInstance(int folderID) {
 
         fileSystem = FileSystem.getInstance();
@@ -54,6 +57,7 @@ public class StoryRecommendFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.story_recommend, container, false);
+        storyRecommend = (LinearLayout)root;
         Bundle args = getArguments();
         if (args != null)
             folderID = args.getInt("folderID");
@@ -63,17 +67,17 @@ public class StoryRecommendFragment extends Fragment {
         //랜덤하게 4개의 스토리를 얻어온다(3개는 임의로 정한 것)
         List<Folder> folders = db.getAllFolders();
         int totalFolderNum = folders.size();
-        Log.d("asdfasdf", "asdfasdfasdfasdfasdf   " + totalFolderNum);
+        Log.d("storyRecommendFragment", "[totalFolderNum]   " + totalFolderNum);
 
-        int recommendNum = 4;//추천할 스토리의 개수(개수 추가할 경우 story_recommend에 추가해야 함)
+
         if (totalFolderNum < recommendNum)//총 스토리의 개수가 4개가 안될떄
             recommendNum = totalFolderNum - 1;//현재 보고있는 스토리 제외
-        Log.d("asdfasdf", "asdfasdfasdfasdfasdf   " + recommendNum);
+        Log.d("storyRecommendFragment", "[recommendNum]   " + recommendNum);
 
         TextView noRecommend = (TextView) root.findViewById(R.id.noRecommend);
         //if (recommendNum == 0) {//추천할 스토리가 없을 때
-        if(recommendNum < 4){//추천 스토리가 4개가 안되면 (추후변경)
-            Log.d("asdfasdf", "asdfasdfasdfasdfasdf");
+        if (recommendNum < 4) {//추천 스토리가 4개가 안되면 (추후변경)
+            Log.d("storyRecommendFragment", "추천할 스토리가 없음");
             noRecommend.setVisibility(View.VISIBLE);
             return root;
         } else
@@ -121,8 +125,10 @@ public class StoryRecommendFragment extends Fragment {
                     storyRecommendTitle = (TextView) root.findViewById(R.id.fourthText);
                     break;
             }
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg";
+            Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth,300);
+            storyRecommendImage.setImageBitmap(bitmap);
 
-            ((AlbumFullActivity)getActivity()).loadBitmap(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg",storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
 
             final int i_ = i;
@@ -143,35 +149,26 @@ public class StoryRecommendFragment extends Fragment {
         //불필요한 메모리 정리---------------------------------------------------------------
         AlbumFullActivity.mViewPager = null;
         AlbumFullActivity.touchImageAdapter = null;
-        System.gc();
-        Runtime.getRuntime().gc();
-        ImageView storyStartImage = (ImageView)getActivity().findViewById(R.id.storyStartImage);
-        ImageView blurImage = (ImageView)getActivity().findViewById(R.id.blurImage);
-        if(storyStartImage != null) {
-            Drawable d = storyStartImage.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if(bitmap != null) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    bitmap.recycle();
-                    bitmap = null;
-                }
+
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.blurImage));
+        //추천 이미지 삭제
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.firstImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.secondImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.thirdImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.fourthImage));
+        //아직 스토리에 남아있는 사진 삭제
+        while(AlbumFullActivity.viewPagerImage.size() > 0){
+            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
+            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+            AlbumFullActivity.viewPagerImage.remove(0);
+            CONSTANT.releaseImageMemory(temp);
+
+            if(AlbumFullActivity.viewPagerImage.size() == 0) {
+                Log.d("TagsOverAlbum","break!");
+
+                break;
             }
-            d.setCallback(null);
-            storyStartImage.setImageBitmap(null);
-        }
-        if( blurImage != null ){
-            Drawable d = blurImage.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if(bitmap != null) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    bitmap.recycle();
-                    bitmap = null;
-                }
-            }
-            d.setCallback(null);
-            blurImage.setImageBitmap(null);
         }
         System.gc();//garbage collector
         Runtime.getRuntime().gc();//garbage collector
@@ -194,5 +191,12 @@ public class StoryRecommendFragment extends Fragment {
                 break;
         }
         getActivity().startActivity(intent);
+    }
+    public void showBlur(float positionOffset){
+        if(storyRecommend.getAlpha() >= 1.0f)
+            return;
+
+        storyRecommend.setAlpha(1.0f*positionOffset);
+        storyRecommend.setAlpha(0.5f*positionOffset + 0.2f);
     }
 }

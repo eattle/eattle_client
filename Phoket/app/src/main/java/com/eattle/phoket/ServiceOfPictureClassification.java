@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,6 +23,8 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -202,7 +205,7 @@ public class ServiceOfPictureClassification extends Service {
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
             Log.d("MainActivity", "!!" + path);
             //썸네일 사진들은 계산대상에서 제외한다
-            if (path.contains("thumbnail") || path.contains("스토리")) {
+            if (path.contains(".thumbnail") || path.contains("스토리")) {
                 Log.d("pictureClassification", "썸네일 및 기존 스토리는 계산대상에서 제외");
                 continue;
             }
@@ -294,6 +297,12 @@ public class ServiceOfPictureClassification extends Service {
             }
 
             //썸네일 이미지를 생성한다
+            /*
+            Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(
+                             getContentResolver(), selectedImageUri,
+                             MediaStore.Images.Thumbnails.MINI_KIND,
+                             (BitmapFactory.Options) null );
+             */
             File ExisTedThumbNail = new File(folderThumbnailName + String.valueOf(pictureID) + ".jpg");
             if (!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
                 Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(mCr, pictureID,MediaStore.Images.Thumbnails.MINI_KIND,null);
@@ -450,9 +459,6 @@ public class ServiceOfPictureClassification extends Service {
 
 
         try {
-            int height = bitmap.getHeight();
-            int width = bitmap.getWidth();
-
             fileCacheItem.createNewFile();
             out = new FileOutputStream(fileCacheItem);
 
@@ -467,6 +473,16 @@ public class ServiceOfPictureClassification extends Service {
             }
         }
     }
+        /*
+        Bitmap original = BitmapFactory.decodeStream(getAssets().open("1024x768.jpg"));
+ByteArrayOutputStream out = new ByteArrayOutputStream();
+original.compress(Bitmap.CompressFormat.PNG, 100, out);
+Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+
+Log.e("Original   dimensions", original.getWidth()+" "+original.getHeight());
+Log.e("Compressed dimensions", decoded.getWidth()+" "+decoded.getHeight());
+         */
+
 
 
 

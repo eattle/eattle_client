@@ -48,6 +48,7 @@ public class AlbumGridActivity extends ActionBarActivity {
     GridView mGrid;
     ImageAdapter Adapter;
     List<Media> mMediaList;
+    ArrayList<ImageView> mImageList;
 
     int Id;//folderId가 될수도 있고 TagId가 될수도 있다
     int kind;
@@ -81,7 +82,7 @@ public class AlbumGridActivity extends ActionBarActivity {
             mediaByTag = db.getMediaById(mediaId);
             tagName = intent.getStringExtra("tagName");
         }
-
+        mImageList = new ArrayList<>();
         refreshGrid();
 
         //그리드 뷰 등록
@@ -112,13 +113,16 @@ public class AlbumGridActivity extends ActionBarActivity {
 
         ImageView drawerImageView = (ImageView)actionBarLayout.findViewById(R.id.home_icon);
 
-
+        //홈버튼
         drawerImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int actSize = CONSTANT.actList.size();
-                for (int i = 0; i < actSize; i++)
+                for (int i = 0; i < actSize; i++) {
                     CONSTANT.actList.get(i).finish();
+                    clearMemory();
+                    finish();
+                }
 //                Intent intent = new Intent(C.this, A.class);
 //                startActivity(intent);
 //                finish();
@@ -220,9 +224,7 @@ public class AlbumGridActivity extends ActionBarActivity {
         //폴더(스토리)의 제목 등록
         titleText.setText(titleName);
         //폴더(스토리)의 대표사진 등록
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inSampleSize = 4;//기존 해상도의 1/4로 줄인다
-        Bitmap bitmap = BitmapFactory.decodeFile(titleImagePath, opt);
+        Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth,200);
         titleImage.setImageBitmap(bitmap);
     }
 
@@ -255,7 +257,7 @@ public class AlbumGridActivity extends ActionBarActivity {
                 //불필요한 메모리 정리---------------------------------------------------------------
                 clearMemory();
                 Adapter = null;
-                finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+                finish();//현재 띄워져 있던 albumGridActivity 종료(메모리 확보를 위해)
                 return false;
         }
         return true;
@@ -264,36 +266,11 @@ public class AlbumGridActivity extends ActionBarActivity {
     private void clearMemory() {
         mGrid = null;
         //Adapter = null;
-        if (titleImage != null) {
-            Drawable d = titleImage.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if (bitmap != null) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    bitmap.recycle();
-                    bitmap = null;
-                }
-            }
-            d.setCallback(null);
-            titleImage.setImageBitmap(null);
-        }
-        /*
-        for(int i= 0;i<mMediaList.size();i++){
-            ImageView gridItem = (ImageView)Adapter.getView(i);
-            if (gridItem != null) {
-                Drawable d = gridItem.getDrawable();
-                if (d instanceof BitmapDrawable) {
-                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                    if (bitmap != null) {
-                        Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                        bitmap.recycle();
-                        bitmap = null;
-                    }
-                }
-                d.setCallback(null);
-                gridItem.setImageBitmap(null);
-            }
-        }*/
+
+        CONSTANT.releaseImageMemory(titleImage);//타이틀 이미지 삭제
+        for(int i= 0;i<mImageList.size();i++)//gridview 아이템 삭제
+            CONSTANT.releaseImageMemory((ImageView)mImageList.get(i));
+
         System.gc();//garbage collector
         Runtime.getRuntime().gc();//garbage collector
         //-----------------------------------------------------------------------------------
@@ -301,6 +278,7 @@ public class AlbumGridActivity extends ActionBarActivity {
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
         public ImageAdapter(Context context) {
+            mImageList = new ArrayList<>();
             mContext = context;
         }
 
@@ -334,6 +312,7 @@ public class AlbumGridActivity extends ActionBarActivity {
             imageView.setAdjustViewBounds(true);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+            mImageList.add(imageView);//나중에 해제하기 위해 등록한다.
             return imageView;
         }
     }

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -59,6 +61,27 @@ public class CONSTANT {
     public static int screenWidth;//스마트폰 화면 너비
     public static int screenHeight;//스마트폰 화면 높이
 
+    public static ImageView currentImageView;
+    public static ArrayList<ImagePathAndImageView> currentImageInfo = new ArrayList<ImagePathAndImageView>();//현재 보고있는 사진에 대해서만 원본을 로드하도록 함
+
+    public static class ImagePathAndImageView{
+        private String path;
+        private ImageView imageView;
+
+        public ImagePathAndImageView(String path, ImageView imageView){
+            this.path = path;
+            this.imageView = imageView;
+        }
+
+        public String getPath(){
+            return path;
+        }
+        public ImageView getImageView(){
+            return imageView;
+        }
+
+    }
+
     public static String convertFolderNameToStoryName(String folderName){
         String name = "";
         if (folderName.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
@@ -93,24 +116,6 @@ public class CONSTANT {
         return name;
 
     }
-
-    //blur함수
-    public static Bitmap blur(Context context, Bitmap bitmap, float radius) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            RenderScript rs = RenderScript.create(context);
-
-            final Allocation input = Allocation.createFromBitmap(rs, bitmap);
-            final Allocation output = Allocation.createTyped(rs, input.getType());
-            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-            script.setRadius(radius);
-            script.setInput(input);
-            script.forEach(output);
-            output.copyTo(bitmap);
-        }
-
-        return bitmap;
-    }
-
     /**
         사진 최적화를 위한 함수들 -----------------------------------------------------------------
      **/
@@ -134,7 +139,7 @@ public class CONSTANT {
             }
         }
 
-        return inSampleSize+1;//더 줄인다
+        return inSampleSize;//더 줄인다
     }
 
     //상황에 따른 적절한 사진을 얻는다
@@ -151,6 +156,35 @@ public class CONSTANT {
         // 비트맵 생성 후 반환
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(path, options);
+    }
+
+    //sampleSize를 지정
+    public static Bitmap decodeSampledBitmapFromPath(String path,int sampleSize) {
+
+        //사진 크기를 알기 위해 inJustDecodeBounds=true 를 설정한다
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        // inSampleSize
+        options.inSampleSize = sampleSize;
+        return BitmapFactory.decodeFile(path, options);
+    }
+    //Bitmap 메모리 해제를 위한 함수
+    public static void releaseImageMemory(ImageView img) {
+
+        if (img != null) {
+            Drawable d = img.getDrawable();
+            if (d instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
+                    img.setImageBitmap(null);
+                    bitmap.recycle();
+                    bitmap = null;
+                    d.setCallback(null);
+                }
+            }
+
+            img = null;
+        }
     }
 
 

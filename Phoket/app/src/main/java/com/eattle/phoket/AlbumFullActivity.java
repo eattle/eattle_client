@@ -11,12 +11,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import android.graphics.drawable.Drawable;
+import android.media.Image;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -74,15 +78,18 @@ public class AlbumFullActivity extends ActionBarActivity {
     StoryStartFragment storyStartFragment;
     StoryRecommendFragment storyRecommendFragment;
 
+    static ArrayList<ImageView> viewPagerImage;
 
     private LruCache<String, Bitmap> mMemoryCache;
     private Bitmap mPlaceHolderBitmap = null;//이미지를 처리하는 동안 보여줄 이미지
     //Set<SoftReference<Bitmap>> mReusableBitmaps;//이미지 재활용
     //private LruCache<String, BitmapDrawable> mMemoryCache;//캐시
     ImageView blurImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        if (viewPagerImage == null)
+            viewPagerImage = new ArrayList<ImageView>();//나중에 비트맵 메모리 해제를 위한 리스트
         CONSTANT.actList.add(this);
 /*
         //이미지 캐싱을 위한 과정
@@ -156,7 +163,8 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         //뷰페이저 생성
         mViewPager = (ViewPager) findViewById(R.id.albumFullViewPager);
-        touchImageAdapter = new TouchImageAdapter(this, mMediaList,getSupportFragmentManager());
+        mViewPager.setOffscreenPageLimit(0);
+        touchImageAdapter = new TouchImageAdapter(this, mMediaList, getSupportFragmentManager());
         mViewPager.setAdapter(touchImageAdapter);//뷰페이저 어댑터 설정
         if (initialMediaPosition != -1)//-1이면 스토리 처음부터 시작(제목화면부터)
             mViewPager.setCurrentItem(initialMediaPosition);
@@ -164,7 +172,9 @@ public class AlbumFullActivity extends ActionBarActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                Log.d("asdf","onpageselected호출 "+position);
+
+                Log.d("AlbumFullActivity", "onpageselected호출(현재 position : " + position + ")");
+
                 if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해.
                     FragmentManager fragmentManager = getFragmentManager();
@@ -185,29 +195,27 @@ public class AlbumFullActivity extends ActionBarActivity {
                     }
                 }
 
-                if(position != -1){// ~년~월~일의 스토리 -> 없앰
+                if (position != -1) {// ~년~월~일의 스토리 -> 없앰
                     storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.INVISIBLE);
                     storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.INVISIBLE);
                 }
                 //추천스토리를 관리하는 부분-----------------------------------------------
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                if(position == mMediaList.size()){
-                    if (isTagAppeared == 1){
-                        pushTabToTag(mMediaList.get(position-1), position-1);
-                        setPlacePopup(mMediaList.get(position-1));
+                if (position == mMediaList.size()) {
+                    if (isTagAppeared == 1) {
+                        pushTabToTag(mMediaList.get(position - 1), position - 1);
+                        setPlacePopup(mMediaList.get(position - 1));
                     }
                     storyRecommendFragment = StoryRecommendFragment.newInstance(mMediaList.get(0).getFolder_id());
                     fragmentTransaction.add(R.id.frameForStoryRecommend, storyRecommendFragment, "storyRecommendFragment");
                     fragmentTransaction.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     fragmentTransaction.commit();
                     return;
-                }
-                else if(storyRecommendFragment != null){//마지막 페이지가 아니면서 기존에 추천 스토리를 만들어 놓은게 있으면
+                } else if (storyRecommendFragment != null) {//마지막 페이지가 아니면서 기존에 추천 스토리를 만들어 놓은게 있으면
                     fragmentTransaction.remove(storyRecommendFragment);
                     fragmentTransaction.commit();
                 }
-
 
 
                 //------------------------------------------------------------------------------
@@ -225,8 +233,11 @@ public class AlbumFullActivity extends ActionBarActivity {
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 if (initialMediaPosition == -1)   //스토리 제목부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해
-                if(position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null){
+                if (position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null) {
                     ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(positionOffset);
+                }
+                if (position > mMediaList.size()-1 && getFragmentManager().findFragmentById(R.id.storyRecommend) != null) {
+                    ((StoryRecommendFragment) (getFragmentManager().findFragmentById(R.id.storyRecommend))).showBlur(positionOffset);
                 }
             }
 
@@ -234,7 +245,6 @@ public class AlbumFullActivity extends ActionBarActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
-
 
     }
 
@@ -256,6 +266,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             Log.d("TouchImageAdapter", "getItemPosition 호출 : " + object);
             return POSITION_NONE;
         }
+
         @Override
         public int getCount() {
             if (initialMediaPosition != -1) //default
@@ -267,25 +278,29 @@ public class AlbumFullActivity extends ActionBarActivity {
 
 
         @Override
-        public android.support.v4.app.Fragment getItem(int position){
-            Log.d("asdf","getItem 호출");
+        public android.support.v4.app.Fragment getItem(int position) {
+            Log.d("albumFullActivity", "getItem 호출(현재 position : " + position + ")");
+
             if (initialMediaPosition == -1) {  //스토리 제목부터 시작해야 하는 경우
-                Log.d("asdf","여기!!!");
                 position--;//첫화면에 제목화면을 넣기 위해.
             }
             if (storyStartFragment == null) {//항상 뒤에 배경사진을 깔아둔다
 
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName, kind,position);
+                storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName, kind, position);
                 fragmentTransaction.add(R.id.storyStart, storyStartFragment, "StoryStartFragment");
                 fragmentTransaction.commit();
 
             }
             if (position == -1 || position == mediaList.size())//스토리 시작 화면 또는 추천스토리 부분
-                return StoryMainFragment.newInstance(null,position,mediaList.size());//결과적으로 아무것도 반환되지 않도록 한다
-            return StoryMainFragment.newInstance(mediaList.get(position),position,mediaList.size());
+                return StoryMainFragment.newInstance(null, position, mediaList.size());//결과적으로 아무것도 반환되지 않도록 한다
+            StoryMainFragment storyMainFragment = StoryMainFragment.newInstance(mediaList.get(position), position, mediaList.size());
+
+
+            return storyMainFragment;
         }
+
         public void removeView(int position) {//뷰페이저 업데이트를 위해 선언
             Log.d("touchImageAdapter", "지우려는 viewpager 포지션 : " + position);
             mediaList.remove(position);
@@ -341,35 +356,20 @@ public class AlbumFullActivity extends ActionBarActivity {
                 //불필요한 메모리 정리---------------------------------------------------------------
                 AlbumFullActivity.mViewPager = null;
                 AlbumFullActivity.touchImageAdapter = null;
-                System.gc();
-                Runtime.getRuntime().gc();
-                ImageView storyStartImage = (ImageView)findViewById(R.id.storyStartImage);
-                ImageView blurImage = (ImageView)findViewById(R.id.blurImage);
-                if(storyStartImage != null) {
-                    Drawable d = storyStartImage.getDrawable();
-                    if (d instanceof BitmapDrawable) {
-                        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                        if(bitmap != null) {
-                            Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                            bitmap.recycle();
-                            bitmap = null;
-                        }
+                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
+                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
+                //아직 스토리에 남아있는 사진 삭제
+                while (AlbumFullActivity.viewPagerImage.size() > 0) {
+                    Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
+                    ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+                    AlbumFullActivity.viewPagerImage.remove(0);
+                    CONSTANT.releaseImageMemory(temp);
+
+                    if (AlbumFullActivity.viewPagerImage.size() == 0) {
+                        Log.d("TagsOverAlbum", "break!");
+
+                        break;
                     }
-                    d.setCallback(null);
-                    storyStartImage.setImageBitmap(null);
-                }
-                if(blurImage != null) {
-                    Drawable d = blurImage.getDrawable();
-                    if (d instanceof BitmapDrawable) {
-                        Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                        if(bitmap != null) {
-                            Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                            bitmap.recycle();
-                            bitmap = null;
-                        }
-                    }
-                    d.setCallback(null);
-                    blurImage.setImageBitmap(null);
                 }
                 System.gc();//garbage collector
                 Runtime.getRuntime().gc();//garbage collector
@@ -454,34 +454,96 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
-        private final WeakReference<ImageView> imageViewReference;
-        private String path = "";
+        public final WeakReference<ImageView> imageViewReference;
+
+        public String path = "";
+        int mode = -1;
+
         public BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
             imageViewReference = new WeakReference<ImageView>(imageView);
         }
 
+        public BitmapWorkerTask(ImageView imageView, int mode) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
+            imageViewReference = new WeakReference<ImageView>(imageView);
+            this.mode = mode;
+        }
+
         // Decode image in background.
         @Override
         protected Bitmap doInBackground(String... params) {
-            final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
-            return bitmap;
+            //기존의 작은 이미지를 큰 이미지로 대체하는 경우
+            //if (imageViewReference != null && (CONSTANT.currentImageView == imageViewReference.get())) {//아직도 현재 페이지를 보고있으면
+            if (imageViewReference != null) {
+                //!!!!!!!!!!!!!!!!!!!!!!!!
+                /*
+                //작은 이미지 삭제
+                if (imageViewReference != null && imageViewReference.get() != null) {
+                    //(imageViewReference.get()).setImageBitmap(null); 해야하는데 오류뜸.
+
+                    Drawable d = imageViewReference.get().getDrawable();
+                    if (d instanceof BitmapDrawable) {
+                        Bitmap bitmap_ = ((BitmapDrawable) d).getBitmap();
+                        if (bitmap_ != null) {
+                            Log.d("StoryRecommendFragment", "기존의 작은 이미지 삭제]"+bitmap_.getByteCount() + " recycle() & gc() 호출");
+                            bitmap_.recycle();
+                            System.gc();
+                            Runtime.getRuntime().gc();//비트맵을 확실하게 지운다
+                            bitmap_ = null;
+                        }
+                    }
+                }*/
+                final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
+                return bitmap;//큰 이미지를 로딩한다
+            } else {
+                Log.d("asdf", "여기여기!!!!!!!!!!!!!!!!!!!!");
+                return null;
+            }
+
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
+        protected void onPostExecute(Bitmap bitmap) {//bitmap은 새로 붙이려는 큰 이미지
             if (isCancelled()) {
                 bitmap = null;
             }
-
+            Log.d("onPostExecute", "onPostExecute 실행");
             if (imageViewReference != null && bitmap != null) {
                 final ImageView imageView = imageViewReference.get();
+                //작은 이미지 삭제
+                Bitmap bitmap_ = null;
+                Drawable d = null;
+                if (imageView != null) {
+                    //(imageViewReference.get()).setImageBitmap(null); 해야하는데 오류뜸.
+
+                    d = imageView.getDrawable();
+                    if (d instanceof BitmapDrawable) {
+                        bitmap_ = ((BitmapDrawable) d).getBitmap();//bitmap_은 지우려는 작은 이미지
+                    }
+
+
+                }
                 final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
-                    imageView.setImageBitmap(bitmap);
+                    imageView.setImageBitmap(bitmap);//큰 사진을 로드한다
                 }
+                if (bitmap_ != null && !bitmap_.isRecycled()) {
+                    Log.d("StoryRecommendFragment", "기존의 작은 이미지 삭제]" + bitmap_.getByteCount() + " recycle() & gc() 호출");
+                    bitmap_.recycle();
+                    System.gc();
+                    Runtime.getRuntime().gc();//비트맵을 확실하게 지운다
+                    bitmap_ = null;
+                    d.setCallback(null);
+                }
+
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
         }
     }
 
@@ -500,31 +562,51 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
     }
 
-    public void loadBitmap(String path, ImageView imageView) {
-        if (cancelPotentialWork(path, imageView)) {
-            final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
-            imageView.setImageDrawable(asyncDrawable);
-            task.execute(path);
-        }
-    }
     /*
-    public void loadBitmap(String path, ImageView imageView) {
-        Log.d("AlbumFullActivity","loadBitmap 호출");
-        final String imageKey = String.valueOf(path);
-
-        final Bitmap bitmap = getBitmapFromMemCache(imageKey);
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-        } else {
+        public void loadBitmap(String path, ImageView imageView) {
             if (cancelPotentialWork(path, imageView)) {
-                final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+                //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
+
+                //final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+                BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+                mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth / 6, CONSTANT.screenHeight / 6);
                 final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
                 imageView.setImageDrawable(asyncDrawable);
-                task.execute(path);
+                //------------------------------------------------------------------------------------------
             }
+        }*/
+    public BitmapWorkerTask loadBitmap(String path, ImageView imageView) {
+        if (cancelPotentialWork(path, imageView)) {
+            //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
+
+            //final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            Log.d("asdf",CONSTANT.screenWidth / 6 + " " +CONSTANT.screenHeight / 6);
+            //mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth / 6, CONSTANT.screenHeight / 6);
+            mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);
+            //decode대신 썸네일로 대체하자.!
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+            imageView.setImageDrawable(asyncDrawable);
+            //------------------------------------------------------------------------------------------
+            return task;
         }
-    }*/
+        return null;
+    }
+    public BitmapWorkerTask loadBitmap(String path, ImageView imageView, int mediaId) {
+        if (cancelPotentialWork(path, imageView)) {
+            //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
+            BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
+            mPlaceHolderBitmap = BitmapFactory.decodeFile(thumbPath);
+            //decode대신 썸네일로 대체하자.!
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+            imageView.setImageDrawable(asyncDrawable);
+            //------------------------------------------------------------------------------------------
+            return task;
+        }
+        return null;
+    }
+
     //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
     public static boolean cancelPotentialWork(String path, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
@@ -545,7 +627,7 @@ public class AlbumFullActivity extends ActionBarActivity {
     }
 
     //특정 imageview에 관련된 task들을 검색한다
-    private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
+    public static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
         if (imageView != null) {
             final Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AsyncDrawable) {
@@ -555,8 +637,9 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
         return null;
     }
+
     /**
-     이미지 캐싱을 통한 부드러운 스와이핑 제공
+     * 이미지 캐싱을 통한 부드러운 스와이핑 제공
      */
     /*
     public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
@@ -568,10 +651,6 @@ public class AlbumFullActivity extends ActionBarActivity {
         return mMemoryCache.get(key);
     }
 */
-
-
-
-
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X
         //1220879 1870864 2133464
@@ -639,7 +718,6 @@ public class AlbumFullActivity extends ActionBarActivity {
             return byteimage;
         }
     }
-
 
 
     @Override
