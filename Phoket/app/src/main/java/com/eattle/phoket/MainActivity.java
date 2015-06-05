@@ -16,6 +16,7 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -25,14 +26,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.BlockDevice;
@@ -202,11 +200,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onResume();
 
 //        drawMainView();
-        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
+/*        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
             Intent intent = new Intent(this, PasswordActivity.class);
             startActivity(intent);
-        }
+        }*/
     }
 
     @Override
@@ -236,6 +234,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 case CONSTANT.END_OF_PICTURE_CLASSIFICATION://사진 정리가 완료 되었을 때 받게되는 메세지
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
+                    mSectionsPagerAdapter.notifyDataSetChanged();
 
                     wantBackUp();
                     exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
@@ -334,8 +333,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void wantCapicUSB() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("종료하시겠습니까?");
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
-        d.setView(r);
+//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
+//        d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -355,10 +354,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
+        Toast.makeText(getBaseContext(), "사진 정리가 완료되었습니다", Toast.LENGTH_SHORT).show();
+        /*
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("백업이 완료되었습니다!");
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_complete_classify_picture_dialog, null);
-        d.setView(r);
+//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_complete_classify_picture_dialog, null);
+//        d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -375,6 +376,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         d.setPositiveButton("Yes", l);
         d.setNegativeButton("No", l);
         d.show();
+        */
     }
 
     public FileSystem getFileSystem() {
@@ -575,11 +577,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
+
+        @Override
+        public int getItemPosition(Object item) {
+            return POSITION_NONE;
+        }
+
 
         @Override
         public Fragment getItem(int position) {
@@ -593,8 +601,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return Section2.newInstance();
                 case 2:
                     return Section3.newInstance();
-                case 3:
-                    return PlaceholderFragment.newInstance(position + 1);
+                //case 3:
+                 //   return PlaceholderFragment.newInstance(position + 1);
             }
 
             return PlaceholderFragment.newInstance(position + 1);
@@ -603,7 +611,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            //return 4;
+            return 3;
         }
 
         @Override
@@ -616,8 +625,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section2);
                 case 2:
                     return getString(R.string.title_section3);
-                case 3:
-                    return getString(R.string.title_section4);
+                //case 3:
+                //    return getString(R.string.title_section4);
 
             }
             return null;

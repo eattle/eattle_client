@@ -54,7 +54,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         Log.d("StoryMainFragment", "onCreateView() 호출(현재 position : " + position + ")");
         final View root = inflater.inflate(R.layout.story_main, container, false);
         //if (isRecycled == 1) {//이미 한번 recycle()이 호출되었다면
-            //img = null;//새로 만들어준다.
+        //img = null;//새로 만들어준다.
         //}
         Bundle args = getArguments();
         m = args.getParcelable("m");
@@ -157,20 +157,26 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         //CONSTANT.previousBigImageView = img;//큰 이미지로 로드되는 뷰를 저장해둔다.
                         if (bitmapWorkerTask != null && isBitmapTaskExecuted == 0) {
 
-                        //if (bitmapWorkerTask != null){
+                            //if (bitmapWorkerTask != null){
 
                             //if(isBitmapTaskExecuted == 1)
-                                Log.d("StoryMainFragment", bitmapWorkerTask.getStatus()  + " 다시 execute() !!!!! path !!!!! : " + path + " AlbumFullActivity.BitmapWorkerTask : " + bitmapWorkerTask);
+                            Log.d("StoryMainFragment", bitmapWorkerTask.getStatus()  + " 다시 execute() !!!!! path !!!!! : " + path + " AlbumFullActivity.BitmapWorkerTask : " + bitmapWorkerTask);
 
 
                             isBitmapTaskExecuted = 1;//execute는 한번만 실행될 수 있다
                             smallOrLarge = 1;
+                            Log.d("asdf"," 인덱스? : "+CONSTANT.currentLoadingImage.indexOf(img));
+                            if(CONSTANT.currentLoadingImage.indexOf(img) == -1) {//중복 execute를 방지하기 위해 필요하다!)
+                                bitmapWorkerTask.execute(path);//큰 이미지 로드 시작
+                                CONSTANT.currentLoadingImage.add(img);//중복 execute를 방지하기 위해 필요하다!
+                                Log.d("asdf"," 인덱스! : "+CONSTANT.currentLoadingImage.indexOf(img));
 
-                            bitmapWorkerTask.execute(path);//큰 이미지 로드 시작
+                            }
+
                         }
                     }
                 }
-            }, 300);// 0.5초 정도 딜레이를 준 후 시작
+            },350);// 0.5초 정도 딜레이를 준 후 시작
 
         } else {
 // fragment is no longer visible
@@ -192,9 +198,11 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         //recycle()을 하기 전에 imageView에 null을 할당한다(이전의 비트맵에 참조하는 것을 방지)
                         bitmapWorkerTask = null;//참조될 가능성이 있는 모든 객체를 해제한다
                         //img.setImageBitmap(null);
-
+                        CONSTANT.currentLoadingImage.remove(img);//중복 execute를 방지하기 위해 필요하다!
                         //작은 이미지로 대체한다
                         bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId());
+
+
                         //작은 이미지로 대체한 다음에 recycle()을 한다
                         bitmap.recycle();
                         bitmap = null;

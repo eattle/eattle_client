@@ -62,8 +62,8 @@ public class CONSTANT {
     public static int screenHeight;//스마트폰 화면 높이
 
     public static ImageView currentImageView;
-    public static ArrayList<ImagePathAndImageView> currentImageInfo = new ArrayList<ImagePathAndImageView>();//현재 보고있는 사진에 대해서만 원본을 로드하도록 함
-
+    public static ArrayList<ImageView> currentLoadingImage = new ArrayList<ImageView>();//현재 execute()되고 있는 것들을 가리키는 배열
+    /*
     public static class ImagePathAndImageView{
         private String path;
         private ImageView imageView;
@@ -80,7 +80,7 @@ public class CONSTANT {
             return imageView;
         }
 
-    }
+    }*/
 
     public static String convertFolderNameToStoryName(String folderName){
         String name = "";

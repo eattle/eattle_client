@@ -60,6 +60,7 @@ public class ServiceOfPictureClassification extends Service {
     Geocoder mCoder;
     IncomingHandler incomingHandler = new IncomingHandler();
 
+
     //파일시스템
     FileSystem fileSystem;
 
@@ -388,7 +389,8 @@ public class ServiceOfPictureClassification extends Service {
             if(ExistedMedia == null) {//새로운 사진
                 Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
                 db.createMedia(m);
-
+                String[] pathArr = path.split("/");
+                db.createTag(pathArr[pathArr.length-2],pictureID);
             }
             else {//기존 사진
                 //업데이트만 한다

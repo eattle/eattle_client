@@ -4,6 +4,8 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="actionBarTabTextStyle">@style/tabTextStyle</item>
         <item name="actionBarTabStyle">@style/tabStyle</item>
+        <item name="android:windowBackground">@android:color/background_dark</item>
+
     </style>
 
     <style name="tabTextStyle" parent="@style/Widget.AppCompat.Light.ActionBar.TabText">

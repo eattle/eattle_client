@@ -40,6 +40,7 @@ public class TagsOverAlbum extends Fragment {
     private static int position;
     private static int totalPictureNum;
     private static Media m;
+    private static int type;
 
     int a = 0;
 
@@ -52,6 +53,7 @@ public class TagsOverAlbum extends Fragment {
         setMedia_id(m.getId());
         setPosition(position);
         setTotalPictureNum(totalPictureNum);
+        setType(0);
 
         fileSystem = FileSystem.getInstance();
 
@@ -70,6 +72,24 @@ public class TagsOverAlbum extends Fragment {
     public static TagsOverAlbum newInstance(Media m) {
         setMedia(m);
         setMedia_id(m.getId());
+        setType(0);
+
+        fileSystem = FileSystem.getInstance();
+
+        TagsOverAlbum ttt = new TagsOverAlbum();
+
+        Bundle args = new Bundle();
+        args.putInt("id", m.getId());
+        ttt.setArguments(args);
+
+        return ttt;
+    }
+
+    //setTabToTag를 위해
+    public static TagsOverAlbum newInstance(Media m, int type) {
+        setMedia(m);
+        setMedia_id(m.getId());
+        setType(type);
 
         fileSystem = FileSystem.getInstance();
 
@@ -104,6 +124,11 @@ public class TagsOverAlbum extends Fragment {
         final LinearLayout layout = (LinearLayout) root.findViewById(R.id.tagLayout);
         List<Tag> tags = db.getAllTagsByMediaId(media_id);
 
+
+        if(type == 1){
+            ExEditText inputTag = (ExEditText)root.findViewById(R.id.editText);
+            inputTag.setOnBackPressListener(onBackPressListener);
+        }
 
         int s = tags.size();
 
@@ -163,17 +188,23 @@ public class TagsOverAlbum extends Fragment {
 
 
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
-        final Button btn = (Button) root.findViewById(R.id.button);//태그 추가 버튼
+        final TextView btn = (TextView) root.findViewById(R.id.button);//태그 추가 버튼
 
-        inputTag.setOnKeyListener(new View.OnKeyListener(){
+        inputTag.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP){
-                    int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                    if(input == ""){
+                        Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+
+                    int tag_id = db.createTag("" + input, media_id);
                     if (tag_id != -1) {
                         Tag tag = db.getTagByTagId(tag_id);
                         FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
-                        ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
+                        ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
                         layout.addView(tagButton);
                         final int id = tag.getId();
 
@@ -202,14 +233,20 @@ public class TagsOverAlbum extends Fragment {
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
+                String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                if(input == ""){
+                    Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int tag_id = db.createTag("" + input, media_id);
 
                 if (tag_id != -1) {
 
                     Tag tag = db.getTagByTagId(tag_id);
 
                     FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
-                    ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
+                    ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
                     layout.addView(tagButton);
                     final int id = tag.getId();
 
@@ -358,6 +395,21 @@ public class TagsOverAlbum extends Fragment {
         //-----------------------------------------------------------------------------------
     }
 
+    private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener()
+    {
+        @Override
+        public void onBackPress()
+        {
+            didBackPressOnEditText();
+        }
+    };
+
+    private void didBackPressOnEditText()
+    {
+        getActivity().finish();
+    }
+
+
     public int getMedia_id() {
         return media_id;
     }
@@ -388,5 +440,13 @@ public class TagsOverAlbum extends Fragment {
 
     public static int getTotalPictureNum() {
         return TagsOverAlbum.totalPictureNum;
+    }
+
+    public static int getType() {
+        return type;
+    }
+
+    public static void setType(int type) {
+        TagsOverAlbum.type = type;
     }
 }

@@ -7,29 +7,36 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:text="추천 스토리"
-        android:textColor="#ffffff"
-        android:textSize="20dp"
-        android:gravity="center"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"/>
+        android:layout_height="50dp"
+        android:background="#000000">
 
-    <TextView
-        android:id="@+id/noRecommend"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="추천할 스토리가 없어요!"
-        android:textColor="#ffffff"
-        android:gravity="center"
-        android:textSize="20dp"
-        android:visibility="gone"/>
+        <TextView
+            android:text="추천 스토리"
+            android:textColor="#ffffff"
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
+
+        <TextView
+            android:id="@+id/noRecommend"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="추천할 스토리가 없어요!"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:visibility="gone"/>
+    </FrameLayout>
+
     <FrameLayout
         android:id="@+id/first"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="1dp">
 
@@ -54,7 +61,7 @@
     <FrameLayout
         android:id="@+id/second"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="1dp">
 
@@ -79,7 +86,7 @@
     <FrameLayout
         android:id="@+id/third"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="1dp">
 
@@ -104,7 +111,7 @@
     <FrameLayout
         android:id="@+id/fourth"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="1dp">
 

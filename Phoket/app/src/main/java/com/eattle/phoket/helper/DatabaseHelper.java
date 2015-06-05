@@ -636,7 +636,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, tag_name);
-            values.put(KEY_COLOR, p.getDarkVibrantColor(0x000000));
+            values.put(KEY_COLOR, p.getDarkVibrantColor(0xff000000));
 
 
             tag_id = (int)db.insert(TABLE_TAG, null, values);
@@ -749,7 +749,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         List<Tag> tags = new ArrayList<Tag>();
 //        List<Tag> tags = new ArrayList<Tag>();
-        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR +" FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
+        String selectQuery = "SELECT DISTINCT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR +" FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
 
         int mediaSize = medias.size();
         for(int i = 0; i < mediaSize; i++){
@@ -758,6 +758,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 selectQuery += ", ";
         }
         selectQuery += ")";
+
+        Log.d("adadsa", selectQuery);
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
