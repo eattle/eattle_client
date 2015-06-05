@@ -200,11 +200,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onResume();
 
 //        drawMainView();
-        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
+/*        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
             //password 창을 띄운다
             Intent intent = new Intent(this, PasswordActivity.class);
             startActivity(intent);
-        }
+        }*/
     }
 
     @Override
@@ -333,8 +333,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void wantCapicUSB() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("종료하시겠습니까?");
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
-        d.setView(r);
+//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
+//        d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -354,10 +354,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
+        Toast.makeText(getBaseContext(), "사진 정리가 완료되었습니다", Toast.LENGTH_SHORT).show();
+        /*
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("백업이 완료되었습니다!");
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_complete_classify_picture_dialog, null);
-        d.setView(r);
+//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_complete_classify_picture_dialog, null);
+//        d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -374,6 +376,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         d.setPositiveButton("Yes", l);
         d.setNegativeButton("No", l);
         d.show();
+        */
     }
 
     public FileSystem getFileSystem() {

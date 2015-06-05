@@ -188,13 +188,19 @@ public class TagsOverAlbum extends Fragment {
 
 
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
-        final Button btn = (Button) root.findViewById(R.id.button);//태그 추가 버튼
+        final TextView btn = (TextView) root.findViewById(R.id.button);//태그 추가 버튼
 
         inputTag.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                    int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
+                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                    if(input == ""){
+                        Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+
+                    int tag_id = db.createTag("" + input, media_id);
                     if (tag_id != -1) {
                         Tag tag = db.getTagByTagId(tag_id);
                         FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
@@ -227,7 +233,13 @@ public class TagsOverAlbum extends Fragment {
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int tag_id = db.createTag("" + inputTag.getText().toString(), media_id);
+                String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                if(input == ""){
+                    Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int tag_id = db.createTag("" + input, media_id);
 
                 if (tag_id != -1) {
 

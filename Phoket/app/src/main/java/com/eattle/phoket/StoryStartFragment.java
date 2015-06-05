@@ -1,27 +1,18 @@
 package com.eattle.phoket;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
-import android.support.v7.internal.widget.ViewUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -83,16 +74,17 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         }
 
 
-        if(position != -1){
-            storyStartDate.setVisibility(View.INVISIBLE);
-            storyStartTitle.setVisibility(View.INVISIBLE);
-        }
-
         blurImage = (ImageView)root.findViewById(R.id.blurImage);
         setGrayScale(blurImage);
         backImage = (ImageView)root.findViewById(R.id.storyStartImage);
         applyBlur();
         filterImage = (ImageView)root.findViewById(R.id.filterImage);
+
+
+        if(position != -1){
+            storyStartDate.setVisibility(View.INVISIBLE);
+            storyStartTitle.setVisibility(View.INVISIBLE);
+        }
 
         return root;
     }
@@ -133,6 +125,11 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
         view.setAlpha(0.0f);
 
+        if(position != -1){
+            showBlur(1.0f);
+        }
+
+
 
         Log.d("Blur", System.currentTimeMillis() - startMs + "ms");
     }
@@ -146,8 +143,6 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
 
     public void showBlur(float positionOffset){
-        if(blurImage.getAlpha() >= 1.0f)
-            return;
 
         blurImage.setAlpha(1.0f*positionOffset);
         filterImage.setAlpha(0.5f*positionOffset + 0.2f);

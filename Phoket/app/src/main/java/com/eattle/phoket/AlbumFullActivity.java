@@ -19,7 +19,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,7 +32,6 @@ import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
@@ -146,82 +144,84 @@ public class AlbumFullActivity extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.albumFullViewPager);
         touchImageAdapter = new TouchImageAdapter(this, mMediaList,getSupportFragmentManager());
         mViewPager.setAdapter(touchImageAdapter);//뷰페이저 어댑터 설정
-        if (initialMediaPosition != -1)//-1이면 스토리 처음부터 시작(제목화면부터)
+        if (initialMediaPosition != -1) {//-1이면 스토리 처음부터 시작(제목화면부터)
             mViewPager.setCurrentItem(initialMediaPosition);
+        }
 
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                Log.d("asdf","onpageselected호출 "+position);
-                if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
-                    position--;//첫화면에 제목화면을 넣기 위해.
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction tr = fragmentManager.beginTransaction();
-                    if (position == -1) {
-                        // ~년~월~일의 스토리 -> 보임
-                        storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.VISIBLE);
-                        storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.VISIBLE);
-
-                        Fragment f;
-                        if ((f = isThereTabToTagHere()) != null) {//만약 태그들이 띄워져 있었으면 삭제한다
-                            tr.remove(f);//tagArrayList에 있는 모든 태그들을 삭제한다
-                            tr.remove(fragmentManager.findFragmentById(R.id.exit));//종료 버튼 삭제
-                            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                            tr.commit();
-                        }
-                        return;
-                    }
-                }
-
-                if(position != -1){// ~년~월~일의 스토리 -> 없앰
-                    storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.INVISIBLE);
-                    storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.INVISIBLE);
-                }
-                //추천스토리를 관리하는 부분-----------------------------------------------
+        @Override
+        public void onPageSelected(int position) {
+            Log.d("asdf","onpageselected호출 "+position);
+            if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
+                position--;//첫화면에 제목화면을 넣기 위해.
                 FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                if(position == mMediaList.size()){
-                    if (isTagAppeared == 1){
-                        pushTabToTag(mMediaList.get(position-1), position-1);
-                        setPlacePopup(mMediaList.get(position-1));
+                FragmentTransaction tr = fragmentManager.beginTransaction();
+                if (position == -1) {
+                    // ~년~월~일의 스토리 -> 보임
+                    storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.VISIBLE);
+                    storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.VISIBLE);
+
+                    Fragment f;
+                    if ((f = isThereTabToTagHere()) != null) {//만약 태그들이 띄워져 있었으면 삭제한다
+                        tr.remove(f);//tagArrayList에 있는 모든 태그들을 삭제한다
+                        tr.remove(fragmentManager.findFragmentById(R.id.exit));//종료 버튼 삭제
+                        tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        tr.commit();
                     }
-                    storyRecommendFragment = StoryRecommendFragment.newInstance(mMediaList.get(0).getFolder_id());
-                    fragmentTransaction.add(R.id.frameForStoryRecommend, storyRecommendFragment, "storyRecommendFragment");
-                    fragmentTransaction.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                    fragmentTransaction.commit();
                     return;
                 }
-                else if(storyRecommendFragment != null){//마지막 페이지가 아니면서 기존에 추천 스토리를 만들어 놓은게 있으면
-                    fragmentTransaction.remove(storyRecommendFragment);
-                    fragmentTransaction.commit();
+            }
+
+            if(position != -1){// ~년~월~일의 스토리 -> 없앰
+                storyStartFragment.getView().findViewById(R.id.storyStartDate).setVisibility(View.INVISIBLE);
+                storyStartFragment.getView().findViewById(R.id.storyStartTitle).setVisibility(View.INVISIBLE);
+
+            }
+            //추천스토리를 관리하는 부분-----------------------------------------------
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            if(position == mMediaList.size()){
+                if (isTagAppeared == 1){
+                    pushTabToTag(mMediaList.get(position-1), position-1);
+                    setPlacePopup(mMediaList.get(position-1));
                 }
-
-
-
-                //------------------------------------------------------------------------------
-                if (isTagAppeared == 1) {//태그들이 띄워져 있어야 하는데
-                    Fragment f;
-                    if ((f = isThereTabToTagHere()) == null) {//스토리 제목(타이틀 화면)에 도달해서 잠시 안보였던 경우
-                        pushTabToTag(mMediaList.get(position), position);//다시 보이게 한다
-                    }
-                }
-                setTabToTag(mMediaList.get(position), position);
+                storyRecommendFragment = StoryRecommendFragment.newInstance(mMediaList.get(0).getFolder_id());
+                fragmentTransaction.add(R.id.frameForStoryRecommend, storyRecommendFragment, "storyRecommendFragment");
+                fragmentTransaction.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                fragmentTransaction.commit();
+                return;
+            }
+            else if(storyRecommendFragment != null){//마지막 페이지가 아니면서 기존에 추천 스토리를 만들어 놓은게 있으면
+                fragmentTransaction.remove(storyRecommendFragment);
+                fragmentTransaction.commit();
             }
 
 
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (initialMediaPosition == -1)   //스토리 제목부터 시작해야 하는 경우
-                    position--;//첫화면에 제목화면을 넣기 위해
-                if(position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null){
-                    ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(positionOffset);
+
+            //------------------------------------------------------------------------------
+            if (isTagAppeared == 1) {//태그들이 띄워져 있어야 하는데
+                Fragment f;
+                if ((f = isThereTabToTagHere()) == null) {//스토리 제목(타이틀 화면)에 도달해서 잠시 안보였던 경우
+                    pushTabToTag(mMediaList.get(position), position);//다시 보이게 한다
                 }
             }
+            setTabToTag(mMediaList.get(position), position);
+        }
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            if (initialMediaPosition == -1)   //스토리 제목부터 시작해야 하는 경우
+                position--;//첫화면에 제목화면을 넣기 위해
+            if(position < 0 && getFragmentManager().findFragmentById(R.id.storyStart) != null){
+                ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(positionOffset);
             }
-        });
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
+    });
 
 
     }
