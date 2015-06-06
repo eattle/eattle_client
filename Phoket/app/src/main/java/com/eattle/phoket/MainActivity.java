@@ -23,6 +23,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.device.BlockDevice;
@@ -161,7 +163,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 ActionBar.LayoutParams.MATCH_PARENT,
                 Gravity.LEFT);
 
-        ImageView alarm = (ImageView)actionBarLayout.findViewById(R.id.alarmIcon);
+        TextView alarm = (TextView)actionBarLayout.findViewById(R.id.alarmIcon);
 
 
         alarm.setOnClickListener(new View.OnClickListener() {
@@ -246,12 +248,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
                     int pictureNumInStory = msg.getData().getInt("picture_num");
 
-//                    Section1 fragment = (Section1)getFragmentManager().findFragmentById(R.id.section1);
-
-                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + mViewPager.getCurrentItem());
-                    // based on the current position you can then cast the page to the correct
-                    // class and call the method:
-                    if (mViewPager.getCurrentItem() == 0 && page != null) {
+                    if (mViewPager.getCurrentItem() == 0 ) {
+                        Fragment page = mSectionsPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
                         ((Section1)page).selectCard(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
                     }
 /*
@@ -579,6 +577,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
 
+        SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -630,6 +630,23 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
             }
             return null;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            registeredFragments.remove(position);
+            super.destroyItem(container, position, object);
+        }
+
+        public Fragment getRegisteredFragment(int position) {
+            return registeredFragments.get(position);
         }
     }
 
