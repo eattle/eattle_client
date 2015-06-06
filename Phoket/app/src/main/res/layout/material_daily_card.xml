@@ -17,19 +17,6 @@
             android:layout_weight="1"
             android:id="@+id/dailyImage1"
             android:scaleType="centerCrop" />
-        <com.eattle.phoket.SquareImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:id="@+id/dailyImage2"
-            android:scaleType="centerCrop" />
-
-        <com.eattle.phoket.SquareImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:id="@+id/dailyImage3"
-            android:scaleType="centerCrop" />
 
     </LinearLayout>
 </com.eattle.phoket.Card.DailyCardView>

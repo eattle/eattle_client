@@ -1,28 +1,21 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
-import com.dexafree.materialList.cards.WelcomeCard;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
@@ -105,6 +98,10 @@ public class Section1 extends Fragment {
         mContext = getActivity();
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview1);
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+        mListView.setLayoutManager(layoutManager);
+
         db = DatabaseHelper.getInstance(mContext);
 
         List<Folder> stories = db.getAllFolders();
@@ -131,6 +128,15 @@ public class Section1 extends Fragment {
                         mContext.startActivity(intent);
                         break;
                     case CONSTANT.DAILY:
+                        List<Media> dailyMedia = db.getAllMediaByFolder(data.getData());
+                        intent = new Intent(mContext, AlbumFullActivity.class);
+                        intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
+                        intent.putExtra("IDForStoryOrTag", data.getData());// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
+                        intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
+                        intent.putExtra("position", data.getId());//어디에서 시작할지
+
+                        mContext.startActivity(intent);
+
                         break;
                     case CONSTANT.FOLDER:
                     case CONSTANT.TAG:
@@ -194,14 +200,22 @@ public class Section1 extends Fragment {
         CardData data;
         if(pictureNum <= CONSTANT.BOUNDARY){
             //daily card 추가
-            final List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
-            final int folderId_ = folderID;
-            card = new DailyCard(mContext);
+            List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
+            for(int i = 0; i < pictureNum; i++){
+                card = new DailyCard(mContext);
+                data = new CardData(CONSTANT.DAILY, folderID, dailyMedia.get(i).getId());
+                card.setTag(data);
+                ((DailyCard)card).setDailyImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
+
+                mListView.add(card);
+            }
+/*            card = new DailyCard(mContext);
             data = new CardData(CONSTANT.NOTHING, -1);
             card.setTag(data);
-            for(int i = 0; i < pictureNum; i++){
-                ((DailyCard)card).setDailyImage(i, dailyMedia.get(i).getId(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
-            }
+            ((DailyCard)card).setDailyId(dailyMedia.get(i).getId());
+//            for(int i = 0; i < pictureNum; i++){
+                ((DailyCard)card).setDailyImage(dailyMedia.get(i).getId(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
+//            }
             ((DailyCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
                 @Override
                 public void onButtonPressedListener(View view, Card card) {
@@ -234,7 +248,7 @@ public class Section1 extends Fragment {
                 }
             });
 
-            mListView.add(card);
+            mListView.add(card);*/
 
         }else {
             card = new BigStoryCard(mContext);

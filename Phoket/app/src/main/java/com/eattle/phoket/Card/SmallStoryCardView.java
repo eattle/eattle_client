@@ -39,6 +39,7 @@ public class SmallStoryCardView extends CardItemView<SmallStoryCard> {
         storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
+
     }
 
 }

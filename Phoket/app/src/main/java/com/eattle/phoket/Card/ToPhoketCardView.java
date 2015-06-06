@@ -2,6 +2,7 @@ package com.eattle.phoket.Card;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -30,6 +31,9 @@ public class ToPhoketCardView extends CardItemView<ToPhoketCard> {
         super.build(card);
         ImageView toPhoketImage = (ImageView)findViewById(R.id.toPhoketImage);
         toPhoketImage.setImageURI(Uri.parse(card.getImage()));
+        StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
+        sglp.setFullSpan(true);
+        this.setLayoutParams(sglp);
     }
 
 }

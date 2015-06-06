@@ -1,6 +1,7 @@
 package com.eattle.phoket.Card;
 
 import android.content.Context;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -112,6 +113,10 @@ public class TagsCardView extends CardItemView<TagsCard> {
             default:
                 break;
         }
+
+        StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
+        sglp.setFullSpan(true);
+        this.setLayoutParams(sglp);
     }
 
 }

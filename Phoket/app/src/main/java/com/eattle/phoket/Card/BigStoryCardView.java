@@ -2,6 +2,7 @@ package com.eattle.phoket.Card;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,6 +40,10 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
+
+        StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
+        sglp.setFullSpan(true);
+        this.setLayoutParams(sglp);
     }
 
 }
