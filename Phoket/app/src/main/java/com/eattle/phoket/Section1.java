@@ -134,7 +134,6 @@ public class Section1 extends Fragment {
                         intent.putExtra("IDForStoryOrTag", data.getData());// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
                         intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
                         intent.putExtra("position", data.getId());//어디에서 시작할지
-
                         mContext.startActivity(intent);
 
                         break;
@@ -203,7 +202,7 @@ public class Section1 extends Fragment {
             List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
             for(int i = 0; i < pictureNum; i++){
                 card = new DailyCard(mContext);
-                data = new CardData(CONSTANT.DAILY, folderID, dailyMedia.get(i).getId());
+                data = new CardData(CONSTANT.DAILY, folderID,i);
                 card.setTag(data);
                 ((DailyCard)card).setDailyImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
 
