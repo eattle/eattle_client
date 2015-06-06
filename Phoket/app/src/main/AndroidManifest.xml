@@ -52,7 +52,8 @@
             android:name=".AlbumFullActivity"
             android:label="@string/title_activity_album_full"
             android:parentActivityName=".AlbumGridActivity"
-            android:theme="@style/NoActionBarTheme" >
+            android:theme="@style/NoActionBarTheme"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.eattle.phoket.AlbumGridActivity" />

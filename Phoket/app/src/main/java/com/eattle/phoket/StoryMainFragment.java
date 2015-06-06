@@ -177,7 +177,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         }
                     }
                 }
-            },100);// 0.5초 정도 딜레이를 준 후 시작
+            },250);// 0.5초 정도 딜레이를 준 후 시작
 
         } else {
 // fragment is no longer visible
