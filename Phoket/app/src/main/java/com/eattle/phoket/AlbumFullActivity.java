@@ -735,6 +735,8 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
+    @Override
+    protected void onUserLeaveHint(){
+        finish();//홈버튼을 누르면 뷰페이저 액티비티를 종료한다(다시 실행하면 그리드뷰로 돌아간다)
+    }
 }

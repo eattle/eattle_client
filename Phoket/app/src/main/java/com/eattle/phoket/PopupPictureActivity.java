@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
@@ -32,10 +33,10 @@ public class PopupPictureActivity extends ActionBarActivity {
 
         Media m = db.getMediaById(mediaId);
         ImageView picture = (ImageView)findViewById(R.id.picture);
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inSampleSize = 4;
-        Bitmap bm = BitmapFactory.decodeFile(m.getPath(), opt);
-        picture.setImageBitmap(bm);
+
+
+        String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
+        picture.setImageBitmap(BitmapFactory.decodeFile(thumbPath));
 
         setTabToTag(db.getMediaById(mediaId));
 
