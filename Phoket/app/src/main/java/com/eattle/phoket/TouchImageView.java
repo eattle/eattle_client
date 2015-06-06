@@ -206,9 +206,14 @@ public class TouchImageView extends ImageView {
 
     @Override
     public void setImageBitmap(Bitmap bm) {
-        super.setImageBitmap(bm);
-        savePreviousImageValues();
-        fitImageToView();
+
+        if(bm != null && !bm.isRecycled()) {
+            super.setImageBitmap(bm);
+            savePreviousImageValues();
+            fitImageToView();
+        }
+        else
+            super.setImageBitmap(null);
     }
 
     @Override

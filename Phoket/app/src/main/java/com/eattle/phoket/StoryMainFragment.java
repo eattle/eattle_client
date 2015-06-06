@@ -34,7 +34,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     private Media m;
     private int isBitmapTaskExecuted = 0;//1이면 bitmapWorkerTask.execute()가 실행된것
     private int smallOrLarge = 0;//0이면 작은 이미지가 로드된 상태, 1이면 큰 이미지가 로드된 상태
-    private int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
+    public int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
     AlbumFullActivity.BitmapWorkerTask bitmapWorkerTask;
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
         Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
@@ -86,7 +86,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
 
                     //일단 작은 사진을 부른다
-                    bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId());
+                    bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId(),imageIdForTaskExecute);
 
 
 
@@ -166,6 +166,9 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
                             isBitmapTaskExecuted = 1;//execute는 한번만 실행될 수 있다
                             smallOrLarge = 1;
+                            for(int j=0;j<CONSTANT.currentLoadingImage.size();j++)
+                                Log.d("asdf"," 큰 이미지 로딩 목록 : "+CONSTANT.currentLoadingImage.get(j));
+
                             Log.d("asdf"," 인덱스? : "+CONSTANT.currentLoadingImage.indexOf(imageIdForTaskExecute));
                             if(CONSTANT.currentLoadingImage.indexOf(new Integer(imageIdForTaskExecute)) == -1) {//중복 execute를 방지하기 위해 필요하다!)
                                 bitmapWorkerTask.execute(path);//큰 이미지 로드 시작
@@ -177,7 +180,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         }
                     }
                 }
-            },250);// 0.5초 정도 딜레이를 준 후 시작
+            },200);// 0.17초 정도 딜레이를 준 후 시작
 
         } else {
 // fragment is no longer visible
@@ -200,7 +203,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         bitmapWorkerTask = null;//참조될 가능성이 있는 모든 객체를 해제한다
                         //img.setImageBitmap(null);
 
-                        bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId());
+                        bitmapWorkerTask = ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId(),imageIdForTaskExecute);
 
 
                         //작은 이미지로 대체한 다음에 recycle()을 한다

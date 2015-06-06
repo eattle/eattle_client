@@ -449,17 +449,16 @@ public class AlbumFullActivity extends ActionBarActivity {
         public final WeakReference<ImageView> imageViewReference;
 
         public String path = "";
-        int mode = -1;
-
+        int imageIdForTaskExecute;
         public BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
             imageViewReference = new WeakReference<ImageView>(imageView);
         }
 
-        public BitmapWorkerTask(ImageView imageView, int mode) {
+        public BitmapWorkerTask(ImageView imageView, int imageIdForTaskExecute) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
             imageViewReference = new WeakReference<ImageView>(imageView);
-            this.mode = mode;
+            this.imageIdForTaskExecute = imageIdForTaskExecute;
         }
 
         // Decode image in background.
@@ -519,7 +518,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 }
                 final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
-                    if(!bitmap.isRecycled()) {//이미 recycle된 사진은 쓰지 않는다!
+                    if(bitmap != null && !bitmap.isRecycled()) {//이미 recycle된 사진은 쓰지 않는다!
                         imageView.setImageBitmap(bitmap);//큰 사진을 로드한다
                     }
                     //!!!!여기 !!!!
@@ -532,7 +531,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                     bitmap_ = null;
                     d.setCallback(null);
                 }
-                CONSTANT.currentLoadingImage.remove(imageView);//중복 execute를 방지하기 위해 필요하다!
+                CONSTANT.currentLoadingImage.remove(new Integer(imageIdForTaskExecute));//중복 execute를 방지하기 위해 필요하다!
 
             }
         }
@@ -586,10 +585,10 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
         return null;
     }
-    public BitmapWorkerTask loadBitmap(String path, ImageView imageView, int mediaId) {
+    public BitmapWorkerTask loadBitmap(String path, ImageView imageView, int mediaId, int imageIdForTaskExecute) {
         if (cancelPotentialWork(path, imageView)) {
             //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
-            BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+            BitmapWorkerTask task = new BitmapWorkerTask(imageView,imageIdForTaskExecute);
             String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
             mPlaceHolderBitmap = BitmapFactory.decodeFile(thumbPath);
             //decode대신 썸네일로 대체하자.!
@@ -737,6 +736,26 @@ public class AlbumFullActivity extends ActionBarActivity {
     }
     @Override
     protected void onUserLeaveHint(){
-        finish();//홈버튼을 누르면 뷰페이저 액티비티를 종료한다(다시 실행하면 그리드뷰로 돌아간다)
+        //불필요한 메모리 정리---------------------------------------------------------------
+        AlbumFullActivity.mViewPager = null;
+        AlbumFullActivity.touchImageAdapter = null;
+        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
+        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
+        //아직 스토리에 남아있는 사진 삭제
+        while (AlbumFullActivity.viewPagerImage.size() > 0) {
+            Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
+            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+            AlbumFullActivity.viewPagerImage.remove(0);
+            CONSTANT.releaseImageMemory(temp);
+
+            if (AlbumFullActivity.viewPagerImage.size() == 0) {
+                Log.d("TagsOverAlbum", "break!");
+
+                break;
+            }
+        }
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
     }
 }
