@@ -258,7 +258,7 @@ public class ServiceOfPictureClassification extends Service {
 //        ArrayList<Media> medias = new ArrayList<Media>();
 
         String startFolderID = "";
-        String endFolderID = "";
+        String endFolderID = "!";
         int folderIDForDB = 0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime = 0;//현재 읽고 있는 사진 이전의 찍힌 시간
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
@@ -321,14 +321,15 @@ public class ServiceOfPictureClassification extends Service {
 
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
             Log.d("MainActivity", "pictureTakenTime-_pictureTakenTime = " + (pictureTakenTime - _pictureTakenTime));
-            if (pictureTakenTime - _pictureTakenTime > CONSTANT.TIMEINTERVAL) {
+            if (pictureTakenTime - _pictureTakenTime > CONSTANT.TIMEINTERVAL && !startFolderID.equals(endFolderID)) {
                 //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
-                if (!startFolderID.equals("")) {
+                Log.d("MainActivity", "startFolderID  " + startFolderID + " endFolderID : "+endFolderID);
+                if (!startFolderID.equals("")) {//최소 하루 단위로
                     String new_name;
-                    if (!startFolderID.equals(endFolderID))
+                    //if (!startFolderID.equals(endFolderID))
                         new_name = startFolderID + "~" + endFolderID + "의 스토리";
-                    else
-                        new_name = startFolderID + "의 스토리";
+                    //else
+                    //    new_name = startFolderID + "의 스토리";
 
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID, pictureNumInStory);
                     db.createFolder(f);
@@ -357,31 +358,7 @@ public class ServiceOfPictureClassification extends Service {
                 placeName_ = ExistedMedia.getPlaceName();
             }
             else {//새로운 사진
-        /*
-                //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
-                longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
-                latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
-                //위치 정보를 토대로 지명이름을 가져온다
-                List<Address> placeName = null;
-                if (longitude != 0 && latitude != 0) {
-                    try {
-                        placeName = mCoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        Log.e("PictureClassification", e.getMessage());
-                    }
-                    //위치 정보가 없으면
-                    if (placeName == null) {
-                        Log.e("PictureClassification", "위치 정보가 없습니다");
-                    } else {
-                        //placeName_ = placeName.get(0).getLocality();//ex)강남구
-                        placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
-                        Log.e("PictureClassification", "~" + placeName.get(0).getAdminArea() + "~" + placeName.get(0).getCountryCode() + "~" + placeName.get(0).getFeatureName() + "~" + placeName.get(0).getLocality() + "~" + placeName.get(0).getSubAdminArea() + "~" + placeName.get(0).getSubLocality() + "~" + placeName.get(0).getSubThoroughfare() + "~" + placeName.get(0).getThoroughfare() + "~" + placeName.get(0).getMaxAddressLineIndex());
-                        //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
-                        //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
-                    }
 
-                }
-        */
             }
 
 

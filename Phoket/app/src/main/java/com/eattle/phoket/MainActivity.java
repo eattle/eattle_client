@@ -79,7 +79,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     Messenger mService = null;
     boolean mIsBound;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
-
+    TextView alarm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +95,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
 
         fileSystem = FileSystem.getInstance();
-
+/*
         usbDeviceHost = new UsbDeviceHost();
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
 
             }
-        });
+        });*/
 
         //데이터베이스 OPEN
         db = DatabaseHelper.getInstance(getApplicationContext());
@@ -163,8 +163,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 ActionBar.LayoutParams.MATCH_PARENT,
                 Gravity.LEFT);
 
-        TextView alarm = (TextView)actionBarLayout.findViewById(R.id.alarmIcon);
-
+        //TextView alarm = (TextView)actionBarLayout.findViewById(R.id.alarmIcon);
+        alarm = (TextView)actionBarLayout.findViewById(R.id.alarmIcon);
 
         alarm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,6 +173,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
                 Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
+                alarm.setEnabled(false); // 클릭 무효화
                 //서비스에게 사진 정리를 요청한다
                 sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
             }
@@ -241,6 +242,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     wantBackUp();
                     exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
 //                    classification.setEnabled(true); // 클릭 유효화
+                    alarm.setEnabled(true); // 클릭 무효화
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
                     String thumbNailID = msg.getData().getString("thumbNailID");

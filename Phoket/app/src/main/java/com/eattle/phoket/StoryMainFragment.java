@@ -171,6 +171,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
                             Log.d("asdf"," 인덱스? : "+CONSTANT.currentLoadingImage.indexOf(imageIdForTaskExecute));
                             if(CONSTANT.currentLoadingImage.indexOf(new Integer(imageIdForTaskExecute)) == -1) {//중복 execute를 방지하기 위해 필요하다!)
+
                                 bitmapWorkerTask.execute(path);//큰 이미지 로드 시작
                                 CONSTANT.currentLoadingImage.add(imageIdForTaskExecute);//중복 execute를 방지하기 위해 필요하다!
                                 Log.d("asdf"," 인덱스! : "+CONSTANT.currentLoadingImage.indexOf(imageIdForTaskExecute));
@@ -180,7 +181,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         }
                     }
                 }
-            },200);// 0.17초 정도 딜레이를 준 후 시작
+            },480);// 0.5초 정도 딜레이를 준 후 시작
 
         } else {
 // fragment is no longer visible
