@@ -5,7 +5,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,8 +22,6 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -273,7 +270,7 @@ public class ServiceOfPictureClassification extends Service {
 
             Log.d("사진 분류", path);
             //썸네일 사진들은 분류대상에서 제외한다
-            if (path.contains("thumbnail") || path.contains("스토리")) {
+            if (path.contains("thumbnail") || path.contains("스토리") || path.contains("Screenshot")|| path.contains("screenshot")) {
                 Log.d("pictureClassification", "썸네일 및 기존 스토리는 분류 대상에서 제외");
                 continue;
             }
