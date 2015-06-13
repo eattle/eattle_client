@@ -353,31 +353,7 @@ public class ServiceOfPictureClassification extends Service {
                 placeName_ = ExistedMedia.getPlaceName();
             }
             else {//새로운 사진
-        /*
-                //위치 정보가 없으면 longitude = 0.0, latitude = 0.0이 들어감
-                longitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LONGITUDE));
-                latitude = ImageSetter.mCursor.getDouble(ImageSetter.mCursor.getColumnIndex(MediaStore.Images.ImageColumns.LATITUDE));
-                //위치 정보를 토대로 지명이름을 가져온다
-                List<Address> placeName = null;
-                if (longitude != 0 && latitude != 0) {
-                    try {
-                        placeName = mCoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        Log.e("PictureClassification", e.getMessage());
-                    }
-                    //위치 정보가 없으면
-                    if (placeName == null) {
-                        Log.e("PictureClassification", "위치 정보가 없습니다");
-                    } else {
-                        //placeName_ = placeName.get(0).getLocality();//ex)강남구
-                        placeName_ = placeName.get(0).getThoroughfare();//ex)선릉로93길, 역삼동
-                        Log.e("PictureClassification", "~" + placeName.get(0).getAdminArea() + "~" + placeName.get(0).getCountryCode() + "~" + placeName.get(0).getFeatureName() + "~" + placeName.get(0).getLocality() + "~" + placeName.get(0).getSubAdminArea() + "~" + placeName.get(0).getSubLocality() + "~" + placeName.get(0).getSubThoroughfare() + "~" + placeName.get(0).getThoroughfare() + "~" + placeName.get(0).getMaxAddressLineIndex());
-                        //ex)~서울특별시~KR~54~강남구~null~null~54~선릉로93길~0
-                        //~서울특별시~KR~619-26~강남구~null~null~619-26~역삼동~0
-                    }
 
-                }
-        */
             }
 
 
