@@ -120,6 +120,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         doBindService();
 
+        //처음에 정리가 안되어 있을 때
+        if(db.getAllFolders().size() == 0){
+            guide();
+        }
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -379,6 +383,33 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         */
     }
 
+    public void guide() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+ //       d.setTitle("상단에 있는 정리 버튼을 눌러보세요! \n 당신의 추억을 정리해 드립니다.");
+        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_guide, null);
+        d.setView(r);
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
+                            importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
+                        Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
+
+                        //alarm.setEnabled(false); // 클릭 무효화
+                        //서비스에게 사진 정리를 요청한다
+                        sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
+
+                        //finish();
+                        break;
+
+
+                }
+            }
+        };
+        d.setPositiveButton("정리 시작", l);
+        d.show();
+    }
     public FileSystem getFileSystem() {
         return this.fileSystem;
     }
