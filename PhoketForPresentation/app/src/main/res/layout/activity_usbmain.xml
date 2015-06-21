@@ -1,0 +1,46 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#ffffff"
+    tools:context="com.example.cds.eattle_prototype_2.USBMainActivity">
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/byStory"
+            android:layout_width="163dp"
+            android:layout_height="28dp"
+            android:background="@mipmap/storybuttonpressed"
+            android:onClick="onUSBButtonClick"/>
+
+        <Button
+            android:id="@+id/byPhoket"
+            android:layout_width="163dp"
+            android:layout_height="28dp"
+            android:background="@mipmap/phoketbutton"
+            android:onClick="onUSBButtonClick"/>
+    </LinearLayout>
+    <!-- USB 내용이 출력되는 곳 -->
+    <GridView
+        android:id="@+id/usbgrid"
+        android:gravity="center"
+        android:layout_below="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="3"
+        android:stretchMode="columnWidth"
+        android:horizontalSpacing="13dp"
+        android:verticalSpacing="12dp"
+        android:layout_gravity="top"
+        android:layout_marginTop="1dp">
+    </GridView>
+</RelativeLayout>

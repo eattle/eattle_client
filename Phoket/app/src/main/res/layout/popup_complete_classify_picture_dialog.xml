@@ -12,7 +12,7 @@
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:background="#ffffff"
-        android:text="USB에 사진이 백업되었습니다! \n스마트폰에서 사진을 삭제하시겠어요?"/>
+        android:text="포켓에 사진이 정리되어 들어갔어요!"/>
 
     <ImageView
         android:layout_width="wrap_content"
