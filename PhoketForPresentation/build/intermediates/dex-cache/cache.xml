@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.github.dexafree\materiallist\2.4.3\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="5bbaeae1d60698a02440fda656fafe9e3c3650ba">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-2915bd4b0bf004a0dec3af8206c8051dd40ab654.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\.gradle\caches\modules-2\files-2.1\com.squareup.picasso\picasso\2.4.0\f36d2d4e3a36b3259aaf9d004d29b4cdc6c1bfb2\picasso-2.4.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f36d2d4e3a36b3259aaf9d004d29b4cdc6c1bfb2">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\picasso-2.4.0-0d5cc27ba4929b3f339cf974e851ac26f6b60d8f.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\21.0.3\support-annotations-21.0.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\support-annotations-21.0.3-48dc83a4974bf8801850439cf4dae5df6c2d3e4e.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\21.0.0\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="efeda77c808750cb670ee9c48d8a1835d89dbcb2">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-1a766d24aabcbb5b08989cfe15ca0ba75c35f09b.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-67dadb0f15b544646c291e545b34bcd3c6d349d1.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\library-2.4.0-7c226d0e8296a0dc840d7535a946eeadf803761d.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\libs\internal_impl-21.0.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\internal_impl-21.0.3-90dbd5a0399cbf2276110e07eca100838b8913a9.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\.gradle\caches\modules-2\files-2.1\com.squareup\otto\1.3.5\7941cd2c2c8ec006800d75c35f8a9dacf892ab93\otto-1.3.5.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="7941cd2c2c8ec006800d75c35f8a9dacf892ab93">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\otto-1.3.5-fe63e3b1ead152f921b297416f8921f7ce564fa4.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\.gradle\caches\modules-2\files-2.1\com.nhaarman.listviewanimations\lib-core\3.1.0\f3f9629b068554d8513a2aaf34418171bf430851\lib-core-3.1.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f3f9629b068554d8513a2aaf34418171bf430851">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\lib-core-3.1.0-14f6f0c1011d4d37c5828904a44a48d4bf2d8e78.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\cardview-v7\21.0.0\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="7d2525cba8ed61fff102977caed964fc22061e34">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-045c2b926b1e4984a1df18b9a633ea60bbcbc3ba.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\.gradle\caches\modules-2\files-2.1\com.nhaarman.listviewanimations\lib-manipulation\3.1.0\63737e512fcd9e0ebe9bcd0bb375c2dded74116f\lib-manipulation-3.1.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="63737e512fcd9e0ebe9bcd0bb375c2dded74116f">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\lib-manipulation-3.1.0-975caa4aceeaddf3582afd7604d8f9d450ba31c2.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\palette-v7\21.0.0\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b65c2fede61220ed2b6a063f11ca13160910089e">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-6ab394db628e1a11aee9cb5b0b2e57458f45fc67.jar" />
+    </item>
+    <item
+        jar="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\21.0.3\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="C:\Users\dh_st_000\Documents\eattle_client\PhoketForPresentation\app\build\intermediates\pre-dexed\debug\classes-ec39cc944fb7d58255df67f2bbf36c7d4683af62.jar" />
+    </item>
+
+</items>

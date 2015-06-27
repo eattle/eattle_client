@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:text="상단의 정리 버튼을 누르면\n사진을 자동으로 정리합니다\n일단 사진을 정리해 볼까요?"
+        android:textSize="13dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+</LinearLayout>

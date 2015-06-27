@@ -99,19 +99,20 @@ public class ServiceOfPictureClassification extends Service {
     //MainActivity로 부터 온 메세지를 받는 부분
     class IncomingHandler extends Handler {
         boolean isNew = true;
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CONSTANT.MSG_REGISTER_CLIENT:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_REGISTER_CLIENT || 'MainActivity가 연결을 요청하였습니다' ");
                     //mClients에 이미 있다면 등록하지(add) 않는다
-                    for(int i=0;i<mClients.size();i++){
-                        if(mClients.get(i) == msg.replyTo) {
+                    for (int i = 0; i < mClients.size(); i++) {
+                        if (mClients.get(i) == msg.replyTo) {
                             isNew = false;
                             break;
                         }
                     }
-                    if(isNew)
+                    if (isNew)
                         mClients.add(msg.replyTo);
                     break;
 
@@ -121,17 +122,17 @@ public class ServiceOfPictureClassification extends Service {
 
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    for(int i=0;i<mClients.size();i++){
-                        if(mClients.get(i) == msg.replyTo) {
+                    for (int i = 0; i < mClients.size(); i++) {
+                        if (mClients.get(i) == msg.replyTo) {
                             isNew = false;
                             break;
                         }
                     }
-                    if(isNew)
+                    if (isNew)
                         mClients.add(msg.replyTo);
 
 
-                    Thread pictureThread = new Thread(new Runnable() {
+                    new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {//사진 정리를 시작한다
@@ -140,8 +141,7 @@ public class ServiceOfPictureClassification extends Service {
                                 Log.d("PictureClassification", e.getMessage());
                             }
                         }
-                    });
-                    pictureThread.start();
+                    }).start();
 
 
                     break;
@@ -173,10 +173,10 @@ public class ServiceOfPictureClassification extends Service {
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 Bundle bundle = new Bundle();
-                bundle.putString("thumbNailID",thumbNailID);
-                bundle.putString("new_name",new_name);
-                bundle.putInt("folderIDForDB",folderIDForDB);
-                bundle.putInt("picture_num",picture_num);
+                bundle.putString("thumbNailID", thumbNailID);
+                bundle.putString("new_name", new_name);
+                bundle.putInt("folderIDForDB", folderIDForDB);
+                bundle.putInt("picture_num", picture_num);
 
                 Message msg = Message.obtain(null, typeOfMessage);
                 msg.setData(bundle);
@@ -232,7 +232,7 @@ public class ServiceOfPictureClassification extends Service {
 
         mCoder = new Geocoder(this);
         mCr = this.getContentResolver();
-        mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN+" ASC");
+        mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
         calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
         long averageInterval = totalInterval;
         if (totalPictureNum != 0)
@@ -261,16 +261,18 @@ public class ServiceOfPictureClassification extends Service {
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String thumbNailID = "";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
+        String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
+        int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
         String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/thumbnail/";
         FolderManage.makeDirectory(folderThumbnailName);
 
-        mCursor.moveToFirst();
-        while (mCursor.moveToNext()) {
+        mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
+        while (mCursor.moveToPrevious()) {
             final String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
 
             Log.d("사진 분류", path);
             //썸네일 사진들은 분류대상에서 제외한다
-            if (path.contains("thumbnail") || path.contains("스토리") || path.contains("Screenshot")|| path.contains("screenshot")) {
+            if (path.contains("thumbnail") || path.contains("스토리") || path.contains("Screenshot") || path.contains("screenshot")) {
                 Log.d("pictureClassification", "썸네일 및 기존 스토리는 분류 대상에서 제외");
                 continue;
             }
@@ -279,7 +281,7 @@ public class ServiceOfPictureClassification extends Service {
             //사진 ID
             final int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
-            Log.d("Media","ExistedMedia == null : "+(ExistedMedia==null));
+            Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
             //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
             //사진이 촬영된 날짜
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
@@ -301,9 +303,11 @@ public class ServiceOfPictureClassification extends Service {
                              MediaStore.Images.Thumbnails.MINI_KIND,
                              (BitmapFactory.Options) null );
              */
+
+            //TODO 기존에 있는 썸네일을 사용한다.
             File ExisTedThumbNail = new File(folderThumbnailName + String.valueOf(pictureID) + ".jpg");
             if (!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
-                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(mCr, pictureID,MediaStore.Images.Thumbnails.MINI_KIND,null);
+                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(mCr, pictureID, MediaStore.Images.Thumbnails.MINI_KIND, null);
                 /*if((bitmap = getThumbnail(pictureID)) == null){//안드로이드 자체의 썸네일도 없는 경우
                     BitmapFactory.Options opt = new BitmapFactory.Options();
                     opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
@@ -312,26 +316,38 @@ public class ServiceOfPictureClassification extends Service {
                 }*/
                 createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
             }
-
+            //TODO ------------------------------
 
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
             Log.d("MainActivity", "pictureTakenTime-_pictureTakenTime = " + (pictureTakenTime - _pictureTakenTime));
-            if (pictureTakenTime - _pictureTakenTime > CONSTANT.TIMEINTERVAL && !startFolderID.equals(endFolderID)) {
-                //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
-                Log.d("MainActivity", "startFolderID  " + startFolderID + " endFolderID : "+endFolderID);
-                if (!startFolderID.equals("")) {//최소 하루 단위로
+            if (_pictureTakenTime - pictureTakenTime > CONSTANT.TIMEINTERVAL) {
+                //이전에 만들어진 폴더의 이름을 바꾼다(endFolderID ~ startFolderID)
+                Log.d("MainActivity", "startFolderID  " + startFolderID + " endFolderID : " + endFolderID);
+                if (!startFolderID.equals("")) {
                     String new_name;
-                    //if (!startFolderID.equals(endFolderID))
-                        new_name = startFolderID + "~" + endFolderID + "의 스토리";
-                    //else
-                    //    new_name = startFolderID + "의 스토리";
+                    if (!startFolderID.equals(endFolderID))
+                        new_name = endFolderID + "~" + startFolderID + "의 스토리";
+                    else
+                        new_name = startFolderID + "의 스토리";
+
+                    if (pictureNumInStory > CONSTANT.BOUNDARY) {//'일상'이 아닌 '스토리'에 대해
+                        if (previousStoryName.equals(new_name)) {//중복 날짜 스토리
+                            Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
+                            overlappedNum++;
+                            new_name += (" -" + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
+                        } else {//중복 날짜 스토리가 아니면
+                            Log.d("MainActivity", "중복 날짜가 아닌 스토리 : " + new_name);
+                            overlappedNum = 1;
+                            previousStoryName = new_name;
+                        }
+                    }
 
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID, pictureNumInStory);
                     db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB,pictureNumInStory);
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, thumbNailID, new_name, folderIDForDB, pictureNumInStory);
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -353,20 +369,18 @@ public class ServiceOfPictureClassification extends Service {
             if (ExistedMedia != null) {//해당 사진이 기존에 있었을 경우
                 Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
                 placeName_ = ExistedMedia.getPlaceName();
-            }
-            else {//새로운 사진
+            } else {//새로운 사진
 
             }
 
 
             //DB에 사진 데이터를 넣는다.
-            if(ExistedMedia == null) {//새로운 사진
+            if (ExistedMedia == null) {//새로운 사진
                 Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
                 db.createMedia(m);
                 String[] pathArr = path.split("/");
-                db.createTag(pathArr[pathArr.length-2],pictureID);
-            }
-            else {//기존 사진
+                db.createTag(pathArr[pathArr.length - 2], pictureID);
+            } else {//기존 사진
                 //업데이트만 한다
                 ExistedMedia.setFolder_id(folderIDForDB);
                 ExistedMedia.setPath(path);
@@ -376,11 +390,11 @@ public class ServiceOfPictureClassification extends Service {
             //USB에 사진을 백업
             //1. 이미 USB에 있는 사진일 경우
             //2. 새로운 사진
-            if(CONSTANT.ISUSBCONNECTED == 1) {
-                if(fileSystem.stringSearch(pictureID+".jpg")[0] == -1) //USB에 없는 사진이면
+            if (CONSTANT.ISUSBCONNECTED == 1) {
+                if (fileSystem.stringSearch(pictureID + ".jpg")[0] == -1) //USB에 없는 사진이면
                     fileSystem.addElementPush(pictureID + ".jpg", CONSTANT.BLOCKDEVICE, path);//USB로 백업
 
-                Log.d("service",pictureID+".jpg 백업 완료");
+                Log.d("service", pictureID + ".jpg 백업 완료");
             }
 
 
@@ -395,12 +409,21 @@ public class ServiceOfPictureClassification extends Service {
         String new_name = null;
         if (!startFolderID.equals("")) {
             if (!startFolderID.equals(endFolderID)) {
-                new_name = startFolderID + "~" + endFolderID + "의 스토리";
+                new_name = endFolderID + "~" + startFolderID + "의 스토리";
             } else {
                 new_name = startFolderID + "의 스토리";
             }
+
+
+            if (previousStoryName.equals(new_name) && pictureNumInStory > CONSTANT.BOUNDARY) {//'일상'이 아닌 '스토리'에 대해 중복 날짜 스토리
+                Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
+                overlappedNum++;
+                new_name += (" -" + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
+            }
+
+
             //Folder DB에 넣는다.
-            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID,pictureNumInStory);
+            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID, pictureNumInStory);
             db.createFolder(f);
         }
         //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
@@ -409,7 +432,7 @@ public class ServiceOfPictureClassification extends Service {
         //drawMainView();
         //MainActivity에 메세지를 보낸다
 
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,thumbNailID,new_name,folderIDForDB,pictureNumInStory);
+        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, thumbNailID, new_name, folderIDForDB, pictureNumInStory);
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
 
         mCursor.close();
@@ -458,8 +481,6 @@ Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteA
 Log.e("Original   dimensions", original.getWidth()+" "+original.getHeight());
 Log.e("Compressed dimensions", decoded.getWidth()+" "+decoded.getHeight());
          */
-
-
 
 
     @Override

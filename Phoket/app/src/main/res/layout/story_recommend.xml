@@ -22,16 +22,18 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"/>
 
-        <TextView
-            android:id="@+id/noRecommend"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="추천할 스토리가 없어요!"
-            android:textColor="#ffffff"
-            android:gravity="center"
-            android:textSize="20dp"
-            android:visibility="gone"/>
+
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/noRecommend"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="추천할 스토리가 없어요!"
+        android:textColor="#ffffff"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:visibility="gone"/>
 
     <FrameLayout
         android:id="@+id/first"

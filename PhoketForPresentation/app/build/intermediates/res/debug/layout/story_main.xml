@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/storyMain"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <com.eattle.phoket.TouchImageView
+        android:id="@+id/pagerImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.eattle.phoket.TouchImageView>
+
+</FrameLayout>
+<!-- From: file:/C:/Users/dh_st_000/Documents/eattle_client/PhoketForPresentation/app/src/main/res/layout/story_main.xml -->

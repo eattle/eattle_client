@@ -1,0 +1,42 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.eattle.phoket.FullPicture">
+
+    <!-- '스토리 시작'을 눌렀을 때 첫 화면 -->
+    <FrameLayout
+        android:id="@+id/storyStart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/albumFullViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.v4.view.ViewPager>
+
+    <!-- 스토리 종료 버튼(x)가 들어가는 Layout -->
+    <FrameLayout
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"></FrameLayout>
+    <!-- Tag & Tag 추가란이 들어가는 Layout -->
+    <FrameLayout
+        android:id="@+id/tagLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"></FrameLayout>
+    <!-- 스토리 추천 -->
+    <FrameLayout
+        android:id="@+id/frameForStoryRecommend"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></FrameLayout>
+
+
+</FrameLayout>
+<!-- From: file:/C:/Users/dh_st_000/Documents/eattle_client/PhoketForPresentation/app/src/main/res/layout/activity_album_full.xml -->

@@ -36,6 +36,8 @@ import java.util.Random;
  * Created by dh_st_000 on 2015-05-23.
  */
 public class StoryRecommendFragment extends Fragment {
+    String TAG = "storyRecommendFragment";
+
     DatabaseHelper db;
     int folderID;//현재 보고 있는 스토리의 ID
     static FileSystem fileSystem;
@@ -66,18 +68,24 @@ public class StoryRecommendFragment extends Fragment {
         //리스트뷰에 들어갈 스토리를 추가한다
         //랜덤하게 4개의 스토리를 얻어온다(3개는 임의로 정한 것)
         List<Folder> folders = db.getAllFolders();
-        int totalFolderNum = folders.size();
-        Log.d("storyRecommendFragment", "[totalFolderNum]   " + totalFolderNum);
+        int totalFolderNum=0;
+
+        //총 '스토리'의 개수를 구해야 한다.
+        for(int i=0;i<folders.size();i++){
+            if(folders.get(i).getPicture_num() > CONSTANT.BOUNDARY)//'일상'이 아니고 '스토리' 일 경우
+                totalFolderNum++;
+        }
+        Log.d(TAG, "[totalFolderNum]   " + totalFolderNum);
 
 
-        if (totalFolderNum < recommendNum)//총 스토리의 개수가 4개가 안될떄
+        if (totalFolderNum < recommendNum)//총 스토리의 개수가 4개가 안될때
             recommendNum = totalFolderNum - 1;//현재 보고있는 스토리 제외
-        Log.d("storyRecommendFragment", "[recommendNum]   " + recommendNum);
+        Log.d(TAG, "[recommendNum]   " + recommendNum);
 
         TextView noRecommend = (TextView) root.findViewById(R.id.noRecommend);
         //if (recommendNum == 0) {//추천할 스토리가 없을 때
         if (recommendNum < 4) {//추천 스토리가 4개가 안되면 (추후변경)
-            Log.d("storyRecommendFragment", "추천할 스토리가 없음");
+            Log.d(TAG, "추천할 스토리가 없음");
             noRecommend.setVisibility(View.VISIBLE);
             return root;
         } else
@@ -95,14 +103,14 @@ public class StoryRecommendFragment extends Fragment {
                 }
             }
             if (isOverlapped == 0) {//중복되지 않으면
-                //TODO 실제로는 없는 스토리인데 folderDB에 등록된 것이 있는듯!!
                 Folder temp = db.getFolder(select);
-                if (temp.getName() != null && temp.getPicture_num() > 3) {////오류가 있는 folderID || 일상이 아니면
+                if (temp.getName() != null && temp.getPicture_num() > CONSTANT.BOUNDARY) {////오류가 있는 folderID || 일상이 아니면
                     randomFolder[count] = select;
                     count++;
                 }
             }
         }
+
         for (int i = 0; i < recommendNum; i++) {
             Folder folder = db.getFolder(randomFolder[i]);
             ImageView storyRecommendImage = null;

@@ -41,14 +41,15 @@ import com.eattle.phoket.device.CachedUsbMassStorageBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.host.BlockDeviceApp;
 import com.eattle.phoket.host.UsbDeviceHost;
+import com.eattle.phoket.model.Folder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.List;
 import java.util.Locale;
-
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
     private String Tag = "MainActivity";
@@ -120,11 +121,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         doBindService();
 
-        //처음에 정리가 안되어 있을 때
-        if(db.getAllFolders().size() == 0){
+        if(db.getAllFolders().size() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
             guide();
         }
-
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -173,8 +172,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         alarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
-                    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
+                //if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
+                //    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
                 Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
                 alarm.setEnabled(false); // 클릭 무효화
@@ -244,7 +243,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     mSectionsPagerAdapter.notifyDataSetChanged();
 
                     wantBackUp();
-                    exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
+                    //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
 //                    classification.setEnabled(true); // 클릭 유효화
                     alarm.setEnabled(true); // 클릭 무효화
                     break;
@@ -356,60 +355,46 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         d.setNegativeButton("No", l);
         d.show();
     }
-
-    public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
-        Toast.makeText(getBaseContext(), "사진 정리가 완료되었습니다", Toast.LENGTH_SHORT).show();
-        /*
+    public void guide() {//앱을 최초 실행했을 때 사진정리를 누르도록 한다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
-        d.setTitle("백업이 완료되었습니다!");
-//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_complete_classify_picture_dialog, null);
-//        d.setView(r);
-        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //스마트폰에서 사진들을 삭제한다
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //스마트폰에서 사진들을 삭제하지 않는다
-                        break;
-
-                }
-            }
-        };
-        d.setPositiveButton("Yes", l);
-        d.setNegativeButton("No", l);
-        d.show();
-        */
-    }
-
-    public void guide() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
-        AlertDialog.Builder d = new AlertDialog.Builder(this);
- //       d.setTitle("상단에 있는 정리 버튼을 눌러보세요! \n 당신의 추억을 정리해 드립니다.");
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_guide, null);
+        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_first_classification, null);
         d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
-                            importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
                         Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
-                        //alarm.setEnabled(false); // 클릭 무효화
+                        alarm.setEnabled(false); // 정리 버튼 클릭 무효화
                         //서비스에게 사진 정리를 요청한다
                         sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
-
-                        //finish();
                         break;
-
-
                 }
             }
         };
         d.setPositiveButton("정리 시작", l);
         d.show();
     }
+
+    public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
+
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setTitle("사진이 정리되었습니다!");
+
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //스마트폰에서 사진들을 삭제한다
+                        break;
+                }
+            }
+        };
+        d.setPositiveButton("확인", l);
+        d.show();
+
+    }
+
     public FileSystem getFileSystem() {
         return this.fileSystem;
     }

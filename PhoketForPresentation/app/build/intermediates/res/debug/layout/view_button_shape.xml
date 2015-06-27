@@ -1,0 +1,49 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@mipmap/defaultbutton_" />
+    <!--   눌린 후 버튼이미지 파일명을 써준다.-->
+    <!-- pressed -->
+
+    <item android:drawable="@mipmap/defaultbutton" />
+    <!--  눌리기 전 버튼이미지 파일명을 써준다..-->
+    <!-- default -->
+</selector>
+
+
+    <!--
+
+
+<item
+android:state_focused="false"
+android:state_pressed="false">
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttonShape"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFF"/>
+    <padding android:left="3dp" android:right="3dp" />
+    <corners android:radius="3dp" />
+
+</shape>
+</item>
+
+
+<item
+android:state_focused="false"
+android:state_pressed="true">
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttonShape"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:shape="rectangle">
+    <solid android:color="#F0F2BD"/>
+    <padding android:left="3dp" android:right="3dp" />
+    <corners android:radius="3dp" />
+
+</item>
+
+    </selector>
+
+    --><!-- From: file:/C:/Users/dh_st_000/Documents/eattle_client/PhoketForPresentation/app/src/main/res/layout/view_button_shape.xml -->

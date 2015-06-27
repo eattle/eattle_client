@@ -1,0 +1,193 @@
+-- Merging decision tree log ---
+manifest
+ADDED from AndroidManifest.xml:2:1
+	package
+		ADDED from AndroidManifest.xml:3:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionName
+		ADDED from AndroidManifest.xml:5:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionCode
+		ADDED from AndroidManifest.xml:4:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	xmlns:android
+		ADDED from AndroidManifest.xml:2:11
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from AndroidManifest.xml:7:5
+	android:name
+		ADDED from AndroidManifest.xml:7:22
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from AndroidManifest.xml:8:5
+	android:name
+		ADDED from AndroidManifest.xml:8:22
+application
+ADDED from AndroidManifest.xml:10:5
+MERGED from com.android.support:appcompat-v7:21.0.3:16:5
+MERGED from com.android.support:support-v4:21.0.3:16:5
+MERGED from com.github.dexafree:materiallist:2.4.3:11:5
+MERGED from com.android.support:cardview-v7:21.0.0:16:5
+MERGED from com.android.support:recyclerview-v7:21.0.0:17:5
+MERGED from com.android.support:support-v4:21.0.3:16:5
+MERGED from com.android.support:appcompat-v7:21.0.3:16:5
+MERGED from com.android.support:support-v4:21.0.3:16:5
+MERGED from com.android.support:palette-v7:21.0.0:16:5
+MERGED from com.android.support:support-v4:21.0.3:16:5
+	android:label
+		ADDED from AndroidManifest.xml:14:9
+	android:allowBackup
+		ADDED from AndroidManifest.xml:11:9
+	android:icon
+		ADDED from AndroidManifest.xml:13:9
+	android:largeHeap
+		ADDED from AndroidManifest.xml:12:9
+	android:theme
+		ADDED from AndroidManifest.xml:15:9
+activity#com.eattle.phoket.SplashActivity
+ADDED from AndroidManifest.xml:17:9
+	android:label
+		ADDED from AndroidManifest.xml:19:13
+	android:theme
+		ADDED from AndroidManifest.xml:20:13
+	android:name
+		ADDED from AndroidManifest.xml:18:13
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:21:13
+action#android.intent.action.MAIN
+ADDED from AndroidManifest.xml:22:17
+	android:name
+		ADDED from AndroidManifest.xml:22:25
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:24:17
+	android:name
+		ADDED from AndroidManifest.xml:24:27
+activity#com.eattle.phoket.MainActivity
+ADDED from AndroidManifest.xml:27:9
+	android:label
+		ADDED from AndroidManifest.xml:29:13
+	android:name
+		ADDED from AndroidManifest.xml:28:13
+intent-filter#android.hardware.usb.action.USB_ACCESSORY_ATTACHED+android.hardware.usb.action.USB_DEVICE_DETACHED
+ADDED from AndroidManifest.xml:30:13
+action#android.hardware.usb.action.USB_ACCESSORY_ATTACHED
+ADDED from AndroidManifest.xml:31:17
+	android:name
+		ADDED from AndroidManifest.xml:31:25
+action#android.hardware.usb.action.USB_DEVICE_DETACHED
+ADDED from AndroidManifest.xml:32:17
+	android:name
+		ADDED from AndroidManifest.xml:32:25
+meta-data#android.hardware.usb.action.USB_DEVICE_ATTACHED
+ADDED from AndroidManifest.xml:34:13
+	android:resource
+		ADDED from AndroidManifest.xml:35:17
+	android:name
+		ADDED from AndroidManifest.xml:34:24
+activity#com.eattle.phoket.PasswordActivity
+ADDED from AndroidManifest.xml:37:9
+	android:clearTaskOnLaunch
+		ADDED from AndroidManifest.xml:39:13
+	android:screenOrientation
+		ADDED from AndroidManifest.xml:42:13
+	android:label
+		ADDED from AndroidManifest.xml:40:13
+	android:launchMode
+		ADDED from AndroidManifest.xml:41:13
+	android:theme
+		ADDED from AndroidManifest.xml:43:13
+	android:name
+		ADDED from AndroidManifest.xml:38:13
+service#com.eattle.phoket.ServiceOfPictureClassification
+ADDED from AndroidManifest.xml:46:9
+	android:enabled
+		ADDED from AndroidManifest.xml:48:13
+	android:exported
+		ADDED from AndroidManifest.xml:49:13
+	android:name
+		ADDED from AndroidManifest.xml:47:13
+activity#com.eattle.phoket.AlbumGridActivity
+ADDED from AndroidManifest.xml:52:9
+	android:label
+		ADDED from AndroidManifest.xml:54:13
+	android:parentActivityName
+		ADDED from AndroidManifest.xml:55:13
+	android:name
+		ADDED from AndroidManifest.xml:53:13
+meta-data#android.support.PARENT_ACTIVITY
+ADDED from AndroidManifest.xml:56:13
+	android:value
+		ADDED from AndroidManifest.xml:58:17
+	android:name
+		ADDED from AndroidManifest.xml:57:17
+activity#com.eattle.phoket.AlbumFullActivity
+ADDED from AndroidManifest.xml:66:9
+	android:screenOrientation
+		ADDED from AndroidManifest.xml:71:13
+	android:label
+		ADDED from AndroidManifest.xml:68:13
+	android:parentActivityName
+		ADDED from AndroidManifest.xml:69:13
+	android:theme
+		ADDED from AndroidManifest.xml:70:13
+	android:name
+		ADDED from AndroidManifest.xml:67:13
+activity#com.eattle.phoket.PopupForTagAddition
+ADDED from AndroidManifest.xml:82:9
+	android:label
+		ADDED from AndroidManifest.xml:84:13
+	android:theme
+		ADDED from AndroidManifest.xml:85:13
+	android:name
+		ADDED from AndroidManifest.xml:83:13
+activity#com.eattle.phoket.USBMainActivity
+ADDED from AndroidManifest.xml:87:9
+	android:label
+		ADDED from AndroidManifest.xml:89:13
+	android:name
+		ADDED from AndroidManifest.xml:88:13
+activity#com.eattle.phoket.PopupPictureActivity
+ADDED from AndroidManifest.xml:98:9
+	android:label
+		ADDED from AndroidManifest.xml:100:13
+	android:windowSoftInputMode
+		ADDED from AndroidManifest.xml:102:13
+	android:theme
+		ADDED from AndroidManifest.xml:101:13
+	android:name
+		ADDED from AndroidManifest.xml:99:13
+activity#com.eattle.phoket.SearchActivity
+ADDED from AndroidManifest.xml:105:9
+	android:label
+		ADDED from AndroidManifest.xml:107:13
+	android:windowSoftInputMode
+		ADDED from AndroidManifest.xml:109:13
+	android:theme
+		ADDED from AndroidManifest.xml:108:13
+	android:name
+		ADDED from AndroidManifest.xml:106:13
+uses-sdk
+INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
+MERGED from com.android.support:appcompat-v7:21.0.3:15:5
+MERGED from com.android.support:support-v4:21.0.3:15:5
+MERGED from com.github.dexafree:materiallist:2.4.3:7:5
+MERGED from com.android.support:cardview-v7:21.0.0:15:5
+MERGED from com.android.support:recyclerview-v7:21.0.0:15:5
+MERGED from com.android.support:support-v4:21.0.3:15:5
+MERGED from com.android.support:appcompat-v7:21.0.3:15:5
+MERGED from com.android.support:support-v4:21.0.3:15:5
+MERGED from com.android.support:palette-v7:21.0.0:15:5
+MERGED from com.android.support:support-v4:21.0.3:15:5
+	android:targetSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:minSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+activity#android.support.v7.widget.TestActivity
+ADDED from com.android.support:recyclerview-v7:21.0.0:18:9
+	android:label
+		ADDED from com.android.support:recyclerview-v7:21.0.0:18:19
+	android:name
+		ADDED from com.android.support:recyclerview-v7:21.0.0:18:60

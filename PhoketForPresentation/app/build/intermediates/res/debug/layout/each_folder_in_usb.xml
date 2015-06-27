@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp">
+
+    <FrameLayout
+        android:id="@+id/folderImageFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+        <!--폴더그림-->
+        <ImageView
+            android:id="@+id/folderImage"
+            android:layout_width="91dp"
+            android:layout_height="72.5dp"
+            android:background="@mipmap/folderimage"/>
+        <!--썸네일
+        <ImageView
+            android:id="@+id/representativeImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />-->
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/folderName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/folderImageFrame"
+        android:gravity="center" />
+</RelativeLayout>
+<!-- From: file:/C:/Users/dh_st_000/Documents/eattle_client/PhoketForPresentation/app/src/main/res/layout/each_folder_in_usb.xml -->
