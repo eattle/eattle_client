@@ -35,8 +35,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.device.CachedBlockDevice;
+import com.eattle.phoket.device.CachedUsbMassStorageBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.host.BlockDeviceApp;
 import com.eattle.phoket.host.UsbDeviceHost;
 import com.eattle.phoket.model.Folder;
 
@@ -333,8 +336,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void wantCapicUSB() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("종료하시겠습니까?");
-        //final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
-        //d.setView(r);
+//        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
+//        d.setView(r);
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -377,7 +380,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("사진이 정리되었습니다!");
-
 
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {

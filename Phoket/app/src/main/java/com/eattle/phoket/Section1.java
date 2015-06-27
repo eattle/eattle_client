@@ -3,11 +3,11 @@ package com.eattle.phoket;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,14 +16,12 @@ import android.view.ViewGroup;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
-import com.dexafree.materialList.cards.WelcomeCard;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.BigStoryCard;
 import com.eattle.phoket.Card.DailyCard;
-import com.eattle.phoket.Card.NotifyCard;
 import com.eattle.phoket.Card.TagsCard;
 import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -107,15 +105,6 @@ public class Section1 extends Fragment {
         db = DatabaseHelper.getInstance(mContext);
 
         List<Folder> stories = db.getAllFolders();
-
-        NotifyCard card= new NotifyCard(mContext);
-        card.setTitle("Phoket USB가 연결되었습니다!");
-        card.setSubtitle("My subtitle!");
-        card.setDescription("Your description");
-        card.setButtonText("OKAY!");
-        card.setBackgroundColor(Color.parseColor("#CA3986"));
-        card.setDismissible(true);
-        mListView.addAtStart(card);
 
         int storiesNum = stories.size();
         for(int i = 0; i < storiesNum; i++){
