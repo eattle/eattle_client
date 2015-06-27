@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.eattle.phoket.Card.ToPhoketCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/MainLayout">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+
+
+        <ImageView
+            android:id="@+id/toPhoketImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gradient_y"/>
+
+        <TextView
+            android:id="@+id/toPhoketText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="이 사진을 포켓에 담아주세요"
+            android:textColor="#ffffff"
+            android:textSize="15dp"
+            android:layout_gravity="center"
+            android:drawableLeft="@mipmap/tophoket"
+            android:drawablePadding="5dp"/>
+
+    </FrameLayout>
+
+</com.eattle.phoket.Card.ToPhoketCardView>

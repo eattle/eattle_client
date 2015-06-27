@@ -1,0 +1,40 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionBarTabTextStyle">@style/tabTextStyle</item>
+        <item name="actionBarTabStyle">@style/tabStyle</item>
+        <item name="android:windowBackground">@android:color/background_dark</item>
+
+    </style>
+
+    <style name="tabTextStyle" parent="@style/Widget.AppCompat.Light.ActionBar.TabText">
+        <item name="android:textColor">@color/tab_indicator_text</item>
+    </style>
+
+    <style name="tabStyle" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_shape</item>
+    </style>
+
+    <style name="NoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="NoActionBarTranslucentTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <style name="ActionBarTranslucentTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
+    <style name="USBActionbarTheme" parent="Theme.AppCompat">
+        <item name="android:homeAsUpIndicator">@mipmap/usbbackground</item>
+        <item name="homeAsUpIndicator">@mipmap/usbbackground</item>
+    </style>
+</resources>

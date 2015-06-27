@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="3"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.3"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/exit_icon"
+            android:scaleType="center"
+            android:src="@mipmap/ic_arrow_back_white_24dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2.7"
+        android:gravity="center_vertical|left">
+
+        <com.eattle.phoket.ExEditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:drawableLeft="@mipmap/ic_search_white_24dp"
+            android:textColorHint="#ffffff"
+            android:hint=""
+            android:singleLine="true"
+            android:textColor="#ffffff"
+            android:layout_weight="5"
+            android:drawablePadding="10dp"
+            />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchButton"
+            android:layout_weight="1"
+            android:textSize="15sp"
+            android:textColor="#ffffff"
+            android:text="검색"
+            />
+
+    </LinearLayout>
+
+    <!--hint size는 textSize를 따라간다-->
+
+
+</LinearLayout>
