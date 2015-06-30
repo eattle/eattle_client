@@ -4,6 +4,7 @@ package com.eattle.phoket;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -43,6 +44,8 @@ import java.util.concurrent.locks.ReentrantLock;
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
 public class AlbumFullActivity extends ActionBarActivity {
 
+    private String TAG = "AlbumFullActivity";
+
     DatabaseHelper db;
     static List<Media> mMediaList;
     int initialMediaPosition;
@@ -73,7 +76,7 @@ public class AlbumFullActivity extends ActionBarActivity {
     //Set<SoftReference<Bitmap>> mReusableBitmaps;//이미지 재활용
     //private LruCache<String, BitmapDrawable> mMemoryCache;//캐시
     ImageView blurImage;
-
+    ContentResolver cr;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (viewPagerImage == null)
@@ -148,6 +151,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         */
 
         fileSystem = FileSystem.getInstance();
+        cr = this.getContentResolver();
 
         //뷰페이저 생성
         mViewPager = (ViewPager) findViewById(R.id.albumFullViewPager);
@@ -446,6 +450,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
+        private String TAG = "BitmapWorkerTask";
         public final WeakReference<ImageView> imageViewReference;
 
         public String path = "";
@@ -485,6 +490,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                         }
                     }
                 }*/
+                Log.d(TAG,"큰 이미지로 대체");
                 final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
                 return bitmap;//큰 이미지를 로딩한다
             } else {
@@ -502,6 +508,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             }
             Log.d("onPostExecute", "onPostExecute 실행");
             if (imageViewReference != null && bitmap != null) {
+
                 final ImageView imageView = imageViewReference.get();
                 //작은 이미지 삭제
                 Bitmap bitmap_ = null;
@@ -531,8 +538,8 @@ public class AlbumFullActivity extends ActionBarActivity {
                     bitmap_ = null;
                     d.setCallback(null);
                 }
-                CONSTANT.currentLoadingImage.remove(new Integer(imageIdForTaskExecute));//중복 execute를 방지하기 위해 필요하다!
 
+                CONSTANT.currentLoadingImage.remove(new Integer(imageIdForTaskExecute));//중복 execute를 방지하기 위해 필요하다!
             }
         }
 
@@ -589,9 +596,18 @@ public class AlbumFullActivity extends ActionBarActivity {
         if (cancelPotentialWork(path, imageView)) {
             //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
             BitmapWorkerTask task = new BitmapWorkerTask(imageView,imageIdForTaskExecute);
-            String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
-            mPlaceHolderBitmap = BitmapFactory.decodeFile(thumbPath);
-            //decode대신 썸네일로 대체하자.!
+            //String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
+            //mPlaceHolderBitmap = BitmapFactory.decodeFile(thumbPath);
+            try {
+                mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
+                Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
+                mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+            }
+
             final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
             //------------------------------------------------------------------------------------------

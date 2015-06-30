@@ -22,6 +22,7 @@ import java.util.List;
  * Created by GA on 2015. 3. 19..
  */
 public class DatabaseHelper extends SQLiteOpenHelper{
+    private String TAG =" DatabaseHelper";
 
     private static DatabaseHelper Instance;
 
@@ -116,7 +117,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     public static DatabaseHelper getInstance(Context context){
         if(Instance == null){
-            Instance = new DatabaseHelper(context.getApplicationContext());
+            Instance = new DatabaseHelper(context);
         }
         return Instance;
     }
@@ -125,6 +126,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
 
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+        context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
     }
 
     @Override

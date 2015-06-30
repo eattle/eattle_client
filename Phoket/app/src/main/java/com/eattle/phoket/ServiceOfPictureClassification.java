@@ -221,6 +221,7 @@ public class ServiceOfPictureClassification extends Service {
 
     private void pictureClassification() throws IOException {//시간간격을 바탕으로 사진들을 분류하는 함수
 
+
         //pictureClassification()의 속도 개선 방안
         //1. 처음에 mediaDB를 전부 삭제하지 않는다
         // -> folderIDForDB만 업데이트 한다
@@ -234,6 +235,8 @@ public class ServiceOfPictureClassification extends Service {
         mCr = this.getContentResolver();
         mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
         calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+
+        Log.d("pictureClassification","사진 정리 시작");
         long averageInterval = totalInterval;
         if (totalPictureNum != 0)
             averageInterval /= totalPictureNum;
@@ -257,7 +260,7 @@ public class ServiceOfPictureClassification extends Service {
         String startFolderID = "";
         String endFolderID = "!";
         int folderIDForDB = 0;//Folder DB에 들어가는 아이디
-        long _pictureTakenTime = 0;//현재 읽고 있는 사진 이전의 찍힌 시간
+        long _pictureTakenTime = System.currentTimeMillis();//현재 읽고 있는 사진 이전의 찍힌 시간, 초기값은 현재 시간
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String thumbNailID = "";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
@@ -298,6 +301,7 @@ public class ServiceOfPictureClassification extends Service {
 
             //썸네일 이미지를 생성한다
             /*
+            //내장 썸네일을 가져오는 방법
             Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(
                              getContentResolver(), selectedImageUri,
                              MediaStore.Images.Thumbnails.MINI_KIND,
@@ -321,7 +325,7 @@ public class ServiceOfPictureClassification extends Service {
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
-            Log.d("MainActivity", "pictureTakenTime-_pictureTakenTime = " + (pictureTakenTime - _pictureTakenTime));
+            Log.d("MainActivity", "_pictureTakenTime-pictureTakenTime = " + (_pictureTakenTime - pictureTakenTime));
             if (_pictureTakenTime - pictureTakenTime > CONSTANT.TIMEINTERVAL) {
                 //이전에 만들어진 폴더의 이름을 바꾼다(endFolderID ~ startFolderID)
                 Log.d("MainActivity", "startFolderID  " + startFolderID + " endFolderID : " + endFolderID);
@@ -336,7 +340,7 @@ public class ServiceOfPictureClassification extends Service {
                         if (previousStoryName.equals(new_name)) {//중복 날짜 스토리
                             Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
                             overlappedNum++;
-                            new_name += (" -" + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
+                            new_name += (" - " + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
                         } else {//중복 날짜 스토리가 아니면
                             Log.d("MainActivity", "중복 날짜가 아닌 스토리 : " + new_name);
                             overlappedNum = 1;
@@ -418,7 +422,7 @@ public class ServiceOfPictureClassification extends Service {
             if (previousStoryName.equals(new_name) && pictureNumInStory > CONSTANT.BOUNDARY) {//'일상'이 아닌 '스토리'에 대해 중복 날짜 스토리
                 Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
                 overlappedNum++;
-                new_name += (" -" + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
+                new_name += (" - " + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
             }
 
 

@@ -69,18 +69,20 @@ public class StoryRecommendFragment extends Fragment {
         //랜덤하게 4개의 스토리를 얻어온다(3개는 임의로 정한 것)
         List<Folder> folders = db.getAllFolders();
         int totalFolderNum=0;
-
+        List<Integer> candidateStory = new ArrayList<Integer>();
         //총 '스토리'의 개수를 구해야 한다.
         for(int i=0;i<folders.size();i++){
-            if(folders.get(i).getPicture_num() > CONSTANT.BOUNDARY)//'일상'이 아니고 '스토리' 일 경우
+            if(folders.get(i).getPicture_num() > CONSTANT.BOUNDARY) {//'일상'이 아니고 '스토리' 일 경우
                 totalFolderNum++;
+                candidateStory.add(folders.get(i).getId());//'스토리'에 해당하는 folder id를 candidateStory배열에 넣는다.
+            }
         }
-        Log.d(TAG, "[totalFolderNum]   " + totalFolderNum);
 
 
         if (totalFolderNum < recommendNum)//총 스토리의 개수가 4개가 안될때
             recommendNum = totalFolderNum - 1;//현재 보고있는 스토리 제외
-        Log.d(TAG, "[recommendNum]   " + recommendNum);
+        Log.d(TAG, "'일상'이 아닌 '스토리'의 개수 [totalFolderNum]   " + totalFolderNum);
+        Log.d(TAG, "추천할 수 있는 사진의 개수 [recommendNum](최대 4개)  : " + recommendNum);
 
         TextView noRecommend = (TextView) root.findViewById(R.id.noRecommend);
         //if (recommendNum == 0) {//추천할 스토리가 없을 때
@@ -94,7 +96,7 @@ public class StoryRecommendFragment extends Fragment {
         randomFolder = new int[recommendNum];
         Random random = new Random();
         for (int count = 0; count < recommendNum; ) {
-            int select = random.nextInt(totalFolderNum);
+            int select = candidateStory.get(random.nextInt(totalFolderNum));
             int isOverlapped = 0;
             for (int i = 0; i < count; i++) {//추천 스토리가 중복되지 않도록 한다
                 if (select == randomFolder[i] || select == folderID) {//기존에 뽑은것과 중복되거나, 현재 스토리와 동일하면
@@ -102,9 +104,11 @@ public class StoryRecommendFragment extends Fragment {
                     break;
                 }
             }
+            Log.d(TAG,"random.nextInt(totalFolderNum) : "+random.nextInt(totalFolderNum)+" select : "+select);
             if (isOverlapped == 0) {//중복되지 않으면
                 Folder temp = db.getFolder(select);
-                if (temp.getName() != null && temp.getPicture_num() > CONSTANT.BOUNDARY) {////오류가 있는 folderID || 일상이 아니면
+                Log.d(TAG,"추천 후보 스토리의 이름 : "+temp.getName()+" 추천 후보 스토리의 사진 개수 : "+temp.getPicture_num());
+                if (temp.getName() != null) {////오류가 있는 folderID가 아니면
                     randomFolder[count] = select;
                     count++;
                 }

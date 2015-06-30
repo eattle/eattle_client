@@ -154,7 +154,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         //큰 이미지를 로드하지 않는다.(아무것도 하지 않음)
                     }
                     //여기에 딜레이 후 시작할 작업들을 입력
-                    else if (img != null && path != null) {//0.5초후엔 img에 1/10 샘플이 채워져 있을 것
+                    else if (img != null && path != null) {//0.5초후엔 img에 썸네일이 채워져 있을 것
                         //CONSTANT.previousBigImageView = img;//큰 이미지로 로드되는 뷰를 저장해둔다.
                         if (bitmapWorkerTask != null && isBitmapTaskExecuted == 0) {
 
@@ -181,11 +181,11 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         }
                     }
                 }
-            },480);// 0.5초 정도 딜레이를 준 후 시작
+            },100);// 0.05초 정도 딜레이를 준 후 시작
 
         } else {
-// fragment is no longer visible
-
+            // fragment is no longer visible
+/*
             if (smallOrLarge == 1 && img != null) {//큰 이미지가 로드되어 있는 상태
                 //if(img!= null){
                 Log.d("StoryMainFragment", "큰 이미지를 지우자~~~");
@@ -229,7 +229,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
             }
             //다시 작은 이미지로 바꿔준다(백그라운드에서)
             //img.setImageBitmap(CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth/6, CONSTANT.screenHeight/6));
-
+*/
         }
     }
 
@@ -277,7 +277,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
         System.gc();//garbage collector
         Runtime.getRuntime().gc();//garbage collector
-        super.onDestroy();
+        super.onStop();
     }
 
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰

@@ -37,8 +37,8 @@ public class TouchImageView extends ImageView {
     // zoomed below or above the zoom boundaries, before animating back to the
     // min/max zoom boundary.
     //
-    private static final float SUPER_MIN_MULTIPLIER = .75f;
-    private static final float SUPER_MAX_MULTIPLIER = 1.25f;
+    private static final float SUPER_MIN_MULTIPLIER = .5f;
+    private static final float SUPER_MAX_MULTIPLIER = 1.5f;
 
     //
     // Scale of image ranges from minScale to maxScale, where minScale == 1
@@ -886,15 +886,6 @@ public class TouchImageView extends ImageView {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         Log.d("TouchImageView","MotionEvent.ACTION_DOWN 호출");
-                        /*
-                        //태그를 불러온다
-                        //태그 DB에서 현재 이미지의 태그들을 가지고 온다(DB에서 가지고 오는 시점은 변할 수 있음)
-                        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        Button tag = (Button)inflater.inflate(R.layout.tag,null);
-
-                        RelativeLayout fullPicture = (RelativeLayout)findViewById(R.id.fullPicture);
-                        tag.setText("TEST TAG");
-                        //this.addView(tag);*/
 
                         last.set(curr);
                         if (fling != null)

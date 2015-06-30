@@ -3,10 +3,16 @@
     android:id="@+id/storyMain"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+
     <com.eattle.phoket.TouchImageView
         android:id="@+id/pagerImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </com.eattle.phoket.TouchImageView>
+<!--
+    <ImageView
+        android:id="@+id/pagerImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />-->
 
 </FrameLayout>

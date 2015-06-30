@@ -1,13 +1,16 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
  * Created by GA on 2015. 5. 14..
  */
 public class CONSTANT {
+
     public static long TIMEINTERVAL=15000L;//사진 분류시 간격(millisecond)
 
     public static ArrayList<Activity> actList = new ArrayList<Activity>();
@@ -120,17 +124,41 @@ public class CONSTANT {
     /**
         사진 최적화를 위한 함수들 -----------------------------------------------------------------
      **/
+    //안드로이드 내장 썸네일을 얻는 함수
+    public static Bitmap getThumbnail(ContentResolver cr,String path) throws Exception {
+
+        //path를 통해 미디어 DB에 쿼리를 날리고 cursor를 얻어온다.
+        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID }, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
+        if (ca != null && ca.moveToFirst()) {
+            int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
+            ca.close();
+            return MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null );
+        }
+
+        ca.close();
+        return null;
+
+    }
     //화면 크기,사진 크기에 따라 Options.inSampleSize 값을 어떻게 해야하는지 알려주는 함수
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+
         // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
+        int height = options.outHeight;
+        int width = options.outWidth;
+        Log.d("CONSTANT","reqWidth & reqHeight & imageWidth & imageHeight :: "+reqWidth+" "+reqHeight+" "+width+" "+height);
+
+        if(width > height){
+            int temp = width;
+            width = height;
+            height = temp;
+        }
         int inSampleSize = 1;
 
         if (height > reqHeight || width > reqWidth) {
 
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
+            Log.d("CONSTANT","halfHeight & halfWidth :: "+halfHeight+" "+halfWidth);
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
@@ -140,7 +168,7 @@ public class CONSTANT {
             }
         }
 
-        return inSampleSize;//더 줄인다
+        return inSampleSize;
     }
 
     //상황에 따른 적절한 사진을 얻는다
