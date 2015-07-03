@@ -7,8 +7,10 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.renderscript.Allocation;
@@ -21,6 +23,7 @@ import android.widget.ImageView;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -61,31 +64,13 @@ public class CONSTANT {
     public static final int START_OF_PICTURE_CLASSIFICATION = 3;//MainActivity가 Service에게 사진 정리를 요청하는 메세지
     public static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
     public static final int END_OF_SINGLE_STORY = 5;//스토리가 정리되는대로 바로바로 보여주기 위하여 정의한 메세지,하나의 스토리가 정리될때마다 보낸다
+    public static final int END_OF_DECODING_THUMBNAIL = 6;//loadBitmap에서 썸네일 생성을 완료했을 때
 
     public static int screenWidth;//스마트폰 화면 너비
     public static int screenHeight;//스마트폰 화면 높이
 
-    public static ImageView currentImageView;
     public static int COUNTIMAGE=0;
-    public static ArrayList<Integer> currentLoadingImage = new ArrayList<Integer>();//현재 execute()되고 있는 것들을 가리키는 배열
-    /*
-    public static class ImagePathAndImageView{
-        private String path;
-        private ImageView imageView;
 
-        public ImagePathAndImageView(String path, ImageView imageView){
-            this.path = path;
-            this.imageView = imageView;
-        }
-
-        public String getPath(){
-            return path;
-        }
-        public ImageView getImageView(){
-            return imageView;
-        }
-
-    }*/
 
     public static String convertFolderNameToStoryName(String folderName){
         String name = "";
@@ -126,13 +111,20 @@ public class CONSTANT {
      **/
     //안드로이드 내장 썸네일을 얻는 함수
     public static Bitmap getThumbnail(ContentResolver cr,String path) throws Exception {
-
         //path를 통해 미디어 DB에 쿼리를 날리고 cursor를 얻어온다.
-        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID }, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
+        //Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID }, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
+        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID ,MediaStore.Images.Thumbnails.DATA}, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
         if (ca != null && ca.moveToFirst()) {
+
             int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
+            String thumbnailPath = ca.getString(ca.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
+            Log.d("CONSTANT","썸네일 경로 : "+thumbnailPath);
             ca.close();
-            return MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null );
+
+            Bitmap beforeBitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null );
+            //사진 회전
+            int degree = GetExifOrientation(thumbnailPath);
+            return GetRotatedBitmap(beforeBitmap,degree);
         }
 
         ca.close();
@@ -140,14 +132,11 @@ public class CONSTANT {
 
     }
     //화면 크기,사진 크기에 따라 Options.inSampleSize 값을 어떻게 해야하는지 알려주는 함수
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-
-        // Raw height and width of image
-        int height = options.outHeight;
-        int width = options.outWidth;
-        Log.d("CONSTANT","reqWidth & reqHeight & imageWidth & imageHeight :: "+reqWidth+" "+reqHeight+" "+width+" "+height);
-
-        if(width > height){
+    public static int calculateInSampleSize(int width, int height , int reqWidth, int reqHeight) {
+        Log.d("CONSTANT","reqWidth & reqHeight & rawWidth & rawHeight :: "+reqWidth+" "+reqHeight+" "+width+" "+height);
+        //모든 사진에 대해서 width가 height보다 크다. 따라서 스마트폰 가로모드에서는 width, height 값을 바꿀 필요가 없다!
+        if(reqWidth < reqHeight && width > height){//스마트폰 세로모드에서, 가로 사진 로드시
+            Log.d("CONSTANT","스마트폰 세로모드에서, 가로 사진 로드시");
             int temp = width;
             width = height;
             height = temp;
@@ -158,7 +147,7 @@ public class CONSTANT {
 
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
-            Log.d("CONSTANT","halfHeight & halfWidth :: "+halfHeight+" "+halfWidth);
+
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
@@ -166,7 +155,9 @@ public class CONSTANT {
                     && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
+            //Log.d("CONSTANT","최종 width & height  "+halfWidth/inSampleSize+" "+halfHeight/inSampleSize);
         }
+
 
         return inSampleSize;
     }
@@ -180,11 +171,16 @@ public class CONSTANT {
         BitmapFactory.decodeFile(path, options);
 
         // inSampleSize를 계산한다
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        Log.d("CONSTANT","inSampleSize : "+options.inSampleSize);
+        options.inSampleSize = calculateInSampleSize(options.outWidth,options.outHeight, reqWidth, reqHeight);
+        Log.d("CONSTANT","[decodeSampledBitmapFromPath] inSampleSize : "+options.inSampleSize);
         // 비트맵 생성 후 반환
         options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(path, options);
+        final Bitmap beforeRotate = BitmapFactory.decodeFile(path, options);
+
+        //사진 방향 파악
+        int degree = GetExifOrientation(path);
+        //회전된 비트맵 반환
+        return GetRotatedBitmap(beforeRotate,degree);
     }
 
     //sampleSize를 지정
@@ -196,6 +192,56 @@ public class CONSTANT {
         options.inSampleSize = sampleSize;
         return BitmapFactory.decodeFile(path, options);
     }
+
+    //사진의 촬영 방향을 알아내는 함수
+    public synchronized static int GetExifOrientation(String filepath){
+        int degree = 0;
+        ExifInterface exif = null;
+        try{
+            exif = new ExifInterface(filepath);
+        }
+        catch (IOException e){
+            Log.e("CONSTANT", "cannot read exif");
+            e.printStackTrace();
+        }
+        if (exif != null){
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+            if (orientation != -1)
+            {
+                switch(orientation){
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        degree = 90;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        degree = 180;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        degree = 270;
+                        break;
+                }
+            }
+        }
+        return degree;
+    }
+    //사진을 회전시키는 함수
+    public synchronized static Bitmap GetRotatedBitmap(Bitmap bitmap, int degrees){
+        if ( degrees != 0 && bitmap != null ){
+            Matrix m = new Matrix();
+            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2 );
+            try{
+                Bitmap b2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                if (bitmap != b2){
+                    bitmap.recycle();
+                    bitmap = b2;
+                }
+            }
+            catch (OutOfMemoryError ex){
+                // We have no memory to rotate. Return the original bitmap.
+            }
+        }
+        return bitmap;
+    }
+
     //Bitmap 메모리 해제를 위한 함수
     public static void releaseImageMemory(ImageView img) {
 
@@ -215,7 +261,5 @@ public class CONSTANT {
             img = null;
         }
     }
-
-
 }
 

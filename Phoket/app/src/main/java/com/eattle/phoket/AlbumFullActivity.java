@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -36,6 +37,7 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -302,47 +304,11 @@ public class AlbumFullActivity extends ActionBarActivity {
             mediaList.remove(position);
             this.notifyDataSetChanged();
         }
-
-/*
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-
-            if(initialMediaPosition == -1)
-                position--;
-            BitmapDrawable d = (BitmapDrawable)((ImageView)findViewById(R.id.pagerImage)).getDrawable();
-            if(d != null) {
-                Bitmap b = d.getBitmap();
-                b.recycle();
-                System.gc();
-            }
-            super.destroyItem(container,position,object);
-
-            if(initialMediaPosition == -1)
-                position--;
-            Log.d("AlbumFullActivity",position+" 에 대한 destroyItem 호출");
-            if(position != -1) {
-                android.support.v4.app.FragmentManager manager = ((StoryMainFragment)object).getFragmentManager();
-                android.support.v4.app.FragmentTransaction trans = manager.beginTransaction();
-                trans.remove((StoryMainFragment) object);
-                trans.commit();
-            }
-        }*/
     }
 
     Fragment isThereTabToTagHere() {
         return getFragmentManager().findFragmentById(R.id.tagLayout);
     }
-
-    /*
-    void setTabToTag(Media m) {
-        if (isThereTabToTagHere() != null) {
-            FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m);
-            tr.replace(R.id.tagLayout, ttt, "TabToTag");
-            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            tr.commit();
-        }
-    }*/
 
     //백버튼을 눌렀을 때, 메모리 정리를 한다
     @Override
@@ -356,14 +322,13 @@ public class AlbumFullActivity extends ActionBarActivity {
                 CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
                 //아직 스토리에 남아있는 사진 삭제
                 while (AlbumFullActivity.viewPagerImage.size() > 0) {
-                    Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
+                    Log.d(TAG, "아직 ViewPager에 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
                     ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
                     AlbumFullActivity.viewPagerImage.remove(0);
                     CONSTANT.releaseImageMemory(temp);
 
                     if (AlbumFullActivity.viewPagerImage.size() == 0) {
-                        Log.d("TagsOverAlbum", "break!");
-
+                        Log.d(TAG, "ViewPager에 남아있는 사진이 없습니다");
                         break;
                     }
                 }
@@ -405,24 +370,6 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
     }
 
-    /*
-    void pushTabToTag(Media m,int position) {
-        Fragment f;
-        if ((f = isThereTabToTagHere()) != null) {
-            FragmentTransaction tr = getFragmentManager().beginTransaction();
-            //tagArrayList에 있는 모든 태그들을 삭제한다
-            tr.remove(f);
-            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            tr.commit();
-        } else {
-            FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m,position,totalPictureNum);
-            tr.add(R.id.tagLayout, ttt, "TabToTag");
-            tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            tr.commit();
-        }
-    }*/
-
     void setPlacePopup(Media m) {
         //장소명이 존재하면 태그로 추가할지 묻는다
         if (!m.getPlaceName().equals("")) {
@@ -447,7 +394,6 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     }
 
-
     //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         private String TAG = "BitmapWorkerTask";
@@ -469,32 +415,14 @@ public class AlbumFullActivity extends ActionBarActivity {
         // Decode image in background.
         @Override
         protected Bitmap doInBackground(String... params) {
-            //기존의 작은 이미지를 큰 이미지로 대체하는 경우
-            //if (imageViewReference != null && (CONSTANT.currentImageView == imageViewReference.get())) {//아직도 현재 페이지를 보고있으면
-            if (imageViewReference != null) {
-                //!!!!!!!!!!!!!!!!!!!!!!!!
-                /*
-                //작은 이미지 삭제
-                if (imageViewReference != null && imageViewReference.get() != null) {
-                    //(imageViewReference.get()).setImageBitmap(null); 해야하는데 오류뜸.
+            Log.d(TAG, "doInBackground() 호출");
 
-                    Drawable d = imageViewReference.get().getDrawable();
-                    if (d instanceof BitmapDrawable) {
-                        Bitmap bitmap_ = ((BitmapDrawable) d).getBitmap();
-                        if (bitmap_ != null) {
-                            Log.d("StoryRecommendFragment", "기존의 작은 이미지 삭제]"+bitmap_.getByteCount() + " recycle() & gc() 호출");
-                            bitmap_.recycle();
-                            System.gc();
-                            Runtime.getRuntime().gc();//비트맵을 확실하게 지운다
-                            bitmap_ = null;
-                        }
-                    }
-                }*/
-                Log.d(TAG,"큰 이미지로 대체");
+            if (imageViewReference != null) {
+                Log.d(TAG, "[imageViewReference != null] imageView가 존재하므로 큰(원본) 이미지로 대체");
                 final Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(params[0], CONSTANT.screenWidth, CONSTANT.screenHeight);
                 return bitmap;//큰 이미지를 로딩한다
             } else {
-                Log.d("asdf", "여기여기!!!!!!!!!!!!!!!!!!!!");
+                Log.d(TAG, "[imageViewReference == null] imageView가 존재하지 않음");
                 return null;
             }
 
@@ -503,10 +431,14 @@ public class AlbumFullActivity extends ActionBarActivity {
         // Once complete, see if ImageView is still around and set bitmap.
         @Override
         protected void onPostExecute(Bitmap bitmap) {//bitmap은 새로 붙이려는 큰 이미지
-            if (isCancelled()) {
+            Log.d(TAG, "onPostExecute() 호출");
+            //if (isCancelled()) {
+            if(imageViewReference == null){
+                Log.d(TAG, "onPostExecute() isCancelled");
+                bitmap.recycle();
                 bitmap = null;
             }
-            Log.d("onPostExecute", "onPostExecute 실행");
+
             if (imageViewReference != null && bitmap != null) {
 
                 final ImageView imageView = imageViewReference.get();
@@ -520,8 +452,6 @@ public class AlbumFullActivity extends ActionBarActivity {
                     if (d instanceof BitmapDrawable) {
                         bitmap_ = ((BitmapDrawable) d).getBitmap();//bitmap_은 지우려는 작은 이미지
                     }
-
-
                 }
                 final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
@@ -531,15 +461,13 @@ public class AlbumFullActivity extends ActionBarActivity {
                     //!!!!여기 !!!!
                 }
                 if (bitmap_ != null && !bitmap_.isRecycled()) {
-                    Log.d("StoryRecommendFragment", "기존의 작은 이미지 삭제]" + bitmap_.getByteCount() + " recycle() & gc() 호출");
+                    Log.d(TAG, "기존의 작은 이미지 삭제]" + bitmap_.getByteCount() + " recycle() & gc() 호출");
                     bitmap_.recycle();
                     System.gc();
                     Runtime.getRuntime().gc();//비트맵을 확실하게 지운다
                     bitmap_ = null;
                     d.setCallback(null);
                 }
-
-                CONSTANT.currentLoadingImage.remove(new Integer(imageIdForTaskExecute));//중복 execute를 방지하기 위해 필요하다!
             }
         }
 
@@ -564,40 +492,37 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
     }
 
-    /*
-        public void loadBitmap(String path, ImageView imageView) {
-            if (cancelPotentialWork(path, imageView)) {
-                //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
-
-                //final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-                BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-                mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth / 6, CONSTANT.screenHeight / 6);
-                final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
-                imageView.setImageDrawable(asyncDrawable);
-                //------------------------------------------------------------------------------------------
-            }
-        }*/
-    public BitmapWorkerTask loadBitmap(String path, ImageView imageView) {
-        if (cancelPotentialWork(path, imageView)) {
-            //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
-
-            //final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-            BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-            mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);
-            //decode대신 썸네일로 대체하자.!
-            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
-            imageView.setImageDrawable(asyncDrawable);
-            //------------------------------------------------------------------------------------------
-            return task;
-        }
-        return null;
+    //이미지 로딩을 위한 callback interface
+    public interface CallbackForImageLoading {
+        public void callbackMethod(ImageView imageView, AsyncDrawable asyncDrawable, BitmapWorkerTask task, String path);
     }
-    public BitmapWorkerTask loadBitmap(String path, ImageView imageView, int mediaId, int imageIdForTaskExecute) {
+    public class EventRegistration {
+        private CallbackForImageLoading callbackEvent;
+
+        //생성자
+        public EventRegistration(CallbackForImageLoading event){
+            callbackEvent = event;
+        }
+        //콜백함수 실행을 위한 함수
+        public void doWork(ImageView imageView, AsyncDrawable asyncDrawable,BitmapWorkerTask task, String path){
+            callbackEvent.callbackMethod(imageView, asyncDrawable, task, path);
+        }
+    }
+
+    CallbackForImageLoading callbackForImageLoading = new CallbackForImageLoading() {
+        @Override
+        public void callbackMethod(ImageView imageView, AsyncDrawable asyncDrawable, BitmapWorkerTask task, String path) {
+            imageView.setImageDrawable(asyncDrawable);
+            task.execute(path);
+        }
+    };
+    public void loadBitmap(final String path, final ImageView imageView, int mediaId, int imageIdForTaskExecute) {
         if (cancelPotentialWork(path, imageView)) {
             //loadBitmap에서는 작은 이미지만 세팅해놓고, 큰 이미지는 StoryMainFragment의 setUserVisibleHint에서 한다
-            BitmapWorkerTask task = new BitmapWorkerTask(imageView,imageIdForTaskExecute);
-            //String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
-            //mPlaceHolderBitmap = BitmapFactory.decodeFile(thumbPath);
+            final BitmapWorkerTask task = new BitmapWorkerTask(imageView,imageIdForTaskExecute);
+
+             /*
+            //original-------------------------------------------------------------------
             try {
                 mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
             }catch(Exception e){
@@ -607,13 +532,51 @@ public class AlbumFullActivity extends ActionBarActivity {
                 Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
                 mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
             }
-
             final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
-            //------------------------------------------------------------------------------------------
-            return task;
+            EventRegistration eventRegistration = new EventRegistration(callbackForImageLoading);
+            //eventRegistration.doWork(task,path_);
+            task.execute(path);
+            */
+
+            //작은 이미지(썸네일)처리가 완료되면,
+            //imageView에 비트맵을 붙이고 task.execute()을 해주는 부분
+            final Handler handler = new Handler(){
+
+                public void handleMessage(Message msg){
+                    switch(msg.what){
+                        case CONSTANT.END_OF_DECODING_THUMBNAIL:
+                            Log.d(TAG,"썸네일 Decoding 완료");
+                            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+                            imageView.setImageDrawable(asyncDrawable);
+                            task.execute(path);
+                            break;
+                    }
+                }
+
+            };
+
+            //썸네일 생성은 쓰레드를 생성해서 처리한다.
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
+                    }catch(Exception e){
+                        Log.d(TAG, "CONSTANT.getThumbnail() 오류");
+                        e.printStackTrace();
+                    }
+                    if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
+                        Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
+                        mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+                    }
+
+                    Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);
+                    handler.sendMessage(m);//썸네일 생성이 완료되었다는 메세지
+                }
+            }).start();
         }
-        return null;
+
     }
 
     //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
@@ -647,19 +610,53 @@ public class AlbumFullActivity extends ActionBarActivity {
         return null;
     }
 
-    /**
-     * 이미지 캐싱을 통한 부드러운 스와이핑 제공
-     */
-    /*
-    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
-        if (getBitmapFromMemCache(key) == null) {
-            mMemoryCache.put(key, bitmap);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_album_full, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
-    public Bitmap getBitmapFromMemCache(String key) {
-        return mMemoryCache.get(key);
+    @Override
+    protected void onUserLeaveHint(){
+        //불필요한 메모리 정리---------------------------------------------------------------
+        AlbumFullActivity.mViewPager = null;
+        AlbumFullActivity.touchImageAdapter = null;
+        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
+        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
+        //아직 스토리에 남아있는 사진 삭제
+        while (AlbumFullActivity.viewPagerImage.size() > 0) {
+            Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
+            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+            AlbumFullActivity.viewPagerImage.remove(0);
+            CONSTANT.releaseImageMemory(temp);
+
+            if (AlbumFullActivity.viewPagerImage.size() == 0) {
+                Log.d("TagsOverAlbum", "break!");
+
+                break;
+            }
+        }
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
     }
-*/
+
+
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X
         //1220879 1870864 2133464
@@ -726,52 +723,5 @@ public class AlbumFullActivity extends ActionBarActivity {
             //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
             return byteimage;
         }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_album_full, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-    @Override
-    protected void onUserLeaveHint(){
-        //불필요한 메모리 정리---------------------------------------------------------------
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
-        //아직 스토리에 남아있는 사진 삭제
-        while (AlbumFullActivity.viewPagerImage.size() > 0) {
-            Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if (AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum", "break!");
-
-                break;
-            }
-        }
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
     }
 }
