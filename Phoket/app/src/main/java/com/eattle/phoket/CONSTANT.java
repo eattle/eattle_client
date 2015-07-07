@@ -39,6 +39,14 @@ public class CONSTANT {
     public static final int DEFAULT_TAG = 2;
     public static final int TOPHOKET = 3;
     public static final int DAILY = 4;
+    public static final int OPTION = 5;
+
+
+    public static final int SHARE = 0;
+    public static final int EDITNAME = 1;
+    public static final int EDITTAG = 2;
+    public static final int OPTION1[] = {EDITNAME,EDITTAG,SHARE};
+    public static final int[] OPTIONS[] = {OPTION1};
 
 
     public static int BOUNDARY = 3; //스토리에 있는 사진의 개수가 BOUNDARY 이하일 경우, 다른 형식으로 보여지게 된다. 즉, 스토리와 일상의 경계가 되는 사진 수

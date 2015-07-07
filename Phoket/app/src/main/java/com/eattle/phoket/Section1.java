@@ -22,6 +22,7 @@ import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.BigStoryCard;
 import com.eattle.phoket.Card.DailyCard;
+import com.eattle.phoket.Card.OptionButtonCard;
 import com.eattle.phoket.Card.TagsCard;
 import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -149,7 +150,37 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-                Log.d("LONG_CLICK", view.getTag().toString());
+                CardData data = (CardData)view.getTag();
+                Log.d("LONG_CLICK", ""+data.getType());
+                SimpleCard card;
+                CardData data_;
+
+                switch (data.getType()){
+                    case CONSTANT.FOLDER:
+                        card = new OptionButtonCard(mContext);
+                        data_ = new CardData(CONSTANT.OPTION, data.getId());
+                        card.setTag(data_);
+                        ((OptionButtonCard)card).setOption(0);
+                        ((OptionButtonCard)card).setOnButtonPressedListener(new OnButtonPressListener() {
+                            @Override
+                            public void onButtonPressedListener(View view, Card card) {
+                                switch (view.getId()) {
+                                    case CONSTANT.SHARE:
+                                        Log.d("option", "share");
+                                        break;
+                                    case CONSTANT.EDITNAME:
+                                        Log.d("option", "edit name");
+                                        break;
+                                    case CONSTANT.EDITTAG:
+                                        Log.d("option", "edit tag");
+                                        break;
+                                }
+                            }
+                        });
+
+                        mListView.onNotifyDataSetChanged();
+                }
+
             }
         });
 
@@ -208,47 +239,6 @@ public class Section1 extends Fragment {
 
                 mListView.add(card);
             }
-/*            card = new DailyCard(mContext);
-            data = new CardData(CONSTANT.NOTHING, -1);
-            card.setTag(data);
-            ((DailyCard)card).setDailyId(dailyMedia.get(i).getId());
-//            for(int i = 0; i < pictureNum; i++){
-                ((DailyCard)card).setDailyImage(dailyMedia.get(i).getId(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
-//            }
-            ((DailyCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
-                @Override
-                public void onButtonPressedListener(View view, Card card) {
-                    Intent intent = new Intent(mContext, AlbumFullActivity.class);
-                    intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
-                    intent.putExtra("IDForStoryOrTag", folderId_);// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
-                    intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
-
-
-                    switch (view.getId()) {
-                        case R.id.dailyImage3:
-                            intent.putExtra("position", 2);//어디에서 시작할지
-
-
-                            mContext.startActivity(intent);
-                            break;
-                        case R.id.dailyImage2:
-                            intent.putExtra("position", 1);//어디에서 시작할지
-
-                            mContext.startActivity(intent);
-
-                            break;
-                        case R.id.dailyImage1:
-                            intent.putExtra("position", 0);//어디에서 시작할지
-
-                            mContext.startActivity(intent);
-
-                            break;
-                    }
-                }
-            });
-
-            mListView.add(card);*/
-
         }else {
             card = new BigStoryCard(mContext);
             data = new CardData(CONSTANT.FOLDER, folderID);
