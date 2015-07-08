@@ -17,6 +17,8 @@ import java.util.List;
 
 public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapter.ViewHolder> implements IMaterialListAdapter {
 	private final List<Card> mCardList = new ArrayList<>();
+    private final List<Integer> mHeaderList = new ArrayList<>();
+
 
 	public static class ViewHolder<T extends Card> extends RecyclerView.ViewHolder {
 		private final CardItemView<T> view;
@@ -53,7 +55,20 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 		return mCardList.get(position).getLayout();
 	}
 
-	public void addAtStart(Card card){
+    /*sticky header*/
+    public long getHeaderId(int position) {
+        return (long) position / 7;
+    }
+
+    public void addHeader(int position){
+        if(position > getItemCount())
+            return;
+        mHeaderList.add(position);
+    }
+    /*sticky header*/
+
+
+    public void addAtStart(Card card){
 		mCardList.add(0, card);
 		notifyItemInserted(0);
 	}
@@ -67,7 +82,8 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 
 	public void add(Card card) {
 		mCardList.add(card);
-		notifyDataSetChanged();
+		notifyItemInserted(mCardList.size()-1);
+//		notifyDataSetChanged();
 	}
 
 	public void addAll(Card... cards) {

@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            ((MainSection1)(((FragmentPagerAdapter) (viewPager.getAdapter())).getItem(0))).setupMaterialListItem();
+            ((MainSection1)(((FragmentPagerAdapter) (viewPager.getAdapter())).getItem(0))).setupDailyItem();
 
             return true;
         }
@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
 
         viewPager.setOffscreenPageLimit(2);
+
+
 
     }
 

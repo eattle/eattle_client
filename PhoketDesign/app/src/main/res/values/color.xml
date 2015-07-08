@@ -5,6 +5,9 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorControlHighlight">#33000000</color>
 
+    <color name="colorTransparent">#00000000</color>
+
+
     <!-- general text colors -->
     <color name="text">#212121</color>
     <color name="secondary">#727272</color>
