@@ -248,20 +248,15 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     alarm.setEnabled(true); // 클릭 무효화
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
-                    String thumbNailID = msg.getData().getString("thumbNailID");
+                    String thumbNailPath = msg.getData().getString("thumbNailPath");
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
                     int pictureNumInStory = msg.getData().getInt("picture_num");
 
                     if (mViewPager.getCurrentItem() == 0 ) {
                         Fragment page = mSectionsPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
-                        ((Section1)page).selectCard(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
+                        ((Section1)page).selectCard(thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
                     }
-/*
-                    StoryListItem tempItem = new StoryListItem(thumbNailID, new_name, folderIDForDB, pictureNumInStory);
-                    storyListAdapter.add(tempItem);
-                    storyListAdapter.notifyDataSetChanged();//메인화면에게 리스트뷰가 업데이트 되었음을 알린다*/
-
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);

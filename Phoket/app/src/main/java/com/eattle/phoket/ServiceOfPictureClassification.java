@@ -169,11 +169,11 @@ public class ServiceOfPictureClassification extends Service {
     }
 
     //MainActivity에게 메세지를 보내는 함수(메인 화면 구성을 위한 여러 데이터를 보낼 때)
-    private void sendMessageToUI(int typeOfMessage, String thumbNailID, String new_name, int folderIDForDB, int picture_num) {
+    private void sendMessageToUI(int typeOfMessage, String thumbNailPath, String new_name, int folderIDForDB, int picture_num) {
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 Bundle bundle = new Bundle();
-                bundle.putString("thumbNailID", thumbNailID);
+                bundle.putString("thumbNailPath", thumbNailPath);
                 bundle.putString("new_name", new_name);
                 bundle.putInt("folderIDForDB", folderIDForDB);
                 bundle.putInt("picture_num", picture_num);
@@ -330,7 +330,7 @@ public class ServiceOfPictureClassification extends Service {
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
                     db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, thumbNailID, new_name, folderIDForDB, pictureNumInStory);
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -422,7 +422,7 @@ public class ServiceOfPictureClassification extends Service {
         //drawMainView();
         //MainActivity에 메세지를 보낸다
 
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, thumbNailID, new_name, folderIDForDB, pictureNumInStory);
+        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
 
         mCursor.close();

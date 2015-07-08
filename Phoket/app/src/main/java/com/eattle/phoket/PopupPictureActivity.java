@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
 
@@ -35,8 +36,9 @@ public class PopupPictureActivity extends ActionBarActivity {
         ImageView picture = (ImageView)findViewById(R.id.picture);
 
 
-        String thumbPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mediaId + ".jpg";
-        picture.setImageBitmap(BitmapFactory.decodeFile(thumbPath));
+        Glide.with(this)
+                .load(m.getPath())
+                .into(picture);
 
         setTabToTag(db.getMediaById(mediaId));
 

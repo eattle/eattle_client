@@ -43,6 +43,7 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class Section1 extends Fragment {
+    private String TAG = "Section1";
 
     MaterialListView mListView;
     Context mContext;
@@ -197,9 +198,11 @@ public class Section1 extends Fragment {
 
         SimpleCard card;
         CardData data;
+        //일상
         if(pictureNum <= CONSTANT.BOUNDARY){
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
+            //Log.d(TAG, "[selectCard] dailyMedia.size() : " + dailyMedia.size() + " pictureNum : "+pictureNum);
             for(int i = 0; i < pictureNum; i++){
                 card = new DailyCard(mContext);
                 data = new CardData(CONSTANT.DAILY, folderID,i);
@@ -311,11 +314,11 @@ public class Section1 extends Fragment {
             }
 
             int randomMediaId = db.getMediaByFolderRandomly(folderID).getId();
-            String randomMediaThumbnailPath = db.getMediaByFolderRandomly(folderID).getThumbnail_path();
+            String randomMediaPath = db.getMediaByFolderRandomly(folderID).getThumbnail_path();
             card = new ToPhoketCard(mContext);
             data = new CardData(CONSTANT.TOPHOKET, randomMediaId);
             card.setTag(data);
-            ((ToPhoketCard)card).setImage(randomMediaThumbnailPath);
+            ((ToPhoketCard)card).setImage(randomMediaPath);
             mListView.add(card);
             //TODO: 포켓에 넣어달라고 추천할만한 사진 걸러내기
 
