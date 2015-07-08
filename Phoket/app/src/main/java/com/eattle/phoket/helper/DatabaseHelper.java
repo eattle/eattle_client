@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 22;
+    private static final int DATABASE_VERSION = 24;
 
     public static final String DATABASE_NAME = "PhoketDB";
 
@@ -106,7 +106,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_NAME + " VARCHAR(255) NOT NULL, "
             + KEY_IMAGE + " VARCHAR(255) NOT NULL, "
-            + KEY_THUMBNAILPATH + " VARCHAR(255) NOT NULL, "
+            + KEY_THUMBNAILPATH + " VARCHAR(255), "
             + KEY_PICTURE_NUM_IN_STORY + " INTEGER NOT NULL, "
             + KEY_TITLEIMAGEID + " INTEGER NOT NULL "
             + ")";

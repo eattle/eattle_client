@@ -111,26 +111,11 @@ public class CONSTANT {
      * 사진 최적화를 위한 함수들 -----------------------------------------------------------------
      */
     //안드로이드 내장 썸네일을 얻는 함수
-    public static Bitmap getThumbnail(ContentResolver cr, String path) throws Exception {
-        //path를 통해 미디어 DB에 쿼리를 날리고 cursor를 얻어온다.
-        //Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID }, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
-        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID, MediaStore.Images.Thumbnails.DATA}, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (ca != null && ca.moveToFirst()) {
-
-            int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
-            String thumbnailPath = ca.getString(ca.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
-            Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
-            ca.close();
-
-            Bitmap beforeBitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
-            //사진 회전
-            int degree = GetExifOrientation(thumbnailPath);
-            return GetRotatedBitmap(beforeBitmap, degree);
-        }
-
-        ca.close();
-        return null;
-
+    public static Bitmap getThumbnail(ContentResolver cr, String originalPath, String thumbnailPath, int mediaId) throws Exception {
+        Bitmap beforeBitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, mediaId, MediaStore.Images.Thumbnails.MINI_KIND, null);
+        //사진 회전
+        int degree = GetExifOrientation(originalPath);//사진 방향은 originalPath로만 알 수 있다
+        return GetRotatedBitmap(beforeBitmap, degree);
     }
 
     //안드로이드 내장 썸네일 경로를 얻는 함수
@@ -243,7 +228,7 @@ public class CONSTANT {
         try {
             exif = new ExifInterface(filepath);
         } catch (IOException e) {
-            Log.e("CONSTANT", "cannot read exif");
+            Log.e("CONSTANT", "exif를 읽을수 없음");
             e.printStackTrace();
         }
         if (exif != null) {
@@ -303,4 +288,10 @@ public class CONSTANT {
         }
     }
 }
+
+
+
+
+
+
 

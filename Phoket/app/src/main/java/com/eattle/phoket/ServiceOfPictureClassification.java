@@ -373,6 +373,7 @@ public class ServiceOfPictureClassification extends Service {
                 //업데이트만 한다
                 ExistedMedia.setFolder_id(folderIDForDB);
                 ExistedMedia.setPath(path);
+                ExistedMedia.setThumbnail_path(thumbnail_path);//처음에 정리할때는 내장 썸네일이 없었다가 나중에 생겼을 수도 있음
                 //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
                 db.updateMedia(ExistedMedia);
             }

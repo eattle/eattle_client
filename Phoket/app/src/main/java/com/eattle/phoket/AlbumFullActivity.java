@@ -13,18 +13,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,14 +34,10 @@ import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
-import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
 public class AlbumFullActivity extends ActionBarActivity {
@@ -622,11 +614,12 @@ public class AlbumFullActivity extends ActionBarActivity {
         };
 
         //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
+        final Media media = db.getMediaById(mediaId);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
+                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr,path,media.getThumbnail_path(), media.getId());//안드로이드 내장 썸네일을 가져온다
                 } catch (Exception e) {
                     Log.d(TAG, "CONSTANT.getThumbnail() 오류");
                     e.printStackTrace();
