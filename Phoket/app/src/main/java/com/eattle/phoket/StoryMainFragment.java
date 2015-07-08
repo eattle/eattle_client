@@ -1,12 +1,16 @@
 package com.eattle.phoket;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.ComponentCallbacks2;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,8 +21,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.model.Media;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
@@ -27,12 +33,14 @@ import java.io.File;
  */
 
 public class StoryMainFragment extends android.support.v4.app.Fragment {
+    private String TAG = "StroyMainFragment";
+
     //private TouchImageView img;
-    private TouchImageView img;
     private int position;
     private String path = "";
     private Media m;
     public int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
+
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
         Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
         final StoryMainFragment fragment = new StoryMainFragment();
@@ -51,9 +59,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("StoryMainFragment", "onCreateView() 호출(현재 position : " + position + ")");
         final View root = inflater.inflate(R.layout.story_main, container, false);
-        //if (isRecycled == 1) {//이미 한번 recycle()이 호출되었다면
-        //img = null;//새로 만들어준다.
-        //}
+
         Bundle args = getArguments();
         m = args.getParcelable("m");
         position = args.getInt("position");
@@ -62,8 +68,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         if (position == -1 || position == mediaListSize)//제목화면 또는 추천스토리 부분은 아무것도 안함(onPageSelected에서 해줌)
             return root;//아무것도 설정하지 않은 fragment를 반환(//배경사진 fragment만 보이게 한다 또는 추천스토리 fragment만 보이게 한다)
         FrameLayout frameLayout = (FrameLayout) root.findViewById(R.id.storyMain);
-        img = (TouchImageView) root.findViewById(R.id.pagerImage);
-        //RecyclingImageView img_ = (RecyclingImageView)root.findViewById(R.id.pagerImage);
+        final TouchImageView img = (TouchImageView) root.findViewById(R.id.pagerImage);
         path = m.getPath();//사진의 경로를 가져온다
 
         //TODO 사진 경로에 사진이 없을 경우를 체크한다
@@ -80,7 +85,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     //return null;
                 } else {
                     //일단 썸네일을 부르면서 사진 로딩 시작
-                    ((AlbumFullActivity) getActivity()).loadBitmap(path, img,m.getId(),imageIdForTaskExecute);
+                    ((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
                 }
             }
 
@@ -101,38 +106,30 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     ((AlbumFullActivity) getActivity()).isTagAppeared = 1;
             }
         });
-        AlbumFullActivity.viewPagerImage.add(img);
 
         return root;
     }
 
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
     public void onStop() {
-        AlbumFullActivity.viewPagerImage.remove(img);
-        if (img != null) {
-            Drawable d = img.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    Log.d("StoryMainFragment","[onStop]에서 "+ bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
-                    img.setImageBitmap(null);
-                    bitmap.recycle();
-                    bitmap = null;
-                    d.setCallback(null);
-                }
-            }
-        }
+        Log.d(TAG, "onStop() 호출");
+        Glide.get(getActivity()).clearMemory();
+        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
         super.onStop();
     }
+
+    /*
+    public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(TAG, "onActivityCreated() 호출");
+        Log.d(TAG, "img == null? "+(img==null));
+        Glide.with(this)
+                .load(path)
+                .thumbnail(0.1f)
+                .into((ImageView) getView().findViewById(R.id.pagerImage));
+        super.onActivityCreated(savedInstanceState);
+    }*/
 
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X

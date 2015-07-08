@@ -32,7 +32,7 @@ import java.util.ArrayList;
  */
 public class CONSTANT {
 
-    public static long TIMEINTERVAL=15000L;//사진 분류시 간격(millisecond)
+    public static long TIMEINTERVAL = 15000L;//사진 분류시 간격(millisecond)
 
     public static ArrayList<Activity> actList = new ArrayList<Activity>();
 
@@ -50,8 +50,8 @@ public class CONSTANT {
     public static int PASSWORD_TRIAL = 5; //비밀번호가 PASSWORD_TRIAL보다 많이 틀릴 경우 앱 종료
     public static CachedBlockDevice BLOCKDEVICE;
 
-    public static final String PACKAGENAME="com.example.cds.eattle_prototype_2";
-    public static final String appDBPath="/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;//스마트폰 앱단의 DB 경로
+    public static final String PACKAGENAME = "com.example.cds.eattle_prototype_2";
+    public static final String appDBPath = "/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;//스마트폰 앱단의 DB 경로
 
     public static final int BIGSTORYCARD = 0;
     public static final int DAILYCARD = 1;
@@ -69,10 +69,10 @@ public class CONSTANT {
     public static int screenWidth;//스마트폰 화면 너비
     public static int screenHeight;//스마트폰 화면 높이
 
-    public static int COUNTIMAGE=0;
+    public static int COUNTIMAGE = 0;
 
 
-    public static String convertFolderNameToStoryName(String folderName){
+    public static String convertFolderNameToStoryName(String folderName) {
         String name = "";
         if (folderName.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
             String[] bigSplit = folderName.split("~");
@@ -88,7 +88,7 @@ public class CONSTANT {
         return name;
     }
 
-    public static String convertFolderNameToDate(String folderName){
+    public static String convertFolderNameToDate(String folderName) {
         String name = "";
         if (folderName.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
             String[] bigSplit = folderName.split("~");
@@ -106,37 +106,80 @@ public class CONSTANT {
         return name;
 
     }
+
     /**
-        사진 최적화를 위한 함수들 -----------------------------------------------------------------
-     **/
+     * 사진 최적화를 위한 함수들 -----------------------------------------------------------------
+     */
     //안드로이드 내장 썸네일을 얻는 함수
-    public static Bitmap getThumbnail(ContentResolver cr,String path) throws Exception {
+    public static Bitmap getThumbnail(ContentResolver cr, String path) throws Exception {
         //path를 통해 미디어 DB에 쿼리를 날리고 cursor를 얻어온다.
         //Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID }, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
-        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID ,MediaStore.Images.Thumbnails.DATA}, MediaStore.MediaColumns.DATA + "=?", new String[] {path}, null);
+        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID, MediaStore.Images.Thumbnails.DATA}, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
         if (ca != null && ca.moveToFirst()) {
 
             int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
             String thumbnailPath = ca.getString(ca.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
-            Log.d("CONSTANT","썸네일 경로 : "+thumbnailPath);
+            Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
             ca.close();
 
-            Bitmap beforeBitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null );
+            Bitmap beforeBitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
             //사진 회전
             int degree = GetExifOrientation(thumbnailPath);
-            return GetRotatedBitmap(beforeBitmap,degree);
+            return GetRotatedBitmap(beforeBitmap, degree);
         }
 
         ca.close();
         return null;
 
     }
+
+    //안드로이드 내장 썸네일 경로를 얻는 함수
+    public static String getThumbnailPath(ContentResolver cr, String path) throws Exception {
+        //path를 통해 미디어 DB에 쿼리를 날리고 cursor를 얻어온다.
+        Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID, MediaStore.Images.Thumbnails.DATA}, MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+        if (ca != null && ca.moveToFirst()) {
+
+            int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
+            Cursor caa = MediaStore.Images.Thumbnails.queryMiniThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+
+            String thumbnailPath = null;
+            if (caa != null && caa.getCount() > 0) {
+                caa.moveToFirst();
+                thumbnailPath = caa.getString(caa.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
+                caa.close();
+            }
+            Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
+            ca.close();
+
+            return thumbnailPath;
+        }
+
+        ca.close();
+        return null;
+    }
+
+    //안드로이드 내장 썸네일 경로를 얻는 함수
+    public static String getThumbnailPath(ContentResolver cr, int id) throws Exception {
+        Cursor caa = MediaStore.Images.Thumbnails.queryMiniThumbnail(cr, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+
+        String thumbnailPath = null;
+        if (caa != null && caa.getCount() > 0) {
+            caa.moveToFirst();
+            thumbnailPath = caa.getString(caa.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
+            caa.close();
+        }
+        Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
+
+        return thumbnailPath;
+    }
+
+
     //화면 크기,사진 크기에 따라 Options.inSampleSize 값을 어떻게 해야하는지 알려주는 함수
-    public static int calculateInSampleSize(int width, int height , int reqWidth, int reqHeight) {
-        Log.d("CONSTANT","reqWidth & reqHeight & rawWidth & rawHeight :: "+reqWidth+" "+reqHeight+" "+width+" "+height);
+    public static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
+        Log.d("CONSTANT", "reqWidth & reqHeight & rawWidth & rawHeight :: " + reqWidth + " " + reqHeight + " " + width + " " + height);
         //모든 사진에 대해서 width가 height보다 크다. 따라서 스마트폰 가로모드에서는 width, height 값을 바꿀 필요가 없다!
-        if(reqWidth < reqHeight && width > height){//스마트폰 세로모드에서, 가로 사진 로드시
-            Log.d("CONSTANT","스마트폰 세로모드에서, 가로 사진 로드시");
+        if (reqWidth < reqHeight && width > height) {//스마트폰 세로모드에서, 가로 사진 로드시
+            Log.d("CONSTANT", "스마트폰 세로모드에서, 가로 사진 로드시");
             int temp = width;
             width = height;
             height = temp;
@@ -171,8 +214,8 @@ public class CONSTANT {
         BitmapFactory.decodeFile(path, options);
 
         // inSampleSize를 계산한다
-        options.inSampleSize = calculateInSampleSize(options.outWidth,options.outHeight, reqWidth, reqHeight);
-        Log.d("CONSTANT","[decodeSampledBitmapFromPath] inSampleSize : "+options.inSampleSize);
+        options.inSampleSize = calculateInSampleSize(options.outWidth, options.outHeight, reqWidth, reqHeight);
+        Log.d("CONSTANT", "[decodeSampledBitmapFromPath] inSampleSize : " + options.inSampleSize);
         // 비트맵 생성 후 반환
         options.inJustDecodeBounds = false;
         final Bitmap beforeRotate = BitmapFactory.decodeFile(path, options);
@@ -180,11 +223,11 @@ public class CONSTANT {
         //사진 방향 파악
         int degree = GetExifOrientation(path);
         //회전된 비트맵 반환
-        return GetRotatedBitmap(beforeRotate,degree);
+        return GetRotatedBitmap(beforeRotate, degree);
     }
 
     //sampleSize를 지정
-    public static Bitmap decodeSampledBitmapFromPath(String path,int sampleSize) {
+    public static Bitmap decodeSampledBitmapFromPath(String path, int sampleSize) {
 
         //사진 크기를 알기 위해 inJustDecodeBounds=true 를 설정한다
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -194,21 +237,19 @@ public class CONSTANT {
     }
 
     //사진의 촬영 방향을 알아내는 함수
-    public synchronized static int GetExifOrientation(String filepath){
+    public synchronized static int GetExifOrientation(String filepath) {
         int degree = 0;
         ExifInterface exif = null;
-        try{
+        try {
             exif = new ExifInterface(filepath);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             Log.e("CONSTANT", "cannot read exif");
             e.printStackTrace();
         }
-        if (exif != null){
+        if (exif != null) {
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
-            if (orientation != -1)
-            {
-                switch(orientation){
+            if (orientation != -1) {
+                switch (orientation) {
                     case ExifInterface.ORIENTATION_ROTATE_90:
                         degree = 90;
                         break;
@@ -223,19 +264,19 @@ public class CONSTANT {
         }
         return degree;
     }
+
     //사진을 회전시키는 함수
-    public synchronized static Bitmap GetRotatedBitmap(Bitmap bitmap, int degrees){
-        if ( degrees != 0 && bitmap != null ){
+    public synchronized static Bitmap GetRotatedBitmap(Bitmap bitmap, int degrees) {
+        if (degrees != 0 && bitmap != null) {
             Matrix m = new Matrix();
-            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2 );
-            try{
+            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+            try {
                 Bitmap b2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                if (bitmap != b2){
+                if (bitmap != b2) {
                     bitmap.recycle();
                     bitmap = b2;
                 }
-            }
-            catch (OutOfMemoryError ex){
+            } catch (OutOfMemoryError ex) {
                 // We have no memory to rotate. Return the original bitmap.
             }
         }

@@ -149,7 +149,7 @@ public class USBMainActivity extends ActionBarActivity {
             //폴더 대표 이미지
             ImageView representativePicture = (ImageView)r.findViewById(R.id.representativeImage);
             if(mode == 0) {//스토리별
-                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folderList.get(position).getThumbNail_name() + ".jpg";
+                String path = folderList.get(position).getThumbNail_path();
                 representativePicture.setImageURI(Uri.parse(path));
 
                 folderName.setText(folderList.get(position).getName());

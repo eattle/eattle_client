@@ -63,7 +63,7 @@ public class Section2 extends Fragment {
 
         int storiesNum = stories.size();
         for(int i = 0; i < storiesNum; i++){
-            selectCard(stories.get(i).getThumbNail_name(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
+            selectCard(stories.get(i).getThumbNail_path(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
         }
 
         //mListView.add(card);
@@ -109,7 +109,7 @@ public class Section2 extends Fragment {
 //        mListener = null;
     }
 
-    void selectCard(String thumbNailID, String storyName, int folderID, int pictureNum){
+    void selectCard(String thumbNailPath, String storyName, int folderID, int pictureNum){
         //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정
 
         SimpleCard card;
@@ -119,7 +119,7 @@ public class Section2 extends Fragment {
             data = new CardData(CONSTANT.FOLDER, folderID);
             card.setTag(data);
             ((SmallStoryCard)card).setStoryName(CONSTANT.convertFolderNameToStoryName(storyName));
-            ((SmallStoryCard)card).setTitleImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + thumbNailID + ".jpg");
+            ((SmallStoryCard)card).setTitleImage(thumbNailPath);
             ((SmallStoryCard)card).setDate(CONSTANT.convertFolderNameToDate(storyName));
             ((SmallStoryCard)card).setItemNum(pictureNum);
             mListView.add(card);

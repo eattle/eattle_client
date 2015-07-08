@@ -108,7 +108,7 @@ public class Section1 extends Fragment {
 
         int storiesNum = stories.size();
         for(int i = 0; i < storiesNum; i++){
-            selectCard(stories.get(i).getThumbNail_name(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
+            selectCard(stories.get(i).getThumbNail_path(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
         }
 
         //mListView.add(card);
@@ -192,7 +192,7 @@ public class Section1 extends Fragment {
 
 
 
-    void selectCard(String thumbNailID, String storyName, int folderID, int pictureNum){
+    void selectCard(String thumbNailPath, String storyName, int folderID, int pictureNum){
         //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정
 
         SimpleCard card;
@@ -204,7 +204,7 @@ public class Section1 extends Fragment {
                 card = new DailyCard(mContext);
                 data = new CardData(CONSTANT.DAILY, folderID,i);
                 card.setTag(data);
-                ((DailyCard)card).setDailyImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
+                ((DailyCard)card).setDailyImage(dailyMedia.get(i).getThumbnail_path());
 
                 mListView.add(card);
             }
@@ -254,7 +254,7 @@ public class Section1 extends Fragment {
             data = new CardData(CONSTANT.FOLDER, folderID);
             card.setTag(data);
             ((BigStoryCard)card).setStoryName(CONSTANT.convertFolderNameToStoryName(storyName));
-            ((BigStoryCard)card).setTitleImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + thumbNailID + ".jpg");
+            ((BigStoryCard)card).setTitleImage(thumbNailPath);
             ((BigStoryCard)card).setDate(CONSTANT.convertFolderNameToDate(storyName));
             ((BigStoryCard)card).setItemNum(pictureNum);
             mListView.add(card);
@@ -311,10 +311,11 @@ public class Section1 extends Fragment {
             }
 
             int randomMediaId = db.getMediaByFolderRandomly(folderID).getId();
+            String randomMediaThumbnailPath = db.getMediaByFolderRandomly(folderID).getThumbnail_path();
             card = new ToPhoketCard(mContext);
             data = new CardData(CONSTANT.TOPHOKET, randomMediaId);
             card.setTag(data);
-            ((ToPhoketCard)card).setImage(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + randomMediaId + ".jpg");
+            ((ToPhoketCard)card).setImage(randomMediaThumbnailPath);
             mListView.add(card);
             //TODO: 포켓에 넣어달라고 추천할만한 사진 걸러내기
 

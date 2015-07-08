@@ -26,9 +26,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 22;
 
-    public static final String DATABASE_NAME = "CaPicDB";
+    public static final String DATABASE_NAME = "PhoketDB";
 
     private static final String TABLE_MEDIA = "media";
     private static final String TABLE_FOLDER = "folder";
@@ -39,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //media(사진)
     private static final String KEY_ID = "id";             //전체에서의 사진 id **primary key**
     private static final String KEY_FOLDER_ID = "folder_id";   //폴더 id (속한 스토리의 id)
-    private static final String KEY_NAME = "name";        //사진 경로
+    private static final String KEY_NAME = "name";        //
     private static final String KEY_PICTURETAKEN = "picturetaken";      //사진이 촬영된 시간
     private static final String KEY_YEAR = "year";           //년
     private static final String KEY_MONTH = "month";          //월
@@ -48,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_LONGITUDE = "longitude";      //경도
     private static final String KEY_PLACENAME = "placename";        //장소명
     private static final String KEY_PATH = "path";      //사진 경로
+    private static final String KEY_THUMBNAILPATH = "thumbnail_path";   //안드로이드 내장 썸네일 경로
     //tag
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
@@ -63,8 +64,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     //private static final String KEY_ID = "id";
     //private static final String KEY_NAME = "name";
     private static final String KEY_IMAGE = "image";
-    private static final String KEY_THUMBNAILID = "thumbNail_id";
     private static final String KEY_PICTURE_NUM_IN_STORY = "picture_num";
+    private static final String KEY_TITLEIMAGEID = "titleImageID";
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
@@ -82,7 +83,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_LATITUDE + " DOUBLE, "
             + KEY_LONGITUDE + " DOUBLE, "
             + KEY_PLACENAME + " VARCHAR(100), "
-            + KEY_PATH + " VARCHAR(255) "
+            + KEY_PATH + " VARCHAR(255), "
+            + KEY_THUMBNAILPATH + " VARCHAR(255) "
             + ")";
 
     private static final String CREATE_TABLE_TAG =
@@ -104,15 +106,16 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
             + KEY_NAME + " VARCHAR(255) NOT NULL, "
             + KEY_IMAGE + " VARCHAR(255) NOT NULL, "
-            + KEY_THUMBNAILID + " VARCHAR(255) NOT NULL, "
-            + KEY_PICTURE_NUM_IN_STORY + " INTEGER NOT NULL "
+            + KEY_THUMBNAILPATH + " VARCHAR(255) NOT NULL, "
+            + KEY_PICTURE_NUM_IN_STORY + " INTEGER NOT NULL, "
+            + KEY_TITLEIMAGEID + " INTEGER NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_MANAGER =
             "CREATE TABLE " + TABLE_MANAGER + " ("
             + KEY_TOTALPICTURENUM + " INTEGER PRIMARY KEY NOT NULL, "
             + KEY_AVERAGEINTERVAL + " LONG, "
-            + KEY_STANDARDDERIVATION + " LONG"
+            + KEY_STANDARDDERIVATION + " LONG "
             + ")";
 
     public static DatabaseHelper getInstance(Context context){
@@ -170,8 +173,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_ID, folder.getId());
         values.put(KEY_NAME, folder.getName());
         values.put(KEY_IMAGE, folder.getImage());
-        values.put(KEY_THUMBNAILID, folder.getThumbNail_name());
+        values.put(KEY_THUMBNAILPATH, folder.getThumbNail_path());
         values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
+        values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
 
         return (int)db.insert(TABLE_FOLDER, null, values);
     }
@@ -193,8 +197,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
                 f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-                f.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
+                f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
                 f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+                f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
                 folders.add(f);
             }while(c.moveToNext());
         }
@@ -215,8 +220,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             folder.setId(c.getInt(c.getColumnIndex(KEY_ID)));
             folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
             folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-            folder.setThumbNail_name(c.getString(c.getColumnIndex(KEY_THUMBNAILID)));
+            folder.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
             folder.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+            folder.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
         }
 
         return folder;
@@ -234,9 +240,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_ID, folder.getId());
         values.put(KEY_NAME, folder.getName());
         values.put(KEY_IMAGE, folder.getImage());
-        values.put(KEY_THUMBNAILID, folder.getThumbNail_name());
+        values.put(KEY_THUMBNAILPATH, folder.getThumbNail_path());
         values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
-
+        values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
         return db.update(TABLE_FOLDER, values, KEY_ID + " = ? ", new String[] {String.valueOf(folder.getId())});
     }
 
@@ -303,7 +309,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_LONGITUDE, media.getLongitude());
         values.put(KEY_PLACENAME, media.getPlaceName());
         values.put(KEY_PATH, media.getPath());
-
+        values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
         return (int)db.insert(TABLE_MEDIA, null, values);
     }
 
@@ -358,6 +364,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
             media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
             media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+            media.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
         }
         else
             media=null;
@@ -389,6 +396,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -421,6 +429,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -451,6 +460,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
             m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
             m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+            m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+
         }
 
         return m;
@@ -481,6 +492,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
 
@@ -514,6 +526,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -546,6 +559,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -578,6 +592,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -602,6 +617,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_LONGITUDE, media.getLongitude());
         values.put(KEY_PLACENAME, media.getPlaceName());
         values.put(KEY_PATH, media.getPath());
+        values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
 
