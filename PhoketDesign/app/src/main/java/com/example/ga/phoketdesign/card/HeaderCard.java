@@ -8,8 +8,8 @@ import com.example.ga.phoketdesign.R;
 /**
  * Created by GA on 2015. 7. 7..
  */
-public class TitleCard extends SimpleCard {
-    public TitleCard(Context context) {
+public class HeaderCard extends SimpleCard {
+    public HeaderCard(Context context) {
         super(context);
     }
 

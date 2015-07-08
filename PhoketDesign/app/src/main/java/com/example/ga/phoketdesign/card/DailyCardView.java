@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
 import com.example.ga.phoketdesign.R;
 
@@ -29,16 +30,12 @@ public class DailyCardView extends CardItemView<DailyCard> {
     @Override
     public void build(final DailyCard card) {
         super.build(card);
-        ImageView dailyImage1 = (ImageView) findViewById(R.id.dailyImage1);
-        dailyImage1.setImageURI(Uri.parse(card.getDailyImage()));
-/*        dailyImage1.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (card.getOnButtonPressedListener() != null) {
-                    card.getOnButtonPressedListener().onButtonPressedListener(dailyImage3, card);
-                }
-            }
-        });*/
+        ImageView dailyImage = (ImageView)findViewById(R.id.dailyImage1);
+
+        Glide.with(dailyImage.getContext())
+                .load(R.drawable.cheese_2)
+                .fitCenter()
+                .into(dailyImage);
 
 
     }

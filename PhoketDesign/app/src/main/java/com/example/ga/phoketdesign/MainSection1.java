@@ -2,8 +2,6 @@ package com.example.ga.phoketdesign;
 
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,19 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
-import com.dexafree.materialList.cards.WelcomeCard;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.example.ga.phoketdesign.card.BigStoryCard;
-import com.example.ga.phoketdesign.card.TitleCard;
+import com.example.ga.phoketdesign.card.DailyCard;
+import com.example.ga.phoketdesign.card.HeaderCard;
 
 
-import java.util.Collections;
-import java.util.List;
-
-import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator;
 
 
@@ -63,9 +57,16 @@ public class MainSection1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-                if (view.getTag().toString() == "BIG_STORY_CARD") {
-                    materialListView.add(position + 1, getRandomCard());
+                switch (((CardTag)(view.getTag())).getCardType()){
+                    case CardTag.CARDTYPE_BIGSTORY:
+                        setupDailyItem();
+                        break;
+                    case CardTag.CARDTYPE_DAILY:
+                        break;
+                    case CardTag.CARDTYPE_HEADER:
+                        break;
                 }
+
             }
         });
 
@@ -93,15 +94,43 @@ public class MainSection1 extends Fragment {
         materialListView.getItemAnimator().setAddDuration(300);
         materialListView.getItemAnimator().setRemoveDuration(300);
 
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
         materialListView.setLayoutManager(layoutManager);
     }
 
-    public void setupMaterialListItem() {
+    public void setupBigStoryItem() {
+        BigStoryCard card = new BigStoryCard(mContext);
+        CardTag cardTag = new CardTag();
+        cardTag.setCardType(CardTag.CARDTYPE_BIGSTORY);
 
-        materialListView.addAtStart(getRandomCard());
-        materialListView.add(new TitleCard(mContext));
+        card.setTag(cardTag);
+
+        materialListView.add(card);
+    }
+
+    public void setupTitleItem() {
+        HeaderCard card = new HeaderCard(mContext);
+        CardTag cardTag = new CardTag();
+        cardTag.setCardType(CardTag.CARDTYPE_HEADER);
+
+        card.setTag(cardTag);
+
+
+        materialListView.add(card);
+        materialListView.addHeader(materialListView.getAdapter().getItemCount()-1);
+    }
+
+
+    public void setupDailyItem() {
+        DailyCard card = new DailyCard(mContext);
+        CardTag cardTag = new CardTag();
+        cardTag.setCardType(CardTag.CARDTYPE_DAILY);
+
+        card.setTag(cardTag);
+
+        card.setTag(cardTag);
+        materialListView.add(card);
     }
 
     private Card getRandomCard(){
@@ -141,16 +170,15 @@ public class MainSection1 extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
 
-            materialListView.setVisibility(View.VISIBLE);
             mProgressBar.setVisibility(View.GONE);
+            materialListView.setVisibility(View.VISIBLE);
 
             //set data for list
             mSwipeRefreshLayout.setRefreshing(false);
             materialListView.clear();
 
-            for(int i = 0; i < 5; i++){
-                setupMaterialListItem();
-            }
+            setupBigStoryItem();
+            setupTitleItem();
 
             super.onPostExecute(result);
         }
