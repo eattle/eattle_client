@@ -57,7 +57,6 @@ public class ServiceOfPictureClassification extends Service {
     Geocoder mCoder;
     IncomingHandler incomingHandler = new IncomingHandler();
 
-
     //파일시스템
     FileSystem fileSystem;
 
@@ -74,7 +73,6 @@ public class ServiceOfPictureClassification extends Service {
         serviceOfEattle.start();
 
         fileSystem = FileSystem.getInstance();
-
     }
 
     class PictureThread extends Thread {
@@ -139,6 +137,8 @@ public class ServiceOfPictureClassification extends Service {
                                 pictureClassification();
                             } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
+                            } catch (Exception e) {
+                                Log.d("PictureClassification", e.getMessage());
                             }
                         }
                     }).start();
@@ -201,6 +201,7 @@ public class ServiceOfPictureClassification extends Service {
         long pictureTakenTime = 0;
         while (mCursor.moveToNext()) {
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+
             Log.d("MainActivity", "!!" + path);
             //썸네일 사진들은 계산대상에서 제외한다
             if (path.contains(".thumbnail") || path.contains("스토리")) {
@@ -219,7 +220,7 @@ public class ServiceOfPictureClassification extends Service {
         }
     }
 
-    private void pictureClassification() throws IOException {//시간간격을 바탕으로 사진들을 분류하는 함수
+    private void pictureClassification() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
 
 
         //pictureClassification()의 속도 개선 방안
@@ -263,6 +264,9 @@ public class ServiceOfPictureClassification extends Service {
         long _pictureTakenTime = System.currentTimeMillis();//현재 읽고 있는 사진 이전의 찍힌 시간, 초기값은 현재 시간
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
         String thumbNailID = "";//폴더에 들어가는 썸네일 사진의 이름, 일단 폴더에 들어가는 첫번째 사진으로 한다.
+        String thumbnail_path = "";//사진의 썸네일 경로
+        String representativeThumbnail_path = "";//폴더의 대표 사진의 썸네일 경로
+        int pictureID = -1;//사진의 고유 ID(안드로이드가 지정한 ID)
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
         String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
         int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
@@ -282,7 +286,9 @@ public class ServiceOfPictureClassification extends Service {
 
             //picture = new File(path);
             //사진 ID
-            final int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            thumbnail_path = CONSTANT.getThumbnailPath(mCr,pictureID);
+
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
             Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
             //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
@@ -293,34 +299,7 @@ public class ServiceOfPictureClassification extends Service {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(pictureTakenTime);
             String folderID = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE);
-            if (representativeImage.equals("")) {
-                //representativeImage = String.valueOf(pictureID);
-                representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
-                thumbNailID = String.valueOf(pictureID);
-            }
 
-            //썸네일 이미지를 생성한다
-            /*
-            //내장 썸네일을 가져오는 방법
-            Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(
-                             getContentResolver(), selectedImageUri,
-                             MediaStore.Images.Thumbnails.MINI_KIND,
-                             (BitmapFactory.Options) null );
-             */
-
-            //TODO 기존에 있는 썸네일을 사용한다.
-            File ExisTedThumbNail = new File(folderThumbnailName + String.valueOf(pictureID) + ".jpg");
-            if (!ExisTedThumbNail.exists()) {//썸네일이 없는 경우
-                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(mCr, pictureID, MediaStore.Images.Thumbnails.MINI_KIND, null);
-                /*if((bitmap = getThumbnail(pictureID)) == null){//안드로이드 자체의 썸네일도 없는 경우
-                    BitmapFactory.Options opt = new BitmapFactory.Options();
-                    opt.inSampleSize = 16;//기존 해상도의 1/16로 줄인다
-                    bitmap = BitmapFactory.decodeFile(path, opt);
-                    Log.e("asdad", "is here");
-                }*/
-                createThumbnail(bitmap, folderThumbnailName, String.valueOf(pictureID) + ".jpg");
-            }
-            //TODO ------------------------------
 
             Log.d("MainActivity", "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime));
 
@@ -348,7 +327,7 @@ public class ServiceOfPictureClassification extends Service {
                         }
                     }
 
-                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID, pictureNumInStory);
+                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
                     db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
                     sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, thumbNailID, new_name, folderIDForDB, pictureNumInStory);
@@ -363,6 +342,12 @@ public class ServiceOfPictureClassification extends Service {
                 //dir = FolderManage.makeDirectory(folderName);
 
                 folderIDForDB++;
+            }
+            if (representativeImage.equals("")) {
+                //representativeImage = String.valueOf(pictureID);
+                representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
+                representativeThumbnail_path = thumbnail_path;
+                thumbNailID = String.valueOf(pictureID);
             }
             //사진에 위치 정보가 있으면 얻어온다
             //mediaDB에 pictureID를 가진 사진이 있는지 확인한다
@@ -380,7 +365,7 @@ public class ServiceOfPictureClassification extends Service {
 
             //DB에 사진 데이터를 넣는다.
             if (ExistedMedia == null) {//새로운 사진
-                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path);
+                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path);
                 db.createMedia(m);
                 String[] pathArr = path.split("/");
                 db.createTag(pathArr[pathArr.length - 2], pictureID);
@@ -388,6 +373,7 @@ public class ServiceOfPictureClassification extends Service {
                 //업데이트만 한다
                 ExistedMedia.setFolder_id(folderIDForDB);
                 ExistedMedia.setPath(path);
+                ExistedMedia.setThumbnail_path(thumbnail_path);//처음에 정리할때는 내장 썸네일이 없었다가 나중에 생겼을 수도 있음
                 //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
                 db.updateMedia(ExistedMedia);
             }
@@ -427,7 +413,7 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //Folder DB에 넣는다.
-            Folder f = new Folder(folderIDForDB, new_name, representativeImage, thumbNailID, pictureNumInStory);
+            Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
             db.createFolder(f);
         }
         //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다

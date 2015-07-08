@@ -321,7 +321,7 @@ public class TagsOverAlbum extends Fragment {
         Folder folder = db.getFolder(folderId);
 
         //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
-        if(media_id == Integer.parseInt(AlbumFullActivity.titleImageId)) {
+        if(media_id == AlbumFullActivity.titleImageId) {
             for (int i = 0; i < allMediaByFolder.size(); i++) {
                 if (allMediaByFolder.get(i).getId() == media_id) {
                     //TODO 일단 그 다음 혹은 이전 사진을 대표사진으로 변경한다 -> 대표 사진 선정 방식 고민
@@ -330,19 +330,20 @@ public class TagsOverAlbum extends Fragment {
                         folder.setImage(path);
                         AlbumFullActivity.titleImagePath = path;
 
-                        String id = String.valueOf(allMediaByFolder.get(i + 1).getId());
-                        folder.setThumbNail_name(id);
-                        AlbumFullActivity.titleImageId = id;
+                        int newId = allMediaByFolder.get(i + 1).getId();
+                        folder.setTitleImageID(newId);
+                        folder.setThumbNail_path(allMediaByFolder.get(i + 1).getThumbnail_path());
+                        AlbumFullActivity.titleImageId = newId;
                     } else {
                         String path = allMediaByFolder.get(i - 1).getPath();
 
                         folder.setImage(path);
                         AlbumFullActivity.titleImagePath = path;
 
-                        String id = String.valueOf(allMediaByFolder.get(i - 1).getId());
-                        folder.setThumbNail_name(id);
-                        AlbumFullActivity.titleImageId = id;
-
+                        int newId = allMediaByFolder.get(i - 1).getId();
+                        folder.setTitleImageID(newId);
+                        folder.setThumbNail_path(allMediaByFolder.get(i - 1).getThumbnail_path());
+                        AlbumFullActivity.titleImageId = newId;
                     }
                 }
             }

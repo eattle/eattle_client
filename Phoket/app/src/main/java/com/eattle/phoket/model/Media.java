@@ -18,7 +18,7 @@ public class Media implements Parcelable {
     double longitude;      //경도
     String placeName;       //위도,경도에 따른 장소명(없으면 "")
     String path;        //사진 경로
-
+    String thumbnail_path;      //내장 썸네일 경로
 
 
     public Media() {
@@ -36,9 +36,10 @@ public class Media implements Parcelable {
         longitude = in.readDouble();
         placeName = in.readString();
         path = in.readString();
+        thumbnail_path = in.readString();
     }
 
-    public Media(int id, int folder_id, String name, Long pictureTaken, int year, int month, int day, double latitude, double longitude, String placeName, String path) {
+    public Media(int id, int folder_id, String name, Long pictureTaken, int year, int month, int day, double latitude, double longitude, String placeName, String path, String thumbnail_path) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
@@ -50,6 +51,7 @@ public class Media implements Parcelable {
         this.longitude = longitude;
         this.placeName = placeName;
         this.path = path;
+        this.thumbnail_path = thumbnail_path;
     }
 
     public Media(Media m){
@@ -64,6 +66,7 @@ public class Media implements Parcelable {
         this.longitude = m.getLongitude();
         this.placeName = m.getPlaceName();
         this.path = m.getPath();
+        this.thumbnail_path = m.getThumbnail_path();
     }
 
     public void setPictureTaken(Long pictureTaken){
@@ -150,9 +153,17 @@ public class Media implements Parcelable {
     }
 
     public String getPath() {
-
         return path;
     }
+
+    public void setThumbnail_path(String thumbnail_path){
+        this.thumbnail_path = thumbnail_path;
+    }
+
+    public String getThumbnail_path(){
+        return this.thumbnail_path;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -171,6 +182,7 @@ public class Media implements Parcelable {
         dest.writeDouble(longitude);
         dest.writeString(placeName);
         dest.writeString(path);
+        dest.writeString(thumbnail_path);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

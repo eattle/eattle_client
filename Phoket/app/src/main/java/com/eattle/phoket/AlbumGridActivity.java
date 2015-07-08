@@ -1,5 +1,7 @@
 package com.eattle.phoket;
 
+import android.content.ComponentCallbacks2;
+import android.content.ContentResolver;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBar;
@@ -28,6 +30,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
@@ -39,7 +43,7 @@ import java.util.List;
 
 
 public class AlbumGridActivity extends ActionBarActivity {
-    String Tag="AlbumGridActivity";
+    String TAG="AlbumGridActivity";
     DatabaseHelper db;
 
     TextView titleText;
@@ -54,20 +58,23 @@ public class AlbumGridActivity extends ActionBarActivity {
     int kind;
     String titleName;
     String titleImagePath;
-    String titleImageId;
+    String titleThumbnailPath;
     Media mediaByTag;//태그가 눌려진 사진
     int mediaId;//태그가 눌려진 사진의 아이디
     String tagName;//태그
 
+    ContentResolver cr;
     private BlockDevice blockDevice;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG,"AlbumGridActivity onCreate() 호출");
         CONSTANT.actList.add(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_grid);
 
-        Log.d(Tag,"AlbumGridActivity onCreate() 호출");
 
+
+        cr = getContentResolver();
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         titleText = (TextView) findViewById(R.id.titleText);
@@ -120,12 +127,8 @@ public class AlbumGridActivity extends ActionBarActivity {
                 int actSize = CONSTANT.actList.size();
                 for (int i = 0; i < actSize; i++) {
                     CONSTANT.actList.get(i).finish();
-                    clearMemory();
                     finish();
                 }
-//                Intent intent = new Intent(C.this, A.class);
-//                startActivity(intent);
-//                finish();
             }
         });
 
@@ -142,6 +145,7 @@ public class AlbumGridActivity extends ActionBarActivity {
         actionBar.setCustomView(actionBarLayout, params);
         actionBar.setDisplayHomeAsUpEnabled(false);
 
+
     }
 
 
@@ -153,10 +157,18 @@ public class AlbumGridActivity extends ActionBarActivity {
         super.onResume();
     }
 
+    @Override
+    public void onStop() {
+        Log.d(TAG, "onStop() 호출");
+
+        Glide.get(this).clearMemory();
+        Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
+        super.onStop();
+    }
+
     public void onClick(View v){
         switch(v.getId()){
             case R.id.storyStart://스토리 시작
-                clearMemory();
 
                 Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
                 intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
@@ -173,7 +185,6 @@ public class AlbumGridActivity extends ActionBarActivity {
     //그리드 뷰 아이템 클릭
     AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            clearMemory();
 
             Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
             intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
@@ -197,7 +208,7 @@ public class AlbumGridActivity extends ActionBarActivity {
 
             titleName = CONSTANT.convertFolderNameToStoryName(f.getName());
             titleImagePath = f.getImage();//대표 이미지의 경로를 얻는다
-            titleImageId = f.getThumbNail_name();//대표 사진의 아이디를 얻는다
+            //titleThumbnailPath = f.getThumbNail_path();//대표 사진의 썸네일 경로를 얻는다.
 
         } else if (kind == CONSTANT.DEFAULT_TAG) {//기본 태그(날짜, 장소)를 타고 들어왔을 경우
             Log.d("onResume()", "디폴트 태그");
@@ -224,8 +235,10 @@ public class AlbumGridActivity extends ActionBarActivity {
         //폴더(스토리)의 제목 등록
         titleText.setText(titleName);
         //폴더(스토리)의 대표사진 등록
-        Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth,200);
-        titleImage.setImageBitmap(bitmap);
+        Glide.with(this)
+                .load(titleImagePath)
+                .thumbnail(0.1f)
+                .into(titleImage);
     }
 
     @Override
@@ -254,27 +267,13 @@ public class AlbumGridActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
-                //불필요한 메모리 정리---------------------------------------------------------------
-                clearMemory();
-                Adapter = null;
+
                 finish();//현재 띄워져 있던 albumGridActivity 종료(메모리 확보를 위해)
                 return false;
         }
         return true;
     }
-    //불필요한 메모리 정리---------------------------------------------------------------
-    private void clearMemory() {
-        mGrid = null;
-        //Adapter = null;
 
-        CONSTANT.releaseImageMemory(titleImage);//타이틀 이미지 삭제
-        for(int i= 0;i<mImageList.size();i++)//gridview 아이템 삭제
-            CONSTANT.releaseImageMemory((ImageView)mImageList.get(i));
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        //-----------------------------------------------------------------------------------
-    }
     class ImageAdapter extends BaseAdapter {
         private Context mContext;
         public ImageAdapter(Context context) {
@@ -302,17 +301,23 @@ public class AlbumGridActivity extends ActionBarActivity {
                 imageView = (SquareImageView) convertView;
             }
 
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + mMediaList.get(position).getName() + ".jpg";
 
-            imageView.setImageURI(Uri.parse(path));
-            //LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, GridView.AUTO_FIT);
-//            GridView.LayoutParams params = new GridView.LayoutParams(GridView.AUTO_FIT, 400);
-//            imageView.setLayoutParams(params);
+            String path = mMediaList.get(position).getThumbnail_path();
 
-            imageView.setAdjustViewBounds(true);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            if(path == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
+                Log.d(TAG, "썸네일이 존재하지 않아 직접 생성");
+                Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+                imageView.setImageBitmap(bitmap);
+            }
+            else {//내장 썸네일이 존재하는 경우
+                Glide.with(getApplicationContext())
+                        .load(path)
+                        .thumbnail(0.1f)
+                        .centerCrop()
+                        .into(imageView);
+                imageView.setAdjustViewBounds(true);
+            }
 
-            mImageList.add(imageView);//나중에 해제하기 위해 등록한다.
             return imageView;
         }
     }

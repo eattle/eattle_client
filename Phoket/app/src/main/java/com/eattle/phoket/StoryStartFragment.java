@@ -1,12 +1,14 @@
 package com.eattle.phoket;
 
 import android.app.Fragment;
+import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +18,14 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 /**
  * Created by dh_st_000 on 2015-05-21.
  */
 public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀을 때 맨처음 화면
+    private String TAG = "StoryStartFragment";
+
     ImageView blurImage;
     ImageView backImage;
     ImageView filterImage;
@@ -38,6 +44,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView() 호출");
         View root = inflater.inflate(R.layout.story_start, container, false);
         Bundle args = getArguments();
 
@@ -50,8 +57,13 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
             ImageView storyStartImage = (ImageView) root.findViewById(R.id.storyStartImage);
 
             //화면 크기, 사진 크기에 따라 사진을 최적화 한다
-            Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
-            storyStartImage.setImageBitmap(changedBitmap);
+            //Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
+            //storyStartImage.setImageBitmap(changedBitmap);
+
+            Glide.with(getActivity())
+                    .load(titleImagePath)
+                    .thumbnail(0.1f)
+                    .into(storyStartImage);
 
         } catch (OutOfMemoryError e) {
             Log.e("warning", "이미지가 너무 큽니다");
@@ -60,8 +72,6 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
         //날짜
         TextView storyStartDate = (TextView) root.findViewById(R.id.storyStartDate);
-
-
         //제목
         TextView storyStartTitle = (TextView) root.findViewById(R.id.storyStartTitle);
 
@@ -91,7 +101,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        Log.d(TAG, "onActivityCreated() 호출");
     }
     private void applyBlur() {
         backImage.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -122,8 +132,17 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         canvas.drawBitmap(bkg, 0, 0, paint);
 
         overlay = FastBlur.doBlur(overlay, (int)radius, true);
+        Log.d("asdfasdf","블러에 사용되는 바이트 : "+overlay.getByteCount());
         view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
         view.setAlpha(0.0f);
+
+        /*
+        Glide.with(this)
+                .
+                .placeHolder(new BitmapDrawable(getResources(), overlay))
+                .into(view);
+        */
+
 
         if(position != -1){
             showBlur(1.0f);
@@ -151,4 +170,37 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         blurImage.setAlpha(1.0f);
     }
 
+    @Override
+    public void onStop() {
+        Log.d(TAG, "onStop() 호출");
+        Glide.get(getActivity()).clearMemory();
+        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+
+        if (backImage != null) {
+            for(int i=0;i<3;i++) {
+                Drawable d = null;
+                if(i==0)
+                    d = backImage.getDrawable();
+                else if(i==1)
+                    d = blurImage.getDrawable();
+                else if(i==2)
+                    d = filterImage.getDrawable();
+
+                if (d instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
+                        backImage.setImageBitmap(null);
+                        bitmap.recycle();
+                        bitmap = null;
+                        d.setCallback(null);
+                    }
+                }
+            }
+        }
+
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        super.onStop();
+    }
 }

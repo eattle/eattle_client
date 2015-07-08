@@ -1,6 +1,8 @@
 package com.eattle.phoket;
 
 import android.app.Fragment;
+import android.content.ComponentCallbacks2;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
@@ -44,6 +47,7 @@ public class StoryRecommendFragment extends Fragment {
     int randomFolder[];//추천 스토리의 폴더 ID가 들어갈 배열
     int recommendNum = 4;//추천할 스토리의 개수(개수 추가할 경우 story_recommend에 추가해야 함)
     LinearLayout storyRecommend;
+    ContentResolver cr;
     public static StoryRecommendFragment newInstance(int folderID) {
 
         fileSystem = FileSystem.getInstance();
@@ -115,6 +119,7 @@ public class StoryRecommendFragment extends Fragment {
             }
         }
 
+        cr = getActivity().getContentResolver();
         for (int i = 0; i < recommendNum; i++) {
             Folder folder = db.getFolder(randomFolder[i]);
             ImageView storyRecommendImage = null;
@@ -137,10 +142,15 @@ public class StoryRecommendFragment extends Fragment {
                     storyRecommendTitle = (TextView) root.findViewById(R.id.fourthText);
                     break;
             }
-            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg";
-            Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth,300);
-            storyRecommendImage.setImageBitmap(bitmap);
+            //String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + folder.getThumbNail_name() + ".jpg";
+            //Bitmap bitmap = CONSTANT.decodeSampledBitmapFromPath(path, CONSTANT.screenWidth,300);
+            //storyRecommendImage.setImageBitmap(bitmap);
 
+            Glide.with(getActivity())
+                    .load(folder.getImage())
+                    .override(CONSTANT.screenWidth, 300)
+                    .centerCrop()
+                    .into(storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
 
             final int i_ = i;
@@ -210,5 +220,28 @@ public class StoryRecommendFragment extends Fragment {
 
         storyRecommend.setAlpha(1.0f*positionOffset);
         storyRecommend.setAlpha(0.5f*positionOffset + 0.2f);
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(TAG, "onStop() 호출");
+        Glide.get(getActivity()).clearMemory();
+        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
+
+        //불필요한 메모리 정리---------------------------------------------------------------
+        AlbumFullActivity.mViewPager = null;
+        AlbumFullActivity.touchImageAdapter = null;
+
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.blurImage));
+        //추천 이미지 삭제
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.firstImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.secondImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.thirdImage));
+        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.fourthImage));
+
+        System.gc();//garbage collector
+        Runtime.getRuntime().gc();//garbage collector
+        super.onStop();
     }
 }
