@@ -111,7 +111,7 @@ public class Section1 extends Fragment {
 
         int storiesNum = stories.size();
         for(int i = 0; i < storiesNum; i++){
-            selectCard(stories.get(i).getThumbNail_path(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
+            selectCard(stories.get(i).getImage(), stories.get(i).getThumbNail_path(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
         }
 
         //mListView.add(card);
@@ -195,7 +195,7 @@ public class Section1 extends Fragment {
 
 
 
-    void selectCard(String thumbNailPath, String storyName, int folderID, int pictureNum){
+    void selectCard(String path, String thumbNailPath, String storyName, int folderID, int pictureNum){
         //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정
 
         SimpleCard card;
@@ -209,9 +209,13 @@ public class Section1 extends Fragment {
                 card = new DailyCard(mContext);
                 data = new CardData(CONSTANT.DAILY, folderID,i);
                 card.setTag(data);
-                ((DailyCard)card).setDailyImage(dailyMedia.get(i).getThumbnail_path());
+                if(dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
+                    ((DailyCard)card).setDailyImage(dailyMedia.get(i).getPath());//원본에서 로드
+                else//썸네일이 있으면(대부분의 경우)
+                    ((DailyCard)card).setDailyImage(dailyMedia.get(i).getThumbnail_path());//썸네일에서 로드
 
                 mListView.add(card);
+
             }
 /*            card = new DailyCard(mContext);
             data = new CardData(CONSTANT.NOTHING, -1);
@@ -259,11 +263,10 @@ public class Section1 extends Fragment {
             data = new CardData(CONSTANT.FOLDER, folderID);
             card.setTag(data);
             ((BigStoryCard)card).setStoryName(CONSTANT.convertFolderNameToStoryName(storyName));
-            ((BigStoryCard)card).setTitleImage(thumbNailPath);
+            ((BigStoryCard)card).setTitleImage(path);//BigStoryCard는 원본 이미지로
             ((BigStoryCard)card).setDate(CONSTANT.convertFolderNameToDate(storyName));
             ((BigStoryCard)card).setItemNum(pictureNum);
             mListView.add(card);
-
             List<Tag> storyTags = db.getAllTagsByFolderId(folderID);
             int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
             if(storyTagsSize > 0) {
@@ -314,14 +317,20 @@ public class Section1 extends Fragment {
 
                 mListView.add(card);
             }
+            Media randomMedia = db.getMediaByFolderRandomly(folderID);
+            int randomMediaId = randomMedia.getId();
+            String randomMediaPath;
+            if(randomMedia.getThumbnail_path() == null)//썸네일이 없으면
+                randomMediaPath = randomMedia.getPath();//원본에서
+            else//썸네일이 있으면
+                randomMediaPath = randomMedia.getThumbnail_path();//썸네일에서
 
-            int randomMediaId = db.getMediaByFolderRandomly(folderID).getId();
-            String randomMediaPath = db.getMediaByFolderRandomly(folderID).getThumbnail_path();
             card = new ToPhoketCard(mContext);
             data = new CardData(CONSTANT.TOPHOKET, randomMediaId);
             card.setTag(data);
             ((ToPhoketCard)card).setImage(randomMediaPath);
             mListView.add(card);
+
             //TODO: 포켓에 넣어달라고 추천할만한 사진 걸러내기
 
         }

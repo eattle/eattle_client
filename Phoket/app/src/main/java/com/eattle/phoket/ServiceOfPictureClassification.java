@@ -169,14 +169,15 @@ public class ServiceOfPictureClassification extends Service {
     }
 
     //MainActivity에게 메세지를 보내는 함수(메인 화면 구성을 위한 여러 데이터를 보낼 때)
-    private void sendMessageToUI(int typeOfMessage, String thumbNailPath, String new_name, int folderIDForDB, int picture_num) {
+    private void sendMessageToUI(int typeOfMessage, String path, String thumbNailPath, String new_name, int folderIDForDB, int picture_num) {
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 Bundle bundle = new Bundle();
-                bundle.putString("thumbNailPath", thumbNailPath);
-                bundle.putString("new_name", new_name);
-                bundle.putInt("folderIDForDB", folderIDForDB);
-                bundle.putInt("picture_num", picture_num);
+                bundle.putString("path", path);//원본 사진의 경로
+                bundle.putString("thumbNailPath", thumbNailPath);//썸네일 경로
+                bundle.putString("new_name", new_name);//스토리 이름
+                bundle.putInt("folderIDForDB", folderIDForDB);//스토리(폴더) 고유의 ID
+                bundle.putInt("picture_num", picture_num);//스토리(폴더) 안에 있는 사진의 개수
 
                 Message msg = Message.obtain(null, typeOfMessage);
                 msg.setData(bundle);
@@ -274,7 +275,7 @@ public class ServiceOfPictureClassification extends Service {
         FolderManage.makeDirectory(folderThumbnailName);
 
         mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
-        while (mCursor.moveToPrevious()) {
+        do {
             final String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
 
             Log.d("사진 분류", path);
@@ -333,7 +334,7 @@ public class ServiceOfPictureClassification extends Service {
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
                     db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -399,7 +400,7 @@ public class ServiceOfPictureClassification extends Service {
             endFolderID = folderID;
             Log.d("classification","pictureNumInStory : "+pictureNumInStory);
             Log.d("classification","------------------------------------------------------------");
-        }
+        } while (mCursor.moveToPrevious());
 
         //마지막 남은 폴더를 처리한다.
         //이전에 만들어진 폴더의 이름을 바꾼다(startFolderID ~ endFolderID)
@@ -430,7 +431,7 @@ public class ServiceOfPictureClassification extends Service {
         //drawMainView();
         //MainActivity에 메세지를 보낸다
 
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
+        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
 
         mCursor.close();
