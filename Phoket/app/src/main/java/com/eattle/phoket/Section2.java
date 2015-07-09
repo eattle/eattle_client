@@ -32,7 +32,9 @@ public class Section2 extends Fragment {
     MaterialListView mListView;
     Context mContext;
     DatabaseHelper db;
-
+    public MaterialListView getmListView(){
+        return this.mListView;
+    }
     public static Section2 newInstance() {
 
 //    public static Section1 newInstance(String param1, String param2) {

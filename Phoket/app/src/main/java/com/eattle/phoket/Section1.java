@@ -45,9 +45,11 @@ import java.util.List;
 public class Section1 extends Fragment {
     private String TAG = "Section1";
 
-    MaterialListView mListView;
+    private MaterialListView mListView;
     Context mContext;
     DatabaseHelper db;
+
+
 
     //private String mParam1;
     //private String mParam2;
@@ -202,7 +204,7 @@ public class Section1 extends Fragment {
         if(pictureNum <= CONSTANT.BOUNDARY){
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
-            //Log.d(TAG, "[selectCard] dailyMedia.size() : " + dailyMedia.size() + " pictureNum : "+pictureNum);
+            Log.d(TAG, "[selectCard] dailyMedia.size() : " + dailyMedia.size() + " pictureNum : "+pictureNum);
             for(int i = 0; i < pictureNum; i++){
                 card = new DailyCard(mContext);
                 data = new CardData(CONSTANT.DAILY, folderID,i);
@@ -325,6 +327,8 @@ public class Section1 extends Fragment {
         }
     }
 
-
+    public MaterialListView getmListView(){
+        return this.mListView;
+    }
 
 }

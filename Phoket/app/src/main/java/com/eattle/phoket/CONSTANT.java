@@ -151,10 +151,10 @@ public class CONSTANT {
         if (caa != null && caa.getCount() > 0) {
             caa.moveToFirst();
             thumbnailPath = caa.getString(caa.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
-            caa.close();
+
         }
         Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
-
+        caa.close();
         return thumbnailPath;
     }
 

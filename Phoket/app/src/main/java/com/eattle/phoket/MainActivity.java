@@ -131,11 +131,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
+        mViewPager.setOffscreenPageLimit(2);//탭간 스와이프를 부드럽게 하기 위해 양옆에 2개씩 가지고 있음
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
         // a reference to the Tab.
@@ -179,6 +178,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 alarm.setEnabled(false); // 클릭 무효화
                 //서비스에게 사진 정리를 요청한다
                 sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
+                //기존의 카드들을 다 지운다
+                mViewPager.removeAllViews();
+                mSectionsPagerAdapter.notifyDataSetChanged();
             }
         });
 
@@ -363,6 +365,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         alarm.setEnabled(false); // 정리 버튼 클릭 무효화
                         //서비스에게 사진 정리를 요청한다
                         sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
+                        mViewPager.removeAllViews();
+                        mSectionsPagerAdapter.notifyDataSetChanged();
                         break;
                 }
             }
@@ -660,6 +664,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         public Fragment getRegisteredFragment(int position) {
             return registeredFragments.get(position);
+        }
+
+        public void removeAllFragment(){//사진 정리를 새로 했을 때 카드들을 지우기 위한 함수
+            for(int i=0;i<3;i++) {
+                registeredFragments.remove(i);
+            }
         }
     }
 

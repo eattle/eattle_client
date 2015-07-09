@@ -137,7 +137,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         //뷰페이저 생성
         mViewPager = (ViewPager) findViewById(R.id.albumFullViewPager);
-        mViewPager.setOffscreenPageLimit(0);
+        //mViewPager.setOffscreenPageLimit(0);
         touchImageAdapter = new TouchImageAdapter(this, mMediaList, getSupportFragmentManager());
         mViewPager.setAdapter(touchImageAdapter);//뷰페이저 어댑터 설정
         if (initialMediaPosition != -1) {//-1이면 스토리 처음부터 시작(제목화면부터)
