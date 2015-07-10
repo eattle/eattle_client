@@ -70,9 +70,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new MainSection1(), "Category 1");
-        adapter.addFragment(new MainSection1(), "Category 2");
-        adapter.addFragment(new MainSection1(), "Category 3");
+        adapter.addFragment(new MainSection1(), "모아보기");
+        adapter.addFragment(new MainSection1(), "스토리");
+        adapter.addFragment(new MainSection1(), "포켓");
         viewPager.setAdapter(adapter);
 
         viewPager.setOffscreenPageLimit(2);

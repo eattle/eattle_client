@@ -7,6 +7,8 @@ public class CardTag {
     public final static int CARDTYPE_HEADER = 0;
     public final static int CARDTYPE_BIGSTORY = 1;
     public final static int CARDTYPE_DAILY = 2;
+    public final static int CARDTYPE_TRANSPARENT_DIVIDER = 2;
+
 
     int cardType;
 

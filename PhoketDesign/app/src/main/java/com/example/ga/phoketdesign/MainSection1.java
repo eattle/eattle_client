@@ -2,6 +2,7 @@ package com.example.ga.phoketdesign;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,12 +15,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
+import com.dexafree.materialList.controller.StickyHeaderDecoration;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.example.ga.phoketdesign.card.BigStoryCard;
 import com.example.ga.phoketdesign.card.DailyCard;
 import com.example.ga.phoketdesign.card.HeaderCard;
+import com.example.ga.phoketdesign.card.TransparentDividerCard;
 
 
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator;
@@ -53,6 +56,18 @@ public class MainSection1 extends Fragment {
         materialListView.addOnItemTouchListener(new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(CardItemView view, int position) {
+                switch (((CardTag)(view.getTag())).getCardType()){
+                    case CardTag.CARDTYPE_BIGSTORY:
+                        Intent intent = new Intent(mContext, StoryActivity.class);
+                        intent.putExtra(StoryActivity.EXTRA_NAME, "수달과 함께");
+                        mContext.startActivity(intent);
+                        break;
+                    case CardTag.CARDTYPE_DAILY:
+                        break;
+                    case CardTag.CARDTYPE_HEADER:
+                        break;
+                }
+
             }
 
             @Override
@@ -62,6 +77,8 @@ public class MainSection1 extends Fragment {
                         setupDailyItem();
                         break;
                     case CardTag.CARDTYPE_DAILY:
+                        setupTitleItem();
+
                         break;
                     case CardTag.CARDTYPE_HEADER:
                         break;
@@ -97,9 +114,35 @@ public class MainSection1 extends Fragment {
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
         materialListView.setLayoutManager(layoutManager);
+
+        materialListView.addItemDecoration(new StickyHeaderDecoration(materialListView.getAdapter()));
     }
 
+    public void setupFullSpanHeader(){
+        TransparentDividerCard card = new TransparentDividerCard(mContext);
+        CardTag cardTag = new CardTag();
+        cardTag.setCardType(CardTag.CARDTYPE_TRANSPARENT_DIVIDER);
+
+        card.setTag(cardTag);
+
+        materialListView.add(card);
+//        materialListView.addHeader(card);
+
+    }
+
+    public void setupNoHeader(){
+        TransparentDividerCard card = new TransparentDividerCard(mContext);
+        CardTag cardTag = new CardTag();
+        cardTag.setCardType(CardTag.CARDTYPE_TRANSPARENT_DIVIDER);
+
+        card.setTag(cardTag);
+
+//        materialListView.add(card);
+        materialListView.addHeader(card);
+
+    }
     public void setupBigStoryItem() {
+        setupNoHeader();
         BigStoryCard card = new BigStoryCard(mContext);
         CardTag cardTag = new CardTag();
         cardTag.setCardType(CardTag.CARDTYPE_BIGSTORY);
@@ -110,15 +153,21 @@ public class MainSection1 extends Fragment {
     }
 
     public void setupTitleItem() {
+
         HeaderCard card = new HeaderCard(mContext);
         CardTag cardTag = new CardTag();
         cardTag.setCardType(CardTag.CARDTYPE_HEADER);
+        card.setTitle("2015.5.25의 일상");
 
         card.setTag(cardTag);
 
 
-        materialListView.add(card);
-        materialListView.addHeader(materialListView.getAdapter().getItemCount()-1);
+        materialListView.addHeader(card);
+//        materialListView.addHeader();
+//        materialListView.addHeader(card);
+        setupFullSpanHeader();
+
+
     }
 
 
@@ -131,16 +180,6 @@ public class MainSection1 extends Fragment {
 
         card.setTag(cardTag);
         materialListView.add(card);
-    }
-
-    private Card getRandomCard(){
-        BigStoryCard card;
-
-        card = new BigStoryCard(mContext);
-        card.setTag("BIG_STORY_CARD");
-
-        return card;
-
     }
 
     /**
@@ -177,8 +216,14 @@ public class MainSection1 extends Fragment {
             mSwipeRefreshLayout.setRefreshing(false);
             materialListView.clear();
 
-            setupBigStoryItem();
-            setupTitleItem();
+            for(int i = 0; i < 10; i++) {
+                setupBigStoryItem();
+                setupTitleItem();
+
+                for (int j = 0; j < 10; j++) {
+                    setupDailyItem();
+                }
+            }
 
             super.onPostExecute(result);
         }

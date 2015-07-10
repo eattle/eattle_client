@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import com.dexafree.materialList.events.BusProvider;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
-import com.dexafree.materialList.view.MaterialListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapter.ViewHolder> implements IMaterialListAdapter {
 	private final List<Card> mCardList = new ArrayList<>();
-    private final List<Integer> mHeaderList = new ArrayList<>();
+    private final List<HeaderCardItem> mHeaderList = new ArrayList<>();
 
 
 	public static class ViewHolder<T extends Card> extends RecyclerView.ViewHolder {
@@ -45,6 +44,16 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 		holder.build(mCardList.get(position));
 	}
 
+	public ViewHolder onCreateHeaderViewHolder(ViewGroup parent, final int position) {
+        final View view = LayoutInflater.from(parent.getContext()).inflate(getHeaderItem(position).getCard().getLayout(), parent, false);
+        return new ViewHolder(view);
+	}
+
+	public void onBindHeaderViewHolder(ViewHolder holder, int position) {
+        holder.build(getHeaderItem(position).getCard());
+	}
+
+
 	@Override
 	public int getItemCount() {
 		return mCardList.size();
@@ -55,15 +64,34 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 		return mCardList.get(position).getLayout();
 	}
 
+
     /*sticky header*/
-    public long getHeaderId(int position) {
-        return (long) position / 7;
+    public HeaderCardItem getHeaderItem(int position){
+        int size = mHeaderList.size();
+        if(size == 0) return null;
+        for(int i = 0; i < size; i++){
+            if(position < mHeaderList.get(i).getPosition()){
+                if(i == 0)  return null;
+                else        return mHeaderList.get(i-1);
+            }
+        }
+        return mHeaderList.get(size - 1);
     }
 
-    public void addHeader(int position){
-        if(position > getItemCount())
-            return;
-        mHeaderList.add(position);
+    public long getHeaderId(int position) {
+        if(getHeaderItem(position) == null) return -1;
+        return getHeaderItem(position).getPosition();
+    }
+
+    public Card getHeaderCard(int position) {
+        if(getHeaderItem(position) == null) return null;
+        return getHeaderItem(position).getCard();
+    }
+
+    public void addHeader(Card card){
+        mHeaderList.add(new HeaderCardItem(mCardList.size(), card));
+//        mHeaderList.put(mCardList.size(), card);
+//        mHeaderList.add(card);
     }
     /*sticky header*/
 
@@ -74,7 +102,7 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 	}
 
 	public void add(int position, Card card){
-		if(position > getItemCount())
+		if(position >= mCardList.size())
 			return;
 		mCardList.add(position, card);
 		notifyItemInserted(position);
@@ -87,7 +115,7 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 	}
 
 	public void addAll(Card... cards) {
-		addAll(Arrays.asList(cards));
+        addAll(Arrays.asList(cards));
 	}
 
 	public void addAll(Collection<Card> cards) {
@@ -95,6 +123,7 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 			add(card);
 		}
 	}
+
 
 	public void remove(Card card, boolean withAnimation) {
 		if (card.isDismissible()) {
@@ -123,4 +152,22 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 	public int getPosition(Card card) {
 		return mCardList.indexOf(card);
 	}
+
+    class HeaderCardItem{
+        private int position;
+        private Card card;
+
+        public HeaderCardItem(int position, Card card) {
+            this.position = position;
+            this.card = card;
+        }
+
+        public int getPosition() {
+            return position;
+        }
+
+        public Card getCard() {
+            return card;
+        }
+    }
 }

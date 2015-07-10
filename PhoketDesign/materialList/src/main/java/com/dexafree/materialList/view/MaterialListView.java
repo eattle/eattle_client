@@ -123,8 +123,8 @@ public class MaterialListView extends RecyclerView {
 		((IMaterialListAdapter) getAdapter()).add(card);
     }
 
-	public void addHeader(int position) {
-		((IMaterialListAdapter) getAdapter()).addHeader(position);
+	public void addHeader(Card card) {
+		((IMaterialListAdapter) getAdapter()).addHeader(card);
 	}
 
 	public void add(int position, Card card) {

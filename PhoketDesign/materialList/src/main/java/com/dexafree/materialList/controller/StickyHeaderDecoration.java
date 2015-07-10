@@ -22,8 +22,8 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
     /**
      * @param adapter the sticky header adapter to use
      */
-    public StickyHeaderDecoration(MaterialListAdapter adapter) {
-        mAdapter = adapter;
+    public StickyHeaderDecoration(RecyclerView.Adapter adapter) {
+        mAdapter = (MaterialListAdapter)adapter;
         mHeaderCache = new HashMap<>();
     }
 
@@ -43,6 +43,7 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         outRect.set(0, headerHeight, 0, 0);
     }
 
+
     /**
      * Clears the header view cache. Headers will be recreated and
      * rebound on list scroll after this method has been called.
@@ -52,12 +53,13 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
     }
 
     private boolean hasHeader(int position) {
-        if (position == 0) {
-            return true;
+        long headId = mAdapter.getHeaderId(position);
+        if(headId == -1){
+            return false;
         }
 
         int previous = position - 1;
-        return mAdapter.getHeaderId(position) != mAdapter.getHeaderId(previous);
+        return headId != mAdapter.getHeaderId(previous);
     }
 
     private RecyclerView.ViewHolder getHeader(RecyclerView parent, int position) {
@@ -66,11 +68,20 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         if (mHeaderCache.containsKey(key)) {
             return mHeaderCache.get(key);
         } else {
-            final RecyclerView.ViewHolder holder = mAdapter.onCreateViewHolder(parent);
+            final MaterialListAdapter.ViewHolder holder;
+            if(mAdapter.getHeaderItem(position) == null){
+                holder = mAdapter.onCreateViewHolder(parent, mAdapter.getItemViewType(position));
+                mAdapter.onBindViewHolder(holder, position);
+
+            } else {
+                holder = mAdapter.onCreateHeaderViewHolder(parent, position);
+                mAdapter.onBindHeaderViewHolder(holder, position);
+            }
             final View header = holder.itemView;
 
             //noinspection unchecked
-            mAdapter.onBindHeaderViewHolder(holder, position);
+//            mAdapter.remove(position);
+
 
             int widthSpec = View.MeasureSpec.makeMeasureSpec(parent.getWidth(), View.MeasureSpec.EXACTLY);
             int heightSpec = View.MeasureSpec.makeMeasureSpec(parent.getHeight(), View.MeasureSpec.UNSPECIFIED);
@@ -88,6 +99,7 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
             return holder;
         }
     }
+
 
     /**
      * {@inheritDoc}

@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="54dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="#FFFFFF">
 
         <TextView
             android:layout_width="wrap_content"
@@ -20,15 +21,6 @@
             android:layout_marginLeft="8dp"
             android:textSize="@dimen/title_font_size" />
 
-        <Button
-            android:id="@+id/button2"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/button"
-            android:layout_centerHorizontal="true"
-            android:text="더보기"
-            android:textSize="@dimen/title_font_size" />
 
     </LinearLayout>
 

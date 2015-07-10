@@ -5,7 +5,7 @@ import com.dexafree.materialList.model.Card;
 import java.util.Collection;
 
 public interface IMaterialListAdapter {
-	void addHeader(int position);
+	void addHeader(Card card);
 
 	void add(Card card);
 
