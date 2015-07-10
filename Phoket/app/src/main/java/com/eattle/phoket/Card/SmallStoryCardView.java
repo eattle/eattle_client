@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
 import com.eattle.phoket.R;
 
@@ -36,7 +37,11 @@ public class SmallStoryCardView extends CardItemView<SmallStoryCard> {
         TextView itemNum = (TextView)findViewById(R.id.smallStoryItemNum);
 
         itemNum.setText(""+card.getItemNum());
-        storyImage.setImageURI(Uri.parse(card.getTitleImage()));
+        //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
+        Glide.with(getContext())
+                .load(card.getTitleImage())
+                .into(storyImage);
+
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
 

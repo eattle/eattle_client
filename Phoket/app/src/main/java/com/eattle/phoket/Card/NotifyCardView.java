@@ -20,7 +20,7 @@ public class NotifyCardView extends BaseTextCardItemView<NotifyCard> {
 
     public NotifyCardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
+}
 
     @Override
     public void build(NotifyCard card) {

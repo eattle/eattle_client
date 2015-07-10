@@ -6,6 +6,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
 import com.eattle.phoket.R;
 
@@ -30,7 +31,11 @@ public class ToPhoketCardView extends CardItemView<ToPhoketCard> {
     public void build(ToPhoketCard card) {
         super.build(card);
         ImageView toPhoketImage = (ImageView)findViewById(R.id.toPhoketImage);
-        toPhoketImage.setImageURI(Uri.parse(card.getImage()));
+        //toPhoketImage.setImageURI(Uri.parse(card.getImage()));
+        Glide.with(getContext())
+                .load(card.getImage())
+                .into(toPhoketImage);
+
         StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
         sglp.setFullSpan(true);
         this.setLayoutParams(sglp);
