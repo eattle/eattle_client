@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
+import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.Card.BigStoryCard;
 import com.eattle.phoket.R;
 
@@ -42,7 +43,7 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         Glide.with(getContext())
                 .load(card.getTitleImage())
-                .fitCenter()
+                .override(CONSTANT.screenWidth, 1000)
                 .into(storyImage);
 
         date.setText(card.getDate());
