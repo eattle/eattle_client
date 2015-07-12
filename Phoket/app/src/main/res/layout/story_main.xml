@@ -4,11 +4,11 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
 
 
-    <com.eattle.phoket.TouchImageView
+    <com.eattle.phoket.view.TouchImageView
         android:id="@+id/pagerImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </com.eattle.phoket.TouchImageView>
+    </com.eattle.phoket.view.TouchImageView>
 <!--
     <ImageView
         android:id="@+id/pagerImage"

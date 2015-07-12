@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Toolbar color -->
+    <color name="colorPrimary">#FFFFFF</color>
+    <!-- Statusbar color -->
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <!-- tab indicator ... highlight color -->
+    <color name="colorAccent">#FF4081</color>
+    <!-- click했을 때 오버라이드 되는 -->
+    <color name="colorControlHighlight">#33000000</color>
+    <!-- 투명 -->
+    <color name="colorTransparent">#00000000</color>
+
+
+    <!-- general text colors -->
+    <color name="text">#212121</color>
+    <color name="secondary">#727272</color>
+    <color name="hint">#B8B8B8</color>
+    <color name="dividers">#DADADA</color>
+
+
+</resources>

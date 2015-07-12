@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,7 @@ import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.SmallStoryCard;
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.model.CardData;
+import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.model.Folder;
 
 import java.util.List;

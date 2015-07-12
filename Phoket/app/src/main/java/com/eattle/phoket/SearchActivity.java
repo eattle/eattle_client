@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.view.ExEditText;
 
 
 public class SearchActivity extends ActionBarActivity {
