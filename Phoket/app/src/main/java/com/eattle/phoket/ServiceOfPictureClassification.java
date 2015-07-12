@@ -364,9 +364,10 @@ public class ServiceOfPictureClassification extends Service {
                     }
 
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
-                    db.createFolder(f);
+                    //db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,db.createFolder(f));
+//                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -453,9 +454,9 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //Folder DB에 넣는다.
-            Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
-            db.createFolder(f);
-            Log.d("MainActivity", "Folder DB 입력 완료");
+//            Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
+//            db.createFolder(f);
+//            Log.d("MainActivity", "Folder DB 입력 완료");
         }
         //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
 
@@ -463,7 +464,10 @@ public class ServiceOfPictureClassification extends Service {
         //drawMainView();
         //MainActivity에 메세지를 보낸다
 
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
+//        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
+        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
+
+        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
         isClassifying = 0;
         mCursor.close();

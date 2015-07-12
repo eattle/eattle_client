@@ -218,7 +218,7 @@ public class MainSection1 extends Fragment {
 
             for(int i = 0; i < 10; i++) {
                 setupBigStoryItem();
-                setupTitleItem();
+//                setupTitleItem();
 
                 for (int j = 0; j < 10; j++) {
                     setupDailyItem();

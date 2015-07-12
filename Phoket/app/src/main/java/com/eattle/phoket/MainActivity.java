@@ -14,30 +14,24 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.device.CachedUsbMassStorageBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -50,26 +44,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
-    private String TAG = "MainActivity";
+public class MainActivity extends AppCompatActivity {
+    public static final String EXTRA_TAG = "MAIN_ACTIVITY";
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    ViewPager mViewPager;
+    //UI 관련 변수
+    private ViewPager mViewPager;
+    private Adapter mAdapter;
 
     //파일 시스템 관련 변수
     FileSystem fileSystem;
@@ -79,12 +62,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     //DB관련 변수
     DatabaseHelper db;
 
+
     Messenger mService = null;
     boolean mIsBound;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
-    TextView alarm;
+    //TextView alarm;
 
-    int flagForList = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +84,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
 
         fileSystem = FileSystem.getInstance();
-/*
-        usbDeviceHost = new UsbDeviceHost();
+
+/*        usbDeviceHost = new UsbDeviceHost();
         usbDeviceHost.start(this, new BlockDeviceApp() {
             @Override
             public void onConnected(BlockDevice originalBlockDevice) {
@@ -125,18 +108,24 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         doBindService();
-
+/*
         if (db.getAllFolders().size() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
             guide();
-        }
-        // Set up the action bar.
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        }*/
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        // Set up the ViewPager with the sections adapter.
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        if (mViewPager != null) {
+            setupViewPager(mViewPager);
+        }
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+
+/*
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);//탭간 스와이프를 부드럽게 하기 위해 양옆에 2개씩 가지고 있음
@@ -201,7 +190,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         actionBar.setCustomView(actionBarLayout, params);
         actionBar.setDisplayHomeAsUpEnabled(false);
 
-
+*/
     }
 
 
@@ -221,7 +210,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG,"onPause() 호출");
+        Log.d(EXTRA_TAG,"onPause() 호출");
         Glide.get(this).clearMemory();
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
     }
@@ -229,7 +218,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onDestroy(){
         super.onStop();
-        Log.d(TAG,"onDestroy() 호출");
+        Log.d(EXTRA_TAG,"onDestroy() 호출");
         if(mIsBound)//서비스와 연결되어 있으면 해제
             doUnbindService();
     }
@@ -244,7 +233,75 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         return true;
     }
 
+    /***************** ViewPager 부분 **********************/
+    private void setupViewPager(ViewPager viewPager) {
+        mAdapter = new Adapter(getSupportFragmentManager());
+        mAdapter.addFragment(new Section1(), "모아보기");
+        mAdapter.addFragment(new Section2(), "스토리");
+        mAdapter.addFragment(new Section3(), "포켓");
+        viewPager.setAdapter(mAdapter);
 
+        viewPager.setOffscreenPageLimit(2);
+
+    }
+
+    static class Adapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mFragmentTitles = new ArrayList<>();
+
+        public Adapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragments.add(fragment);
+            mFragmentTitles.add(title);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragments.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitles.get(position);
+        }
+    }
+
+
+    /***************** Classification Service 부분 **********************/
+    void doBindService() {
+        Log.d(EXTRA_TAG, "doBindService() 호출");
+        if(!mIsBound) {
+            bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
+            mIsBound = true;
+        }
+    }
+
+
+    void doUnbindService() {
+        if (mIsBound) {
+            // If we have received the service, and hence registered with it, then now is the time to unregister.
+            if (mService != null) {
+                try {
+                    Message msg = Message.obtain(null, CONSTANT.MSG_UNREGISTER_CLIENT);
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                    // There is nothing special we need to do if the service has crashed.
+                }
+            }
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsBound = false;
+        }
+    }
     //서비스로부터 메세지를 받는 부분
     class IncomingHandler extends Handler {
         @Override
@@ -255,27 +312,35 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     //pictureDialog.dismiss();
                     //mSectionsPagerAdapter.notifyDataSetChanged();
 
+                    ((Section1)(mAdapter.getItem(0))).setRunning();
+
+
                     wantBackUp();
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
 //                    classification.setEnabled(true); // 클릭 유효화
-                    alarm.setEnabled(true); // 클릭 무효화
+//                    alarm.setEnabled(true); // 클릭 무효화
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
-                    String path = msg.getData().getString("path");
+                    int id = msg.arg1;
+/*                    String path = msg.getData().getString("path");
                     String thumbNailPath = msg.getData().getString("thumbNailPath");
                     String new_name = msg.getData().getString("new_name");
                     int folderIDForDB = msg.getData().getInt("folderIDForDB");
-                    int pictureNumInStory = msg.getData().getInt("picture_num");
+                    int pictureNumInStory = msg.getData().getInt("picture_num");*/
 
-                    Fragment page = mSectionsPagerAdapter.getRegisteredFragment(0);//모아보기
-                    ((Section1) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
-                    page = mSectionsPagerAdapter.getRegisteredFragment(1);//스토리
-                    ((Section2) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
+                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id));
+//                    ((Section2)(mAdapter.getItem(1)))(db.getFolder(id));
 
-                    if(flagForList == 1) {//기존에 있던 리스트들을 다 지우고 시작하는 부분
-                        mSectionsPagerAdapter.notifyDataSetChanged();
-                        flagForList = 0;
-                    }
+
+//                    Fragment page = mSectionsPagerAdapter.getRegisteredFragment(0);//모아보기
+//                    ((Section1) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
+//                    page = mSectionsPagerAdapter.getRegisteredFragment(1);//스토리
+//                    ((Section2) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
+
+//                    if(flagForList == 1) {//기존에 있던 리스트들을 다 지우고 시작하는 부분
+//                        mSectionsPagerAdapter.notifyDataSetChanged();
+//                        flagForList = 0;
+//                    }
                     /*
                     if (mViewPager.getCurrentItem() == 0) {
                         Fragment page = mSectionsPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
@@ -312,7 +377,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
     //메세지의 형태는 ServiceOfPictureClassification에 정의된 상수를 통해서
-    private void sendMessageToService(int typeOfMessage, int intValueToSend) {
+    public void sendMessageToService(int typeOfMessage, int intValueToSend) {
         if (mIsBound) {
             if (mService != null) {
                 try {
@@ -321,40 +386,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     msg.replyTo = mMessenger;//'답장은 mMessenger로 받겠습니다'라는 의미
                     mService.send(msg);//서비스로 메세지를 보낸다
                 } catch (RemoteException e) {
-
+                    Log.d(EXTRA_TAG, e.toString());
                 }
             }
         }
     }
 
-    void doBindService() {
-        Log.d(TAG, "doBindService() 호출");
-        if(!mIsBound) {
-            bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
-            mIsBound = true;
-        }
-    }
 
 
-    void doUnbindService() {
-        if (mIsBound) {
-            // If we have received the service, and hence registered with it, then now is the time to unregister.
-            if (mService != null) {
-                try {
-                    Message msg = Message.obtain(null, CONSTANT.MSG_UNREGISTER_CLIENT);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                    // There is nothing special we need to do if the service has crashed.
-                }
-            }
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-        }
-    }
 
-
+    /***************** Dialog 부분 **********************/
     public void wantCapicUSB() {//앱을 종료하려 할때, USB 구매의사를 묻는다.
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setTitle("종료하시겠습니까?");
@@ -388,11 +429,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     case DialogInterface.BUTTON_POSITIVE:
                         Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
-                        alarm.setEnabled(false); // 정리 버튼 클릭 무효화
+                        Snackbar.make(findViewById(R.id.main_content), "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
+                                .setAction("Action", null).show();
+
+
+                        //alarm.setEnabled(false); // 정리 버튼 클릭 무효화
                         //서비스에게 사진 정리를 요청한다
                         sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
 
-                        flagForList = 1;
                         break;
                 }
             }
@@ -420,6 +464,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     }
 
+
+
+    /***************** File System 부분 **********************/
+
     public FileSystem getFileSystem() {
         return this.fileSystem;
     }
@@ -435,6 +483,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void setBlockDevice(CachedBlockDevice blockDevice) {
         this.blockDevice = blockDevice;
     }
+
+    /***************** File System DB 호환 부분 **********************/
 
     //[DB] 앱 -> USB
     File sd = Environment.getExternalStorageDirectory();
@@ -462,7 +512,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     src.close();
                     dst.close();
                     //Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "[exportDB]" + backupDB.toString());
+                    Log.d(EXTRA_TAG, "[exportDB]" + backupDB.toString());
 
                 }
             } catch (Exception e) {
@@ -471,7 +521,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
             fileSystem.delete(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
             fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
-            Log.d(TAG, "[exportDB] APP->USB 성공");
+            Log.d(EXTRA_TAG, "[exportDB] APP->USB 성공");
             Toast.makeText(getBaseContext(), "[exportDB] export후 APP DB 존재여부 " + currentDB.exists(), Toast.LENGTH_LONG).show();
 
             Toast.makeText(this, "[exportDB] APP->USB 성공", Toast.LENGTH_SHORT).show();
@@ -489,24 +539,24 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             File data = Environment.getDataDirectory();
             //일단 USB -> 스마트폰 /CaPic 폴더
             File middlePointFile = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
-            Log.d(TAG, "[importDB]middlePointFile 값? " + middlePointFile);
+            Log.d(EXTRA_TAG, "[importDB]middlePointFile 값? " + middlePointFile);
 
             byte tempDBArray[] = getDBFromUSB(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
             if (tempDBArray == null) {
-                Log.d(TAG, "[importDB]tempDBArray == null 에러! importDB 중단");
+                Log.d(EXTRA_TAG, "[importDB]tempDBArray == null 에러! importDB 중단");
                 return;
             } else
-                Log.d(TAG, "[importDB]tempDBArray != null import 성공!, tempDBArray Length " + tempDBArray.length);
+                Log.d(EXTRA_TAG, "[importDB]tempDBArray != null import 성공!, tempDBArray Length " + tempDBArray.length);
 
             try {
                 if (middlePointFile != null && tempDBArray != null) {
                     FileOutputStream fos = new FileOutputStream(middlePointFile);
                     fos.write(tempDBArray);
                     fos.close();
-                    Log.d(TAG, "[importDB]FileOutputStream Success ! ");
+                    Log.d(EXTRA_TAG, "[importDB]FileOutputStream Success ! ");
                 }
             } catch (IOException e) {
-                Log.d(TAG, "[importDB]FileOutputStream Error ! " + e.toString());
+                Log.d(EXTRA_TAG, "[importDB]FileOutputStream Error ! " + e.toString());
             }
 
             // /CaPic/에서 앱 DB로
@@ -524,7 +574,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     dst.transferFrom(src, 0, src.size());
                     src.close();
                     dst.close();
-                    Log.d(TAG, "[importDB] USB->APP 성공");
+                    Log.d(EXTRA_TAG, "[importDB] USB->APP 성공");
                     Toast.makeText(getBaseContext(), "[importDB] USB->APP 성공", Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
@@ -545,7 +595,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         //result[0] = 6505;
         Log.d("xxxxxx", "result[0] " + result[0]);
         if (result[0] == -1) {
-            Log.d(TAG, "[getDBFromUSB]값이 잘못들어왔습니다");
+            Log.d(EXTRA_TAG, "[getDBFromUSB]값이 잘못들어왔습니다");
             //Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
             return null;
         } else {
@@ -594,135 +644,5 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
             return resultbyte;
         }
-
     }
-
-
-    @Override
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-        // When the given tab is selected, switch to the corresponding page in
-        // the ViewPager.
-        mViewPager.setCurrentItem(tab.getPosition());
-    }
-
-    @Override
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-    }
-
-    @Override
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
-
-        SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public int getItemPosition(Object item) {
-            return POSITION_NONE;
-        }
-
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-
-            switch (position) {
-                case 0:
-                    return Section1.newInstance();
-                case 1:
-                    return Section2.newInstance();
-                case 2:
-                    return Section3.newInstance();
-                //case 3:
-                //   return PlaceholderFragment.newInstance(position + 1);
-            }
-
-            return PlaceholderFragment.newInstance(position + 1);
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            //return 4;
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return getString(R.string.title_section1);
-                case 1:
-                    return getString(R.string.title_section2);
-                case 2:
-                    return getString(R.string.title_section3);
-                //case 3:
-                //    return getString(R.string.title_section4);
-
-            }
-            return null;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Fragment fragment = (Fragment) super.instantiateItem(container, position);
-            registeredFragments.put(position, fragment);
-            return fragment;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            registeredFragments.remove(position);
-            super.destroyItem(container, position, object);
-        }
-
-        public Fragment getRegisteredFragment(int position) {
-            return registeredFragments.get(position);
-        }
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-    }
-
 }

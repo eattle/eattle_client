@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.eattle.phoket.Card.TagsCardView
+<com.eattle.phoket.Card.view.TagsCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/MainLayout">
@@ -16,7 +16,7 @@
             android:layout_weight="1"
             android:id="@+id/tag1"
             >
-            <com.eattle.phoket.SquareImageView
+            <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage1"/>
@@ -44,7 +44,7 @@
             android:layout_weight="1"
             android:id="@+id/tag2"
             >
-            <com.eattle.phoket.SquareImageView
+            <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage2"/>
@@ -72,7 +72,7 @@
             android:layout_weight="1"
             android:id="@+id/tag3"
             >
-            <com.eattle.phoket.SquareImageView
+            <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage3"/>
@@ -101,7 +101,7 @@
             android:layout_weight="1"
             android:id="@+id/tag4"
             >
-            <com.eattle.phoket.SquareImageView
+            <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage4"/>
@@ -129,7 +129,7 @@
             android:layout_weight="1"
             android:id="@+id/tag5"
             >
-            <com.eattle.phoket.SquareImageView
+            <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage5"/>
@@ -153,4 +153,4 @@
 
         </FrameLayout>
     </LinearLayout>
-</com.eattle.phoket.Card.TagsCardView>
+</com.eattle.phoket.Card.view.TagsCardView>

@@ -17,7 +17,7 @@ import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.TagButtonCard;
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.model.CardData;
+import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.model.Tag;
 
 import java.util.List;

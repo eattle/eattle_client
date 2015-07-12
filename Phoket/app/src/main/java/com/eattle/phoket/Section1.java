@@ -3,29 +3,29 @@ package com.eattle.phoket;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
+import com.dexafree.materialList.controller.StickyHeaderDecoration;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
-import com.eattle.phoket.Card.BigStoryCard;
-import com.eattle.phoket.Card.DailyCard;
 import com.eattle.phoket.Card.TagsCard;
-import com.eattle.phoket.Card.ToPhoketCard;
+import com.eattle.phoket.Card.manager.CardManager;
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.model.CardData;
+import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
@@ -33,96 +33,49 @@ import com.eattle.phoket.model.Tag;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.recyclerview.animators.FadeInUpAnimator;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link Section1.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link Section1#newInstance} factory method to
- * create an instance of this fragment.
- */
+
+
 public class Section1 extends Fragment {
-    private String TAG = "Section1";
+    private final static String EXTRA_TAG = "MAIN_SECTION1";
 
-    private MaterialListView mListView;
+    private final static int STATE_LOADING = 0;
+    private final static int STATE_RUNNING = 1;
+
     Context mContext;
     DatabaseHelper db;
 
+    private MaterialListView mListView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ProgressBar mProgressBar;
 
-
-    //private String mParam1;
-    //private String mParam2;
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Section1.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Section1 newInstance() {
-
-//    public static Section1 newInstance(String param1, String param2) {
-        Section1 fragment = new Section1();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-        return fragment;
-    }
-
-    public Section1() {
-        // Required empty public constructor
-    }
+    private int state;
+    private boolean isDaily;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-    }
-
-/*    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("curChoice", mCurCheckPosition);
-    }*/
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root =  inflater.inflate(R.layout.fragment_section1, container, false);
         mContext = getActivity();
-
-        mListView = (MaterialListView) root.findViewById(R.id.section_listview1);
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
-        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
-        mListView.setLayoutManager(layoutManager);
-
         db = DatabaseHelper.getInstance(mContext);
 
-        List<Folder> stories = db.getAllFolders();
+        state = STATE_LOADING;
+        isDaily = false;
 
-        int storiesNum = stories.size();
-        for(int i = 0; i < storiesNum; i++){
-            selectCard(stories.get(i).getImage(), stories.get(i).getThumbNail_path(), stories.get(i).getName(), stories.get(i).getId(), stories.get(i).getPicture_num());
-        }
+        mListView = (MaterialListView) root.findViewById(R.id.section_listview1);
+        mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
 
-        //mListView.add(card);
+        setupMaterialListView();
 
         mListView.addOnItemTouchListener(new RecyclerItemClickListener.OnItemClickListener() {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
-                CardData data = (CardData)view.getTag();
+                if(state != STATE_RUNNING)  return;
+                CardData data = (CardData) view.getTag();
                 Intent intent;
-                switch (data.getType()){
+                switch (data.getType()) {
                     case CONSTANT.NOTHING:
                         break;
                     case CONSTANT.TOPHOKET:
@@ -135,7 +88,7 @@ public class Section1 extends Fragment {
                         intent = new Intent(mContext, AlbumFullActivity.class);
                         intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
                         intent.putExtra("IDForStoryOrTag", data.getData());// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
-                        intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
+                        intent.putExtra("kind", CardManager.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
                         intent.putExtra("position", data.getId());//어디에서 시작할지
                         mContext.startActivity(intent);
 
@@ -152,192 +105,187 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-                Log.d("LONG_CLICK", view.getTag().toString());
+                if(state != STATE_RUNNING)  return;
+
+//                Log.d("LONG_CLICK", view.getTag().toString());
             }
         });
 
+        mSwipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
+        mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+//                mSwipeRefreshLayout.setRefreshing(false);
+                state = STATE_LOADING;
+                mListView.clear();
+                ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
+                Snackbar.make(mSwipeRefreshLayout, "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+
+            }
+        });
+
+        new InitializeApplicationsTask().execute();
+
+        //show progress
+        mListView.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
 
         return root;
+
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-/*        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }*/
-    }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-//        mListener = null;
+    private void setupMaterialListView() {
+        mListView.setItemAnimator(new FadeInUpAnimator());
+//        mListView.getItemAnimator().setAddDuration(300);
+//        mListView.getItemAnimator().setRemoveDuration(300);
+
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+        layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+        mListView.setLayoutManager(layoutManager);
+
+        mListView.addItemDecoration(new StickyHeaderDecoration(mListView.getAdapter()));
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     *
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
+     * A simple AsyncTask to load the list of applications and display them
      */
+    private class InitializeApplicationsTask extends AsyncTask<Void, Void, List<Folder>> {
 
+        @Override
+        protected void onPreExecute() {
+            state = STATE_LOADING;
+            super.onPreExecute();
+        }
 
+        @Override
+        protected List<Folder> doInBackground(Void... params) {
+            //Query the applications
+            List<Folder> stories = db.getAllFolders();
 
-    void selectCard(String path, String thumbNailPath, String storyName, int folderID, int pictureNum){
-        //TODO:update날짜 비교해서 추가할지 말지 결정 or list안에서 비교해서 추가할지 말지 결정
+            return stories;
+        }
 
-        SimpleCard card;
-        CardData data;
-        //일상
-        if(pictureNum <= CONSTANT.BOUNDARY){
-            //daily card 추가
-            List<Media> dailyMedia = db.getAllMediaByFolder(folderID);
-            Log.d(TAG, "[selectCard] dailyMedia.size() : " + dailyMedia.size() + " pictureNum : "+pictureNum);
-            for(int i = 0; i < pictureNum; i++){
-                card = new DailyCard(mContext);
-                data = new CardData(CONSTANT.DAILY, folderID,i);
-                card.setTag(data);
-                if(dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
-                    ((DailyCard)card).setDailyImage(dailyMedia.get(i).getPath());//원본에서 로드
-                else//썸네일이 있으면(대부분의 경우)
-                    ((DailyCard)card).setDailyImage(dailyMedia.get(i).getThumbnail_path());//썸네일에서 로드
+        @Override
+        protected void onPostExecute(List<Folder> result) {
 
-                mListView.add(card);
+            state = STATE_RUNNING;
 
+            mProgressBar.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
+
+            //set data for list
+            mSwipeRefreshLayout.setRefreshing(false);
+            mListView.clear();
+
+            int storiesNum = result.size();
+            for(int i = 0; i < storiesNum; i++){
+                addCard(result.get(i));
             }
-/*            card = new DailyCard(mContext);
-            data = new CardData(CONSTANT.NOTHING, -1);
-            card.setTag(data);
-            ((DailyCard)card).setDailyId(dailyMedia.get(i).getId());
-//            for(int i = 0; i < pictureNum; i++){
-                ((DailyCard)card).setDailyImage(dailyMedia.get(i).getId(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + "thumbnail" + "/" + dailyMedia.get(i).getId() + ".jpg");
-//            }
-            ((DailyCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
-                @Override
-                public void onButtonPressedListener(View view, Card card) {
-                    Intent intent = new Intent(mContext, AlbumFullActivity.class);
-                    intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
-                    intent.putExtra("IDForStoryOrTag", folderId_);// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
-                    intent.putExtra("kind", CONSTANT.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
+
+            super.onPostExecute(result);
+        }
+    }
 
 
-                    switch (view.getId()) {
-                        case R.id.dailyImage3:
-                            intent.putExtra("position", 2);//어디에서 시작할지
 
-
-                            mContext.startActivity(intent);
-                            break;
-                        case R.id.dailyImage2:
-                            intent.putExtra("position", 1);//어디에서 시작할지
-
-                            mContext.startActivity(intent);
-
-                            break;
-                        case R.id.dailyImage1:
-                            intent.putExtra("position", 0);//어디에서 시작할지
-
-                            mContext.startActivity(intent);
-
-                            break;
-                    }
-                }
-            });
-
-            mListView.add(card);*/
-
+    private void addCard(Folder f){
+        SimpleCard card;
+        CardData tag;
+        //일상
+        if(f.getPicture_num() <= CONSTANT.BOUNDARY){
+            if(!isDaily){
+                isDaily = true;
+                CardManager.setHeaderItem(mListView, mContext, CONSTANT.convertFolderNameToStoryName(f.getName()));
+            }
+            //daily card 추가
+            List<Media> dailyMedia = db.getAllMediaByFolder(f.getId());
+            for(int i = 0; i < f.getPicture_num(); i++){
+                if(dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
+                    //원본에서 로드
+                    CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getPath());
+                else
+                    //썸네일에서 로드
+                    CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getThumbnail_path());
+            }
         }else {
-            card = new BigStoryCard(mContext);
-            data = new CardData(CONSTANT.FOLDER, folderID);
-            card.setTag(data);
-            ((BigStoryCard)card).setStoryName(CONSTANT.convertFolderNameToStoryName(storyName));
-            ((BigStoryCard)card).setTitleImage(path);//BigStoryCard는 원본 이미지로
-            ((BigStoryCard)card).setDate(CONSTANT.convertFolderNameToDate(storyName));
-            ((BigStoryCard)card).setItemNum(pictureNum);
-            mListView.add(card);
-            List<Tag> storyTags = db.getAllTagsByFolderId(folderID);
+            isDaily = false;
+
+            CardManager.setBigStoryItem(mListView, mContext,
+                    f.getId(),
+                    CONSTANT.convertFolderNameToStoryName(f.getName()),
+                    f.getImage(),
+                    CONSTANT.convertFolderNameToDate(f.getName()),
+                    f.getPicture_num());
+
+            List<Tag> storyTags = db.getAllTagsByFolderId(f.getId());
             int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
             if(storyTagsSize > 0) {
-                card = new TagsCard(mContext);
-                data = new CardData(CONSTANT.NOTHING, -1);
-                card.setTag(data);
-                for (int i = 0; i < storyTagsSize; i++) {
-                    ((TagsCard) card).setTag(i, storyTags.get(i).getId(), storyTags.get(i).getName(), storyTags.get(i).getColor());
-                }
-                ((TagsCard) card).setOnButtonPressedListener(new OnButtonPressListener() {
-                    @Override
-                    public void onButtonPressedListener(View view, Card card) {
-                        Intent intent = new Intent(mContext, AlbumGridActivity.class);
+                CardManager.setRelationTagsItem(mListView, mContext,
+                        storyTagsSize,
+                        storyTags,
+                        new OnButtonPressListener() {
+                            @Override
+                            public void onButtonPressedListener(View view, Card card) {
+                                Intent intent = new Intent(mContext, AlbumGridActivity.class);
 
-                        switch (view.getId()) {
-                            case R.id.tag1:
-                                intent.putExtra("kind", CONSTANT.TAG);
-                                intent.putExtra("id", ((TagsCard) card).getTagId(0));
-                                mContext.startActivity(intent);
-                                break;
-                            case R.id.tag2:
-                                intent.putExtra("kind", CONSTANT.TAG);
-                                intent.putExtra("id", ((TagsCard) card).getTagId(1));
-                                mContext.startActivity(intent);
+                                switch (view.getId()) {
+                                    case R.id.tag1:
+                                        intent.putExtra("kind", CardManager.TAG);
+                                        intent.putExtra("id", ((TagsCard) card).getTagId(0));
+                                        mContext.startActivity(intent);
+                                        break;
+                                    case R.id.tag2:
+                                        intent.putExtra("kind", CardManager.TAG);
+                                        intent.putExtra("id", ((TagsCard) card).getTagId(1));
+                                        mContext.startActivity(intent);
 
-                                break;
-                            case R.id.tag3:
-                                intent.putExtra("kind", CONSTANT.TAG);
-                                intent.putExtra("id", ((TagsCard) card).getTagId(2));
-                                mContext.startActivity(intent);
+                                        break;
+                                    case R.id.tag3:
+                                        intent.putExtra("kind", CardManager.TAG);
+                                        intent.putExtra("id", ((TagsCard) card).getTagId(2));
+                                        mContext.startActivity(intent);
 
-                                break;
-                            case R.id.tag4:
-                                intent.putExtra("kind", CONSTANT.TAG);
-                                intent.putExtra("id", ((TagsCard) card).getTagId(3));
-                                mContext.startActivity(intent);
+                                        break;
+                                    case R.id.tag4:
+                                        intent.putExtra("kind", CardManager.TAG);
+                                        intent.putExtra("id", ((TagsCard) card).getTagId(3));
+                                        mContext.startActivity(intent);
 
-                                break;
-                            case R.id.tag5:
-                                intent.putExtra("kind", CONSTANT.TAG);
-                                intent.putExtra("id", ((TagsCard) card).getTagId(4));
-                                mContext.startActivity(intent);
+                                        break;
+                                    case R.id.tag5:
+                                        intent.putExtra("kind", CardManager.TAG);
+                                        intent.putExtra("id", ((TagsCard) card).getTagId(4));
+                                        mContext.startActivity(intent);
 
-                                break;
-                        }
-                    }
-                });
-
-                mListView.add(card);
+                                        break;
+                                }
+                            }
+                        });
             }
-            Media randomMedia = db.getMediaByFolderRandomly(folderID);
-            int randomMediaId = randomMedia.getId();
-            String randomMediaPath;
+            Media randomMedia = db.getMediaByFolderRandomly(f.getId());
             if(randomMedia.getThumbnail_path() == null)//썸네일이 없으면
-                randomMediaPath = randomMedia.getPath();//원본에서
-            else//썸네일이 있으면
-                randomMediaPath = randomMedia.getThumbnail_path();//썸네일에서
-
-            card = new ToPhoketCard(mContext);
-            data = new CardData(CONSTANT.TOPHOKET, randomMediaId);
-            card.setTag(data);
-            ((ToPhoketCard)card).setImage(randomMediaPath);
-            mListView.add(card);
-
-            //TODO: 포켓에 넣어달라고 추천할만한 사진 걸러내기
+                CardManager.setRecommendItem(mListView, mContext,
+                        randomMedia.getId(),
+                        randomMedia.getPath());
+            else
+                CardManager.setRecommendItem(mListView, mContext,
+                        randomMedia.getId(),
+                        randomMedia.getThumbnail_path());
 
         }
     }
 
-    public MaterialListView getmListView(){
-        return this.mListView;
+    public void setRunning(){
+        state = STATE_RUNNING;
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
+    public void addSingleCard(Folder f){
+        if(mListView == null)   return;
+        addCard(f);
+    }
 }
