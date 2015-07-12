@@ -3,12 +3,15 @@ package com.eattle.phoket.Card.manager;
 import android.content.Context;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
+import com.dexafree.materialList.cards.SimpleCard;
 import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.Card.BigStoryCard;
 import com.eattle.phoket.Card.DailyCard;
 import com.eattle.phoket.Card.HeaderCard;
+import com.eattle.phoket.Card.SmallStoryCard;
+import com.eattle.phoket.Card.TagButtonCard;
 import com.eattle.phoket.Card.TagsCard;
 import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.Card.TransparentDividerCard;
@@ -48,9 +51,15 @@ public class CardManager {
         return card;
     }
 
+    public static void setHeaderList(MaterialListView list, final Context context){
+        list.add(setupFullSpan(context));
+    }
+
+
     //basic text header를 추가
     //다음에 그리드 item이 나올지도 모르므로 추가한 후 fullspan 해야 됨(header뒤에 추가)
     public static void setHeaderItem(MaterialListView list, final Context context, String title) {
+        //list.add(setupFullSpan(context));
         HeaderCard card = new HeaderCard(context);
         CardData tag = new CardData(NOTHING, -1);
         card.setTag(tag);
@@ -103,6 +112,30 @@ public class CardManager {
         CardData tag = new CardData(TOPHOKET, mId);
         card.setTag(tag);
         card.setImage(path);
+
+        list.add(card);
+    }
+
+
+    public static void setSmallStoryItem(MaterialListView list, final Context context, int fId, String fName, String path, String date, int itemNum){
+        SmallStoryCard card = new SmallStoryCard(context);
+        CardData tag = new CardData(FOLDER, fId);
+        card.setTag(tag);
+        card.setStoryName(fName);
+        card.setTitleImage(path);
+        card.setDate(date);
+        card.setItemNum(itemNum);
+
+        list.add(card);
+    }
+
+
+    public static void setTagItem(MaterialListView list, final Context context, int tId, String tName, int color){
+        TagButtonCard card = new TagButtonCard(context);
+        CardData tag = new CardData(TAG, tId);
+        card.setTag(tag);
+        ((TagButtonCard)card).setTagName(tName);
+        ((TagButtonCard)card).setTagColor(color);
 
         list.add(card);
     }

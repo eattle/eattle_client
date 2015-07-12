@@ -17,6 +17,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -71,6 +72,7 @@ public class CONSTANT {
 
     public static int COUNTIMAGE = 0;
 
+    public static Snackbar snackbar;
 
     public static String convertFolderNameToStoryName(String folderName) {
         String name = "";

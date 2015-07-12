@@ -1,25 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.eattle.phoket.Card.view.BigStoryCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    style="@style/MainLayout">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/MainLayout"
+    android:clickable="true"
+    >
 
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="250dp">
 
 
-        <ImageView
+        <com.fmsirvent.ParallaxEverywhere.PEWImageView
             android:id="@+id/bigStoryImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            app:reverse="reverseBoth"
+            />
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/gradient_y"/>
+            android:id="@+id/imageView2"
+            android:background="@drawable/ripple_button" />
+
+
+        <!--        <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/gradient_y"/>-->
 
         <LinearLayout
             android:orientation="vertical"
@@ -28,12 +39,13 @@
             android:layout_gravity="center"
             android:gravity="top">
 
+            <!--
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageView"
                 android:layout_gravity="center"
-                android:src="@mipmap/story"/>
+                android:src="@mipmap/story"/>-->
 
             <TextView
                 android:id="@+id/bigStoryName"
@@ -43,7 +55,9 @@
                 android:padding="15dp"
                 android:textColor="#ffffff"
                 android:textSize="20dp"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:background="#77000000" />
+
 
         </LinearLayout>
 
@@ -53,8 +67,8 @@
             android:id="@+id/bigStoryDate"
             android:textColor="#ffffff"
             android:layout_gravity="right|bottom"
-            android:layout_marginRight="15dp"
-            android:layout_marginBottom="15dp" />
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -63,8 +77,8 @@
             android:id="@+id/bigStoryItemNum"
             android:layout_gravity="left|bottom"
             android:textColor="#ffffff"
-            android:layout_marginLeft="15dp"
-            android:layout_marginBottom="15dp" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="8dp" />
 
 
     </FrameLayout>
