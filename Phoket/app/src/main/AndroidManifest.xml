@@ -48,6 +48,8 @@
         </service>
 
         <activity
+            android:theme="@style/FullScreenTheme"
+
             android:name=".AlbumGridActivity"
             android:label="@string/title_activity_album_grid"
             android:parentActivityName=".MainActivity" >

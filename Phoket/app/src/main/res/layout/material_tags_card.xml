@@ -2,7 +2,8 @@
 <com.eattle.phoket.Card.view.TagsCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/MainLayout">
+    style="@style/MainLayout"
+    android:paddingBottom="1dp">
 
 
     <LinearLayout
@@ -15,11 +16,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/tag1"
+            android:clickable="true"
             >
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage1"/>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_button" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -43,11 +49,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/tag2"
+            android:clickable="true"
+
             >
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage2"/>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_button" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -71,12 +83,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/tag3"
+            android:clickable="true"
+
             >
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage3"/>
-
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_button" />
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -100,11 +117,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/tag4"
+            android:clickable="true"
+
             >
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage4"/>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_button" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -128,12 +152,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/tag5"
+            android:clickable="true"
+
             >
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/tagimage5"/>
-
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_button" />
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

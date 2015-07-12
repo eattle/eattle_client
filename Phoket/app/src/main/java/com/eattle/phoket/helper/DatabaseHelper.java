@@ -669,7 +669,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
             ContentValues values = new ContentValues();
             values.put(KEY_NAME, tag_name);
-            values.put(KEY_COLOR, p.getDarkVibrantColor(0xff000000));
+            values.put(KEY_COLOR, p.getLightVibrantColor(0xff000000));
 
 
             tag_id = (int)db.insert(TABLE_TAG, null, values);

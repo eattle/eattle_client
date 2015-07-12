@@ -2,10 +2,11 @@
 <com.eattle.phoket.Card.view.DailyCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/MainLayout">
+    style="@style/MainLayout"
+    android:padding="1dp">
 
 
-    <LinearLayout
+    <FrameLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,9 +15,14 @@
         <com.eattle.phoket.view.SquareImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:id="@+id/dailyImage1"
+            android:id="@+id/dailyImage"
             android:scaleType="centerCrop" />
 
-    </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/ripple_button" />
+
+
+    </FrameLayout>
 </com.eattle.phoket.Card.view.DailyCardView>

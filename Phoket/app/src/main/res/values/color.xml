@@ -7,7 +7,7 @@
     <!-- tab indicator ... highlight color -->
     <color name="colorAccent">#FF4081</color>
     <!-- click했을 때 오버라이드 되는 -->
-    <color name="colorControlHighlight">#33000000</color>
+    <color name="colorControlHighlight">#88000000</color>
     <!-- 투명 -->
     <color name="colorTransparent">#00000000</color>
 

@@ -33,6 +33,7 @@ public class CardManager {
 
 
 
+
     //빈 card를 add로 넣어서 다음 카드들이 fullspan되도록 함
     private static Card setupFullSpan(final Context context){
         TransparentDividerCard card = new TransparentDividerCard(context);
@@ -140,5 +141,14 @@ public class CardManager {
         list.add(card);
     }
 
+
+    public static void setMediaItem(MaterialListView list, final Context context, int mId, int order, String path){
+        DailyCard card = new DailyCard(context);
+        CardData tag = new CardData(NOTHING, mId, order);
+        card.setTag(tag);
+        card.setDailyImage(path);
+
+        list.add(card);
+    }
 }
 
