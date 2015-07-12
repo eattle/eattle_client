@@ -108,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         doBindService();
-/*
+
         if (db.getAllFolders().size() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
             guide();
-        }*/
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -313,39 +313,26 @@ public class MainActivity extends AppCompatActivity {
                     //mSectionsPagerAdapter.notifyDataSetChanged();
 
                     ((Section1)(mAdapter.getItem(0))).setRunning();
+                    ((Section2)(mAdapter.getItem(1))).setRunning();
 
 
-                    wantBackUp();
+                    Snackbar s = Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_LONG);
+                    s.getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    s.setAction("Action", null).show();
+
+/*                    Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_SHORT)
+                            .getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                            .setAction("Action", null).show();*/
+
+
+                    //wantBackUp();
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
-//                    classification.setEnabled(true); // 클릭 유효화
-//                    alarm.setEnabled(true); // 클릭 무효화
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
                     int id = msg.arg1;
-/*                    String path = msg.getData().getString("path");
-                    String thumbNailPath = msg.getData().getString("thumbNailPath");
-                    String new_name = msg.getData().getString("new_name");
-                    int folderIDForDB = msg.getData().getInt("folderIDForDB");
-                    int pictureNumInStory = msg.getData().getInt("picture_num");*/
 
                     ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id));
-//                    ((Section2)(mAdapter.getItem(1)))(db.getFolder(id));
-
-
-//                    Fragment page = mSectionsPagerAdapter.getRegisteredFragment(0);//모아보기
-//                    ((Section1) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
-//                    page = mSectionsPagerAdapter.getRegisteredFragment(1);//스토리
-//                    ((Section2) page).selectCard(path, thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
-
-//                    if(flagForList == 1) {//기존에 있던 리스트들을 다 지우고 시작하는 부분
-//                        mSectionsPagerAdapter.notifyDataSetChanged();
-//                        flagForList = 0;
-//                    }
-                    /*
-                    if (mViewPager.getCurrentItem() == 0) {
-                        Fragment page = mSectionsPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
-                        ((Section1) page).selectCard(thumbNailPath, new_name, folderIDForDB, pictureNumInStory);
-                    }*/
+                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id));
                     break;
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
@@ -427,7 +414,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
 
                         Snackbar.make(findViewById(R.id.main_content), "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();

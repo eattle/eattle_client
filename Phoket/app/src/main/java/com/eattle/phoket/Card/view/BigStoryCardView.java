@@ -38,10 +38,11 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         TextView storyName = (TextView) findViewById(R.id.bigStoryName);
         TextView itemNum = (TextView)findViewById(R.id.bigStoryItemNum);
 
-        itemNum.setText(""+card.getItemNum());
+        itemNum.setText("" + card.getItemNum());
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         Glide.with(getContext())
                 .load(card.getTitleImage())
+                .fitCenter()
                 .into(storyImage);
 
         date.setText(card.getDate());

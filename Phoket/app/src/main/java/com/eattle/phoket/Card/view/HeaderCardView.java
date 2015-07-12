@@ -32,7 +32,6 @@ public class HeaderCardView extends CardItemView<HeaderCard> {
 
         TextView text = (TextView)findViewById(R.id.textView);
         text.setText(card.getTitle());
-
         StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
         sglp.setFullSpan(true);
         this.setLayoutParams(sglp);

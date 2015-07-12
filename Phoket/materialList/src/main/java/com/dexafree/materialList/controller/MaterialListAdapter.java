@@ -71,7 +71,7 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
         if(size == 0) return null;
         for(int i = 0; i < size; i++){
             if(position < mHeaderList.get(i).getPosition()){
-                if(i == 0)  return null;
+                if(i <= 0)  return null;
                 else        return mHeaderList.get(i-1);
             }
         }
@@ -136,9 +136,10 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 		}
 	}
 
-    public void clear(){
-        mCardList.clear();
-        notifyDataSetChanged();
+    public void clear() {
+		mHeaderList.clear();
+		mCardList.clear();
+		notifyDataSetChanged();
     }
 
 	public boolean isEmpty() {

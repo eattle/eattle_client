@@ -43,8 +43,8 @@ public class Section1 extends Fragment {
     private final static int STATE_LOADING = 0;
     private final static int STATE_RUNNING = 1;
 
-    Context mContext;
-    DatabaseHelper db;
+    private Context mContext;
+    private DatabaseHelper db;
 
     private MaterialListView mListView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -72,7 +72,7 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
-                if(state != STATE_RUNNING)  return;
+//                if(state != STATE_RUNNING)  return;
                 CardData data = (CardData) view.getTag();
                 Intent intent;
                 switch (data.getType()) {
@@ -117,9 +117,8 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                mSwipeRefreshLayout.setRefreshing(false);
-                state = STATE_LOADING;
-                mListView.clear();
+
+                setLoading();
                 ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
                 Snackbar.make(mSwipeRefreshLayout, "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
@@ -172,19 +171,19 @@ public class Section1 extends Fragment {
         @Override
         protected void onPostExecute(List<Folder> result) {
 
-            state = STATE_RUNNING;
 
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
             //set data for list
-            mSwipeRefreshLayout.setRefreshing(false);
             mListView.clear();
 
             int storiesNum = result.size();
             for(int i = 0; i < storiesNum; i++){
                 addCard(result.get(i));
             }
+
+            setRunning();
 
             super.onPostExecute(result);
         }
@@ -279,13 +278,23 @@ public class Section1 extends Fragment {
         }
     }
 
+
+    public void setLoading(){
+        state = STATE_LOADING;
+        mListView.clear();
+    }
+
     public void setRunning(){
         state = STATE_RUNNING;
         mSwipeRefreshLayout.setRefreshing(false);
+        isDaily = false;
+
     }
 
     public void addSingleCard(Folder f){
         if(mListView == null)   return;
+        if(state == STATE_RUNNING)
+            setLoading();
         addCard(f);
     }
 }
