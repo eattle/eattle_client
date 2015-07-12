@@ -13,6 +13,7 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Media_Tag;
+import com.eattle.phoket.model.NotificationM;
 import com.eattle.phoket.model.Tag;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 24;
+    private static final int DATABASE_VERSION = 26;
 
     public static final String DATABASE_NAME = "PhoketDB";
 
@@ -35,6 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String TABLE_MANAGER = "manager";
     private static final String TABLE_TAG = "tag";
     private static final String TABLE_MEDIA_TAG = "media_tag";
+    private static final String TABLE_NOTIFICATION = "notification";
 
     //media(사진)
     private static final String KEY_ID = "id";             //전체에서의 사진 id **primary key**
@@ -70,6 +72,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
     private static final String KEY_STANDARDDERIVATION = "standardDerivation";
+    //notification
+    private static final String KEY_LASTNOTIFICATION = "lastNotification";
+    private static final String KEY_LASTPICTUREID = "lastPictureID";
 
     private static final String CREATE_TABLE_MEDIA =
             "CREATE TABLE " + TABLE_MEDIA + " ("
@@ -118,6 +123,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_STANDARDDERIVATION + " LONG "
             + ")";
 
+    private static final String CREATE_TABLE_NOTIFICATION =
+            "CREATE TABLE " + TABLE_NOTIFICATION + " ("
+                    + KEY_LASTNOTIFICATION + " LONG NOT NULL, "
+                    + KEY_LASTPICTUREID + " INTEGER NOT NULL "
+                    + ")";
+
     public static DatabaseHelper getInstance(Context context){
         if(Instance == null){
             Instance = new DatabaseHelper(context);
@@ -143,10 +154,12 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         db.execSQL(CREATE_TABLE_MEDIA_TAG);
         db.execSQL(CREATE_TABLE_FOLDER);
         db.execSQL(CREATE_TABLE_MANAGER);
+        db.execSQL(CREATE_TABLE_NOTIFICATION);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d(TAG, "onUpgrade() 호출 oldVersion : "+oldVersion+" newVersion : "+newVersion);
         //기존의 테이블들을 일단 삭제하고 새로 만든다
         try {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA);
@@ -154,6 +167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MEDIA_TAG);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_FOLDER);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MANAGER);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTIFICATION);
         } catch (Exception ex) {
             Log.e("DatabaseHelper", "Exception in DROP_SQL", ex);
         }
@@ -1008,5 +1022,31 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     }
 
+    /******************* NOTIFICATION *******************/
+    public int createNotification(NotificationM n){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NOTIFICATION,null,null);//기존의 데이터들을 모두 삭제한다.
 
+        ContentValues values = new ContentValues();
+        values.put(KEY_LASTNOTIFICATION, n.getNotificationTime());
+        values.put(KEY_LASTPICTUREID, n.getLastPictureID());
+
+        return (int)db.insert(TABLE_NOTIFICATION, null, values);
+    }
+    public NotificationM getNotification(){
+        String selectQuery = "SELECT * FROM " + TABLE_NOTIFICATION;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        NotificationM n = new NotificationM();
+
+        if(c.moveToLast()){//마지막으로 푸시한 시간을 얻어온다
+            n.setNotificationTime(c.getLong(c.getColumnIndex(KEY_LASTNOTIFICATION)));
+            n.setLastPictureID(c.getInt(c.getColumnIndex(KEY_LASTPICTUREID)));
+            return n;
+        }
+
+        return null;
+    }
 }

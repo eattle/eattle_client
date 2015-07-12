@@ -6,6 +6,9 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -84,6 +87,16 @@
             android:theme="@style/ActionBarTranslucentTheme"
             android:windowSoftInputMode="stateVisible" >
         </activity>
+
+
+        <!--죽지 않는 서비스를 위한 리시버-->
+        <receiver android:name=".BroadcastListener" >
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_TICK"/>
+                <action android:name="ACTION.Restart.PhoketService" /><!-- 커스텀으로 정의한 인텐트 종류 -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

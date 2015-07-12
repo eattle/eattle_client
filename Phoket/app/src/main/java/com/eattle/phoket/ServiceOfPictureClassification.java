@@ -1,8 +1,13 @@
 package com.eattle.phoket;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Geocoder;
@@ -14,6 +19,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -21,6 +27,7 @@ import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
+import com.eattle.phoket.model.NotificationM;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,6 +67,9 @@ public class ServiceOfPictureClassification extends Service {
     //파일시스템
     FileSystem fileSystem;
 
+    public static int isClassifying = 0;//사진 분류중이면 1, 평상시엔 0
+
+    BroadcastListener broadcastListener = null;
     public ServiceOfPictureClassification() {
 
     }
@@ -68,11 +78,14 @@ public class ServiceOfPictureClassification extends Service {
         super.onCreate();
 
         Log.d(Tag, "서비스 onCreate() 호출");
+        unregisterRestartService();
+
         //쓰레드를 생성하여 사진 관련 서비스 시작
         PictureThread serviceOfEattle = new PictureThread(incomingHandler);
         serviceOfEattle.start();
 
         fileSystem = FileSystem.getInstance();
+
     }
 
     class PictureThread extends Thread {
@@ -86,9 +99,29 @@ public class ServiceOfPictureClassification extends Service {
             Log.d(Tag, "ServiceOfPictureClassification Run() 호출");
             db = DatabaseHelper.getInstance(getApplicationContext());
             isRunning = true;
+
+            NotificationM n = db.getNotification();
+            //86400000
+            //마지막 푸시를 넣은지 24시간을 넘지 않았으면
+            if(n != null) {
+                if (System.currentTimeMillis() - n.getNotificationTime() < 86400000L)
+                    BroadcastListener.setHowOftenCheck(1440);//24시간후에 다시 체크
+                else
+                    BroadcastListener.setHowOftenCheck(10);//10분마다 체크
+            }
+
+
+            //Notification을 위한 브로드캐스트 리시버
+            if(broadcastListener == null)
+                broadcastListener = new BroadcastListener(getApplicationContext());
+            registerReceiver(broadcastListener, new IntentFilter(Intent.ACTION_TIME_TICK));
+
             Looper.prepare();
         }
     }
+
+
+
 
     public static boolean isRunning() {
         return isRunning;
@@ -117,7 +150,7 @@ public class ServiceOfPictureClassification extends Service {
                 case CONSTANT.MSG_UNREGISTER_CLIENT:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_UNREGISTER_CLIENT || 'MainActivity가 연결 취소를 원합니다' ");
                     mClients.remove(msg.replyTo);
-
+                    break;
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
                     for (int i = 0; i < mClients.size(); i++) {
@@ -192,7 +225,6 @@ public class ServiceOfPictureClassification extends Service {
 
 
     //사진 정리와 관련된 함수들
-
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
         totalInterval = 0;
         totalPictureNum = 0;
@@ -223,7 +255,7 @@ public class ServiceOfPictureClassification extends Service {
 
     private void pictureClassification() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
         String TAG = "classification";
-
+        isClassifying = 1;
         //pictureClassification()의 속도 개선 방안
         //1. 처음에 mediaDB를 전부 삭제하지 않는다
         // -> folderIDForDB만 업데이트 한다
@@ -433,7 +465,7 @@ public class ServiceOfPictureClassification extends Service {
 
         sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
-
+        isClassifying = 0;
         mCursor.close();
     }
 
@@ -487,6 +519,35 @@ Log.e("Compressed dimensions", decoded.getWidth()+" "+decoded.getHeight());
         super.onDestroy();
         Log.d(Tag, "서비스 onDestroy() 호출");
         isRunning = false;
+        unregisterReceiver(broadcastListener);
+        registerRestartService();//서비스가 죽으면 다시 살리기 위해서
+    }
+
+    //서비스가 죽었을 때 다시 살리기 위한 함수
+    public void registerRestartService(){
+        Log.d(Tag,"registerRestartService() 호출");
+        Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
+        intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
+        intent.putExtra("countForTick",BroadcastListener.getCountForTick());
+        intent.putExtra("HOWOFTENCHECK",BroadcastListener.getHOWOFTENCHECK());
+        Log.d(Tag, "countForTick "+BroadcastListener.getCountForTick());
+        Log.d(Tag, "HOWOFTENCHECK "+BroadcastListener.getHOWOFTENCHECK());
+        PendingIntent sender = PendingIntent.getBroadcast(
+                ServiceOfPictureClassification.this,0,intent,0);
+        long currentTime = SystemClock.elapsedRealtime();//현재 시간
+        currentTime += 1*1000;
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME, currentTime, 10*1000, sender);
+    }
+    //서비스가 죽었을 때 다시 살리기 위한 함수
+    public void unregisterRestartService(){
+        Log.d(Tag,"unregisterRestartService() 호출");
+        Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
+        intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
+        PendingIntent sender = PendingIntent.getBroadcast(
+                ServiceOfPictureClassification.this,0,intent,0);
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        am.cancel(sender);
     }
 
     @Override

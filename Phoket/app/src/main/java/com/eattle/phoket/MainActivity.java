@@ -208,13 +208,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onResume() {
         super.onResume();
-
-//        drawMainView();
-/*        if (CONSTANT.PASSWORD == 0) {//비밀 번호 해제 안됬으면
-            //password 창을 띄운다
-            Intent intent = new Intent(this, PasswordActivity.class);
-            startActivity(intent);
-        }*/
+        if(!mIsBound)//서비스와 연결 안되어 있으면
+            doBindService();//연결
     }
 
     @Override
@@ -231,6 +226,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
     }
 
+    @Override
+    protected void onDestroy(){
+        super.onStop();
+        Log.d(TAG,"onDestroy() 호출");
+        if(mIsBound)//서비스와 연결되어 있으면 해제
+            doUnbindService();
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -327,8 +329,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     void doBindService() {
         Log.d(TAG, "doBindService() 호출");
-        bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
+        if(!mIsBound) {
+            bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
+            mIsBound = true;
+        }
     }
 
 
@@ -685,18 +689,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         public Fragment getRegisteredFragment(int position) {
             return registeredFragments.get(position);
-        }
-
-        public void removeAllFragment() {//사진 정리를 새로 했을 때 카드들을 지우기 위한 함수
-/*
-            Section1 page = (Section1) registeredFragments.get(0);//'모아보기'
-            page.getmListView().clear();//카드들을 다 지움
-
-            Section2 page2 = (Section2) registeredFragments.get(1);//'모아보기'
-            page2.getmListView().clear();//카드들을 다 지움
-            registeredFragments.remove(0);
-            registeredFragments.remove(1);
-            registeredFragments.remove(2);*/
         }
     }
 
