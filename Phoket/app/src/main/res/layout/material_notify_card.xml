@@ -2,6 +2,8 @@
 <com.eattle.phoket.Card.view.NotifyCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:clickable="true"
+
     style="@style/MainLayout">
 
     <android.support.v7.widget.CardView

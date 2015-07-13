@@ -31,10 +31,10 @@ public class DailyCardView extends CardItemView<DailyCard> {
     @Override
     public void build(final DailyCard card) {
         super.build(card);
-        ImageView dailyImage1 = (ImageView) findViewById(R.id.dailyImage1);
+        ImageView dailyImage = (ImageView) findViewById(R.id.dailyImage);
         Glide.with(getContext())
                 .load(card.getDailyImage())
-                .into(dailyImage1);
+                .into(dailyImage);
         //dailyImage1.setImageURI(Uri.parse(card.getDailyImage()));
 /*        dailyImage1.setOnClickListener(new OnClickListener() {
             @Override

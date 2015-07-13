@@ -2,6 +2,8 @@
 <com.eattle.phoket.Card.view.SmallStoryCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:clickable="true"
+
     style="@style/MainLayout">
 
 
@@ -19,7 +21,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/gradient_y"/>
+            android:background="@drawable/ripple_button" />
 
 
         <TextView
