@@ -320,6 +320,9 @@ public class ServiceOfPictureClassification extends Service {
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
             Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
+            if((ExistedMedia != null) && (ExistedMedia.getFolder_id() == -1))//휴지통에 들어있는 사진
+                continue; //정리에 포함시키지 않는다.
+
             //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
             //사진이 촬영된 날짜
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));

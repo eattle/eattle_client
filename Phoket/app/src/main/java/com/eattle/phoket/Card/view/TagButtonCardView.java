@@ -34,6 +34,22 @@ public class TagButtonCardView extends CardItemView<TagButtonCard> {
         TextView tagName = (TextView) findViewById(R.id.tagName);
         tagImage.setBackgroundColor(card.getTagColor());
         tagName.setText(card.getTagName());
+
+        if(card.isSelecting())  setSelect();
+        else                    setNoSelect();
+
     }
+
+
+    public void setSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.pressed_button);
+    }
+
+    public void setNoSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.ripple_button);
+    }
+
 
 }

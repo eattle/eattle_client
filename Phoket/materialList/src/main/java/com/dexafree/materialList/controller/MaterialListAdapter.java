@@ -96,6 +96,22 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
     /*sticky header*/
 
 
+	/*multi selection*/
+	public boolean setSelect(int position){
+		boolean s = mCardList.get(position).setSelectingToggle();
+		notifyItemChanged(position);
+		return s;
+	}
+
+	public boolean isSelectable(int position){
+		if(position >= mCardList.size())
+			return false;
+		return mCardList.get(position).isSelectable();
+	}
+
+	/*multi selection*/
+
+
     public void addAtStart(Card card){
 		mCardList.add(0, card);
 		notifyItemInserted(0);

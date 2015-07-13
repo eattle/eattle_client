@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/MainLayout"
+    android:clickable="true"
     android:padding="1dp">
 
 
     <FrameLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/dailyCardLayout">
 
         <com.eattle.phoket.view.SquareImageView
@@ -21,8 +22,8 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:id="@+id/interactionEffect"
             android:background="@drawable/ripple_button" />
-
 
     </FrameLayout>
 </com.eattle.phoket.Card.view.DailyCardView>

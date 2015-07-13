@@ -5,9 +5,32 @@ package com.dexafree.materialList.model;
  */
 public abstract class Card {
 
+
     private Object tag;
 
     private boolean mDismissible;
+
+    private boolean mSelectable = false;
+
+    private boolean mSelecting;
+
+    public boolean isSelecting() {
+        return mSelecting;
+    }
+
+    public boolean setSelectingToggle() {
+        this.mSelecting = !this.mSelecting;
+        return this.mSelecting;
+    }
+
+    public boolean isSelectable() {
+        return mSelectable;
+    }
+
+    public void setSelectable(boolean canSelect) {
+        this.mSelectable = canSelect;
+        this.mSelecting = false;
+    }
 
     public boolean isDismissible() {
         return mDismissible;

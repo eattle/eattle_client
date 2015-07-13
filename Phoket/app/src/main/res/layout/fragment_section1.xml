@@ -25,4 +25,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="72dp" />
+
+
 </FrameLayout>

@@ -35,17 +35,20 @@ public class DailyCardView extends CardItemView<DailyCard> {
         Glide.with(getContext())
                 .load(card.getDailyImage())
                 .into(dailyImage);
-        //dailyImage1.setImageURI(Uri.parse(card.getDailyImage()));
-/*        dailyImage1.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (card.getOnButtonPressedListener() != null) {
-                    card.getOnButtonPressedListener().onButtonPressedListener(dailyImage3, card);
-                }
-            }
-        });*/
 
+        if(card.isSelecting())  setSelect();
+        else                    setNoSelect();
 
+    }
+
+    public void setSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.pressed_button);
+    }
+
+    public void setNoSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.ripple_button);
     }
 
 }

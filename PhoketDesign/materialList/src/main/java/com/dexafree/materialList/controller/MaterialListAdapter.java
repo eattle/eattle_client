@@ -16,7 +16,8 @@ import java.util.List;
 
 public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapter.ViewHolder> implements IMaterialListAdapter {
 	private final List<Card> mCardList = new ArrayList<>();
-    private final List<HeaderCardItem> mHeaderList = new ArrayList<>();
+    private final List<CardAtPosition> mHeaderList = new ArrayList<>();
+
 
 
 	public static class ViewHolder<T extends Card> extends RecyclerView.ViewHolder {
@@ -66,7 +67,7 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 
 
     /*sticky header*/
-    public HeaderCardItem getHeaderItem(int position){
+    public CardAtPosition getHeaderItem(int position){
         int size = mHeaderList.size();
         if(size == 0) return null;
         for(int i = 0; i < size; i++){
@@ -89,14 +90,30 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
     }
 
     public void addHeader(Card card){
-        mHeaderList.add(new HeaderCardItem(mCardList.size(), card));
+        mHeaderList.add(new CardAtPosition(mCardList.size(), card));
 //        mHeaderList.put(mCardList.size(), card);
 //        mHeaderList.add(card);
     }
     /*sticky header*/
 
 
-    public void addAtStart(Card card){
+	/*multi selection*/
+	public void setSelect(int position){
+		if(position >= mCardList.size())
+			return;
+		mCardList.get(position).setSelectingToggle();
+		notifyItemChanged(position);
+	}
+
+	public boolean isSelectable(int position){
+		if(position >= mCardList.size())
+			return false;
+		return mCardList.get(position).isSelectable();
+	}
+
+	/*multi selection*/
+
+	public void addAtStart(Card card){
 		mCardList.add(0, card);
 		notifyItemInserted(0);
 	}
@@ -153,11 +170,11 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 		return mCardList.indexOf(card);
 	}
 
-    class HeaderCardItem{
+    class CardAtPosition{
         private int position;
         private Card card;
 
-        public HeaderCardItem(int position, Card card) {
+        public CardAtPosition(int position, Card card) {
             this.position = position;
             this.card = card;
         }

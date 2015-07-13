@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.eattle.phoket.device.CachedBlockDevice;
+import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.view.TouchImageView;
 
@@ -84,6 +85,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         }
 
         final int _position = position;
+
         //태그를 불러오기 위한 클릭 리스너
         img.setOnClickListener(new View.OnClickListener() {
             @Override

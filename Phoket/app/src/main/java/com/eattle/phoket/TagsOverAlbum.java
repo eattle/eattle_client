@@ -37,6 +37,8 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class TagsOverAlbum extends Fragment {
+    private String TAG = "TagsOverAlbum";
+
     DatabaseHelper db;
     private static int media_id;
     private static int position;
@@ -272,6 +274,11 @@ public class TagsOverAlbum extends Fragment {
 
         //휴지통(사진 삭제)
         ImageView storyContentDelete = (ImageView) root.findViewById(R.id.storyContentDelete);
+        if( ((db.getAllMediaByFolder(db.getMediaById(media_id).getFolder_id())).size()) <= CONSTANT.BOUNDARY)//일상에서는
+            storyContentDelete.setVisibility(View.GONE);//휴지통이 보이지 않는다
+        else//일상이 아니면
+            storyContentDelete.setVisibility(View.VISIBLE);//휴지통이 보인다
+
         storyContentDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -283,7 +290,7 @@ public class TagsOverAlbum extends Fragment {
 
     public void wantPictureDeleted() {//사진을 삭제할지
         AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-        d.setTitle("사진을 스토리에서 삭제하시겠습니까?");
+        d.setTitle("사진을 스토리에서 제외하시겠습니까? ");
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -303,9 +310,26 @@ public class TagsOverAlbum extends Fragment {
         //데이터베이스 OPEN
         if(db == null)
             db = DatabaseHelper.getInstance(getActivity());
+
         int folderId = m.getFolder_id();
         List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
         Folder folder = db.getFolder(folderId);
+        int totalPictureNum = allMediaByFolder.size();
+
+        //해당 사진의 folderID를 변경한다.
+        m.setFolder_id(-1);//휴지통의 folderID는 -1(유령폴더)
+        db.updateMedia(m);//DB에 업데이트
+
+        //사진에 '휴지통'태그를 등록한다.
+        db.createTag("휴지통", m.getId());
+
+        //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때
+        if ((totalPictureNum-1) == 0) {
+            db.deleteFolder(folderId, true);//폴더(스토리) 자체를 지운다
+            this.getActivity().finish();//뷰페이저(AlbumFullActivity) 종료
+            return;
+        }
+
 
         //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
         if(media_id == AlbumFullActivity.titleImageId) {
@@ -335,29 +359,15 @@ public class TagsOverAlbum extends Fragment {
                 }
             }
         }
-        folder.setPicture_num(--AlbumFullActivity.totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
+        folder.setPicture_num(--totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
         db.updateFolder(folder);//DB에 업데이트
 
-
-
-        //해당 사진의 folderID를 변경한다.
-        m.setFolder_id(-1);//휴지통의 folderID는 -1(유령폴더)
-        db.updateMedia(m);//DB에 업데이트
-
-        //사진에 '휴지통'태그를 등록한다.
-        db.createTag("휴지통", m.getId());
-
-
-
-        //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
-        if ((allMediaByFolder.size()-1) == 0)
-            db.deleteFolder(folderId, true);
-        Log.d("TagsOverAlbum", "폴더 삭제 완료");
-
+        Log.d(TAG, "폴더 삭제 완료");
 
         Toast.makeText(getActivity(),"사진이 스토리에서 제외되었습니다",Toast.LENGTH_SHORT).show();
-        //뷰를 새로 그린다.
-        AlbumFullActivity.touchImageAdapter.removeView(position);
+
+        Log.d(TAG,"AlbumFullActivity.touchImageAdapter == null?" + (AlbumFullActivity.touchImageAdapter==null));
+        AlbumFullActivity.touchImageAdapter.removeView(position);//뷰페이저 업데이트
     }
 
 /*

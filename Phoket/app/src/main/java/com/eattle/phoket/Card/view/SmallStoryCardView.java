@@ -47,10 +47,23 @@ public class SmallStoryCardView extends CardItemView<SmallStoryCard> {
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
 
+        if(card.isSelecting())  setSelect();
+        else                    setNoSelect();
+
         StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
         sglp.setFullSpan(true);
         this.setLayoutParams(sglp);
 
+    }
+
+    public void setSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.pressed_button);
+    }
+
+    public void setNoSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
+        pressed.setImageResource(R.drawable.ripple_button);
     }
 
 }

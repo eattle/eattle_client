@@ -212,6 +212,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                         pushTabToTag(mMediaList.get(position), position);//다시 보이게 한다
                     }
                 }
+                Log.d(TAG,"onPageSelected에서의 setTabToTag");
                 setTabToTag(mMediaList.get(position), position);
             }
 
@@ -285,12 +286,25 @@ public class AlbumFullActivity extends ActionBarActivity {
             if (initialMediaPosition == -1) {  //스토리 제목부터 시작한 경우
                 position--;//인덱스 -1이 스토리시작화면!!
             }
+
             if(position >= 0 && position < mediaList.size())
                 mediaList.remove(position);
             else
                 Log.d(TAG, "지우려는 viewpager 포지션 : " + position + "에 에러가 있음");
 
             this.notifyDataSetChanged();
+
+            //태그 상태 업데이트
+            if(mediaList.size() != 0){//아직 사진이 남아 있을 때
+                Log.d(TAG,"removeView에서의 setTabToTag");
+
+                if(position == mediaList.size()) {//마지막 사진
+                    setTabToTag(mMediaList.get(position - 1), position - 1);
+                    mViewPager.setCurrentItem(position-1);//뷰페이저 초점 이동
+                }
+                else
+                    setTabToTag(mMediaList.get(position), position);
+            }
         }
     }
 
@@ -348,8 +362,8 @@ public class AlbumFullActivity extends ActionBarActivity {
     void setTabToTag(Media m, int position) {
         if (isThereTabToTagHere() != null) {
             FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m, position, totalPictureNum);
-            tr.replace(R.id.tagLayout, ttt, "TabToTag");//기존의 fragment의 내용을 변경한다(position ,totalPictureNum)
+            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m, position, mMediaList.size());
+            tr.replace(R.id.tagLayout, ttt, "TabToTag");//기존의 fragment의 내용을 변경한다(position , mMediaList.size())
             tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             tr.commit();
         }
@@ -366,7 +380,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             tr.commit();
         } else {
             FragmentTransaction tr = getFragmentManager().beginTransaction();
-            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m, position, totalPictureNum);
+            TagsOverAlbum ttt = TagsOverAlbum.newInstance(m, position, mMediaList.size());
             tr.add(R.id.tagLayout, ttt, "TabToTag");
             tr.add(R.id.exit, new StoryExitFragment(), "StoryExitFragment");
             tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);

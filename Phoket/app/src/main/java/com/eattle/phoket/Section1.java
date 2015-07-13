@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -53,6 +54,10 @@ public class Section1 extends Fragment {
     private int state;
     private boolean isDaily;
 
+    boolean isSelectMode = false;
+    int selected = 0;
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -72,6 +77,17 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
+
+                if(isSelectMode){
+                    if(mListView.isSelectable(position))
+                        selected += mListView.setSelect(position)? 1 : -1;
+                    if(selected <= 0) {
+                        ((MainActivity) getActivity()).setSelectMode();
+                        isSelectMode = false;
+                    }
+
+                    return;
+                }
 //                if(state != STATE_RUNNING)  return;
                 CardData data = (CardData) view.getTag();
                 Intent intent;
@@ -106,8 +122,12 @@ public class Section1 extends Fragment {
             @Override
             public void onItemLongClick(CardItemView view, int position) {
                 if(state != STATE_RUNNING)  return;
-
-//                Log.d("LONG_CLICK", view.getTag().toString());
+                if(isSelectMode)    return;
+                if(!mListView.isSelectable(position))   return;
+                isSelectMode = true;
+                mListView.setSelect(position);
+                ((MainActivity)getActivity()).setSelectMode();
+                selected++;
             }
         });
 
@@ -131,6 +151,7 @@ public class Section1 extends Fragment {
         //show progress
         mListView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
+
 
         return root;
 
@@ -297,4 +318,12 @@ public class Section1 extends Fragment {
             setLoading();
         addCard(f);
     }
+
+/*    private void setOptionButton(){
+        if(isSelectMode){
+            mFab.setVisibility(View.VISIBLE);
+        }else{
+            mFab.setVisibility(View.GONE);
+        }
+    }*/
 }
