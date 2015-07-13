@@ -245,23 +245,22 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     }
 
-/*    @Override
+    @Override
     protected void onResume() {
         refreshGrid();
         //변경사항 적용
-        Adapter.notifyDataSetChanged();
+        new InitializeApplicationsTask().execute();
         super.onResume();
     }
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop() 호출");
-
         Glide.get(this).clearMemory();
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
         super.onStop();
     }
 
+    /*
     public void onClick(View v){
         switch(v.getId()){
             case R.id.storyStart://스토리 시작

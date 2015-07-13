@@ -13,6 +13,7 @@ public class BigStoryCard extends SimpleCard {
 
     public BigStoryCard(Context context) {
         super(context);
+        this.setSelectable(true);
     }
 
     @Override

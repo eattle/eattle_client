@@ -15,6 +15,8 @@ public class DailyCard extends SimpleCard {
 
     public DailyCard(Context context) {
         super(context);
+        this.setSelectable(true);
+
     }
 
     public String getDailyImage() {

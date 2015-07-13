@@ -32,12 +32,25 @@ public class DailyCardView extends CardItemView<DailyCard> {
         super.build(card);
         ImageView dailyImage = (ImageView)findViewById(R.id.dailyImage1);
 
+
         Glide.with(dailyImage.getContext())
                 .load(R.drawable.cheese_2)
                 .fitCenter()
                 .into(dailyImage);
 
+        if(card.isSelecting())  setSelect();
+        else                    setNoSelect();
+    }
 
+
+    public void setSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.imageView2);
+        pressed.setImageResource(R.drawable.pressed_button);
+    }
+
+    public void setNoSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.imageView2);
+        pressed.setImageResource(R.drawable.ripple_button);
     }
 
 }

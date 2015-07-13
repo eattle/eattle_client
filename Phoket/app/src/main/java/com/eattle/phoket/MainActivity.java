@@ -14,21 +14,26 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPropertyAnimatorListener;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -53,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     //UI 관련 변수
     private ViewPager mViewPager;
     private Adapter mAdapter;
+    private FloatingActionButton mFAB;
+
 
     //파일 시스템 관련 변수
     FileSystem fileSystem;
@@ -124,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        mFAB = (FloatingActionButton)findViewById(R.id.fab);
 
 /*
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -274,6 +283,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setSelectMode(){
+        if(mFAB.getVisibility() == View.GONE) {
+            Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_in);
+            anim.setInterpolator(new FastOutSlowInInterpolator());
+            anim.setDuration(200L);
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mFAB.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            mFAB.startAnimation(anim);
+        }else{
+            Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_out);
+            anim.setInterpolator(new FastOutSlowInInterpolator());
+            anim.setDuration(200L);
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mFAB.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            mFAB.startAnimation(anim);
+        }
+
+    }
 
     /***************** Classification Service 부분 **********************/
     void doBindService() {

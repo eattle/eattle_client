@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
@@ -20,6 +21,7 @@ import com.dexafree.materialList.model.Card;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.example.ga.phoketdesign.card.BigStoryCard;
+import com.example.ga.phoketdesign.card.BigStoryCardView;
 import com.example.ga.phoketdesign.card.DailyCard;
 import com.example.ga.phoketdesign.card.HeaderCard;
 import com.example.ga.phoketdesign.card.TransparentDividerCard;
@@ -35,6 +37,7 @@ public class MainSection1 extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
 
+    boolean isSelectMode = false;
 
     public MainSection1() {
         // Required empty public constructor
@@ -56,16 +59,24 @@ public class MainSection1 extends Fragment {
         materialListView.addOnItemTouchListener(new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(CardItemView view, int position) {
-                switch (((CardTag)(view.getTag())).getCardType()){
-                    case CardTag.CARDTYPE_BIGSTORY:
-                        Intent intent = new Intent(mContext, StoryActivity.class);
-                        intent.putExtra(StoryActivity.EXTRA_NAME, "수달과 함께");
-                        mContext.startActivity(intent);
-                        break;
-                    case CardTag.CARDTYPE_DAILY:
-                        break;
-                    case CardTag.CARDTYPE_HEADER:
-                        break;
+                if(isSelectMode){
+                    if(materialListView.isSelectable(position)){
+                        materialListView.setSelect(position);
+                    }
+
+
+                }else {
+                    switch (((CardTag) (view.getTag())).getCardType()) {
+                        case CardTag.CARDTYPE_BIGSTORY:
+                            Intent intent = new Intent(mContext, StoryActivity.class);
+                            intent.putExtra(StoryActivity.EXTRA_NAME, "수달과 함께");
+                            mContext.startActivity(intent);
+                            break;
+                        case CardTag.CARDTYPE_DAILY:
+                            break;
+                        case CardTag.CARDTYPE_HEADER:
+                            break;
+                    }
                 }
 
             }
@@ -74,11 +85,13 @@ public class MainSection1 extends Fragment {
             public void onItemLongClick(CardItemView view, int position) {
                 switch (((CardTag)(view.getTag())).getCardType()){
                     case CardTag.CARDTYPE_BIGSTORY:
-                        setupDailyItem();
+                        if(!isSelectMode) {
+                            materialListView.setSelect(position);
+//                            ((BigStoryCardView) view).setSelect();
+                            isSelectMode = true;
+                        }
                         break;
                     case CardTag.CARDTYPE_DAILY:
-                        setupTitleItem();
-
                         break;
                     case CardTag.CARDTYPE_HEADER:
                         break;

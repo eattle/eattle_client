@@ -16,6 +16,8 @@ public class TagButtonCard extends SimpleCard {
 
     public TagButtonCard(Context context) {
         super(context);
+        this.setSelectable(true);
+
     }
 
     public String getTagName() {

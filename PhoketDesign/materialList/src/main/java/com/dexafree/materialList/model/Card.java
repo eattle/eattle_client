@@ -9,6 +9,27 @@ public abstract class Card {
 
     private boolean mDismissible;
 
+    private boolean mSelectable = false;
+
+    private boolean mSelecting;
+
+    public boolean isSelecting() {
+        return mSelecting;
+    }
+
+    public void setSelectingToggle() {
+        this.mSelecting = !this.mSelecting;
+    }
+
+    public boolean isSelectable() {
+        return mSelectable;
+    }
+
+    public void setSelectable(boolean canSelect) {
+        this.mSelectable = canSelect;
+        this.mSelecting = false;
+    }
+
     public boolean isDismissible() {
         return mDismissible;
     }

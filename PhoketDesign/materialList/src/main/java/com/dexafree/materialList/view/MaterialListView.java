@@ -143,7 +143,16 @@ public class MaterialListView extends RecyclerView {
 		((IMaterialListAdapter) getAdapter()).addAll(cards);
     }
 
-    public void clear(){
+	public void setSelect(int position) {
+		((MaterialListAdapter) getAdapter()).setSelect(position);
+	}
+
+	public boolean isSelectable(int position) {
+		return ((MaterialListAdapter) getAdapter()).isSelectable(position);
+	}
+
+
+	public void clear(){
         ((MaterialListAdapter)getAdapter()).clear();
     }
 

@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#FFFFFF</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorControlHighlight">#33000000</color>
+    <color name="colorControlHighlight2">#33FF4081</color>
+
+    <color name="colorControlHighlightDark">#FF4081</color>
+
 
     <color name="colorTransparent">#00000000</color>
 

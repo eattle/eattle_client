@@ -17,6 +17,7 @@ public class SmallStoryCard extends SimpleCard {
 
     public SmallStoryCard(Context context) {
         super(context);
+        this.setSelectable(true);
     }
 
     public String getStoryName() {

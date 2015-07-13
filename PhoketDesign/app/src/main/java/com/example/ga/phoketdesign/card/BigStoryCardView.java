@@ -32,17 +32,30 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
     @Override
     public void build(BigStoryCard card) {
         super.build(card);
-        ImageView storyImage = (ImageView)findViewById(R.id.bigStoryImage);
 
-        Glide.with(storyImage.getContext())
+        ImageView dailyImage = (ImageView)findViewById(R.id.bigStoryImage);
+
+        Glide.with(dailyImage.getContext())
                 .load(R.drawable.cheese_1)
                 .fitCenter()
-                .into(storyImage);
+                .into(dailyImage);
 
+        if(card.isSelecting())  setSelect();
+        else                    setNoSelect();
 
         StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
         sglp.setFullSpan(true);
         this.setLayoutParams(sglp);
+    }
+
+    public void setSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.imageView2);
+        pressed.setImageResource(R.drawable.pressed_button);
+    }
+
+    public void setNoSelect(){
+        ImageView pressed = (ImageView)findViewById(R.id.imageView2);
+        pressed.setImageResource(R.drawable.ripple_button);
     }
 
 }
