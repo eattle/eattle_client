@@ -47,7 +47,6 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
                 .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
                 .into(storyImage);
 
-        //.fitCenter()
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
 

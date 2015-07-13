@@ -63,6 +63,7 @@ public class CONSTANT {
     public static final int MSG_REGISTER_CLIENT = 1;//MainActivity와 Service가 bind 되었을 때
     public static final int MSG_UNREGISTER_CLIENT = 2;//MainActivity와 Service가 bind를 중단하라는 메세지
     public static final int START_OF_PICTURE_CLASSIFICATION = 3;//MainActivity가 Service에게 사진 정리를 요청하는 메세지
+    public static final int RECEIPT_OF_PICTURE_CLASSIFICATION = 7;//Service가 MainActivity의 사진 요청을 수락했다는 메세지
     public static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
     public static final int END_OF_SINGLE_STORY = 5;//스토리가 정리되는대로 바로바로 보여주기 위하여 정의한 메세지,하나의 스토리가 정리될때마다 보낸다
     public static final int END_OF_DECODING_THUMBNAIL = 6;//loadBitmap에서 썸네일 생성을 완료했을 때

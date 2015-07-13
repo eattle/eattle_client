@@ -244,12 +244,12 @@ public class AlbumGridActivity extends AppCompatActivity {
         mGridView.setLayoutManager(layoutManager);
 
     }
-
-/*    @Override
+/*
+    @Override
     protected void onResume() {
         refreshGrid();
         //변경사항 적용
-        Adapter.notifyDataSetChanged();
+
         super.onResume();
     }
 

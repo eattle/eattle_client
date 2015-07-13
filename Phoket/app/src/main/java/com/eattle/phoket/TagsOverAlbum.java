@@ -3,8 +3,10 @@ package com.eattle.phoket;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,6 +28,8 @@ import com.eattle.phoket.model.Tag;
 import com.eattle.phoket.view.ExEditText;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -145,8 +149,6 @@ public class TagsOverAlbum extends Fragment {
                 @Override
                 public void onClick(View v) {
                     //불필요한 메모리 정리---------------------------------------------------------------
-                    clearMemory();
-
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.TAG);
                     intent.putExtra("id", id);
@@ -173,7 +175,6 @@ public class TagsOverAlbum extends Fragment {
             defaultTagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    clearMemory();//불필요한 메모리 정리
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                     intent.putExtra("tagName", tagName_);//기본 태그에서는 tagName을 넘겨준다
@@ -282,7 +283,7 @@ public class TagsOverAlbum extends Fragment {
 
     public void wantPictureDeleted() {//사진을 삭제할지
         AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-        d.setTitle("사진을 완전히 삭제하시겠습니까?");
+        d.setTitle("사진을 스토리에서 삭제하시겠습니까?");
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
@@ -298,7 +299,68 @@ public class TagsOverAlbum extends Fragment {
         d.setNegativeButton("No", l);
         d.show();
     }
+    public void deletePicture() {
+        //데이터베이스 OPEN
+        if(db == null)
+            db = DatabaseHelper.getInstance(getActivity());
+        int folderId = m.getFolder_id();
+        List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
+        Folder folder = db.getFolder(folderId);
 
+        //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
+        if(media_id == AlbumFullActivity.titleImageId) {
+            for (int i = 0; i < allMediaByFolder.size(); i++) {
+                if (allMediaByFolder.get(i).getId() == media_id) {
+                    //TODO 일단 그 다음 혹은 이전 사진을 대표사진으로 변경한다 -> 대표 사진 선정 방식 고민
+                    if (i != allMediaByFolder.size() - 1) {
+                        String path = allMediaByFolder.get(i + 1).getPath();
+                        folder.setImage(path);
+                        AlbumFullActivity.titleImagePath = path;
+
+                        int newId = allMediaByFolder.get(i + 1).getId();
+                        folder.setTitleImageID(newId);
+                        folder.setThumbNail_path(allMediaByFolder.get(i + 1).getThumbnail_path());
+                        AlbumFullActivity.titleImageId = newId;
+                    } else {
+                        String path = allMediaByFolder.get(i - 1).getPath();
+
+                        folder.setImage(path);
+                        AlbumFullActivity.titleImagePath = path;
+
+                        int newId = allMediaByFolder.get(i - 1).getId();
+                        folder.setTitleImageID(newId);
+                        folder.setThumbNail_path(allMediaByFolder.get(i - 1).getThumbnail_path());
+                        AlbumFullActivity.titleImageId = newId;
+                    }
+                }
+            }
+        }
+        folder.setPicture_num(--AlbumFullActivity.totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
+        db.updateFolder(folder);//DB에 업데이트
+
+
+
+        //해당 사진의 folderID를 변경한다.
+        m.setFolder_id(-1);//휴지통의 folderID는 -1(유령폴더)
+        db.updateMedia(m);//DB에 업데이트
+
+        //사진에 '휴지통'태그를 등록한다.
+        db.createTag("휴지통", m.getId());
+
+
+
+        //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
+        if ((allMediaByFolder.size()-1) == 0)
+            db.deleteFolder(folderId, true);
+        Log.d("TagsOverAlbum", "폴더 삭제 완료");
+
+
+        Toast.makeText(getActivity(),"사진이 스토리에서 제외되었습니다",Toast.LENGTH_SHORT).show();
+        //뷰를 새로 그린다.
+        AlbumFullActivity.touchImageAdapter.removeView(position);
+    }
+
+/*
     public void deletePicture() {
         //데이터베이스 OPEN
         if(db == null)
@@ -365,34 +427,7 @@ public class TagsOverAlbum extends Fragment {
         //뷰를 새로 그린다.
         AlbumFullActivity.touchImageAdapter.removeView(position);
     }
-
-    //불필요한 메모리 정리---------------------------------------------------------------
-    private void clearMemory() {
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView)getActivity().findViewById(R.id.blurImage));
-
-        //아직 스토리에 남아있는 사진 삭제
-        while(AlbumFullActivity.viewPagerImage.size() > 0){
-            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if(AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum","break!");
-
-                break;
-            }
-        }
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
-        //-----------------------------------------------------------------------------------
-    }
+    */
 
     private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener()
     {
