@@ -89,6 +89,7 @@ public class Section1 extends Fragment {
                                 isSelectMode = false;
                             }
                         }
+                        ((MainActivity)getActivity()).mActionMode.setSubtitle(selected.size()+"개 선택됨");
                     }
                     return;
                 }

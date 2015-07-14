@@ -25,11 +25,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     final Messenger mMessenger = new Messenger(new IncomingHandler());
     //TextView alarm;
 
+    ActionMode mActionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +164,51 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            mode.setTitle("사진을 선택해주세요");
+            mode.setSubtitle("1개 선택됨");
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_action_select, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+//                case R.id.cancel_action:
+//                    shareCurrentItem();
+//                    mode.finish(); // Action picked, so close the CAB
+//                    return true;
+//                default:
+//                    return false;
+            }
+            return false;
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            if(mFAB.getVisibility() == View.VISIBLE){
+                mFAB.setVisibility(View.INVISIBLE);
+                ((Section1)(mAdapter.getItem(0))).initialize();
+            }
+        }
+    };
 
 
     @Override
@@ -262,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     mFAB.setVisibility(View.VISIBLE);
+                    mActionMode = startSupportActionMode(mActionModeCallback);
                 }
 
                 @Override
@@ -283,6 +332,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     mFAB.setVisibility(View.INVISIBLE);
+                    mActionMode.finish();
                 }
 
                 @Override
