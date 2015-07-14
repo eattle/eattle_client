@@ -79,6 +79,7 @@ public class Section1 extends Fragment {
 
         setupMaterialListView();
 
+
         mListView.addOnItemTouchListener(new RecyclerItemClickListener.OnItemClickListener() {
 
             @Override
@@ -95,6 +96,7 @@ public class Section1 extends Fragment {
                                 isSelectMode = false;
                             }
                         }
+                        ((MainActivity)getActivity()).mActionMode.setSubtitle(selected.size()+"개 선택됨");
                     }
                     return;
                 }
@@ -315,6 +317,7 @@ public class Section1 extends Fragment {
 
     public void initialize(){
         isSelectMode = false;
+        selected.clear();
         new InitializeApplicationsTask().execute();
     }
 
