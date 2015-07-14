@@ -160,7 +160,7 @@ public class Section1 extends Fragment {
             }
         });
 
-        new InitializeApplicationsTask().execute();
+        initialize();
 
         //show progress
         mListView.setVisibility(View.GONE);
@@ -313,6 +313,10 @@ public class Section1 extends Fragment {
         }
     }
 
+    public void initialize(){
+        isSelectMode = false;
+        new InitializeApplicationsTask().execute();
+    }
 
     public void setLoading(){
         state = STATE_LOADING;

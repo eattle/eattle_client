@@ -21,6 +21,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -35,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.host.UsbDeviceHost;
@@ -139,73 +143,23 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
         });
+    }
 
-/*
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(2);//탭간 스와이프를 부드럽게 하기 위해 양옆에 2개씩 가지고 있음
-        // When swiping between different sections, select the corresponding
-        // tab. We can also use ActionBar.Tab#select() to do this if we have
-        // a reference to the Tab.
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
-            }
-        });
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
-        // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (listener) for when
-            // this tab is selected.
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this));
-        }
-
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-
-        LinearLayout actionBarLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.actionbar_main, null);
-        ActionBar.LayoutParams params = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.MATCH_PARENT,
-                ActionBar.LayoutParams.MATCH_PARENT,
-                Gravity.LEFT);
-
-        //TextView alarm = (TextView)actionBarLayout.findViewById(R.id.alarmIcon);
-        alarm = (TextView) actionBarLayout.findViewById(R.id.alarmIcon);
-
-        alarm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //if (CONSTANT.ISUSBCONNECTED == 1) //USB가 연결되었을 떄
-                //    importDB(); //USB에 있는 Sqlite DB를 import한다(기존의 앱 DB에서 대체함)
-                Toast.makeText(getBaseContext(), "사진 정리 중입니다", Toast.LENGTH_SHORT).show();
-
-                alarm.setEnabled(false); // 클릭 무효화
-                //서비스에게 사진 정리를 요청한다
-                sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
-
-                flagForList = 1;
-            }
-        });
-
-        ImageView search = (ImageView) actionBarLayout.findViewById(R.id.searchIcon);
-
-        search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.search:
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 startActivity(intent);
-            }
-        });
-
-        actionBar.setCustomView(actionBarLayout, params);
-        actionBar.setDisplayHomeAsUpEnabled(false);
-
-*/
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -242,6 +196,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                if(mFAB.getVisibility() == View.VISIBLE){
+                    mFAB.setVisibility(View.INVISIBLE);
+                    ((Section1)(mAdapter.getItem(0))).initialize();
+                    return false;
+                }
                 wantCapicUSB();
                 return false;
         }

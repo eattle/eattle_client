@@ -21,32 +21,12 @@
             app:reverse="reverseBoth"
             />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/interactionEffect"
-            android:background="@drawable/ripple_button" />
-
-
-        <!--        <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/gradient_y"/>-->
-
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="top">
-
-            <!--
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/imageView"
-                android:layout_gravity="center"
-                android:src="@mipmap/story"/>-->
 
             <TextView
                 android:id="@+id/bigStoryName"
@@ -80,6 +60,24 @@
             android:textColor="#ffffff"
             android:layout_marginLeft="8dp"
             android:layout_marginBottom="8dp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/interactionEffect"
+            android:background="@drawable/ripple_button"
+            android:focusableInTouchMode="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/check"
+            android:src="@drawable/ic_check"
+            android:background="@drawable/ripple_button"
+            android:focusableInTouchMode="true"
+            android:scaleType="center"
+            android:layout_gravity="right|top"
+            android:visibility="invisible" />
 
 
     </FrameLayout>
