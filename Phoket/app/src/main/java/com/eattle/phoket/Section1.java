@@ -1,10 +1,14 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
@@ -31,6 +36,7 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +132,7 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
+
                 if(state != STATE_RUNNING)  return;
                 if(isSelectMode)    return;
                 if(!mListView.isSelectable(position))   return;

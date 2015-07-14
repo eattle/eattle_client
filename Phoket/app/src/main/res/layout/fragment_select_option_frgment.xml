@@ -17,11 +17,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="폰에 적용"
+            android:text="스마트폰에 스토리 내보내기"
             android:id="@+id/textView4"
             android:layout_gravity="center_vertical" />
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fabmini2"
+            android:id="@+id/fabLocal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"

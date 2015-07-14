@@ -72,7 +72,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                 File isExist = new File(path);
                 if (!isExist.exists()) {
                     //사진 파일이 로컬에 존재하지 않고 USB에만 있다고 판단될 때
-                    Toast.makeText(getActivity(), "사진이 존재하지 않습니다. USB를 연결하세요", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "사진이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
                     //return null;
                 } else {
                     //일단 썸네일을 부르면서 사진 로딩 시작
