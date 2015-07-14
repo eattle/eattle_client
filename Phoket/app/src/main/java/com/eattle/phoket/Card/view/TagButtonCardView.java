@@ -43,12 +43,12 @@ public class TagButtonCardView extends CardItemView<TagButtonCard> {
 
     public void setSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
-        pressed.setImageResource(R.drawable.pressed_button);
+        pressed.setBackgroundResource(R.drawable.pressed_button);
     }
 
     public void setNoSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
-        pressed.setImageResource(R.drawable.ripple_button);
+        pressed.setBackgroundResource(R.drawable.ripple_button);
     }
 
 

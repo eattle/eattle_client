@@ -20,16 +20,14 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -38,11 +36,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.eattle.phoket.device.CachedBlockDevice;
-import com.eattle.phoket.device.CachedUsbMassStorageBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.host.BlockDeviceApp;
 import com.eattle.phoket.host.UsbDeviceHost;
-import com.eattle.phoket.model.Folder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -133,6 +128,17 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         mFAB = (FloatingActionButton)findViewById(R.id.fab);
+
+        mFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                Fragment fr = SelectOptionFragment.newInstance(((Section1)(mAdapter.getItem(0))).selected);
+                fragmentTransaction.add(R.id.fragment, fr, "Option");
+                fragmentTransaction.commit();
+            }
+        });
 
 /*
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -284,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setSelectMode(){
-        if(mFAB.getVisibility() == View.GONE) {
+        if(mFAB.getVisibility() == View.INVISIBLE) {
             Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_in);
             anim.setInterpolator(new FastOutSlowInInterpolator());
             anim.setDuration(200L);
@@ -317,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    mFAB.setVisibility(View.GONE);
+                    mFAB.setVisibility(View.INVISIBLE);
                 }
 
                 @Override
