@@ -1,6 +1,7 @@
 package com.eattle.phoket;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -137,7 +138,7 @@ public class SelectOptionFragment extends Fragment {
         if(db == null)
             db = DatabaseHelper.getInstance(getActivity());
         String storyName = CONSTANT.convertFolderNameToStoryName(db.getFolder(folderID).getName());
-        d.setMessage("스마트폰에 \n'" + storyName +"'\n폴더를 생성하시겠습니까?");
+        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?");
 
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
