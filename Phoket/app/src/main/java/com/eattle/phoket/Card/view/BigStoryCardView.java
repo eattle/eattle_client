@@ -44,7 +44,7 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         Glide.with(getContext())
                 .load(card.getTitleImage())
-                .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
+                .override(CONSTANT.screenWidth,1000)
                 .into(storyImage);
 
         date.setText(card.getDate());
@@ -61,11 +61,16 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
     public void setSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
         pressed.setBackgroundResource(R.drawable.pressed_button);
+        ImageView check = (ImageView)findViewById(R.id.check);
+        check.setVisibility(VISIBLE);
     }
 
     public void setNoSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
         pressed.setBackgroundResource(R.drawable.ripple_button);
+        ImageView check = (ImageView)findViewById(R.id.check);
+        check.setVisibility(INVISIBLE);
+
     }
 
 }

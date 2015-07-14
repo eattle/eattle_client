@@ -44,11 +44,17 @@ public class DailyCardView extends CardItemView<DailyCard> {
     public void setSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
         pressed.setBackgroundResource(R.drawable.pressed_button);
+        ImageView check = (ImageView)findViewById(R.id.check);
+        check.setVisibility(VISIBLE);
+
     }
 
     public void setNoSelect(){
         ImageView pressed = (ImageView)findViewById(R.id.interactionEffect);
         pressed.setBackgroundResource(R.drawable.ripple_button);
+        ImageView check = (ImageView)findViewById(R.id.check);
+        check.setVisibility(INVISIBLE);
+
     }
 
 }

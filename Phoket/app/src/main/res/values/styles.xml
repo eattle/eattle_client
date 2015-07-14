@@ -37,6 +37,8 @@
     <style name="MaterialTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+
 
         <!-- ...and here we setting appcompat’s color theming attrs -->
         <item name="colorPrimary">@color/colorPrimary</item>
