@@ -79,6 +79,7 @@ public class Section1 extends Fragment {
 
         setupMaterialListView();
 
+
         mListView.addOnItemTouchListener(new RecyclerItemClickListener.OnItemClickListener() {
 
             @Override
@@ -316,6 +317,7 @@ public class Section1 extends Fragment {
 
     public void initialize(){
         isSelectMode = false;
+        selected.clear();
         new InitializeApplicationsTask().execute();
     }
 
