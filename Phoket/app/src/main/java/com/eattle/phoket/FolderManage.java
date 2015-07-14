@@ -57,13 +57,13 @@ public class FolderManage {
         boolean result;
         if(file!=null&&file.exists()){
             File[] childFileList = file.listFiles();
-            for(File childFile : childFileList)
-            {
-                if(childFile.isDirectory()) {
-                    deleteFile(new File(childFile.getAbsolutePath()));    //하위 디렉토리
-                }
-                else {
-                    childFile.delete();    //하위 파일
+            if(childFileList != null) {//하위 폴더 및 하위 파일이 있으면
+                for (File childFile : childFileList) {
+                    if (childFile.isDirectory()) {
+                        deleteFile(new File(childFile.getAbsolutePath()));    //하위 디렉토리
+                    } else {
+                        childFile.delete();    //하위 파일
+                    }
                 }
             }
 

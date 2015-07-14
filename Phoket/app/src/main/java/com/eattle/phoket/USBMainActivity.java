@@ -155,7 +155,6 @@ public class USBMainActivity extends ActionBarActivity {
                 folderName.setText(folderList.get(position).getName());
             }
             else if(mode == 1){//태그별
-
                 //TODO 태그별 대표 이미지 가져오기
                 folderName.setText(tagList.get(position).getName());
             }

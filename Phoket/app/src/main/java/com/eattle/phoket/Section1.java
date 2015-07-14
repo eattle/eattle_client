@@ -1,10 +1,14 @@
 package com.eattle.phoket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
@@ -31,6 +36,7 @@ import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,13 +127,20 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
+
                 if(state != STATE_RUNNING)  return;
                 if(isSelectMode)    return;
                 if(!mListView.isSelectable(position))   return;
+                /*
                 isSelectMode = true;
                 mListView.setSelect(position);
                 ((MainActivity)getActivity()).setSelectMode();
-                selected++;
+                selected++;*/
+
+                CardData data = (CardData) view.getTag();
+                Toast.makeText(getActivity(),"롱클릭 folder ID : "+data.getData(),Toast.LENGTH_SHORT).show();
+
+                testPopupDialog(data.getData());
             }
         });
 
@@ -157,6 +170,136 @@ public class Section1 extends Fragment {
 
     }
 
+    public void testPopupDialog(final int folderID){
+        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+        d.setTitle("로컬에 폴더를 생성하시겠습니까?");
+
+        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //makeLocalFolder(folderID);
+                        new ProgressDlgSample(getActivity()).execute(folderID);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        break;
+
+                }
+            }
+        };
+        d.setPositiveButton("Yes", l);
+        d.setNegativeButton("No", l);
+        d.show();
+
+    }
+    public void makeLocalFolder(int folderID){
+        if(db == null)
+            db = DatabaseHelper.getInstance(getActivity());
+
+        Folder folder = db.getFolder(folderID);
+        String folderName = CONSTANT.convertFolderNameToStoryName(folder.getName());
+        folderName = Environment.getExternalStorageDirectory() + "/PhoKet/" + folderName;
+        FolderManage.makeDirectory(folderName);
+
+        List<Media> medias = db.getAllMediaByFolder(folder.getId());
+        for(int i=0;i<medias.size();i++){
+            Media media = medias.get(i);
+            File originalPicture = new File(media.getPath());
+            String newPath = folderName+"/"+media.getName();
+            FolderManage.copyFile(originalPicture,newPath);
+            //기존의 사진에서 지우기
+            FolderManage.deleteFile(originalPicture);
+            //Media DB에 업데이트
+            media.setPath(newPath);
+            db.updateMedia(media);
+
+            //Folder DB에 업데이트
+            if(media.getId() == folder.getTitleImageID()) {//폴더의 대표사진에 대해
+                folder.setImage(newPath);
+                db.updateFolder(folder);
+                //TODO 사진 경로 바뀌면 썸네일 경로도 달라지는지?
+            }
+        }
+
+
+    }
+    //new ProgressDlgSample(getActivity()).execute(folder ID);
+    public class ProgressDlgSample extends AsyncTask<Integer, String, Integer> {
+
+        private ProgressDialog mDlg;
+        private Context mContext;
+
+        public ProgressDlgSample(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mDlg = new ProgressDialog(mContext);
+            mDlg.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mDlg.setMessage("스토리를 폴더로 생성하는 중입니다..");
+            mDlg.show();
+
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+
+            final int folderID = params[0];
+
+            if(db == null)
+                db = DatabaseHelper.getInstance(getActivity());
+
+            Folder folder = db.getFolder(folderID);
+            String folderName = CONSTANT.convertFolderNameToStoryName(folder.getName());
+            folderName = Environment.getExternalStorageDirectory() + "/PhoKet/" + folderName;
+            FolderManage.makeDirectory(folderName);
+
+            List<Media> medias = db.getAllMediaByFolder(folder.getId());
+            int totalNum = medias.size();
+            publishProgress("max",Integer.toString(totalNum));//사진의 총 개수를 프로그레스 바에 설정한다
+
+            for(int i=0;i<medias.size();i++){
+                Media media = medias.get(i);
+                File originalPicture = new File(media.getPath());
+                String newPath = folderName+"/"+media.getName();
+                FolderManage.copyFile(originalPicture,newPath);
+                //기존의 사진에서 지우기
+                FolderManage.deleteFile(originalPicture);
+                //Media DB에 업데이트
+                media.setPath(newPath);
+                db.updateMedia(media);
+
+                //Folder DB에 업데이트
+                if(media.getId() == folder.getTitleImageID()) {//폴더의 대표사진에 대해
+                    folder.setImage(newPath);
+                    db.updateFolder(folder);
+                    //TODO 사진 경로 바뀌면 썸네일 경로도 달라지는지?
+                }
+
+                // 작업이 진행되면서 호출하며 화면의 업그레이드를 담당하게 된다
+                publishProgress("progress", Integer.toString(i+1));
+            }
+            // 수행이 끝나고 리턴하는 값은 다음에 수행될 onProgressUpdate 의 파라미터가 된다
+            return totalNum;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... progress) {
+            if (progress[0].equals("progress")) {
+                mDlg.setProgress(Integer.parseInt(progress[1]));
+            } else if (progress[0].equals("max")) {
+                mDlg.setMax(Integer.parseInt(progress[1]));//사진의 총 개수
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            mDlg.dismiss();
+            Toast.makeText(mContext, "스토리 폴더 생성 완료",Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private void setupMaterialListView() {
         mListView.setItemAnimator(new FadeInUpAnimator());

@@ -299,8 +299,6 @@ public class ServiceOfPictureClassification extends Service {
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
         String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
         int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
-        String folderThumbnailName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/thumbnail/";
-        FolderManage.makeDirectory(folderThumbnailName);
 
         mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
         do {
@@ -400,10 +398,11 @@ public class ServiceOfPictureClassification extends Service {
 
             //DB에 사진 데이터를 넣는다.
             if (ExistedMedia == null) {//새로운 사진
-                Media m = new Media(pictureID, folderIDForDB, "" + pictureID, pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path);
-                db.createMedia(m);
                 String[] pathArr = path.split("/");
-                db.createTag(pathArr[pathArr.length - 2], pictureID);
+
+                Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1] , pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path);
+                db.createMedia(m);
+                db.createTag(pathArr[pathArr.length - 2], pictureID);//사진이 속했던 폴더 이름으로 태그 만들기
                 Log.d(TAG,"미디어 id "+pictureID+" 에 대해 createMedia() 호출 (folderIDForDB : "+folderIDForDB+")");
             } else {//기존 사진
                 //업데이트만 한다
@@ -443,26 +442,13 @@ public class ServiceOfPictureClassification extends Service {
                 new_name = startFolderID + "의 스토리";
             }
 
-
             if (previousStoryName.equals(new_name) && pictureNumInStory > CONSTANT.BOUNDARY) {//'일상'이 아닌 '스토리'에 대해 중복 날짜 스토리
                 Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
                 overlappedNum++;
                 new_name += (" - " + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
             }
-
-
-            //Folder DB에 넣는다.
-//            Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
-//            db.createFolder(f);
-//            Log.d("MainActivity", "Folder DB 입력 완료");
         }
-        //db.createSeveralMedia(medias);//사진 목록들을 한꺼번에 DB에 넣는다
 
-        //메인화면의 스토리 목록을 갱신한다.
-        //drawMainView();
-        //MainActivity에 메세지를 보낸다
-
-//        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
         Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
 
         sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
@@ -470,51 +456,6 @@ public class ServiceOfPictureClassification extends Service {
         isClassifying = 0;
         mCursor.close();
     }
-
-    //썸네일 생성 함수
-    public static void createThumbnail(Bitmap bitmap, String strFilePath, String filename) {
-
-        File file = new File(strFilePath);
-
-        if (!file.exists()) {
-            file.mkdirs();
-            // Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-        }
-        File fileCacheItem = new File(strFilePath + filename);
-        //strFilePath+filename이 이미 존재한다면, 썸네일을 만들 필요가 없다
-        if (fileCacheItem.exists()) {
-            Log.d("createThumbnail", "썸네일이 이미 존재합니다");
-            return;
-        }
-
-        OutputStream out = null;
-
-
-        try {
-            fileCacheItem.createNewFile();
-            out = new FileOutputStream(fileCacheItem);
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-        /*
-        Bitmap original = BitmapFactory.decodeStream(getAssets().open("1024x768.jpg"));
-ByteArrayOutputStream out = new ByteArrayOutputStream();
-original.compress(Bitmap.CompressFormat.PNG, 100, out);
-Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
-
-Log.e("Original   dimensions", original.getWidth()+" "+original.getHeight());
-Log.e("Compressed dimensions", decoded.getWidth()+" "+decoded.getHeight());
-         */
-
 
     @Override
     public void onDestroy() {
