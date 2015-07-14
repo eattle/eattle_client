@@ -256,6 +256,10 @@ public class ServiceOfPictureClassification extends Service {
     private void pictureClassification() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
         String TAG = "classification";
         isClassifying = 1;
+        //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
+        sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
+
+
         //pictureClassification()의 속도 개선 방안
         //1. 처음에 mediaDB를 전부 삭제하지 않는다
         // -> folderIDForDB만 업데이트 한다
@@ -278,21 +282,13 @@ public class ServiceOfPictureClassification extends Service {
         //DB를 참조한다.
         Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
         db.createManager(_m);//Manager DB에 값들을 집어넣음
-        //DB에 있는 데이터들을 초기화한다
-        db.deleteAllFolder();
-        //db.deleteAllMedia();
-        //db.deleteAllTag();
-        //db.deleteAllMediaTag();
-        //커서의 위치를 처음으로 이동시킨다.
-//        ImageSetter.setCursor(0, 0);
-        //File picture=null;
-        //File dir=null;
 
-        //DB에 추가될 Media들의 목록(DB에 한꺼번에 넣기 위하여)
-//        ArrayList<Media> medias = new ArrayList<Media>();
+        db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(folderID == 1<-휴지통)은 제외되어 있음
+
 
         String startFolderID = "";
         String endFolderID = "!";
+
         int folderIDForDB = 0;//Folder DB에 들어가는 아이디
         long _pictureTakenTime = 0;//현재 읽고 있는 사진 이전의 찍힌 시간, 초기값은 현재 시간
         String representativeImage = "";//폴더에 들어가는 대표이미지의 경로, 일단 폴더에 들어가는 첫번째 사진으로 한다.
@@ -324,6 +320,9 @@ public class ServiceOfPictureClassification extends Service {
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
             Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
+            if((ExistedMedia != null) && (ExistedMedia.getFolder_id() == -1))//휴지통에 들어있는 사진
+                continue; //정리에 포함시키지 않는다.
+
             //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
             //사진이 촬영된 날짜
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
@@ -367,7 +366,6 @@ public class ServiceOfPictureClassification extends Service {
                     //db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
                     sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,db.createFolder(f));
-//                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, representativeImage, representativeThumbnail_path, new_name, folderIDForDB, pictureNumInStory);
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");

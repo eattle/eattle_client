@@ -395,6 +395,12 @@ public class MainActivity extends AppCompatActivity {
                     ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id));
                     ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id));
                     break;
+
+                case CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION://서비스가 사진 정리를 시작했다는 메세지
+                    int isClassifying = msg.arg1;//사진정리중이면 1, 아니면 0이 들어있음
+                    //TODO
+
+                    break;
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);

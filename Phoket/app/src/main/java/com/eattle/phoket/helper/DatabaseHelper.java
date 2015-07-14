@@ -634,7 +634,6 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
-
     }
 
     /*

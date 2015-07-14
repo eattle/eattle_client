@@ -245,6 +245,7 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     protected void onResume() {
         refreshGrid();
@@ -327,6 +328,9 @@ public class AlbumGridActivity extends AppCompatActivity {
             titleImagePath = mMediaList.get(0).getPath();
 
         }
+
+        if(mMediaList.size() == 0)//사진이 하나도 남지 않으면
+            this.finish();//그리드뷰 종료
     }
 
     //백버튼을 눌렀을 때, 메모리 정리를 한다
