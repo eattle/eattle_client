@@ -55,7 +55,7 @@ public class Section1 extends Fragment {
     private boolean isDaily;
 
     boolean isSelectMode = false;
-    int selected = 0;
+    ArrayList<CardData> selected = new ArrayList<>();
 
 
     @Override
@@ -79,13 +79,17 @@ public class Section1 extends Fragment {
             public void onItemClick(CardItemView view, int position) {
 
                 if(isSelectMode){
-                    if(mListView.isSelectable(position))
-                        selected += mListView.setSelect(position)? 1 : -1;
-                    if(selected <= 0) {
-                        ((MainActivity) getActivity()).setSelectMode();
-                        isSelectMode = false;
+                    if(mListView.isSelectable(position)){
+                        if(mListView.setSelect(position)){
+                            selected.add((CardData)view.getTag());
+                        }else{
+                            selected.remove((CardData)view.getTag());
+                            if(selected.size() <= 0) {
+                                ((MainActivity) getActivity()).setSelectMode();
+                                isSelectMode = false;
+                            }
+                        }
                     }
-
                     return;
                 }
 //                if(state != STATE_RUNNING)  return;
@@ -125,9 +129,12 @@ public class Section1 extends Fragment {
                 if(isSelectMode)    return;
                 if(!mListView.isSelectable(position))   return;
                 isSelectMode = true;
-                mListView.setSelect(position);
+                if(mListView.setSelect(position)){
+                    selected.add((CardData)view.getTag());
+                }else{
+                    selected.remove((CardData)view.getTag());
+                }
                 ((MainActivity)getActivity()).setSelectMode();
-                selected++;
             }
         });
 

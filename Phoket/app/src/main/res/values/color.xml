@@ -9,10 +9,12 @@
     <!-- click했을 때 오버라이드 되는 -->
     <color name="colorControlHighlight">#88000000</color>
     <!-- press됐을 때 오버라이드 되는 -->
-    <color name="colorPressedHighlight">#DD000000</color>
+    <color name="colorPressedHighlight">#AA000000</color>
 
     <!-- 투명 -->
     <color name="colorTransparent">#00000000</color>
+    <color name="colorPrimaryLight">#DDFFFFFF</color>
+    <!-- tab indicator ... highlight color -->
 
 
     <!-- general text colors -->

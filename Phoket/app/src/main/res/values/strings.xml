@@ -24,4 +24,5 @@
     <string name="title_activity_usbmain">USBMainActivity</string>
     <string name="title_activity_popup_picture">PopupPictureActivity</string>
     <string name="title_activity_search">SearchActivity</string>
+    <string name="title_activity_select_option">SelectOptionActivity</string>
 </resources>

@@ -47,13 +47,20 @@
         android:textSize="@dimen/abc_text_size_menu_material"
         android:layout_gravity="bottom" />
 
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_check"
-        android:visibility="gone"/>
+        android:src="@drawable/ic_more_vert_white_24dp"
+        android:visibility="invisible"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment">
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
