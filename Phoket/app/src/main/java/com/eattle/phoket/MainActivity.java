@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     Messenger mService = null;
     boolean mIsBound;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
-    //TextView alarm;
+    boolean mIsClassifying = false;
 
     ActionMode mActionMode;
 
@@ -134,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        //우측 하단 FAB
+        //롱클릭 했을 때만 보여
         mFAB = (FloatingActionButton)findViewById(R.id.fab);
 
         mFAB.setOnClickListener(new View.OnClickListener() {
@@ -147,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    /***************** Menu 부분 **********************/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -202,6 +206,13 @@ public class MainActivity extends AppCompatActivity {
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fm.beginTransaction();
+            Fragment fr = fm.findFragmentByTag("Option");
+            if(fr != null) {
+                fragmentTransaction.remove(fr);
+                fragmentTransaction.commit();
+            }
             mActionMode = null;
             if(mFAB.getVisibility() == View.VISIBLE){
                 mFAB.setVisibility(View.INVISIBLE);
@@ -210,17 +221,24 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /***************** 기본 activity 관련 함수 부분 **********************/
+
 
     @Override
     protected void onResume() {
         super.onResume();
         if(!mIsBound)//서비스와 연결 안되어 있으면
             doBindService();//연결
+
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("adsa", "restart");
+        if(mIsClassifying)  return;
+        ((Section1)(mAdapter.getItem(0))).initialize();
+        ((Section2)(mAdapter.getItem(1))).initialize();
 
     }
 
@@ -242,15 +260,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
-                if(mFAB.getVisibility() == View.VISIBLE){
-                    mFAB.setVisibility(View.INVISIBLE);
-                    ((Section1)(mAdapter.getItem(0))).initialize();
-                    return false;
-                }
+        if(keyCode == KeyEvent.KEYCODE_BACK){//백버튼을 통제(비밀번호 유지를 위해)
+            //선택된 것을 두번째로 끔
+            if(mFAB.getVisibility() == View.VISIBLE){
+                mFAB.setVisibility(View.INVISIBLE);
+                ((Section1)(mAdapter.getItem(0))).initialize();
+            }else{
                 wantCapicUSB();
-                return false;
+            }
+
+            return false;
+
         }
         return true;
     }
@@ -390,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
                     s.getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
                     s.setAction("Action", null).show();
 
+                    mIsClassifying = false;
 /*                    Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_SHORT)
                             .getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
                             .setAction("Action", null).show();*/
@@ -407,7 +428,17 @@ public class MainActivity extends AppCompatActivity {
 
                 case CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION://서비스가 사진 정리를 시작했다는 메세지
                     int isClassifying = msg.arg1;//사진정리중이면 1, 아니면 0이 들어있음
-                    //TODO
+                    if(isClassifying == 1){
+                        ((Section1)(mAdapter.getItem(0))).setLoading();
+                        ((Section2)(mAdapter.getItem(1))).setLoading();
+
+
+                        Snackbar.make(findViewById(R.id.main_content), "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
+                                .setAction("Action", null).show();
+
+                        mIsClassifying = true;
+                        //((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id));
+                    }
 
                     break;
                 default:
@@ -490,9 +521,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-
-                        Snackbar.make(findViewById(R.id.main_content), "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
-                                .setAction("Action", null).show();
 
 
                         //alarm.setEnabled(false); // 정리 버튼 클릭 무효화

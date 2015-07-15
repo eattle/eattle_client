@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 27;
 
     public static final String DATABASE_NAME = "PhoketDB";
 

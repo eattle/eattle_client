@@ -1,16 +1,10 @@
 package com.eattle.phoket;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcelable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.dexafree.materialList.cards.OnButtonPressListener;
 import com.dexafree.materialList.cards.SimpleCard;
@@ -49,6 +42,8 @@ public class Section1 extends Fragment {
 
     private final static int STATE_LOADING = 0;
     private final static int STATE_RUNNING = 1;
+    private final static int STATE_SELECT = 2;
+
 
     private Context mContext;
     private DatabaseHelper db;
@@ -60,8 +55,9 @@ public class Section1 extends Fragment {
     private int state;
     private boolean isDaily;
 
-    boolean isSelectMode = false;
+//    boolean isSelectMode = false;
     ArrayList<CardData> selected = new ArrayList<>();
+    ArrayList<Integer> selectedp = new ArrayList<>();
 
 
     @Override
@@ -70,9 +66,6 @@ public class Section1 extends Fragment {
         View root =  inflater.inflate(R.layout.fragment_section1, container, false);
         mContext = getActivity();
         db = DatabaseHelper.getInstance(mContext);
-
-        state = STATE_LOADING;
-        isDaily = false;
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview1);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -84,66 +77,70 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
+                CardData data = (CardData) view.getTag();
 
-                if(isSelectMode){
-                    if(mListView.isSelectable(position)){
-                        if(mListView.setSelect(position)){
-                            selected.add((CardData)view.getTag());
-                        }else{
-                            selected.remove((CardData)view.getTag());
-                            if(selected.size() <= 0) {
+                switch (state) {
+                    case STATE_SELECT:
+                        if (!mListView.isSelectable(position))
+                            break;
+                        if (mListView.setSelect(position)) {
+                            selected.add(data);
+                            selectedp.add(position);
+                        } else {
+                            selected.remove(data);
+                            selectedp.remove(position);
+                            if (selected.size() <= 0) {
                                 ((MainActivity) getActivity()).setSelectMode();
-                                isSelectMode = false;
+                                state = STATE_RUNNING;
                             }
                         }
-                        ((MainActivity)getActivity()).mActionMode.setSubtitle(selected.size()+"개 선택됨");
-                    }
-                    return;
-                }
-//                if(state != STATE_RUNNING)  return;
-                CardData data = (CardData) view.getTag();
-                Intent intent;
-                switch (data.getType()) {
-                    case CONSTANT.NOTHING:
+                        ((MainActivity) getActivity()).mActionMode.setSubtitle(selected.size() + "개 선택됨");
                         break;
-                    case CONSTANT.TOPHOKET:
-                        intent = new Intent(mContext, PopupPictureActivity.class);
-                        intent.putExtra("id", data.getData());
-                        mContext.startActivity(intent);
-                        break;
-                    case CONSTANT.DAILY:
-                        List<Media> dailyMedia = db.getAllMediaByFolder(data.getData());
-                        intent = new Intent(mContext, AlbumFullActivity.class);
-                        intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
-                        intent.putExtra("IDForStoryOrTag", data.getData());// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
-                        intent.putExtra("kind", CardManager.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
-                        intent.putExtra("position", data.getId());//어디에서 시작할지
-                        mContext.startActivity(intent);
+                    case STATE_LOADING:
+                    case STATE_RUNNING:
+                        Intent intent;
+                        switch (data.getType()) {
+                            case CONSTANT.NOTHING:
+                                break;
+                            case CONSTANT.TOPHOKET:
+                                intent = new Intent(mContext, PopupPictureActivity.class);
+                                intent.putExtra("id", data.getData());
+                                mContext.startActivity(intent);
+                                break;
+                            case CONSTANT.DAILY:
+                                List<Media> dailyMedia = db.getAllMediaByFolder(data.getData());
+                                intent = new Intent(mContext, AlbumFullActivity.class);
+                                intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
+                                intent.putExtra("IDForStoryOrTag", data.getData());// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
+                                intent.putExtra("kind", CardManager.FOLDER);// 그리드 종류(스토리,디폴트태그,태그)
+                                intent.putExtra("position", data.getId());//어디에서 시작할지
+                                mContext.startActivity(intent);
 
-                        break;
-                    case CONSTANT.FOLDER:
-                    case CONSTANT.TAG:
-                        intent = new Intent(mContext, AlbumGridActivity.class);
-                        intent.putExtra("kind", data.getType());
-                        intent.putExtra("id", data.getData());
-                        mContext.startActivity(intent);
+                                break;
+                            case CONSTANT.FOLDER:
+                            case CONSTANT.TAG:
+                                intent = new Intent(mContext, AlbumGridActivity.class);
+                                intent.putExtra("kind", data.getType());
+                                intent.putExtra("id", data.getData());
+                                mContext.startActivity(intent);
+                                break;
+                        }
                         break;
                 }
             }
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-
-                if(state != STATE_RUNNING)  return;
-                if(isSelectMode)    return;
-                if(!mListView.isSelectable(position))   return;
-                isSelectMode = true;
-                if(mListView.setSelect(position)){
-                    selected.add((CardData)view.getTag());
-                }else{
-                    selected.remove((CardData)view.getTag());
+                if(state == STATE_RUNNING && mListView.isSelectable(position)){
+                    state = STATE_SELECT;
+                    mListView.setSelect(position);
+                    selected.add((CardData) view.getTag());
+                    selectedp.add(position);
+                    ((MainActivity)getActivity()).setSelectMode();
+                }else if(state == STATE_LOADING){
+                    Snackbar.make(mSwipeRefreshLayout, "정리가 완료된 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
                 }
-                ((MainActivity)getActivity()).setSelectMode();
             }
         });
 
@@ -153,12 +150,7 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
-                setLoading();
                 ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
-                Snackbar.make(mSwipeRefreshLayout, "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-
             }
         });
 
@@ -193,7 +185,6 @@ public class Section1 extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            state = STATE_LOADING;
             super.onPreExecute();
         }
 
@@ -235,7 +226,7 @@ public class Section1 extends Fragment {
         if(f.getPicture_num() <= CONSTANT.BOUNDARY){
             if(!isDaily){
                 isDaily = true;
-                CardManager.setHeaderItem(mListView, mContext, CONSTANT.convertFolderNameToStoryName(f.getName()));
+                CardManager.setHeaderItem(mListView, mContext, CONSTANT.convertFolderNameToDate(f.getName()));
             }
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(f.getId());
@@ -315,22 +306,38 @@ public class Section1 extends Fragment {
         }
     }
 
+    //초기화
+    //단순히 db에서 값을 가져와서 보여줌
     public void initialize(){
-        isSelectMode = false;
+        state = STATE_LOADING;
+        isDaily = false;
+//        isSelectMode = false;
+        int s = selected.size();
+        for(int i = 0; i < s; i++) {
+            mListView.setSelect(selectedp.get(i));
+        }
         selected.clear();
-        new InitializeApplicationsTask().execute();
+        selectedp.clear();
+        if(s <= 0) {
+            new InitializeApplicationsTask().execute();
+        }else{
+            state = STATE_RUNNING;
+
+        }
     }
 
+    // 상태를 loading으로
+    // db자체를 바꾸는 service를 실행
     public void setLoading(){
         state = STATE_LOADING;
         mListView.clear();
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     public void setRunning(){
         state = STATE_RUNNING;
-        mSwipeRefreshLayout.setRefreshing(false);
         isDaily = false;
-
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     public void addSingleCard(Folder f){
@@ -340,11 +347,5 @@ public class Section1 extends Fragment {
         addCard(f);
     }
 
-/*    private void setOptionButton(){
-        if(isSelectMode){
-            mFab.setVisibility(View.VISIBLE);
-        }else{
-            mFab.setVisibility(View.GONE);
-        }
-    }*/
+
 }

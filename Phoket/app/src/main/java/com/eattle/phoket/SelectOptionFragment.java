@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -94,24 +95,24 @@ public class SelectOptionFragment extends Fragment {
             public void onClick(View v) {
                 ArrayList<Uri> imageUris = new ArrayList<Uri>();
                 int cs = cards.size();
-                for(int i = 0; i< cs; i++) {
+                for (int i = 0; i < cs; i++) {
                     List<Media> medias = db.getAllMediaByFolder(cards.get(i).getData());
                     if (cards.get(i).getType() == CONSTANT.FOLDER) {
                         int ms = medias.size();
                         for (int j = 0; j < ms; j++) {
-                            imageUris.add(Uri.parse("file://"+medias.get(j).getPath()));
+                            imageUris.add(Uri.parse("file://" + medias.get(j).getPath()));
                         }
                     } else {
-                        imageUris.add(Uri.parse("file://"+medias.get(cards.get(i).getId()).getPath()));
+                        imageUris.add(Uri.parse("file://" + medias.get(cards.get(i).getId()).getPath()));
                     }
                 }
-                if(imageUris.size() == 1) {
+                if (imageUris.size() == 1) {
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, "공유하기"));
-                }else {
+                } else {
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
                     shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
@@ -129,7 +130,6 @@ public class SelectOptionFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
 
     }
-
 
 
     public void exportStoryPopupDialog(final int folderID){
