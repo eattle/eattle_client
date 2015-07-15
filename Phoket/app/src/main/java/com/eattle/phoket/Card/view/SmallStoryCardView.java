@@ -44,7 +44,7 @@ public class SmallStoryCardView extends CardItemView<SmallStoryCard> {
 
         Glide.with(getContext())
                 .load(card.getTitleImage())
-                .override(CONSTANT.screenWidth, 1000)
+                .override(CONSTANT.screenWidth, CONSTANT.screenHeight/2)
                 .into(storyImage);
 
 

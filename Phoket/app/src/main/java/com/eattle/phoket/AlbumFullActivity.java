@@ -639,8 +639,10 @@ public class AlbumFullActivity extends ActionBarActivity {
                     e.printStackTrace();
                 }
                 if (mPlaceHolderBitmap == null) {//내장 썸네일이 혹시 존재하지 않을 경우에만
-                    Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
+                    Log.d(TAG, "썸네일이 존재하지 않아 직접 생성");
                     mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+                    int degree = CONSTANT.GetExifOrientation(media.getPath());//사진 방향은 originalPath로만 알 수 있다
+                    mPlaceHolderBitmap = CONSTANT.GetRotatedBitmap(mPlaceHolderBitmap, degree);
                 }
 
                 Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);

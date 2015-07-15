@@ -150,12 +150,13 @@ public class TagsOverAlbum extends Fragment {
             tagButton.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //불필요한 메모리 정리---------------------------------------------------------------
+                    getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.TAG);
                     intent.putExtra("id", id);
                     intent.putExtra("mediaId", media_id);
                     startActivity(intent);
+
                 }
             });
         }
@@ -177,6 +178,7 @@ public class TagsOverAlbum extends Fragment {
             defaultTagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                     Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                     intent.putExtra("kind", CONSTANT.DEFAULT_TAG);
                     intent.putExtra("tagName", tagName_);//기본 태그에서는 tagName을 넘겨준다
@@ -212,6 +214,7 @@ public class TagsOverAlbum extends Fragment {
                         tagButton.setOnClickListener(new Button.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                                 Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                                 intent.putExtra("kind", CONSTANT.TAG);
                                 intent.putExtra("id", id);
@@ -254,11 +257,13 @@ public class TagsOverAlbum extends Fragment {
                     tagButton.setOnClickListener(new Button.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                             Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
                             intent.putExtra("kind", CONSTANT.TAG);
                             intent.putExtra("id", id);
                             intent.putExtra("mediaId", media_id);
                             startActivity(intent);
+
                         }
                     });
                 }
@@ -370,74 +375,6 @@ public class TagsOverAlbum extends Fragment {
         AlbumFullActivity.touchImageAdapter.removeView(position);//뷰페이저 업데이트
     }
 
-/*
-    public void deletePicture() {
-        //데이터베이스 OPEN
-        if(db == null)
-            db = DatabaseHelper.getInstance(getActivity());
-        //해당 사진을 삭제한다
-        //로컬(USB)에서 삭제
-        if (CONSTANT.ISUSBCONNECTED == 0) {//USB에 연결되지 않았을 때
-            Log.d("asdfasdf", "USB 낫 연결 " + m.getPath());
-            File tempFile = new File(m.getPath());
-            tempFile.delete();
-        } else if (CONSTANT.ISUSBCONNECTED == 1) {//USB에 연결되었을 때
-            Log.d("asdfasdf", "USB  연결");
-            fileSystem.delete(m.getId() + ".jpg", CONSTANT.BLOCKDEVICE);
-        }
-
-        int folderId = m.getFolder_id();
-        List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
-        Folder folder = db.getFolder(folderId);
-
-        //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
-        if(media_id == AlbumFullActivity.titleImageId) {
-            for (int i = 0; i < allMediaByFolder.size(); i++) {
-                if (allMediaByFolder.get(i).getId() == media_id) {
-                    //TODO 일단 그 다음 혹은 이전 사진을 대표사진으로 변경한다 -> 대표 사진 선정 방식 고민
-                    if (i != allMediaByFolder.size() - 1) {
-                        String path = allMediaByFolder.get(i + 1).getPath();
-                        folder.setImage(path);
-                        AlbumFullActivity.titleImagePath = path;
-
-                        int newId = allMediaByFolder.get(i + 1).getId();
-                        folder.setTitleImageID(newId);
-                        folder.setThumbNail_path(allMediaByFolder.get(i + 1).getThumbnail_path());
-                        AlbumFullActivity.titleImageId = newId;
-                    } else {
-                        String path = allMediaByFolder.get(i - 1).getPath();
-
-                        folder.setImage(path);
-                        AlbumFullActivity.titleImagePath = path;
-
-                        int newId = allMediaByFolder.get(i - 1).getId();
-                        folder.setTitleImageID(newId);
-                        folder.setThumbNail_path(allMediaByFolder.get(i - 1).getThumbnail_path());
-                        AlbumFullActivity.titleImageId = newId;
-                    }
-                }
-            }
-        }
-        folder.setPicture_num(--AlbumFullActivity.totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
-        db.updateFolder(folder);//DB에 업데이트
-
-
-
-        //DB에서 해당 사진 삭제
-        db.deleteMedia(m.getId());
-        Log.d("TagsOverAlbum", "DB 삭제 완료");
-
-        //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때, 폴더(스토리) 자체를 지운다
-        if (allMediaByFolder.size() == 0)
-            db.deleteFolder(folderId, true);
-        Log.d("TagsOverAlbum", "폴더 삭제 완료");
-
-
-        Toast.makeText(getActivity(),"사진이 삭제되었습니다",Toast.LENGTH_SHORT).show();
-        //뷰를 새로 그린다.
-        AlbumFullActivity.touchImageAdapter.removeView(position);
-    }
-    */
 
     private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener()
     {

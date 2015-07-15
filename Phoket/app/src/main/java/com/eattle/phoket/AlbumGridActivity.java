@@ -1,35 +1,22 @@
 package com.eattle.phoket;
 
 import android.content.ComponentCallbacks2;
-import android.content.ContentResolver;
 import android.os.AsyncTask;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
@@ -43,11 +30,9 @@ import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
-import com.eattle.phoket.view.SquareImageView;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class AlbumGridActivity extends AppCompatActivity {
     private final static String EXTRA_TAG = "ALBUM_GRID";
@@ -348,7 +333,6 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     private void addCard(Media m, int order){
         Log.d("asd", ""+order);
-
         if(day != m.getDay() || month != m.getMonth() || year != m.getYear()) {
             day = m.getDay();
             month = m.getMonth();
@@ -415,4 +399,5 @@ public class AlbumGridActivity extends AppCompatActivity {
 //        LinearLayout albumLayout = (LinearLayout) findViewById(R.id.albumLayout);
 //        albumLayout.startAnimation(animationFadeIn);
 */
+
 }

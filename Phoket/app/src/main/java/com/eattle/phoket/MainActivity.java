@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -86,6 +87,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+/*
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+*/
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -179,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     /***************** Menu 부분 **********************/
@@ -287,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy(){
-        super.onStop();
+        super.onDestroy();
         Log.d(EXTRA_TAG,"onDestroy() 호출");
         if(mIsBound)//서비스와 연결되어 있으면 해제
             doUnbindService();

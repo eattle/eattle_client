@@ -1,6 +1,7 @@
 package com.eattle.phoket;
 
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     private String path = "";
     private Media m;
     public int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
+    private Context context;
 
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
         Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
@@ -46,9 +48,15 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
     public StoryMainFragment() {
     }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
+        context = getActivity();//꼭 여기서 해줘야함
+    }
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("StoryMainFragment", "onCreateView() 호출(현재 position : " + position + ")");
+
         final View root = inflater.inflate(R.layout.story_main, container, false);
 
         Bundle args = getArguments();
@@ -77,6 +85,12 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                 } else {
                     //일단 썸네일을 부르면서 사진 로딩 시작
                     ((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
+
+
+//                    Glide.with(context)
+//                            .load(path)
+//                            .thumbnail(0.3f)
+//                            .into(img);
                 }
             }
 

@@ -207,21 +207,28 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
 
-        if(c.moveToFirst()){
-            do{
-                Folder f = new Folder();
-                f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-                f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
-                f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
-                f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
-                folders.add(f);
-            }while(c.moveToNext());
+            if (c.moveToFirst()) {
+                do {
+                    Folder f = new Folder();
+                    f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+                    f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+                    f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+                    f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+                    folders.add(f);
+                } while (c.moveToNext());
+            }
+        }
+        finally {
+            if(c != null)
+                c.close();
         }
         return folders;
     }
@@ -234,18 +241,25 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ID + " = " + id;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            folder.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-            folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-            folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-            folder.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-            folder.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
-            folder.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
-            folder.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
+            if (c.moveToFirst()) {
+                folder.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                folder.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                folder.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+                folder.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                folder.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+                folder.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+                folder.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return folder;
     }
 
@@ -317,20 +331,27 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
         SQLiteDatabase db=this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 1";//static이 1인 폴더의 아이디를 얻어온다
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
 
-        if(c.moveToFirst()){
-            do{
-                Folder f = new Folder();
-                f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
-                f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
-                f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
-                f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
-                folders.add(f);
-            }while(c.moveToNext());
+        try {
+            c = db.rawQuery(selectQuery, null);
+            if (c.moveToFirst()) {
+                do {
+                    Folder f = new Folder();
+                    f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+                    f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+                    f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+                    f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+                    folders.add(f);
+                } while (c.moveToNext());
+            }
+        }
+        finally {
+            if(c != null)
+                c.close();
         }
         return folders;
     }
@@ -400,28 +421,34 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_ID + " = " + media_id;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){//media_id에 해당하는 사진이 있을 때
 
-            media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-            media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-            media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-            media.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-            media.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-            media.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-            media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-            media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-            media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-            media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-            media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-            media.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-            media.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            if (c.moveToFirst()) {//media_id에 해당하는 사진이 있을 때
 
+                media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                media.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                media.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                media.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                media.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                media.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
+            } else
+                media = null;
         }
-        else
-            media=null;
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
 
@@ -433,29 +460,35 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
-                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
-                media.add(m);
-            }while(c.moveToNext());
+                    media.add(m);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
 
@@ -467,11 +500,52 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
+                    media.add(m);
+                } while (c.moveToNext());
+            }
+        }
+        finally {
+            if(c != null)
+                c.close();
+        }
+        return media;
+    }
+
+    /*
+    * getting Media by Tag id
+    */
+    public Media getMediaByFolderRandomly(int folder_id){
+        Media m = new Media();
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id + " ORDER BY RANDOM() LIMIT 1";
+
+
+        Cursor c = null;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            c = db.rawQuery(selectQuery, null);
+
+            if (c.moveToFirst()) {
                 m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
                 m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
@@ -485,40 +559,10 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
                 m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
-
-                media.add(m);
-            }while(c.moveToNext());
+            }
+        }finally {
+            c.close();
         }
-
-        return media;
-    }
-
-    /*
-    * getting Media by Tag id
-    */
-    public Media getMediaByFolderRandomly(int folder_id){
-        Media m = new Media();
-        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id + " ORDER BY RANDOM() LIMIT 1";
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
-
-        if(c.moveToFirst()){
-            m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-            m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-            m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-            m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-            m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-            m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-            m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-            m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-            m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-            m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-            m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-            m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-            m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
-        }
-
         return m;
     }
 
@@ -531,30 +575,36 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT "+ TABLE_MEDIA+".* FROM " + TABLE_MEDIA + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_MEDIA + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " = " + tag_id ;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
-                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
-                media.add(m);
+                    media.add(m);
 
-            }while(c.moveToNext());
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
 
@@ -566,29 +616,36 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_YEAR + " = " + year;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
-                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
-                media.add(m);
-            }while(c.moveToNext());
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
+                    media.add(m);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
 
@@ -600,29 +657,35 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_MONTH + " = " + month;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
-                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
-                media.add(m);
-            }while(c.moveToNext());
+                    media.add(m);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
 
@@ -634,29 +697,35 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_DAY + " = " + day;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media m = new Media();
-                m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
-                m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
-                m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
-                m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
-                m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
-                m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
-                m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
-                m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
-                m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+            if (c.moveToFirst()) {
+                do {
+                    Media m = new Media();
+                    m.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    m.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                    m.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    m.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                    m.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                    m.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                    m.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                    m.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                    m.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                    m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                    m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                    m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                    m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
-                media.add(m);
-            }while(c.moveToNext());
+                    media.add(m);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return media;
     }
     /*
@@ -757,20 +826,26 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_TAG;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Tag t = new Tag();
-                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+            if (c.moveToFirst()) {
+                do {
+                    Tag t = new Tag();
+                    t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
 
-                tags.add(t);
-            }while(c.moveToNext());
+                    tags.add(t);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return tags;
     }
 
@@ -783,15 +858,21 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_ID + " = " + tag_id;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            tag.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-            tag.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-            tag.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+            if (c.moveToFirst()) {
+                tag.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                tag.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                tag.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return tag;
     }
 
@@ -804,19 +885,25 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id ;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Tag t = new Tag();
-                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+            if (c.moveToFirst()) {
+                do {
+                    Tag t = new Tag();
+                    t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
-                tags.add(t);
-            }while(c.moveToNext());
+                    tags.add(t);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return tags;
     }
 
@@ -838,22 +925,28 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         }
         selectQuery += ")";
 
-        Log.d("adadsa", selectQuery);
+        //Log.d("adadsa", selectQuery);
 
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Tag t = new Tag();
-                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
-                t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
+            if (c.moveToFirst()) {
+                do {
+                    Tag t = new Tag();
+                    t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    t.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                    t.setColor(c.getInt(c.getColumnIndex(KEY_COLOR)));
 
-                tags.add(t);
-            }while(c.moveToNext());
+                    tags.add(t);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return tags;
     }
 
@@ -865,12 +958,18 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_NAME + " = \"" + tag_name + "\"";
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            return c.getInt(c.getColumnIndex(KEY_ID));
+            if (c.moveToFirst()) {
+                return c.getInt(c.getColumnIndex(KEY_ID));
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return 0;
     }
 
@@ -965,12 +1064,18 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG + " WHERE " + KEY_MEDIA_ID + " = " + media_id + " AND " + KEY_TAG_ID + " = " + tag_id;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            return c.getInt(c.getColumnIndex(KEY_ID));
+            if (c.moveToFirst()) {
+                return c.getInt(c.getColumnIndex(KEY_ID));
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return 0;
     }
 
@@ -979,19 +1084,25 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Media_Tag t = new Media_Tag();
-                t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                t.setTag_id(c.getInt(c.getColumnIndex(KEY_TAG_ID)));
-                t.setMedia_id(c.getInt(c.getColumnIndex(KEY_MEDIA_ID)));
+            if (c.moveToFirst()) {
+                do {
+                    Media_Tag t = new Media_Tag();
+                    t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                    t.setTag_id(c.getInt(c.getColumnIndex(KEY_TAG_ID)));
+                    t.setMedia_id(c.getInt(c.getColumnIndex(KEY_MEDIA_ID)));
 
-                mediaTag.add(t);
-            }while(c.moveToNext());
+                    mediaTag.add(t);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return mediaTag;
     }
 
@@ -1052,18 +1163,24 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_MANAGER;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        if(c.moveToFirst()){
-            do{
-                Manager m = new Manager();
-                m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
-                m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
-                m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
-                managers.add(m);
-            }while(c.moveToNext());
+            if (c.moveToFirst()) {
+                do {
+                    Manager m = new Manager();
+                    m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
+                    m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
+                    m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
+                    managers.add(m);
+                } while (c.moveToNext());
+            }
         }
-
+        finally {
+            if(c != null)
+                c.close();
+        }
         return managers;
 
     }
@@ -1083,16 +1200,21 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         String selectQuery = "SELECT * FROM " + TABLE_NOTIFICATION;
 
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = db.rawQuery(selectQuery, null);
+        Cursor c = null;
+        NotificationM n = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
 
-        NotificationM n = new NotificationM();
-
-        if(c.moveToLast()){//마지막으로 푸시한 시간을 얻어온다
-            n.setNotificationTime(c.getLong(c.getColumnIndex(KEY_LASTNOTIFICATION)));
-            n.setLastPictureID(c.getInt(c.getColumnIndex(KEY_LASTPICTUREID)));
-            return n;
+            if (c.moveToLast()) {//마지막으로 푸시한 시간을 얻어온다
+                n = new NotificationM();
+                n.setNotificationTime(c.getLong(c.getColumnIndex(KEY_LASTNOTIFICATION)));
+                n.setLastPictureID(c.getInt(c.getColumnIndex(KEY_LASTPICTUREID)));
+            }
         }
-
-        return null;
+        finally {
+            if(c != null)
+                c.close();
+        }
+        return n;
     }
 }
