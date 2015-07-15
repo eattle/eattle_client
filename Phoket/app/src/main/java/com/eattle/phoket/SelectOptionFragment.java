@@ -1,6 +1,7 @@
 package com.eattle.phoket;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -12,12 +13,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.eattle.phoket.Card.manager.CardData;
@@ -34,10 +34,11 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class SelectOptionFragment extends Fragment {
+    private String TAG = "SelectOptionFragment";
 
     private List<CardData> cards;
     private DatabaseHelper db;
-
+    private Context context;
 
     // TODO: Rename and change types and number of parameters
     public static SelectOptionFragment newInstance(List<CardData> cards) {
@@ -54,6 +55,7 @@ public class SelectOptionFragment extends Fragment {
         if (getArguments() != null) {
             cards = getArguments().getParcelableArrayList("cards");
         }
+        context = getActivity();//꼭 여기서 해줘야함
     }
 
     @Override
@@ -80,6 +82,8 @@ public class SelectOptionFragment extends Fragment {
                 for(int i=0;i<cards.size();i++) {
                     exportStoryPopupDialog(cards.get(i).getData());
                 }
+                removeFragment();
+
             }
         });
 
@@ -138,14 +142,15 @@ public class SelectOptionFragment extends Fragment {
         if(db == null)
             db = DatabaseHelper.getInstance(getActivity());
         String storyName = CONSTANT.convertFolderNameToStoryName(db.getFolder(folderID).getName());
-        d.setMessage("스마트폰에 \n'" + storyName +"'\n폴더를 생성하시겠습니까?");
+        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?");
 
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
                         //makeLocalFolder(folderID);
-                        new exportStoryToFolder(getActivity()).execute(folderID);
+                        Log.d(TAG, " context : "+context);
+                        new exportStoryToFolder(context).execute(folderID);
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         break;
@@ -184,10 +189,10 @@ public class SelectOptionFragment extends Fragment {
             final int folderID = params[0];
 
             if(db == null)
-                db = DatabaseHelper.getInstance(getActivity());
+                db = DatabaseHelper.getInstance(mContext);
 
             Folder folder = db.getFolder(folderID);
-            String folderName = CONSTANT.convertFolderNameToStoryName(folder.getName());
+            String folderName = CONSTANT.convertFolderNameToStoryFolderName(folder.getName());
             folderName = Environment.getExternalStorageDirectory() + "/PhoKet/" + folderName;
             FolderManage.makeDirectory(folderName);
 
@@ -204,11 +209,15 @@ public class SelectOptionFragment extends Fragment {
                 FolderManage.deleteFile(originalPicture);
                 //Media DB에 업데이트
                 media.setPath(newPath);
+                media.setIsFixed(1);//고정 스토리에 속한 사진이 된다.
+                Log.d(TAG,"new Path : "+newPath);
                 db.updateMedia(media);
 
                 //Folder DB에 업데이트
+                Log.d(TAG,"media.getId() : "+media.getId()+" folder.getTitleImageID()"+folder.getTitleImageID());
                 if(media.getId() == folder.getTitleImageID()) {//폴더의 대표사진에 대해
                     folder.setImage(newPath);
+                    folder.setIsFixed(1);//고정 스토리가 된다.
                     db.updateFolder(folder);
                     //TODO 사진 경로 바뀌면 썸네일 경로도 달라지는지?
                 }

@@ -283,8 +283,7 @@ public class ServiceOfPictureClassification extends Service {
         Manager _m = new Manager(totalPictureNum, averageInterval, standardDerivation);
         db.createManager(_m);//Manager DB에 값들을 집어넣음
 
-        db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(folderID == 1<-휴지통)은 제외되어 있음
-
+        db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(isFixed == 1<- 고정 스토리)은 제외되어 있음
 
         String startFolderID = "";
         String endFolderID = "!";
@@ -299,6 +298,7 @@ public class ServiceOfPictureClassification extends Service {
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
         String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
         int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
+        int tempFixedFolder=0;//고정 스토리 판별을 위한 flag
 
         mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
         do {
@@ -316,12 +316,34 @@ public class ServiceOfPictureClassification extends Service {
             pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
             thumbnail_path = CONSTANT.getThumbnailPath(mCr,pictureID);
 
-            Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
-            Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
-            if((ExistedMedia != null) && (ExistedMedia.getFolder_id() == -1))//휴지통에 들어있는 사진
-                continue; //정리에 포함시키지 않는다.
 
-            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것
+            Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+
+            Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
+            if((ExistedMedia != null) &&
+                    ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
+                //썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
+                ExistedMedia.setThumbnail_path(thumbnail_path);
+                db.updateMedia(ExistedMedia);
+
+                //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지 확인해야한다
+                //TODO File 객체 생성하여 사진 파일 존재여부 체크.
+                //TODO 사진의 경로가 달라졌다면 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
+
+                if(tempFixedFolder == ExistedMedia.getFolder_id())
+                    continue;
+
+                if(ExistedMedia.getIsFixed() == 1) {
+                    int folderID = ExistedMedia.getFolder_id();
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID);
+                    tempFixedFolder = folderID;
+
+                }
+                continue; //정리에 포함시키지 않는다.
+            }
+            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것 -- 유지됨
+            tempFixedFolder = 0;//고정 스토리 판별을 위한 flag
+
             //사진이 촬영된 날짜
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
 
@@ -360,7 +382,7 @@ public class ServiceOfPictureClassification extends Service {
                         }
                     }
 
-                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
+                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID), 0);
                     //db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
                     sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,db.createFolder(f));
@@ -400,7 +422,7 @@ public class ServiceOfPictureClassification extends Service {
             if (ExistedMedia == null) {//새로운 사진
                 String[] pathArr = path.split("/");
 
-                Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1] , pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path);
+                Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1] , pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path,0);
                 db.createMedia(m);
                 db.createTag(pathArr[pathArr.length - 2], pictureID);//사진이 속했던 폴더 이름으로 태그 만들기
                 Log.d(TAG,"미디어 id "+pictureID+" 에 대해 createMedia() 호출 (folderIDForDB : "+folderIDForDB+")");
@@ -449,7 +471,7 @@ public class ServiceOfPictureClassification extends Service {
             }
         }
 
-        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID));
+        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID),0);
 
         sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
         sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);

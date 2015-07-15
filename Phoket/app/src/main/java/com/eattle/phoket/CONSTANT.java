@@ -109,7 +109,21 @@ public class CONSTANT {
         return name;
 
     }
+    public static String convertFolderNameToStoryFolderName(String folderName) {
+        String name = "";
+        if (folderName.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
+            String[] bigSplit = folderName.split("~");
+            String[] tempName = bigSplit[0].split("_");
+            name += tempName[0] + "년" + tempName[1] + "월" + tempName[2] + "일~";
+            tempName = bigSplit[1].split("_");
+            name += tempName[1] + "월" + tempName[2].replace("의", "일의");
+        } else {//단일 날짜의 스토리일 경우
+            String[] tempName = folderName.split("_");
+            name = tempName[0] + "년" + tempName[1] + "월" + tempName[2].replace("의", "일의");
+        }
 
+        return name;
+    }
     /**
      * 사진 최적화를 위한 함수들 -----------------------------------------------------------------
      */

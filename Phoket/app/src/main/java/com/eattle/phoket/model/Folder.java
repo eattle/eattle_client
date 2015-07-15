@@ -10,6 +10,8 @@ public class Folder {
     String thumbNail_path;//폴더 대표 이미지의 썸네일 경로
     int picture_num;//특정 folder에 들어있는 사진의 개수
     int titleImageID;//폴더 대표 이미지의 아이디
+    int isFixed;//고정 스토리인지, 아닌지
+
     public Folder() {
     }
 
@@ -28,13 +30,14 @@ public class Folder {
         this.name = name;
     }
 
-    public Folder(int id, String name, String image, String thumbNail_path,int picture_num, int titleImageID) {
+    public Folder(int id, String name, String image, String thumbNail_path,int picture_num, int titleImageID, int isFixed) {
         this.id = id;
         this.name = name;
         this.image = image;
         this.thumbNail_path = thumbNail_path;
         this.picture_num = picture_num;
         this.titleImageID = titleImageID;
+        this.isFixed = isFixed;
     }
     public int getPicture_num(){
         return picture_num;
@@ -82,5 +85,11 @@ public class Folder {
     }
     public int getTitleImageID(){
         return this.titleImageID;
+    }
+    public void setIsFixed(int isFixed){
+        this.isFixed = isFixed;
+    }
+    public int getIsFixed(){
+        return this.isFixed;
     }
 }
