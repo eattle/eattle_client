@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
+import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.Card.SmallStoryCard;
 import com.eattle.phoket.R;
 
@@ -34,17 +35,20 @@ public class SmallStoryCardView extends CardItemView<SmallStoryCard> {
     public void build(SmallStoryCard card) {
         super.build(card);
         ImageView storyImage = (ImageView)findViewById(R.id.smallStoryImage);
-        TextView date = (TextView)findViewById(R.id.smallStoryDate);
+//        TextView date = (TextView)findViewById(R.id.smallStoryDate);
         TextView storyName = (TextView) findViewById(R.id.smallStoryName);
         TextView itemNum = (TextView)findViewById(R.id.smallStoryItemNum);
 
         itemNum.setText(""+card.getItemNum());
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
+
         Glide.with(getContext())
                 .load(card.getTitleImage())
+                .override(CONSTANT.screenWidth, 1000)
                 .into(storyImage);
 
-        date.setText(card.getDate());
+
+//        date.setText(card.getDate());
         storyName.setText(card.getStoryName());
 
         if(card.isSelecting())  setSelect();

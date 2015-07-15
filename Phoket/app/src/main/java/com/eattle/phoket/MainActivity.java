@@ -251,12 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
-
             }
-//            if(mFAB.getVisibility() == View.VISIBLE){
-//                mFAB.setVisibility(View.INVISIBLE);
-//                ((Section1)(mAdapter.getItem(0))).initialize();
-//            }
         }
     };
 
