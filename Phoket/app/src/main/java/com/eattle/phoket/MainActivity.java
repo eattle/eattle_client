@@ -56,6 +56,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_TAG = "MAIN_ACTIVITY";
 
+    private final static int STATE_RUNNING = 0;
+    private final static int STATE_SELECT = 1;
+    private final static int STATE_OPTION = 2;
+
     //UI 관련 변수
     private ViewPager mViewPager;
     private Adapter mAdapter;
@@ -77,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     boolean mIsClassifying = false;
 
     ActionMode mActionMode;
+
+    int state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        state = STATE_RUNNING;
+
         //우측 하단 FAB
         //롱클릭 했을 때만 보여
         mFAB = (FloatingActionButton)findViewById(R.id.fab);
@@ -141,11 +149,34 @@ public class MainActivity extends AppCompatActivity {
         mFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                state = STATE_OPTION;
                 FragmentManager fm = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fm.beginTransaction();
                 Fragment fr = SelectOptionFragment.newInstance(((Section1)(mAdapter.getItem(0))).selected);
                 fragmentTransaction.add(R.id.fragment, fr, "Option");
                 fragmentTransaction.commit();
+
+                Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_out);
+                anim.setInterpolator(new FastOutSlowInInterpolator());
+                anim.setDuration(200L);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mFAB.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                mFAB.startAnimation(anim);
+
             }
         });
     }
@@ -175,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
+            state = STATE_SELECT;
+
             mode.setTitle("사진을 선택해주세요");
             mode.setSubtitle("1개 선택됨");
             MenuInflater inflater = mode.getMenuInflater();
@@ -214,10 +247,16 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
             mActionMode = null;
-            if(mFAB.getVisibility() == View.VISIBLE){
+            if(state != STATE_RUNNING){
+                state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
+
             }
+//            if(mFAB.getVisibility() == View.VISIBLE){
+//                mFAB.setVisibility(View.INVISIBLE);
+//                ((Section1)(mAdapter.getItem(0))).initialize();
+//            }
         }
     };
 
@@ -262,7 +301,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK){//백버튼을 통제(비밀번호 유지를 위해)
             //선택된 것을 두번째로 끔
-            if(mFAB.getVisibility() == View.VISIBLE){
+            if(state != STATE_RUNNING){
+                state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
             }else{
@@ -317,50 +357,78 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setSelectMode(){
-        if(mFAB.getVisibility() == View.INVISIBLE) {
-            Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_in);
-            anim.setInterpolator(new FastOutSlowInInterpolator());
-            anim.setDuration(200L);
-            anim.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
+        Animation anim;
 
-                }
+        switch (state){
+            case STATE_RUNNING:
+                anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_in);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        state = STATE_SELECT;
+                    }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    mFAB.setVisibility(View.VISIBLE);
-                    mActionMode = startSupportActionMode(mActionModeCallback);
-                }
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mFAB.setVisibility(View.VISIBLE);
+                        mActionMode = startSupportActionMode(mActionModeCallback);
+                    }
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
 
-                }
-            });
-            mFAB.startAnimation(anim);
-        }else{
-            Animation anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_out);
-            anim.setInterpolator(new FastOutSlowInInterpolator());
-            anim.setDuration(200L);
-            anim.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
+                    }
+                });
+                anim.setInterpolator(new FastOutSlowInInterpolator());
+                anim.setDuration(200L);
+                mFAB.startAnimation(anim);
 
-                }
+                break;
+            case STATE_OPTION:
+                anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_in);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        state = STATE_SELECT;
+                    }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    mFAB.setVisibility(View.INVISIBLE);
-                    mActionMode.finish();
-                }
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mFAB.setVisibility(View.VISIBLE);
+                    }
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {
+                    }
+                });
+                anim.setInterpolator(new FastOutSlowInInterpolator());
+                anim.setDuration(200L);
+                mFAB.startAnimation(anim);
 
-                }
-            });
-            mFAB.startAnimation(anim);
+                break;
+            case STATE_SELECT:
+                anim = android.view.animation.AnimationUtils.loadAnimation(mFAB.getContext(), R.anim.fab_out);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        state = STATE_RUNNING;
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mFAB.setVisibility(View.INVISIBLE);
+                        mActionMode.finish();
+                    }
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                anim.setInterpolator(new FastOutSlowInInterpolator());
+                anim.setDuration(200L);
+                mFAB.startAnimation(anim);
+
+                break;
         }
 
     }

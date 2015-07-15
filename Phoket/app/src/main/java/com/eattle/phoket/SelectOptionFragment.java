@@ -127,6 +127,7 @@ public class SelectOptionFragment extends Fragment {
     }
 
     void removeFragment(){
+        ((MainActivity)getActivity()).setSelectMode();
         getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
 
     }
