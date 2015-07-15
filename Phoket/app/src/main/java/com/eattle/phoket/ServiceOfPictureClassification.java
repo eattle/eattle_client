@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 //사진 분류, 백업 등을 담당하는 서비스
 public class ServiceOfPictureClassification extends Service {
@@ -299,7 +300,9 @@ public class ServiceOfPictureClassification extends Service {
         String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
         int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
         int tempFixedFolder=0;//고정 스토리 판별을 위한 flag
-
+        List<Folder> fixedFolders = db.getFixedFolder();//고정 스토리 목록
+        for(int i=0;i<fixedFolders.size();i++)
+            Log.d(TAG,"고정 스토리 목록 : "+fixedFolders.get(i).getId());
         mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
         do {
             final String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
@@ -319,13 +322,12 @@ public class ServiceOfPictureClassification extends Service {
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
 
-            Log.d("Media", "ExistedMedia == null : " + (ExistedMedia == null));
             if((ExistedMedia != null) &&
                     ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
                 //썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
                 ExistedMedia.setThumbnail_path(thumbnail_path);
                 db.updateMedia(ExistedMedia);
-
+                Log.d(TAG,"휴지통에 들어있는 사진 || 고정 스토리에 속한 사진");
                 //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지 확인해야한다
                 //TODO File 객체 생성하여 사진 파일 존재여부 체크.
                 //TODO 사진의 경로가 달라졌다면 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
@@ -335,6 +337,7 @@ public class ServiceOfPictureClassification extends Service {
 
                 if(ExistedMedia.getIsFixed() == 1) {
                     int folderID = ExistedMedia.getFolder_id();
+                    Log.d(TAG,"고정 스토리 메인 액티비티로 전송");
                     sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID);
                     tempFixedFolder = folderID;
 
@@ -393,10 +396,19 @@ public class ServiceOfPictureClassification extends Service {
 
                 //방금 읽은 사진의 folderID가 시작날짜가 된다.
                 startFolderID = folderID;
-                //tempEattle이라는 이름으로 임시 폴더를 만든다.
-                //dir = FolderManage.makeDirectory(folderName);
 
-                folderIDForDB++;
+                //다음 스토리의 ID(folderIDForDB)를 결정하는 부분.(고정 스토리와 중복되지 않도록 한다)
+                int j;
+                while(true) {
+                    folderIDForDB++;
+                    for(j=0;j<fixedFolders.size();j++){
+                        if(folderIDForDB == fixedFolders.get(j).getId())
+                            break;
+                    }
+                    if(j == fixedFolders.size())
+                        break;
+                }
+
             }
             if (representativeImage.equals("")) {
                 //representativeImage = String.valueOf(pictureID);

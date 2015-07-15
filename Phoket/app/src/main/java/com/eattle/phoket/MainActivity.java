@@ -265,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Log.d(EXTRA_TAG, "onResume() 호출");
         super.onResume();
         if(!mIsBound)//서비스와 연결 안되어 있으면
             doBindService();//연결
@@ -274,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d("adsa", "restart");
+        Log.d(EXTRA_TAG, "onRestart() 호출");
         if(mIsClassifying)  return;
         ((Section1)(mAdapter.getItem(0))).initialize();
         ((Section2)(mAdapter.getItem(1))).initialize();

@@ -308,7 +308,32 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         db.execSQL("DELETE FROM " + TABLE_FOLDER + " WHERE "+KEY_ISFIXED+" = 0");
     }
 
+    //고정된 스토리의 아이디값들을 얻어온다
+    public List<Folder> getFixedFolder(){
+        Log.d("DatabaseHelper","getFixedFolder() 호출");
 
+
+        List<Folder> folders = new ArrayList<Folder>();;
+
+        SQLiteDatabase db=this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 1";//static이 1인 폴더의 아이디를 얻어온다
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()){
+            do{
+                Folder f = new Folder();
+                f.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                f.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                f.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+                f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
+                f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+                f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+                folders.add(f);
+            }while(c.moveToNext());
+        }
+        return folders;
+    }
 
 
 
