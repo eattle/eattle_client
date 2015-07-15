@@ -88,7 +88,7 @@ public class Section1 extends Fragment {
                             selectedp.add(position);
                         } else {
                             selected.remove(data);
-                            selectedp.remove(position);
+                            selectedp.remove((Integer)position);
                             if (selected.size() <= 0) {
                                 ((MainActivity) getActivity()).setSelectMode();
                                 state = STATE_RUNNING;
