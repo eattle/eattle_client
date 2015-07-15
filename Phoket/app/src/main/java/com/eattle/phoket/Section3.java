@@ -61,8 +61,6 @@ public class Section3 extends Fragment {
         mContext = getActivity();
         db = DatabaseHelper.getInstance(mContext);
 
-        state = STATE_LOADING;
-
         mListView = (MaterialListView) root.findViewById(R.id.section_listview3);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
 
@@ -100,8 +98,7 @@ public class Section3 extends Fragment {
             }
         });
 
-        new InitializeApplicationsTask().execute();
-
+        initialize();
         //show progress
         mListView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -172,24 +169,23 @@ public class Section3 extends Fragment {
     }
 
 
+    //초기화
+    //단순히 db에서 값을 가져와서 보여줌
+    public void initialize(){
+        state = STATE_LOADING;
+        new InitializeApplicationsTask().execute();
+    }
+
+    // 상태를 loading으로
+    // db자체를 바꾸는 service를 실행
     public void setLoading(){
         state = STATE_LOADING;
         mListView.clear();
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     public void setRunning(){
         state = STATE_RUNNING;
         mSwipeRefreshLayout.setRefreshing(false);
     }
-
-    public void addSingleCard(Tag t){
-        if(mListView == null)   return;
-        if(state == STATE_RUNNING)
-            setLoading();
-        addCard(t);
-    }
-
-
-
-
 }

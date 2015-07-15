@@ -61,7 +61,7 @@
             android:name=".AlbumFullActivity"
             android:label="@string/title_activity_album_full"
             android:parentActivityName=".AlbumGridActivity"
-            android:theme="@style/NoActionBarTheme"
+            android:theme="@style/FullScreenTheme"
             >
             <!--android:screenOrientation="portrait"-->
             <meta-data
@@ -71,7 +71,7 @@
         <activity
             android:name=".PopupForTagAddition"
             android:label="@string/title_activity_popup_for_tag_addition"
-            android:theme="@style/NoActionBarTheme" >
+            android:theme="@style/FullScreenTheme">
         </activity>
         <activity
             android:name=".USBMainActivity"

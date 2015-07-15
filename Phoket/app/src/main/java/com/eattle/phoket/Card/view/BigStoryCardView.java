@@ -44,7 +44,7 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
         Glide.with(getContext())
                 .load(card.getTitleImage())
-                .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
+                .override(CONSTANT.screenWidth,1000)
                 .into(storyImage);
 
         date.setText(card.getDate());
