@@ -21,7 +21,7 @@ import com.eattle.phoket.model.NotificationM;
 public class BroadcastListener extends BroadcastReceiver {
     private String TAG = "BroadcastListener";
     private static int countForTick = 0;
-    private static int howOftenCheck = 2;//60이면 60분마다 체크,10이면 10분마다 체크
+    private static int howOftenCheck = 10;//60이면 60분마다 체크,10이면 10분마다 체크
     //일정 시간마다 새로운 사진이 생성되었는지 여부를 체크한다.
     private static final String TIME_TICK = "android.intent.action.TIME_TICK";
     public static String ACTION_RESTART_PERSISTENTSERVICE = "ACTION.Restart.PhoketService";//서비스 재시작을 위해
@@ -101,11 +101,11 @@ public class BroadcastListener extends BroadcastReceiver {
 
         NotificationCompat.Builder mCompatBuilder = new NotificationCompat.Builder(context);
         mCompatBuilder.setSmallIcon(R.mipmap.icon);
-        mCompatBuilder.setTicker("새로운 사진으로 스토리를 만들어 보세요");
+        mCompatBuilder.setTicker("새로운 사진이 있네요! 스토리를 만들어 보세요");
         mCompatBuilder.setWhen(System.currentTimeMillis());
         //mCompatBuilder.setNumber(1);
         mCompatBuilder.setContentTitle("Phoket");
-        mCompatBuilder.setContentText("새로운 사진으로 스토리를 만들어 보세요");
+        mCompatBuilder.setContentText("새로운 사진이 있네요! 스토리를 만들어 보세요");
         mCompatBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
         mCompatBuilder.setContentIntent(pendingIntent);
         mCompatBuilder.setAutoCancel(true);
