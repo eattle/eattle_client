@@ -83,7 +83,7 @@ public class StoryRecommendFragment extends Fragment {
         }
 
 
-        if (totalFolderNum < recommendNum)//총 스토리의 개수가 4개가 안될때
+        if (totalFolderNum <= recommendNum)//총 스토리의 개수가 4개 이하일 때
             recommendNum = totalFolderNum - 1;//현재 보고있는 스토리 제외
         Log.d(TAG, "'일상'이 아닌 '스토리'의 개수 [totalFolderNum]   " + totalFolderNum);
         Log.d(TAG, "추천할 수 있는 사진의 개수 [recommendNum](최대 4개)  : " + recommendNum);

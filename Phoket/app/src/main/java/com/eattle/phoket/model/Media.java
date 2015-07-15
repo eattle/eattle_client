@@ -19,7 +19,7 @@ public class Media implements Parcelable {
     String placeName;       //위도,경도에 따른 장소명(없으면 "")
     String path;        //사진 경로
     String thumbnail_path;      //내장 썸네일 경로
-
+    int isFixed;        //1이면 특정 스토리(folder_id)에 고정으로 속한다는 의미, 0이면 일반적인 사진
 
     public Media() {
     }
@@ -37,9 +37,10 @@ public class Media implements Parcelable {
         placeName = in.readString();
         path = in.readString();
         thumbnail_path = in.readString();
+        isFixed = in.readInt();
     }
 
-    public Media(int id, int folder_id, String name, Long pictureTaken, int year, int month, int day, double latitude, double longitude, String placeName, String path, String thumbnail_path) {
+    public Media(int id, int folder_id, String name, Long pictureTaken, int year, int month, int day, double latitude, double longitude, String placeName, String path, String thumbnail_path,int isFixed) {
         this.id = id;
         this.folder_id = folder_id;
         this.name = name;
@@ -52,6 +53,7 @@ public class Media implements Parcelable {
         this.placeName = placeName;
         this.path = path;
         this.thumbnail_path = thumbnail_path;
+        this.isFixed = isFixed;
     }
 
     public Media(Media m){
@@ -67,8 +69,14 @@ public class Media implements Parcelable {
         this.placeName = m.getPlaceName();
         this.path = m.getPath();
         this.thumbnail_path = m.getThumbnail_path();
+        this.isFixed = m.getIsFixed();
     }
-
+    public void setIsFixed(int isFixed){
+        this.isFixed = isFixed;
+    }
+    public int getIsFixed(){
+        return this.isFixed;
+    }
     public void setPictureTaken(Long pictureTaken){
         this.pictureTaken = pictureTaken;
     }
@@ -183,6 +191,7 @@ public class Media implements Parcelable {
         dest.writeString(placeName);
         dest.writeString(path);
         dest.writeString(thumbnail_path);
+        dest.writeInt(isFixed);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

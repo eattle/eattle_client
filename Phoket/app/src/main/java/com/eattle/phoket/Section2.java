@@ -49,6 +49,7 @@ public class Section2 extends Fragment {
     private final static int STATE_LOADING = 0;
     private final static int STATE_RUNNING = 1;
 
+
     private Context mContext;
     private DatabaseHelper db;
 
@@ -66,8 +67,6 @@ public class Section2 extends Fragment {
         View root =  inflater.inflate(R.layout.fragment_section2, container, false);
         mContext = getActivity();
         db = DatabaseHelper.getInstance(mContext);
-
-        state = STATE_LOADING;
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview2);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -102,15 +101,11 @@ public class Section2 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                setLoading();
                 ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
-                Snackbar.make(mSwipeRefreshLayout, "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-
             }
         });
 
-        new InitializeApplicationsTask().execute();
+        initialize();
 
         //show progress
         mListView.setVisibility(View.GONE);
@@ -139,7 +134,6 @@ public class Section2 extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            state = STATE_LOADING;
             super.onPreExecute();
         }
 
@@ -184,9 +178,20 @@ public class Section2 extends Fragment {
         }
     }
 
+    //초기화
+    //단순히 db에서 값을 가져와서 보여줌
+    public void initialize(){
+        state = STATE_LOADING;
+        //selected.clear();
+        new InitializeApplicationsTask().execute();
+    }
+
+    // 상태를 loading으로
+    // db자체를 바꾸는 service를 실행
     public void setLoading(){
         state = STATE_LOADING;
         mListView.clear();
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     public void setRunning(){
@@ -200,6 +205,9 @@ public class Section2 extends Fragment {
             setLoading();
         addCard(f);
     }
+
+
+
 
 
 }

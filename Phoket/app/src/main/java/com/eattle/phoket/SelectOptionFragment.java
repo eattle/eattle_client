@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.eattle.phoket.Card.manager.CardData;
@@ -100,24 +99,24 @@ public class SelectOptionFragment extends Fragment {
             public void onClick(View v) {
                 ArrayList<Uri> imageUris = new ArrayList<Uri>();
                 int cs = cards.size();
-                for(int i = 0; i< cs; i++) {
+                for (int i = 0; i < cs; i++) {
                     List<Media> medias = db.getAllMediaByFolder(cards.get(i).getData());
                     if (cards.get(i).getType() == CONSTANT.FOLDER) {
                         int ms = medias.size();
                         for (int j = 0; j < ms; j++) {
-                            imageUris.add(Uri.parse("file://"+medias.get(j).getPath()));
+                            imageUris.add(Uri.parse("file://" + medias.get(j).getPath()));
                         }
                     } else {
-                        imageUris.add(Uri.parse("file://"+medias.get(cards.get(i).getId()).getPath()));
+                        imageUris.add(Uri.parse("file://" + medias.get(cards.get(i).getId()).getPath()));
                     }
                 }
-                if(imageUris.size() == 1) {
+                if (imageUris.size() == 1) {
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND);
                     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUris.get(0));
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, "공유하기"));
-                }else {
+                } else {
                     Intent shareIntent = new Intent();
                     shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
                     shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
@@ -135,7 +134,6 @@ public class SelectOptionFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
 
     }
-
 
 
     public void exportStoryPopupDialog(final int folderID){
@@ -210,6 +208,7 @@ public class SelectOptionFragment extends Fragment {
                 FolderManage.deleteFile(originalPicture);
                 //Media DB에 업데이트
                 media.setPath(newPath);
+                media.setIsFixed(1);//고정 스토리에 속한 사진이 된다.
                 Log.d(TAG,"new Path : "+newPath);
                 db.updateMedia(media);
 
@@ -217,7 +216,7 @@ public class SelectOptionFragment extends Fragment {
                 Log.d(TAG,"media.getId() : "+media.getId()+" folder.getTitleImageID()"+folder.getTitleImageID());
                 if(media.getId() == folder.getTitleImageID()) {//폴더의 대표사진에 대해
                     folder.setImage(newPath);
-
+                    folder.setIsFixed(1);//고정 스토리가 된다.
                     db.updateFolder(folder);
                     //TODO 사진 경로 바뀌면 썸네일 경로도 달라지는지?
                 }

@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private static DatabaseHelper Instance;
 
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 28;
 
     public static final String DATABASE_NAME = "PhoketDB";
 
@@ -68,6 +68,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_IMAGE = "image";
     private static final String KEY_PICTURE_NUM_IN_STORY = "picture_num";
     private static final String KEY_TITLEIMAGEID = "titleImageID";
+    private static final String KEY_ISFIXED = "isFixed";//고정 스토리이면 1,일반 스토리는 0
+
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
@@ -89,7 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_LONGITUDE + " DOUBLE, "
             + KEY_PLACENAME + " VARCHAR(100), "
             + KEY_PATH + " VARCHAR(255), "
-            + KEY_THUMBNAILPATH + " VARCHAR(255) "
+            + KEY_THUMBNAILPATH + " VARCHAR(255), "
+            + KEY_ISFIXED + " INTEGER NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_TAG =
@@ -113,7 +116,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             + KEY_IMAGE + " VARCHAR(255) NOT NULL, "
             + KEY_THUMBNAILPATH + " VARCHAR(255), "
             + KEY_PICTURE_NUM_IN_STORY + " INTEGER NOT NULL, "
-            + KEY_TITLEIMAGEID + " INTEGER NOT NULL "
+            + KEY_TITLEIMAGEID + " INTEGER NOT NULL, "
+            + KEY_ISFIXED + " INTEGER NOT NULL "
             + ")";
 
     private static final String CREATE_TABLE_MANAGER =
@@ -190,6 +194,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_THUMBNAILPATH, folder.getThumbNail_path());
         values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
         values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
+        values.put(KEY_ISFIXED, folder.getIsFixed());
 
         return (int)db.insert(TABLE_FOLDER, null, values);
     }
@@ -214,6 +219,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 f.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
                 f.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
                 f.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+                f.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
                 folders.add(f);
             }while(c.moveToNext());
         }
@@ -237,6 +243,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             folder.setThumbNail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
             folder.setPicture_num(c.getInt(c.getColumnIndex(KEY_PICTURE_NUM_IN_STORY)));
             folder.setTitleImageID(c.getInt(c.getColumnIndex(KEY_TITLEIMAGEID)));
+            folder.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
         }
 
         return folder;
@@ -257,6 +264,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_THUMBNAILPATH, folder.getThumbNail_path());
         values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
         values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
+        values.put(KEY_ISFIXED, folder.getIsFixed());
         return db.update(TABLE_FOLDER, values, KEY_ID + " = ? ", new String[] {String.valueOf(folder.getId())});
     }
 
@@ -296,7 +304,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public void deleteAllFolder(){
         Log.d("DatabaseHelper","deleteAllFolder() 호출");
         SQLiteDatabase db=this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_FOLDER);
+        //static이 1인 폴더는 지우지 않는다
+        db.execSQL("DELETE FROM " + TABLE_FOLDER + " WHERE "+KEY_ISFIXED+" = 0");
     }
 
 
@@ -324,6 +333,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_PLACENAME, media.getPlaceName());
         values.put(KEY_PATH, media.getPath());
         values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
+        values.put(KEY_ISFIXED, media.getIsFixed());
+
         return (int)db.insert(TABLE_MEDIA, null, values);
     }
 
@@ -346,6 +357,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             values.put(KEY_LONGITUDE, medias.get(i).getLongitude());
             values.put(KEY_PLACENAME, medias.get(i).getPlaceName());
             values.put(KEY_PATH, medias.get(i).getPath());
+            values.put(KEY_ISFIXED, medias.get(i).getIsFixed());
 
             db.insert(TABLE_MEDIA, null, values);
         }
@@ -379,6 +391,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
             media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
             media.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+            media.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
         }
         else
             media=null;
@@ -411,6 +425,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -444,6 +459,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -475,7 +491,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
             m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
             m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
-
+            m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
         }
 
         return m;
@@ -507,6 +523,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
 
@@ -541,6 +558,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -574,6 +592,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -607,6 +626,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 m.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
                 m.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
                 m.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                m.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
 
                 media.add(m);
             }while(c.moveToNext());
@@ -632,6 +652,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_PLACENAME, media.getPlaceName());
         values.put(KEY_PATH, media.getPath());
         values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
+        values.put(KEY_ISFIXED, media.getIsFixed());
 
         return  db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[] {String.valueOf(media.getId())});
     }
@@ -649,7 +670,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     public void deleteAllMedia(){
         Log.d("DatabaseHelper","deleteAllMedia() 호출");
         SQLiteDatabase db=this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_MEDIA);
+        //KEY_ISFIXED = 1인 놈은 지우지 않는다
+        db.execSQL("DELETE FROM " + TABLE_MEDIA + " WHERE "+KEY_ISFIXED+" = 0");
         deleteAllMediaTag();
     }
 
