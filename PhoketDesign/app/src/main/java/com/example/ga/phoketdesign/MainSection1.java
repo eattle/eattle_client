@@ -228,15 +228,7 @@ public class MainSection1 extends Fragment {
             //set data for list
             mSwipeRefreshLayout.setRefreshing(false);
             materialListView.clear();
-
-            for(int i = 0; i < 10; i++) {
-                setupBigStoryItem();
-//                setupTitleItem();
-
-                for (int j = 0; j < 10; j++) {
-                    setupDailyItem();
-                }
-            }
+            setupDailyItem();
 
             super.onPostExecute(result);
         }

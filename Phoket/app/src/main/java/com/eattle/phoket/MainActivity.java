@@ -251,12 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
-
             }
-//            if(mFAB.getVisibility() == View.VISIBLE){
-//                mFAB.setVisibility(View.INVISIBLE);
-//                ((Section1)(mAdapter.getItem(0))).initialize();
-//            }
         }
     };
 
@@ -473,6 +468,7 @@ public class MainActivity extends AppCompatActivity {
 
                     ((Section1)(mAdapter.getItem(0))).setRunning();
                     ((Section2)(mAdapter.getItem(1))).setRunning();
+                    ((Section3)(mAdapter.getItem(2))).initialize();
 
 
                     Snackbar s = Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_LONG);
@@ -480,10 +476,6 @@ public class MainActivity extends AppCompatActivity {
                     s.setAction("Action", null).show();
 
                     mIsClassifying = false;
-/*                    Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_SHORT)
-                            .getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
-                            .setAction("Action", null).show();*/
-
 
                     //wantBackUp();
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
@@ -500,6 +492,7 @@ public class MainActivity extends AppCompatActivity {
                     if(isClassifying == 1){
                         ((Section1)(mAdapter.getItem(0))).setLoading();
                         ((Section2)(mAdapter.getItem(1))).setLoading();
+                        ((Section3)(mAdapter.getItem(2))).setLoading();
 
 
                         Snackbar.make(findViewById(R.id.main_content), "사진을 정리 중입니다", Snackbar.LENGTH_SHORT)

@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.controller.RecyclerItemClickListener;
+import com.dexafree.materialList.controller.StickyHeaderDecoration;
 import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.manager.CardData;
@@ -64,24 +65,17 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     private List<Media> mMediaList;
 
+    private int day = 0;
+    private int month = 0;
+    private int year = 0;
 
-//    TextView titleText;
-//    ImageView titleImage;
-
-/*    GridView mGrid;
-    ImageAdapter Adapter;
-    List<Media> mMediaList;
-    ArrayList<ImageView> mImageList;
-
-
-    int Id;//folderId가 될수도 있고 TagId가 될수도 있다
-    int kind;
-*/
     String titleName;
     String titleImagePath;
     Media mediaByTag;//태그가 눌려진 사진
     int mediaId;//태그가 눌려진 사진의 아이디
     String tagName;//태그
+
+
 
     private BlockDevice blockDevice;
     @Override
@@ -92,9 +86,6 @@ public class AlbumGridActivity extends AppCompatActivity {
         setContentView(R.layout.activity_album_grid);
 
         db = DatabaseHelper.getInstance(getApplicationContext());
-
-//        titleText = (TextView) findViewById(R.id.titleText);
-//        titleImage = (ImageView) findViewById(R.id.titleImage);
 
         Intent intent = new Intent(this.getIntent());
 
@@ -115,6 +106,9 @@ public class AlbumGridActivity extends AppCompatActivity {
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbar.setTitle(titleName);
+        collapsingToolbar.setExpandedTitleTextAppearance(R.style.TextAppearance_AppCompat_Subhead);
+        collapsingToolbar.setCollapsedTitleTextAppearance(R.style.TextAppearance_AppCompat_Small);
+
 
         //폴더(스토리)의 대표사진 등록
         loadBackdrop();
@@ -170,64 +164,31 @@ public class AlbumGridActivity extends AppCompatActivity {
         mGridView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
 
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_album_grid, menu);
+        return true;
+    }
 
-
-/*        mGrid = (GridView) findViewById(R.id.imagegrid);
-        Adapter = new ImageAdapter(this);
-        mGrid.setAdapter(Adapter);
-        mGrid.setOnItemClickListener(mItemClickListener);
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-
-        LinearLayout actionBarLayout = (LinearLayout)getLayoutInflater().inflate(R.layout.actionbar_album, null);
-        TextView actionBarTitle = (TextView)actionBarLayout.findViewById(R.id.actionbar_title);
-        switch (kind){
-            case CONSTANT.FOLDER:
-                actionBarTitle.setText(getString(R.string.title_section2));
-                break;
-            case CONSTANT.TAG:
-            case CONSTANT.DEFAULT_TAG:
-                actionBarTitle.setText(getString(R.string.title_section3));
-                break;
-        }
-        ActionBar.LayoutParams params = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.MATCH_PARENT,
-                ActionBar.LayoutParams.MATCH_PARENT,
-                Gravity.LEFT);
-
-        ImageView drawerImageView = (ImageView)actionBarLayout.findViewById(R.id.home_icon);
-
-        //홈버튼
-        drawerImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.home:
                 int actSize = CONSTANT.actList.size();
                 for (int i = 0; i < actSize; i++) {
                     CONSTANT.actList.get(i).finish();
                     finish();
                 }
-            }
-        });
-
-        ImageView drawerImageViewCheck = (ImageView)actionBarLayout.findViewById(R.id.search_icon);
-
-        drawerImageViewCheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                return true;
+            case R.id.search:
                 Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
                 startActivity(intent);
-            }
-        });
-
-        actionBar.setCustomView(actionBarLayout, params);
-        actionBar.setDisplayHomeAsUpEnabled(false);*/
-
-
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
-
 
 
     private void loadBackdrop() {
@@ -239,15 +200,18 @@ public class AlbumGridActivity extends AppCompatActivity {
     }
 
     public void setupMaterialListView() {
+
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         layoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
         mGridView.setLayoutManager(layoutManager);
+
+        mGridView.addItemDecoration(new StickyHeaderDecoration(mGridView.getAdapter()));
 
     }
 
 
     @Override
-    protected void onResume() {
+    protected void onRestart() {
         refreshGrid();
         //변경사항 적용
         new InitializeApplicationsTask().execute();
@@ -383,6 +347,15 @@ public class AlbumGridActivity extends AppCompatActivity {
     }
 
     private void addCard(Media m, int order){
+        Log.d("asd", ""+order);
+
+        if(day != m.getDay() || month != m.getMonth() || year != m.getYear()) {
+            day = m.getDay();
+            month = m.getMonth();
+            year = m.getYear();
+            CardManager.setHeaderItem(mGridView, getBaseContext(), CONSTANT.convertFolderNameToDate("" + year + "_" + month + "_" + day));
+        }
+
 
         if(m.getThumbnail_path() == null)//내장 썸네일이 혹시 존재하지 않을 경우에만
             CardManager.setMediaItem(mGridView, getBaseContext(), m.getId(), order, m.getPath());
