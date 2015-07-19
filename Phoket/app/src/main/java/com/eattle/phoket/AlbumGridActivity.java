@@ -244,6 +244,9 @@ public class AlbumGridActivity extends AppCompatActivity {
     };*/
 
     public void refreshGrid() {
+        day = 0;
+        month = 0;
+        year = 0;
         //grid view를 업데이트 한다(백버튼 또는 x버튼으로 들어왔을 때)
         //1. CONSTANT.FOLDER 2. CONSTANT.DEFAULT_TAG 3.CONSTANT.TAG
         if (kind == CONSTANT.FOLDER) {//스토리(폴더)로 보고있을 때

@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         Log.d(EXTRA_TAG, "onRestart() 호출");
-        if(mIsClassifying)  return;
+        if(mIsClassifying || state != STATE_RUNNING)  return;
         ((Section1)(mAdapter.getItem(0))).initialize();
         ((Section2)(mAdapter.getItem(1))).initialize();
 
