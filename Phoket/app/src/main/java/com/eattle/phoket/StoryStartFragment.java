@@ -62,7 +62,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
             Glide.with(getActivity())
                     .load(titleImagePath)
-                    .thumbnail(0.1f)
+                    .thumbnail(0.5f)
                     .into(storyStartImage);
 
         } catch (OutOfMemoryError e) {

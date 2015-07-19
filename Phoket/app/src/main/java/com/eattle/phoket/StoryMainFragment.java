@@ -71,6 +71,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         path = m.getPath();//사진의 경로를 가져온다
 
         //TODO 사진 경로에 사진이 없을 경우를 체크한다
+
         //사진은 USB에서 읽어오는 것을 표준으로 한다
         try {
             if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때
@@ -84,13 +85,14 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     //return null;
                 } else {
                     //일단 썸네일을 부르면서 사진 로딩 시작
-                    ((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
+                    //((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
+                    Glide.with(context)
+                            .load(path)
+                            .placeholder(R.mipmap.loading)
+                            .thumbnail(0.3f)
+                            .into(img);
 
 
-//                    Glide.with(context)
-//                            .load(path)
-//                            .thumbnail(0.3f)
-//                            .into(img);
                 }
             }
 
