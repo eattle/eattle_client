@@ -1114,6 +1114,11 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
     }
+    public void deleteMediaTag(String tag_name, int media_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        int tag_id = getTagIdByTagName(tag_name);
+        db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
+    }
 
     /*
      * deleting media to tag relation by tag_id

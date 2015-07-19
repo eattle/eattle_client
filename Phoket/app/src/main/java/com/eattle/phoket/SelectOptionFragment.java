@@ -76,6 +76,7 @@ public class SelectOptionFragment extends Fragment {
             }
         });
 
+        //스마트폰 로컬에 폴더 만들어서 내보내기
         root.findViewById(R.id.fabLocal).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -238,7 +238,7 @@ public class ServiceOfPictureClassification extends Service {
 
             //Log.d("MainActivity", "!!" + path);
             //썸네일 사진들은 계산대상에서 제외한다
-            if (path.contains("thumbnail") || path.contains("스토리") || path.contains("Screenshot") || path.contains("screenshot")) {
+            if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot")) {
                 //Log.d("pictureClassification", "썸네일 및 기존 스토리는 계산대상에서 제외");
                 continue;
             }
@@ -309,7 +309,7 @@ public class ServiceOfPictureClassification extends Service {
 
             Log.d("사진 분류", path);
             //썸네일 사진들은 분류대상에서 제외한다
-            if (path.contains("thumbnail") || path.contains("스토리") || path.contains("Screenshot") || path.contains("screenshot")) {
+            if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot")) {
                 //Log.d("pictureClassification", "썸네일 및 기존 스토리는 분류 대상에서 제외");
                 continue;
             }
@@ -322,30 +322,7 @@ public class ServiceOfPictureClassification extends Service {
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
 
-            if((ExistedMedia != null) &&
-                    ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
-                //썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
-                ExistedMedia.setThumbnail_path(thumbnail_path);
-                db.updateMedia(ExistedMedia);
-                Log.d(TAG,"휴지통에 들어있는 사진 || 고정 스토리에 속한 사진");
-                //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지 확인해야한다
-                //TODO File 객체 생성하여 사진 파일 존재여부 체크.
-                //TODO 사진의 경로가 달라졌다면 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
 
-                if(tempFixedFolder == ExistedMedia.getFolder_id())
-                    continue;
-
-                if(ExistedMedia.getIsFixed() == 1) {
-                    int folderID = ExistedMedia.getFolder_id();
-                    Log.d(TAG,"고정 스토리 메인 액티비티로 전송");
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID);
-                    tempFixedFolder = folderID;
-
-                }
-                continue; //정리에 포함시키지 않는다.
-            }
-            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것 -- 유지됨
-            tempFixedFolder = 0;//고정 스토리 판별을 위한 flag
 
             //사진이 촬영된 날짜
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
@@ -363,7 +340,8 @@ public class ServiceOfPictureClassification extends Service {
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
             Log.d("MainActivity", "CONSTANT.TIMEINTERVAL " + CONSTANT.TIMEINTERVAL);
             Log.d("MainActivity", "_pictureTakenTime-pictureTakenTime = " + Math.abs(_pictureTakenTime - pictureTakenTime));
-            if (Math.abs(_pictureTakenTime - pictureTakenTime) > CONSTANT.TIMEINTERVAL) {
+            if ((Math.abs(_pictureTakenTime - pictureTakenTime) > CONSTANT.TIMEINTERVAL)
+                    && tempFixedFolder == 0) {//고정 스토리에 속한 사진이 아니어야 함
                 //이전에 만들어진 폴더의 이름을 바꾼다(endFolderID ~ startFolderID)
                 Log.d("MainActivity", "startFolderID  " + startFolderID + " endFolderID : " + endFolderID);
                 if (!startFolderID.equals("")) {
@@ -410,6 +388,31 @@ public class ServiceOfPictureClassification extends Service {
                 }
 
             }
+
+            if((ExistedMedia != null) &&
+                    ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
+                //썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
+                ExistedMedia.setThumbnail_path(thumbnail_path);
+                db.updateMedia(ExistedMedia);
+                Log.d(TAG,"휴지통에 들어있는 사진 || 고정 스토리에 속한 사진");
+                //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지 확인해야한다
+                //TODO File 객체 생성하여 사진 파일 존재여부 체크.
+                //TODO 사진의 경로가 달라졌다면 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
+
+                if(tempFixedFolder == ExistedMedia.getFolder_id())
+                    continue;
+
+                if(ExistedMedia.getIsFixed() == 1) {
+                    int folderID_ = ExistedMedia.getFolder_id();
+                    Log.d(TAG,"고정 스토리 메인 액티비티로 전송");
+                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID_);
+                    tempFixedFolder = folderID_;
+                }
+                continue; //정리에 포함시키지 않는다.
+            }
+            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것 -- 유지됨
+            tempFixedFolder = 0;//고정 스토리 판별을 위한 flag
+
             if (representativeImage.equals("")) {
                 //representativeImage = String.valueOf(pictureID);
                 representativeImage = path;//폴더에 들어갈 첫번째 사진의 경로
@@ -436,7 +439,9 @@ public class ServiceOfPictureClassification extends Service {
 
                 Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1] , pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path,0);
                 db.createMedia(m);
-                db.createTag(pathArr[pathArr.length - 2], pictureID);//사진이 속했던 폴더 이름으로 태그 만들기
+                String folderNameForPicture = pathArr[pathArr.length - 2];
+                if(!folderNameForPicture.contains("스토리"))//사진이 속하는 폴더 이름에 '스토리'가 없을 때에만
+                    db.createTag(folderNameForPicture, pictureID);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
                 Log.d(TAG,"미디어 id "+pictureID+" 에 대해 createMedia() 호출 (folderIDForDB : "+folderIDForDB+")");
             } else {//기존 사진
                 //업데이트만 한다
