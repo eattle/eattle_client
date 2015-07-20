@@ -133,8 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
         doBindService();
 
-        if (db.getAllFolders().size() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
-            guide();
+        if (db.getGuide() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
+            GUIDE.guide_one(this);
+            GUIDE.GUIDE_STEP++;
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -262,6 +263,19 @@ public class MainActivity extends AppCompatActivity {
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
             }
+
+            if(db == null)
+                db = DatabaseHelper.getInstance(MainActivity.this);
+            if(db != null){
+                if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){
+                    GUIDE.guide_eight(MainActivity.this);
+                    db.createGuide(1);//가이드 종료했다는 표시
+                    db.deleteAllFolder();
+                    db.deleteAllMedia();
+                    db.deleteAllMediaTag();
+                    db.deleteAllTag();
+                }
+            }
         }
     };
 
@@ -275,6 +289,23 @@ public class MainActivity extends AppCompatActivity {
         if(!mIsBound)//서비스와 연결 안되어 있으면
             doBindService();//연결
 
+
+        if(db == null)
+            db = DatabaseHelper.getInstance(MainActivity.this);
+        if(db != null){
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==5){
+                GUIDE.guide_six(MainActivity.this);
+                GUIDE.GUIDE_STEP++;
+            }
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){
+                GUIDE.guide_eight(MainActivity.this);
+                db.createGuide(1);//가이드 종료
+                db.deleteAllFolder();
+                db.deleteAllMedia();
+                db.deleteAllMediaTag();
+                db.deleteAllTag();
+            }
+        }
     }
 
     @Override
@@ -284,7 +315,6 @@ public class MainActivity extends AppCompatActivity {
         if(mIsClassifying || state != STATE_RUNNING)  return;
         ((Section1)(mAdapter.getItem(0))).initialize();
         ((Section2)(mAdapter.getItem(1))).initialize();
-
     }
 
     @Override
@@ -513,6 +543,27 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     break;
+
+                case CONSTANT.END_OF_SINGLE_STORY_GUIDE:
+                    int id_ = msg.arg1;
+
+                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id_));
+                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id_));
+
+                    ((Section1)(mAdapter.getItem(0))).setRunning();
+                    ((Section2)(mAdapter.getItem(1))).setRunning();
+                    ((Section3)(mAdapter.getItem(2))).initialize();
+
+
+                    Snackbar s_ = Snackbar.make(findViewById(R.id.main_content), "사진 정리가 완료되었습니다!", Snackbar.LENGTH_LONG);
+                    s_.getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    s_.setAction("Action", null).show();
+
+                    mIsClassifying = false;
+
+                    GUIDE.guide_two(MainActivity.this);
+                    GUIDE.GUIDE_STEP++;
+                    break;
                 default:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);
@@ -582,28 +633,6 @@ public class MainActivity extends AppCompatActivity {
         };
         d.setPositiveButton("Yes", l);
         d.setNegativeButton("No", l);
-        d.show();
-    }
-
-    public void guide() {//앱을 최초 실행했을 때 사진정리를 누르도록 한다.
-        AlertDialog.Builder d = new AlertDialog.Builder(this);
-        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_first_classification, null);
-        d.setView(r);
-        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-
-
-                        //alarm.setEnabled(false); // 정리 버튼 클릭 무효화
-                        //서비스에게 사진 정리를 요청한다
-                        sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);//1은 더미데이터(추후에 용도 지정, 예를 들면 0이면 전체 사진 새로 정리, 1이면 일부 사진 새로 정리 등)
-
-                        break;
-                }
-            }
-        };
-        d.setPositiveButton("정리 시작", l);
         d.show();
     }
 

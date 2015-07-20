@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
 import com.eattle.phoket.Card.DailyCard;
+import com.eattle.phoket.GUIDE;
 import com.eattle.phoket.R;
 
 /**
@@ -32,10 +33,17 @@ public class DailyCardView extends CardItemView<DailyCard> {
     public void build(final DailyCard card) {
         super.build(card);
         ImageView dailyImage = (ImageView) findViewById(R.id.dailyImage);
-        Glide.with(getContext())
-                .load(card.getDailyImage())
-                .into(dailyImage);
-
+        if(!card.getDailyImage().contains("phoket")) {
+            Glide.with(getContext())
+                    .load(card.getDailyImage())
+                    .into(dailyImage);
+        }
+        else{//가이드 중일때
+            String asdf = "phoket1";
+            Glide.with(getContext())
+                    .load(GUIDE.guide_grid(card.getDailyImage()))
+                    .into(dailyImage);
+        }
         if(card.isSelecting())  setSelect();
         else                    setNoSelect();
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:text="[Phoket의 간단 튜토리얼]\n\n타임라인 최상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n일단 스크롤 해보실래요?"
+        android:textSize="15dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+</LinearLayout>

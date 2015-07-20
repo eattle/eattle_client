@@ -3,8 +3,8 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <TextView
-        android:text="타임라인 최상단에서 스크롤하면\n사진을 자동으로 정리합니다\n일단 사진을 정리해 볼까요?"
-        android:textSize="13dp"
+        android:text="태그를 등록할 수 있는 창이 등장합니다\n\n태그를 등록하여 사진을 자유로히 분류할 수 있습니다\n\n백버튼을 통해 홈으로 이동해 보세요"
+        android:textSize="15dp"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="350dp" />

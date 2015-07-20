@@ -149,6 +149,10 @@ public class AlbumGridActivity extends AppCompatActivity {
         mGridView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
 
+        if(db.getGuide() == 0) {//가이드 중
+            GUIDE.guide_three(AlbumGridActivity.this);
+            GUIDE.GUIDE_STEP++;
+        }
     }
 
     @Override
@@ -178,10 +182,23 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     private void loadBackdrop() {
         final ImageView imageView = (ImageView) findViewById(R.id.backdrop);
-        Glide.with(this)
-                .load(titleImagePath)
-                .thumbnail(0.1f)
-                .into(imageView);
+        if(db == null)
+            db = DatabaseHelper.getInstance(AlbumGridActivity.this);
+
+        if(db != null) {
+            if(db.getGuide() == 1) {//가이드 아닐때
+                Glide.with(AlbumGridActivity.this)
+                        .load(titleImagePath)
+                        .thumbnail(0.1f)
+                        .into(imageView);
+            }
+            else if(db.getGuide() == 0){//가이드 중
+                Glide.with(AlbumGridActivity.this)
+                        .load(R.mipmap.phoket1)
+                        .thumbnail(0.1f)
+                        .into(imageView);
+            }
+        }
     }
 
     public void setupMaterialListView() {
@@ -343,12 +360,21 @@ public class AlbumGridActivity extends AppCompatActivity {
             CardManager.setHeaderItem(mGridView, getBaseContext(), CONSTANT.convertFolderNameToDate("" + year + "_" + month + "_" + day));
         }
 
+        if(db == null)
+            db = DatabaseHelper.getInstance(AlbumGridActivity.this);
 
-        if(m.getThumbnail_path() == null)//내장 썸네일이 혹시 존재하지 않을 경우에만
-            CardManager.setMediaItem(mGridView, getBaseContext(), m.getId(), order, m.getPath());
-        else
-            CardManager.setMediaItem(mGridView, getBaseContext(), m.getId(), order, m.getThumbnail_path());
+        if(db != null) {
+            if (db.getGuide() == 1) {//가이드가 종료되었을 경우
+                if (m.getThumbnail_path() == null)//내장 썸네일이 혹시 존재하지 않을 경우에만
+                    CardManager.setMediaItem(mGridView, AlbumGridActivity.this, m.getId(), order, m.getPath());
+                else
+                    CardManager.setMediaItem(mGridView, AlbumGridActivity.this, m.getId(), order, m.getThumbnail_path());
 
+            }
+            else if(db.getGuide() == 0){//가이드 중일 때
+                CardManager.setMediaItem(mGridView, AlbumGridActivity.this, m.getId(), order, "phoket"+m.getId());
+            }
+        }
     }
 /*
     class ImageAdapter extends BaseAdapter {

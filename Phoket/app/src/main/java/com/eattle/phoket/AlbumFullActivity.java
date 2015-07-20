@@ -231,6 +231,14 @@ public class AlbumFullActivity extends ActionBarActivity {
             }
         });
 
+
+        if(db == null){
+            db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+        }
+        if(db.getGuide() == 0) {//가이드 중
+            GUIDE.guide_four(AlbumFullActivity.this);
+            GUIDE.GUIDE_STEP++;
+        }
     }
 
     //뷰페이저
@@ -391,7 +399,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     void setPlacePopup(Media m) {
         //장소명이 존재하면 태그로 추가할지 묻는다
-        if (!m.getPlaceName().equals("")) {
+        if ((m.getPlaceName() != null) &&!m.getPlaceName().equals("")) {
             //일단 m.getPlaceName()이 태그 목록에 있는지 확인한다
             int tagId = db.getTagIdByTagName(m.getPlaceName());
             //1. 해당 장소명으로 태그가 아예 존재하지 않을 때 -> 묻는다

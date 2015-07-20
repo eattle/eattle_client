@@ -67,6 +67,8 @@ public class CONSTANT {
     public static final int END_OF_PICTURE_CLASSIFICATION = 4;//Service가 MainActivity에게 사진 정리를 완료 했다고 보내는 메세지
     public static final int END_OF_SINGLE_STORY = 5;//스토리가 정리되는대로 바로바로 보여주기 위하여 정의한 메세지,하나의 스토리가 정리될때마다 보낸다
     public static final int END_OF_DECODING_THUMBNAIL = 6;//loadBitmap에서 썸네일 생성을 완료했을 때
+    public static final int START_OF_GUIDE = 8;//MainActivity가 Service에게 가이드 시작을 알릴 때
+    public static final int END_OF_SINGLE_STORY_GUIDE = 9;//Service가 MainActivity에게 가이드 사진정리를 완료했음을 알림
 
     public static int screenWidth;//스마트폰 화면 너비
     public static int screenHeight;//스마트폰 화면 높이

@@ -13,6 +13,7 @@ import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.Card.BigStoryCard;
 import com.eattle.phoket.MainActivity;
 import com.eattle.phoket.R;
+import com.eattle.phoket.helper.DatabaseHelper;
 
 /**
  * Created by GA on 2015. 5. 14..
@@ -42,10 +43,21 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
 
         itemNum.setText("" + card.getItemNum());
         //storyImage.setImageURI(Uri.parse(card.getTitleImage()));
-        Glide.with(getContext())
-                .load(card.getTitleImage())
-                .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
-                .into(storyImage);
+        DatabaseHelper db = DatabaseHelper.getInstance(getContext());
+        if(db != null){
+            if(db.getGuide() == 1){//가이드가 끝났을 때
+                Glide.with(getContext())
+                        .load(card.getTitleImage())
+                        .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
+                        .into(storyImage);
+            }
+            else if(db.getGuide() == 0){//가이드 중일때
+                Glide.with(getContext())
+                        .load(R.mipmap.phoket1)
+                        .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
+                        .into(storyImage);
+            }
+        }
 
         date.setText(card.getDate());
         storyName.setText(card.getStoryName());
@@ -70,7 +82,6 @@ public class BigStoryCardView extends CardItemView<BigStoryCard> {
         pressed.setBackgroundResource(R.drawable.ripple_button);
         ImageView check = (ImageView)findViewById(R.id.check);
         check.setVisibility(INVISIBLE);
-
     }
 
 }

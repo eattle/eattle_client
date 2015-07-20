@@ -141,6 +141,14 @@ public class Section1 extends Fragment {
                     Snackbar.make(mSwipeRefreshLayout, "정리가 완료된 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                 }
+
+                if(db == null)
+                    db = DatabaseHelper.getInstance(getActivity());
+
+                if(db != null && db.getGuide() == 0) {//가이드 중
+                    GUIDE.guide_seven(getActivity());
+                    GUIDE.GUIDE_STEP++;
+                }
             }
         });
 
@@ -150,7 +158,12 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
+                if(db.getGuide() == 0) {//가이드를 완료하지 않았으면
+                    //서비스에게 가이드 시작을 요청한다
+                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE, 1);
+                }
+                else
+                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
             }
         });
 
@@ -298,11 +311,11 @@ public class Section1 extends Fragment {
                 CardManager.setRecommendItem(mListView, mContext,
                         randomMedia.getId(),
                         randomMedia.getPath());
-            else
+            else {
                 CardManager.setRecommendItem(mListView, mContext,
                         randomMedia.getId(),
                         randomMedia.getThumbnail_path());
-
+            }
         }
     }
 

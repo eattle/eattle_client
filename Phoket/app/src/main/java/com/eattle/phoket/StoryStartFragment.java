@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.eattle.phoket.helper.DatabaseHelper;
 
 /**
  * Created by dh_st_000 on 2015-05-21.
@@ -59,12 +60,19 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
             //화면 크기, 사진 크기에 따라 사진을 최적화 한다
             //Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
             //storyStartImage.setImageBitmap(changedBitmap);
+            DatabaseHelper db = DatabaseHelper.getInstance(getActivity());
 
-            Glide.with(getActivity())
-                    .load(titleImagePath)
-                    .thumbnail(0.5f)
-                    .into(storyStartImage);
-
+            if(db.getGuide() == 0) {//가이드 사진일 경우
+                Glide.with(getActivity())
+                        .load(R.mipmap.phoket1)
+                        .into(storyStartImage);
+            }
+            else {
+                Glide.with(getActivity())
+                        .load(titleImagePath)
+                        .thumbnail(0.5f)
+                        .into(storyStartImage);
+            }
         } catch (OutOfMemoryError e) {
             Log.e("warning", "이미지가 너무 큽니다");
         }

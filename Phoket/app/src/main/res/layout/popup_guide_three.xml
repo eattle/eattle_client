@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:text="스토리에 있는 사진들을 확인하고 감상할 수 있어요\n\n사진 하나를 클릭해보세요"
+        android:textSize="15dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+</LinearLayout>

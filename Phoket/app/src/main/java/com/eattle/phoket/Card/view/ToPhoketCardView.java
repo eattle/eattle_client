@@ -8,8 +8,10 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.dexafree.materialList.model.CardItemView;
+import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.Card.ToPhoketCard;
 import com.eattle.phoket.R;
+import com.eattle.phoket.helper.DatabaseHelper;
 
 /**
  * Created by GA on 2015. 5. 14..
@@ -33,10 +35,20 @@ public class ToPhoketCardView extends CardItemView<ToPhoketCard> {
         super.build(card);
         ImageView toPhoketImage = (ImageView)findViewById(R.id.toPhoketImage);
         //toPhoketImage.setImageURI(Uri.parse(card.getImage()));
-        Glide.with(getContext())
-                .load(card.getImage())
-                .into(toPhoketImage);
 
+        DatabaseHelper db = DatabaseHelper.getInstance(getContext());
+        if(db != null){
+            if(db.getGuide() == 1){//가이드가 끝났을 때
+                Glide.with(getContext())
+                        .load(card.getImage())
+                        .into(toPhoketImage);
+            }
+            else if(db.getGuide() == 0){//가이드 중일때
+                Glide.with(getContext())
+                        .load(R.mipmap.phoket2)
+                        .into(toPhoketImage);
+            }
+        }
         StaggeredGridLayoutManager.LayoutParams sglp = (StaggeredGridLayoutManager.LayoutParams) this.getLayoutParams();
         sglp.setFullSpan(true);
         this.setLayoutParams(sglp);

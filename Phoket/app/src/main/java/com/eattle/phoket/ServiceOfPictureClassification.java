@@ -180,6 +180,21 @@ public class ServiceOfPictureClassification extends Service {
 
                     break;
 
+                case CONSTANT.START_OF_GUIDE:
+                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {//가이드를 시작한다
+                                pictureClassification_guide();
+                            } catch (IOException e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            } catch (Exception e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            }
+                        }
+                    }).start();
+                    break;
                 default:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);
@@ -321,7 +336,6 @@ public class ServiceOfPictureClassification extends Service {
 
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
-
 
 
             //사진이 촬영된 날짜
@@ -496,6 +510,41 @@ public class ServiceOfPictureClassification extends Service {
         mCursor.close();
     }
 
+    private void pictureClassification_guide() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
+        String TAG = "classification";
+        isClassifying = 1;
+        //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
+        //sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
+
+        Log.d("guide","가이드 시작");
+        db.deleteAllFolder();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
+        db.deleteAllMedia();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
+        long currentTime = System.currentTimeMillis();//현재 시간
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(currentTime);
+        String folderName = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE)+"의 스토리";
+        Folder f = new Folder(1, folderName, "" , null , 8, 0, 0);
+        Media m1 = new Media(1, 1, "phoket1" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m2 = new Media(2, 1, "phoket2" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m3 = new Media(3, 1, "phoket3" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m4 = new Media(4, 1, "phoket4" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m5 = new Media(5, 1, "phoket5" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m6 = new Media(6, 1, "phoket6" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m7 = new Media(7, 1, "phoket7" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        Media m8 = new Media(8, 1, "phoket8" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        db.createMedia(m1);
+        db.createMedia(m2);
+        db.createMedia(m3);
+        db.createMedia(m4);
+        db.createMedia(m5);
+        db.createMedia(m6);
+        db.createMedia(m7);
+        db.createMedia(m8);
+
+        //db.createFolder(f);
+        //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
+        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY_GUIDE, db.createFolder(f));
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();

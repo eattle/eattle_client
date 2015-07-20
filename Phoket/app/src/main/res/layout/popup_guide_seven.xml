@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:text="하단에 생성된 빨간 버튼을 누르시면\n\n1. 스토리를 스마트폰에 폴더로 만들기\n\n2.드랍박스 등에 공유\n\n가 가능합니다\n\n이제 백버튼을 눌러 홈으로 이동해주세요!"
+        android:textSize="15dp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+</LinearLayout>
