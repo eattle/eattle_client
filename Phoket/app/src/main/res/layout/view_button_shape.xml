@@ -1,16 +1,28 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" android:drawable="@mipmap/defaultbutton_" />
-    <!--   눌린 후 버튼이미지 파일명을 써준다.-->
-    <!-- pressed -->
+    <!--눌린 후 버튼이미지 파일명을 써준다.
+    pressed-->
 
     <item android:drawable="@mipmap/defaultbutton" />
-    <!--  눌리기 전 버튼이미지 파일명을 써준다..-->
-    <!-- default -->
+    <!--눌리기 전 버튼이미지 파일명을 써준다.
+    default-->
 </selector>
 
-
     <!--
+<item
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:state_focused="false"
+    android:state_pressed="false">
 
+    <shape xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:shape="rectangle">
+
+        <padding android:left="3dp" android:right="3dp" />
+        <stroke android:width="1dp" android:color="#FF000000" />
+    </shape>
+</item>
 
 <item
 android:state_focused="false"
@@ -45,5 +57,17 @@ android:state_pressed="true">
 </item>
 
     </selector>
+
+
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@mipmap/defaultbutton_" />
+       눌린 후 버튼이미지 파일명을 써준다.
+     pressed
+
+    <item android:drawable="@mipmap/defaultbutton" />
+          눌리기 전 버튼이미지 파일명을 써준다..
+         default
+        </selector>
 
     -->

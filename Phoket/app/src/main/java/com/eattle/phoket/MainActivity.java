@@ -133,14 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
         doBindService();
 
-        if (db.getGuide() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
-            GUIDE.guide_one(this);
-            GUIDE.GUIDE_STEP++;
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
         if (mViewPager != null) {
@@ -190,6 +185,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        if (db.getGuide() == 0 && GUIDE.GUIDE_STEP==0) {//앱 최초 실행시
+            GUIDE.guide_initiate(this);
+            GUIDE.GUIDE_STEP = 0;
+            GUIDE.GUIDE_STEP++;
+        }
     }
 
     /***************** Menu 부분 **********************/
@@ -267,13 +267,18 @@ public class MainActivity extends AppCompatActivity {
             if(db == null)
                 db = DatabaseHelper.getInstance(MainActivity.this);
             if(db != null){
-                if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){
+                if(db.getGuide() == 0 && GUIDE.GUIDE_STEP>=7){
                     GUIDE.guide_eight(MainActivity.this);
+
                     db.createGuide(1);//가이드 종료했다는 표시
+
+                    //더미데이터 삭제
                     db.deleteAllFolder();
                     db.deleteAllMedia();
                     db.deleteAllMediaTag();
                     db.deleteAllTag();
+
+                    endOfGuide();
                 }
             }
         }
@@ -293,11 +298,12 @@ public class MainActivity extends AppCompatActivity {
         if(db == null)
             db = DatabaseHelper.getInstance(MainActivity.this);
         if(db != null){
+
             if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==5){
                 GUIDE.guide_six(MainActivity.this);
                 GUIDE.GUIDE_STEP++;
             }
-            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){//마지막 가이드
                 GUIDE.guide_eight(MainActivity.this);
                 db.createGuide(1);//가이드 종료
                 db.deleteAllFolder();
@@ -307,7 +313,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
+    public void endOfGuide(){
+        ((Section1)(mAdapter.getItem(0))).initialize();
+        ((Section2)(mAdapter.getItem(1))).initialize();
+    }
     @Override
     protected void onRestart() {
         super.onRestart();

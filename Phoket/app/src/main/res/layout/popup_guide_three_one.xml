@@ -4,7 +4,7 @@
     android:background="#99000000">
 
     <TextView
-        android:text="하단에 생성된 빨간 버튼을 누르시면\n\n1. 스토리를 스마트폰에 폴더로 만들기\n\n2.드랍박스 등에 공유\n\n가 가능합니다\n\n이제 스마트폰의 뒤로가기 버튼을 눌러주세요!"
+        android:text="사진 하나를 클릭해보세요"
         android:textSize="25dp"
         android:gravity="center"
         android:textColor="#ffffff"

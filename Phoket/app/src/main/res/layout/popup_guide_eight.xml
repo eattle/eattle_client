@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#99000000">
 
     <TextView
-        android:text="다시한번 최상단에서 스크롤하여\n\n 여러분만의 스토리를 만들어보세요! \n\n사진을 정리하고 싶으시다면\n언제든지 최상단에서 스크롤해주세요\n\n포켓이 도와드리겠습니다"
-        android:textSize="15dp"
+        android:text="다시한번 상단에서 스크롤하여\n\n 여러분만의 스토리를 만들어보세요! \n\n사진을 정리하고 싶으시다면\n언제든지 스크롤해주세요\n\n포켓이 도와드리겠습니다"
+        android:textSize="20dp"
         android:gravity="center"
+        android:textColor="#ffffff"
         android:layout_width="match_parent"
-        android:layout_height="350dp" />
+        android:layout_height="match_parent" />
 </LinearLayout>

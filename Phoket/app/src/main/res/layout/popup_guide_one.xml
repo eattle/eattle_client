@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#99000000">
 
-    <TextView
-        android:text="[Phoket의 간단 튜토리얼]\n\n타임라인 최상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n일단 스크롤 해보실래요?"
-        android:textSize="15dp"
-        android:gravity="center"
+    <!--선이미지
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="350dp" />
+        android:layout_height="wrap_content"
+        android:background="@mipmap/line" />-->
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"
+            android:background="@mipmap/fingerdown" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:gravity="center"
+            android:text="타임라인 상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n흰 바탕에서 스크롤 해보실래요?"
+            android:textColor="#ffffff"
+            android:textSize="20dp"/>
+    </LinearLayout>
+    <!--선이미지
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/line" />-->
 </LinearLayout>

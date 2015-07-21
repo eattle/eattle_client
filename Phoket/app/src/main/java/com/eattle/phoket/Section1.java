@@ -162,8 +162,12 @@ public class Section1 extends Fragment {
                     //서비스에게 가이드 시작을 요청한다
                     ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE, 1);
                 }
-                else
+                else {
+                    for(int i=0;i<GUIDE.CURRENT_POPUP.size();i++)
+                        GUIDE.CURRENT_POPUP.get(i).dismiss();//이전의 팝업을 지운다
+
                     ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
+                }
             }
         });
 

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#99000000">
 
     <TextView
-        android:text="스토리가 생성되었습니다 ! \n\n 스토리를 눌러보세요"
-        android:textSize="15dp"
+        android:id="@+id/guide_two_text"
+        android:textSize="25dp"
+        android:textColor="#ffffff"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
         android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="350dp" />
+        android:layout_height="match_parent"/>
 </LinearLayout>
