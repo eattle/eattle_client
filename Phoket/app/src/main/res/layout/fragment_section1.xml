@@ -15,7 +15,10 @@
         <com.dexafree.materialList.view.MaterialListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/section_listview1"/>
+            android:id="@+id/section_listview1"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true"
+            />
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <ProgressBar

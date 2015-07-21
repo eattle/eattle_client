@@ -25,4 +25,10 @@
     <string name="title_activity_popup_picture">PopupPictureActivity</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_select_option">SelectOptionActivity</string>
+
+    <string name="guide1Title">Phoket 도움말</string>
+    <string name="guide1Content">Phoket으로 추억을 정리해보세요!\n</string>
+    <string name="guide1Button1">튜토리얼 볼래\n</string>
+    <string name="guide1Button2">내가 알아서 할게\n</string>
+
 </resources>
