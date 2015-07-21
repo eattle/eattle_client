@@ -48,6 +48,7 @@ import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.host.UsbDeviceHost;
+import com.eattle.phoket.view.CustomViewPager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //UI 관련 변수
-    private ViewPager mViewPager;
+    private CustomViewPager mViewPager;
     private Adapter mAdapter;
     private FloatingActionButton mFAB;
 
@@ -80,26 +81,10 @@ public class MainActivity extends AppCompatActivity {
     //DB관련 변수
     DatabaseHelper db;
 
-    //Service 관련 변수
+    //service에 메시지를 보내기 위해 데이터를 담는 intent
     private Intent mService;
-//    private Messenger mService;
-//    private boolean mBound;
+    //service로 부터 메시지를 받아서 UI작업 하는 broadcastreceiver
     private ClassificationReceiver mClassificationReceiver;
-    //서비스 연결
-
-/*    public ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mService = new Messenger(service);
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService = null;
-            mBound = false;
-        }
-    };*/
 
     ActionMode mActionMode;
 
@@ -107,14 +92,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-/*
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
-*/
+
+        /*StrictMode*/
+        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+        //        .detectLeakedSqlLiteObjects()
+        //        .detectLeakedClosableObjects()
+        //        .penaltyLog()
+        //        .penaltyDeath()
+        //        .build());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -127,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
         final Button toUSB = (Button) findViewById(R.id.toUSB);
         toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
 
-        fileSystem = FileSystem.getInstance();
+        /*FileSystem*/
+        //fileSystem = FileSystem.getInstance();
 
         //usbDeviceHost = new UsbDeviceHost();
         //usbDeviceHost.start(this, new BlockDeviceApp() {
@@ -149,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         //});
 
         //데이터베이스 OPEN
+
         db = DatabaseHelper.getInstance(getApplicationContext());
 
         if (db.getGuide() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
@@ -160,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (CustomViewPager) findViewById(R.id.pager);
         if (mViewPager != null) {
             setupViewPager(mViewPager);
         }
@@ -171,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         state = STATE_RUNNING;
 
         //우측 하단 FAB
-        //롱클릭 했을 때만 보여
+        //롱클릭 했을 때만 보여짐
         mFAB = (FloatingActionButton)findViewById(R.id.fab);
 
         mFAB.setOnClickListener(new View.OnClickListener() {
@@ -190,12 +178,11 @@ public class MainActivity extends AppCompatActivity {
                 anim.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
-
                     }
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        mFAB.setVisibility(View.INVISIBLE);
+                        mFAB.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -260,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
         // may be called multiple times if the mode is invalidated.
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            mViewPager.setPagingDisabled();
             return false; // Return false if nothing is done
         }
 
@@ -280,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            mViewPager.setPagingEnabled();
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fm.beginTransaction();
             Fragment fr = fm.findFragmentByTag("Option");
@@ -318,8 +307,6 @@ public class MainActivity extends AppCompatActivity {
         //서비스 등록
         mService = new Intent(this, ServiceOfPictureClassification.class);
         startService(mService);
-
-//        bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
 
         Log.d(EXTRA_TAG, "onStart");
     }
@@ -368,20 +355,12 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         //stopService(mService);
-
-//        if (mBound) {
-//            unbindService(mConnection);
-//            mBound = false;
-//        }
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
         Log.d(EXTRA_TAG, "onDestroy() 호출");
-//        if(mIsBound)//서비스와 연결되어 있으면 해제
-//            doUnbindService();
-        // If the DownloadStateReceiver still exists, unregister it and set it to null
         if (mClassificationReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mClassificationReceiver);
             mClassificationReceiver = null;
@@ -408,7 +387,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /***************** ViewPager 부분 **********************/
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager(CustomViewPager viewPager) {
+        viewPager.setPagingEnabled();
         mAdapter = new Adapter(getSupportFragmentManager());
         mAdapter.addFragment(new Section1(), "모아보기");
         mAdapter.addFragment(new Section2(), "스토리");
@@ -448,6 +428,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //fragment에서 select할 수 있는 카드를 길게 눌렀을 경우 호출하는 함수
+    //actionmode를 selectmode로 바꾸고
+    //fab를 노출한다
     public void setSelectMode(){
         Animation anim;
 
@@ -529,45 +512,22 @@ public class MainActivity extends AppCompatActivity {
 
 
     //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
-    //메세지의 형태는 ServiceOfPictureClassification에 정의된 상수를 통해서
+    //bind-> start로 바뀌면서 intent를 보내는 것으로 바뀜
     public void sendMessageToService(int typeOfMessage) {
         mService = new Intent(this, ServiceOfPictureClassification.class);
         mService.putExtra("what", typeOfMessage);
         startService(mService);
-
-/*
-        if (mBound) {
-            //START_OF_PICTURE_CLASSIFICATION은 '메세지의 유형'을 정의하는 것
-            Message msg = Message.obtain(null, typeOfMessage, intValueToSend, 0);
-            try {
-                mService.send(msg);
-            } catch (RemoteException e) {
-                Log.d(EXTRA_TAG, e.toString());
-            }
-        }*/
     }
 
-    //서비스로부터 오는 브로드케스트를 케치하여 처리해주는 부분
+    //서비스로부터 오는 메세지를 처리한다(ServiceOfPictureClassification -> MainActivity)
     private class ClassificationReceiver extends BroadcastReceiver {
 
         private ClassificationReceiver() {
 
-            // prevents instantiation by other packages.
         }
-        /**
-         *
-         * This method is called by the system when a broadcast Intent is matched by this class'
-         * intent filters
-         *
-         * @param context An Android context
-         * @param intent The incoming broadcast Intent
-         */
+
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            /*
-             * Gets the status from the Intent's extended data, and chooses the appropriate action
-             */
             int data;
             switch (intent.getIntExtra(CONSTANT.EXTENDED_DATA_STATUS,
                     CONSTANT.END_OF_PICTURE_CLASSIFICATION)) {

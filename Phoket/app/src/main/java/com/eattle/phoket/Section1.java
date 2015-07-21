@@ -162,11 +162,19 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (db.getGuide() == 0) {//가이드를 완료하지 않았으면
-                    //서비스에게 가이드 시작을 요청한다
-                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE);
-                } else
-                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
+                if(state == STATE_RUNNING) {
+                    if (db.getGuide() == 0)
+                        //가이드를 완료하지 않았으면
+                        //서비스에게 가이드 시작을 요청한다
+                        ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE);
+                    else
+                        ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
+                }else{
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    Snackbar.make(mSwipeRefreshLayout, "선택을 취소한 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+
             }
         });
 
