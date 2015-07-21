@@ -21,7 +21,7 @@ import com.eattle.phoket.model.NotificationM;
 public class BroadcastListener extends BroadcastReceiver {
     private String TAG = "BroadcastListener";
     private static int countForTick = 0;
-    private static int howOftenCheck = 10;//60이면 60분마다 체크,10이면 10분마다 체크
+    private static int howOftenCheck = CONSTANT.CHECK;//60이면 60분마다 체크,10이면 10분마다 체크
     //일정 시간마다 새로운 사진이 생성되었는지 여부를 체크한다.
     private static final String TIME_TICK = "android.intent.action.TIME_TICK";
     public static String ACTION_RESTART_PERSISTENTSERVICE = "ACTION.Restart.PhoketService";//서비스 재시작을 위해
@@ -45,10 +45,11 @@ public class BroadcastListener extends BroadcastReceiver {
             // do something when PHONE_STATE_ACTION broadcast occurred.
             countForTick++;
             if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
-                if(ServiceOfPictureClassification.isClassifying == 1)//사진을 정리하고 있으면
+                /*TODO : ERROR*/
+                if(ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
                     return;//아무것도 하지 않음
-                if(howOftenCheck == 1440)//마지막 푸시를 한지 24시간이 지났으면
-                    howOftenCheck = 10;//다시 10분마다 체크를 한다.
+                if(howOftenCheck == CONSTANT.ONEDAY)//마지막 푸시를 한지 24시간이 지났으면
+                    howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
                 //미디어 DB의 맨 마지막 사진이 Phoket DB에 있는지 확인한다.(사진 하나만 체크, 부하를 줄이기 위해)
                 mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
                 mCursor.moveToLast();//제일 최신사진을 확인
@@ -68,7 +69,7 @@ public class BroadcastListener extends BroadcastReceiver {
 
                     countForTick = 0;
                     //하루에 한번 이상 보내지 않는다
-                    howOftenCheck = 1440; //다음 확인은 최소 하루가 지난후에
+                    howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
                 }
                 mCursor.close();
             }
@@ -77,8 +78,8 @@ public class BroadcastListener extends BroadcastReceiver {
 
         //서비스 재시작을 위해 ---------------------------------------
         //앱이 종료되었거나 스마트폰이 재부팅 되었을 때
-        if(intent.getAction().equals(ACTION_RESTART_PERSISTENTSERVICE) ||
-                intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
+        if(action.equals(ACTION_RESTART_PERSISTENTSERVICE) ||
+                action.equals(Intent.ACTION_BOOT_COMPLETED)){
 
             Log.d(TAG, "ACTION_RESTART_PERSISTENTSERVICE || ACTION_BOOT_COMPLETED");
             int countForTick = intent.getIntExtra("countForTick",0);
