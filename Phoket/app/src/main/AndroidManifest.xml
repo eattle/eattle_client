@@ -79,7 +79,7 @@
         <activity
             android:name=".PopupPictureActivity"
             android:label="@string/title_activity_popup_picture"
-            android:theme="@style/ActionBarTranslucentTheme"
+            android:theme="@style/FullScreenTheme"
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity

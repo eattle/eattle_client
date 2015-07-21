@@ -34,6 +34,8 @@ dependencies {
     compile 'com.fmsirvent:parallaxeverywhere:1.0.4'
     compile 'com.github.bumptech.glide:glide:3.6.0'
     compile 'com.android.support:palette-v7:21.0.0'
+    compile 'com.afollestad:material-dialogs:0.7.6.0'
+
 
 
 }
