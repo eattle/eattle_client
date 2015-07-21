@@ -167,14 +167,17 @@ public class Section1 extends Fragment {
                         //가이드를 완료하지 않았으면
                         //서비스에게 가이드 시작을 요청한다
                         ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE);
-                    else
+                    else{
+                        for(int i=0;i<GUIDE.CURRENT_POPUP.size();i++)
+                            GUIDE.CURRENT_POPUP.get(i).dismiss();//가이드 팝업을 지운다
+                        
                         ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
+                    }
                 }else{
                     mSwipeRefreshLayout.setRefreshing(false);
                     Snackbar.make(mSwipeRefreshLayout, "선택을 취소한 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                 }
-
             }
         });
 
