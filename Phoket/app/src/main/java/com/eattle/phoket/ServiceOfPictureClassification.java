@@ -21,6 +21,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.eattle.phoket.helper.DatabaseHelper;
@@ -33,18 +34,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 //사진 분류, 백업 등을 담당하는 서비스
 public class ServiceOfPictureClassification extends Service {
-    String Tag = "Eattle_Service";
+    public static final String EXTRA_TAG = "EATTLE_SERVICE";
 
-    private static boolean isRunning = false;
+    public static boolean isClassifying = false;//사진 분류중이면 1, 평상시엔 0
 
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
+    //사진 정리 관련된 정보를 보내는 브로드 캐스트 알림
+    //이 변수를 이용해 이전에 메시지를 보내는 것과 같은 방식으로 메인에 의사 전달을 할 수 있음
+    private BroadcastNotifier mBroadcaster;
+    //main으로부터 오는 메시지를 받는 메신저
+    //final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
 
     //사진 정리와 관련된 변수들
@@ -63,52 +68,115 @@ public class ServiceOfPictureClassification extends Service {
     //장소 관련(역지오코딩)
 //    LocationManager mLocMan;
     Geocoder mCoder;
-    IncomingHandler incomingHandler = new IncomingHandler();
+    //IncomingHandler incomingHandler = new IncomingHandler(this);
 
     //파일시스템
-    FileSystem fileSystem;
+//    FileSystem fileSystem;
 
-    public static int isClassifying = 0;//사진 분류중이면 1, 평상시엔 0
 
     BroadcastListener broadcastListener = null;
     public ServiceOfPictureClassification() {
-
+        super();
     }
 
+    @Override
     public void onCreate() {
         super.onCreate();
 
-        Log.d(Tag, "서비스 onCreate() 호출");
+        Log.d(EXTRA_TAG, "서비스 onCreate() 호출");
         unregisterRestartService();
 
         //쓰레드를 생성하여 사진 관련 서비스 시작
-        PictureThread serviceOfEattle = new PictureThread(incomingHandler);
+        PictureThread serviceOfEattle = new PictureThread();
         serviceOfEattle.start();
-
-        fileSystem = FileSystem.getInstance();
+        mBroadcaster = new BroadcastNotifier(this);
 
     }
 
-    class PictureThread extends Thread {
-        Handler mHandler;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
 
-        public PictureThread(Handler handler) {
-            mHandler = handler;
+        Log.i(EXTRA_TAG, "Service onStartCommand");
+        if(intent!=null) {
+            switch (intent.getIntExtra("what", -1)) {
+                case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
+                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
+                    if (!isClassifying) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {//사진 정리를 시작한다
+                                    isClassifying = true;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                    pictureClassification();
+                                } catch (IOException e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } catch (Exception e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } finally {
+                                    isClassifying = false;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
+                                }
+                            }
+                        }).start();
+                    }
+
+                    break;
+                case CONSTANT.START_OF_GUIDE:
+                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {//가이드를 시작한다
+                                isClassifying = true;
+                                pictureClassification_guide();
+                            } catch (IOException e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            } catch (Exception e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            } finally {
+                                isClassifying = false;
+                            }
+                        }
+                    }).start();
+                    break;
+
+                default:
+                    break;
+            }
         }
+        return Service.START_STICKY;
+    }
+
+
+    @Override
+    public IBinder onBind(Intent arg0) {
+        Log.i(EXTRA_TAG, "Service onBind");
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(EXTRA_TAG, "Service onDestroy");
+        unregisterReceiver(broadcastListener);
+        registerRestartService();//서비스가 죽으면 다시 살리기 위해서
+    }
+
+
+    class PictureThread extends Thread {
 
         public void run() {
-            Log.d(Tag, "ServiceOfPictureClassification Run() 호출");
+            Log.d(EXTRA_TAG, "ServiceOfPictureClassification Run() 호출");
             db = DatabaseHelper.getInstance(getApplicationContext());
-            isRunning = true;
 
             NotificationM n = db.getNotification();
             //86400000
             //마지막 푸시를 넣은지 24시간을 넘지 않았으면
             if(n != null) {
                 if (System.currentTimeMillis() - n.getNotificationTime() < 86400000L)
-                    BroadcastListener.setHowOftenCheck(1440);//24시간후에 다시 체크
+                    BroadcastListener.setHowOftenCheck(CONSTANT.ONEDAY);//24시간후에 다시 체크
                 else
-                    BroadcastListener.setHowOftenCheck(10);//10분마다 체크
+                    BroadcastListener.setHowOftenCheck(CONSTANT.CHECK);//10분마다 체크
             }
 
 
@@ -121,123 +189,68 @@ public class ServiceOfPictureClassification extends Service {
         }
     }
 
-
-
-
-    public static boolean isRunning() {
-        return isRunning;
-    }
-
+    /*
     //MainActivity로 부터 온 메세지를 받는 부분
-    class IncomingHandler extends Handler {
-        boolean isNew = true;
+    private static class IncomingHandler extends Handler {
+        private final WeakReference<ServiceOfPictureClassification> mReference;
+
+        IncomingHandler(ServiceOfPictureClassification service) {
+            mReference = new WeakReference<>(service);
+        }
 
         @Override
         public void handleMessage(Message msg) {
+            final ServiceOfPictureClassification service = mReference.get();
             switch (msg.what) {
-                case CONSTANT.MSG_REGISTER_CLIENT:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_REGISTER_CLIENT || 'MainActivity가 연결을 요청하였습니다' ");
-                    //mClients에 이미 있다면 등록하지(add) 않는다
-                    for (int i = 0; i < mClients.size(); i++) {
-                        if (mClients.get(i) == msg.replyTo) {
-                            isNew = false;
-                            break;
-                        }
-                    }
-                    if (isNew)
-                        mClients.add(msg.replyTo);
-                    break;
-
-                case CONSTANT.MSG_UNREGISTER_CLIENT:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - MSG_UNREGISTER_CLIENT || 'MainActivity가 연결 취소를 원합니다' ");
-                    mClients.remove(msg.replyTo);
-                    break;
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    for (int i = 0; i < mClients.size(); i++) {
-                        if (mClients.get(i) == msg.replyTo) {
-                            isNew = false;
-                            break;
-                        }
-                    }
-                    if (isNew)
-                        mClients.add(msg.replyTo);
-
-
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {//사진 정리를 시작한다
-                                pictureClassification();
-                            } catch (IOException e) {
-                                Log.d("PictureClassification", e.getMessage());
-                            } catch (Exception e) {
-                                Log.d("PictureClassification", e.getMessage());
+                    if (service != null && !isClassifying) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {//사진 정리를 시작한다
+                                    isClassifying = true;
+                                    service.mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                    service.pictureClassification();
+                                } catch (IOException e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } catch (Exception e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                }finally {
+                                    isClassifying = false;
+                                    service.mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
+                                }
                             }
-                        }
-                    }).start();
-
+                        }).start();
+                    }
 
                     break;
-
                 case CONSTANT.START_OF_GUIDE:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {//가이드를 시작한다
-                                pictureClassification_guide();
-                            } catch (IOException e) {
-                                Log.d("PictureClassification", e.getMessage());
-                            } catch (Exception e) {
-                                Log.d("PictureClassification", e.getMessage());
+                    if (service != null) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {//가이드를 시작한다
+                                    isClassifying = true;
+                                    service.pictureClassification_guide();
+                                } catch (IOException e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } catch (Exception e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                }finally {
+                                    isClassifying = false;
+                                }
                             }
-                        }
-                    }).start();
+                        }).start();
+                    }
                     break;
+
                 default:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - Default");
                     super.handleMessage(msg);
             }
         }
-    }
-
-    //MainActivity에게 메세지를 보내는 함수(int값만 보낼 때)
-    private void sendMessageToUI(int typeOfMessage, int intValueToSend) {
-        for (int i = mClients.size() - 1; i >= 0; i--) {
-            try {
-                // Send data as an Integer
-                mClients.get(i).send(Message.obtain(null, typeOfMessage, intValueToSend, 0));
-
-
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-    }
-
-    //MainActivity에게 메세지를 보내는 함수(메인 화면 구성을 위한 여러 데이터를 보낼 때)
-    private void sendMessageToUI(int typeOfMessage, String path, String thumbNailPath, String new_name, int folderIDForDB, int picture_num) {
-        for (int i = mClients.size() - 1; i >= 0; i--) {
-            try {
-                Bundle bundle = new Bundle();
-                bundle.putString("path", path);//원본 사진의 경로
-                bundle.putString("thumbNailPath", thumbNailPath);//썸네일 경로
-                bundle.putString("new_name", new_name);//스토리 이름
-                bundle.putInt("folderIDForDB", folderIDForDB);//스토리(폴더) 고유의 ID
-                bundle.putInt("picture_num", picture_num);//스토리(폴더) 안에 있는 사진의 개수
-
-                Message msg = Message.obtain(null, typeOfMessage);
-                msg.setData(bundle);
-                mClients.get(i).send(msg);
-
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-    }
+    }*/
 
 
     //사진 정리와 관련된 함수들
@@ -271,9 +284,9 @@ public class ServiceOfPictureClassification extends Service {
 
     private void pictureClassification() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
         String TAG = "classification";
-        isClassifying = 1;
         //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
-        sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
+
+//        sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
 
 
         //pictureClassification()의 속도 개선 방안
@@ -380,7 +393,8 @@ public class ServiceOfPictureClassification extends Service {
                     Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID), 0);
                     //db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,db.createFolder(f));
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
+//                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,db.createFolder(f));
                     pictureNumInStory = 0;
                     representativeImage = "";
                     Log.d("MainActivity", "Folder DB 입력 완료");
@@ -419,7 +433,9 @@ public class ServiceOfPictureClassification extends Service {
                 if(ExistedMedia.getIsFixed() == 1) {
                     int folderID_ = ExistedMedia.getFolder_id();
                     Log.d(TAG,"고정 스토리 메인 액티비티로 전송");
-                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID_);
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, folderID_);
+
+//                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID_);
                     tempFixedFolder = folderID_;
                 }
                 continue; //정리에 포함시키지 않는다.
@@ -440,7 +456,7 @@ public class ServiceOfPictureClassification extends Service {
             double latitude = 0.0;
 
             if (ExistedMedia != null) {//해당 사진이 기존에 있었을 경우
-                Log.d(Tag, "기존에 존재하는 사진에 대해서 위치 조회 안함");
+                Log.d(EXTRA_TAG, "기존에 존재하는 사진에 대해서 위치 조회 안함");
                 placeName_ = ExistedMedia.getPlaceName();
             } else {//새로운 사진
 
@@ -469,12 +485,12 @@ public class ServiceOfPictureClassification extends Service {
             //USB에 사진을 백업
             //1. 이미 USB에 있는 사진일 경우
             //2. 새로운 사진
-            if (CONSTANT.ISUSBCONNECTED == 1) {
+/*            if (CONSTANT.ISUSBCONNECTED == 1) {
                 if (fileSystem.stringSearch(pictureID + ".jpg")[0] == -1) //USB에 없는 사진이면
                     fileSystem.addElementPush(pictureID + ".jpg", CONSTANT.BLOCKDEVICE, path);//USB로 백업
 
                 Log.d("service", pictureID + ".jpg 백업 완료");
-            }
+            }*/
 
 
             pictureNumInStory++;
@@ -502,17 +518,19 @@ public class ServiceOfPictureClassification extends Service {
             }
         }
 
-        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID),0);
+        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID), 0);
 
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
-        sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
-        isClassifying = 0;
+        mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
+
+//        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
+//        sendMessageToUI(CONSTANT.END_OF_PICTURE_CLASSIFICATION, 1);
+//        isClassifying = 0;
         mCursor.close();
     }
 
     private void pictureClassification_guide() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
         String TAG = "classification";
-        isClassifying = 1;
+        //isClassifying = 1;
         //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
         //sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
 
@@ -543,36 +561,27 @@ public class ServiceOfPictureClassification extends Service {
 
         //db.createFolder(f);
         //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
-        sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY_GUIDE, db.createFolder(f));
+        mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY_GUIDE, db.createFolder(f));
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(Tag, "서비스 onDestroy() 호출");
-        isRunning = false;
-        unregisterReceiver(broadcastListener);
-        registerRestartService();//서비스가 죽으면 다시 살리기 위해서
-    }
-
     //서비스가 죽었을 때 다시 살리기 위한 함수
-    public void registerRestartService(){
-        Log.d(Tag,"registerRestartService() 호출");
+    public void registerRestartService() {
+        Log.d(EXTRA_TAG, "registerRestartService() 호출");
         Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
-        intent.putExtra("countForTick",BroadcastListener.getCountForTick());
+        intent.putExtra("countForTick", BroadcastListener.getCountForTick());
         intent.putExtra("HOWOFTENCHECK",BroadcastListener.getHOWOFTENCHECK());
-        Log.d(Tag, "countForTick "+BroadcastListener.getCountForTick());
-        Log.d(Tag, "HOWOFTENCHECK "+BroadcastListener.getHOWOFTENCHECK());
+        Log.d(EXTRA_TAG, "countForTick "+BroadcastListener.getCountForTick());
+        Log.d(EXTRA_TAG, "HOWOFTENCHECK " + BroadcastListener.getHOWOFTENCHECK());
         PendingIntent sender = PendingIntent.getBroadcast(
                 ServiceOfPictureClassification.this,0,intent,0);
         long currentTime = SystemClock.elapsedRealtime();//현재 시간
         currentTime += 1*1000;
         AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME, currentTime, 10*1000, sender);
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME, currentTime, 60 * 1000, sender);
     }
     //서비스가 죽었을 때 다시 살리기 위한 함수
     public void unregisterRestartService(){
-        Log.d(Tag,"unregisterRestartService() 호출");
+        Log.d(EXTRA_TAG,"unregisterRestartService() 호출");
         Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
         PendingIntent sender = PendingIntent.getBroadcast(
@@ -581,11 +590,5 @@ public class ServiceOfPictureClassification extends Service {
         am.cancel(sender);
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        //return null;
-        return mMessenger.getBinder();
-    }
 }
 

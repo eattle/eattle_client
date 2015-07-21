@@ -1,11 +1,13 @@
 package com.eattle.phoket;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
@@ -60,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private final static int STATE_RUNNING = 0;
     private final static int STATE_SELECT = 1;
     private final static int STATE_OPTION = 2;
+    private boolean mIsClassifying = false;
+
 
     //UI 관련 변수
     private ViewPager mViewPager;
@@ -75,11 +80,26 @@ public class MainActivity extends AppCompatActivity {
     //DB관련 변수
     DatabaseHelper db;
 
+    //Service 관련 변수
+    private Intent mService;
+//    private Messenger mService;
+//    private boolean mBound;
+    private ClassificationReceiver mClassificationReceiver;
+    //서비스 연결
 
-    Messenger mService = null;
-    boolean mIsBound;
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
-    boolean mIsClassifying = false;
+/*    public ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService = null;
+            mBound = false;
+        }
+    };*/
 
     ActionMode mActionMode;
 
@@ -109,29 +129,27 @@ public class MainActivity extends AppCompatActivity {
 
         fileSystem = FileSystem.getInstance();
 
-/*        usbDeviceHost = new UsbDeviceHost();
-        usbDeviceHost.start(this, new BlockDeviceApp() {
-            @Override
-            public void onConnected(BlockDevice originalBlockDevice) {
-                CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
-
-                fileSystem.incaseSearchTable(blockDevice);
-
-                CONSTANT.BLOCKDEVICE = blockDevice;//temp
-                setBlockDevice(blockDevice);
-                //USB가 스마트폰에 연결되었을 떄
-                CONSTANT.ISUSBCONNECTED = 1;
-                toUSB.setVisibility(View.VISIBLE);//USB가 연결되었으면 하단에 USB 버튼을 보여준다
-                //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
-                //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
-
-            }
-        });*/
+        //usbDeviceHost = new UsbDeviceHost();
+        //usbDeviceHost.start(this, new BlockDeviceApp() {
+        //    @Override
+        //    public void onConnected(BlockDevice originalBlockDevice) {
+        //        CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
+//
+        //        fileSystem.incaseSearchTable(blockDevice);
+//
+        //        CONSTANT.BLOCKDEVICE = blockDevice;//temp
+        //        setBlockDevice(blockDevice);
+        //        //USB가 스마트폰에 연결되었을 떄
+        //        CONSTANT.ISUSBCONNECTED = 1;
+        //        toUSB.setVisibility(View.VISIBLE);//USB가 연결되었으면 하단에 USB 버튼을 보여준다
+        //        //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
+        //        //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
+//
+        //    }
+        //});
 
         //데이터베이스 OPEN
         db = DatabaseHelper.getInstance(getApplicationContext());
-
-        doBindService();
 
         if (db.getGuide() == 0) {//앱 최초 실행시, 또는 사진 정리가 되어 있지 않을 때
             GUIDE.guide_one(this);
@@ -162,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 state = STATE_OPTION;
                 FragmentManager fm = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                Fragment fr = SelectOptionFragment.newInstance(((Section1)(mAdapter.getItem(0))).selected);
+                Fragment fr = SelectOptionFragment.newInstance(((Section1) (mAdapter.getItem(0))).selected);
                 fragmentTransaction.add(R.id.fragment, fr, "Option");
                 fragmentTransaction.commit();
 
@@ -189,6 +207,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
+        //서비스로부터 오는 브로드케스트를 캐치하기위해
+        //메인에 리시버를 등록
+        IntentFilter statusIntentFilter = new IntentFilter(CONSTANT.BROADCAST_ACTION);
+        statusIntentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        mClassificationReceiver = new ClassificationReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mClassificationReceiver,
+                statusIntentFilter);
+
+
 
     }
 
@@ -283,12 +313,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
+    public void onStart() {
+        super.onStart();
+        //서비스 등록
+        mService = new Intent(this, ServiceOfPictureClassification.class);
+        startService(mService);
+
+//        bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
+
+        Log.d(EXTRA_TAG, "onStart");
+    }
+
+    @Override
     protected void onResume() {
         Log.d(EXTRA_TAG, "onResume() 호출");
         super.onResume();
-        if(!mIsBound)//서비스와 연결 안되어 있으면
-            doBindService();//연결
-
 
         if(db == null)
             db = DatabaseHelper.getInstance(MainActivity.this);
@@ -326,11 +365,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        //stopService(mService);
+
+//        if (mBound) {
+//            unbindService(mConnection);
+//            mBound = false;
+//        }
+    }
+
+    @Override
     protected void onDestroy(){
         super.onDestroy();
-        Log.d(EXTRA_TAG,"onDestroy() 호출");
-        if(mIsBound)//서비스와 연결되어 있으면 해제
-            doUnbindService();
+        Log.d(EXTRA_TAG, "onDestroy() 호출");
+//        if(mIsBound)//서비스와 연결되어 있으면 해제
+//            doUnbindService();
+        // If the DownloadStateReceiver still exists, unregister it and set it to null
+        if (mClassificationReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mClassificationReceiver);
+            mClassificationReceiver = null;
+        }
+
     }
 
     @Override
@@ -470,38 +526,54 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /***************** Classification Service 부분 **********************/
-    void doBindService() {
-        Log.d(EXTRA_TAG, "doBindService() 호출");
-        if(!mIsBound) {
-            bindService(new Intent(this, ServiceOfPictureClassification.class), mConnection, Context.BIND_AUTO_CREATE);
-            mIsBound = true;
-        }
-    }
 
 
-    void doUnbindService() {
-        if (mIsBound) {
-            // If we have received the service, and hence registered with it, then now is the time to unregister.
-            if (mService != null) {
-                try {
-                    Message msg = Message.obtain(null, CONSTANT.MSG_UNREGISTER_CLIENT);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                    // There is nothing special we need to do if the service has crashed.
-                }
+    //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
+    //메세지의 형태는 ServiceOfPictureClassification에 정의된 상수를 통해서
+    public void sendMessageToService(int typeOfMessage) {
+        mService = new Intent(this, ServiceOfPictureClassification.class);
+        mService.putExtra("what", typeOfMessage);
+        startService(mService);
+
+/*
+        if (mBound) {
+            //START_OF_PICTURE_CLASSIFICATION은 '메세지의 유형'을 정의하는 것
+            Message msg = Message.obtain(null, typeOfMessage, intValueToSend, 0);
+            try {
+                mService.send(msg);
+            } catch (RemoteException e) {
+                Log.d(EXTRA_TAG, e.toString());
             }
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-        }
+        }*/
     }
-    //서비스로부터 메세지를 받는 부분
-    class IncomingHandler extends Handler {
+
+    //서비스로부터 오는 브로드케스트를 케치하여 처리해주는 부분
+    private class ClassificationReceiver extends BroadcastReceiver {
+
+        private ClassificationReceiver() {
+
+            // prevents instantiation by other packages.
+        }
+        /**
+         *
+         * This method is called by the system when a broadcast Intent is matched by this class'
+         * intent filters
+         *
+         * @param context An Android context
+         * @param intent The incoming broadcast Intent
+         */
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case CONSTANT.END_OF_PICTURE_CLASSIFICATION://사진 정리가 완료 되었을 때 받게되는 메세지
+        public void onReceive(Context context, Intent intent) {
+
+            /*
+             * Gets the status from the Intent's extended data, and chooses the appropriate action
+             */
+            int data;
+            switch (intent.getIntExtra(CONSTANT.EXTENDED_DATA_STATUS,
+                    CONSTANT.END_OF_PICTURE_CLASSIFICATION)) {
+
+                // Logs "started" state
+                case CONSTANT.END_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
                     //mSectionsPagerAdapter.notifyDataSetChanged();
@@ -521,15 +593,21 @@ public class MainActivity extends AppCompatActivity {
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
-                    int id = msg.arg1;
+                    data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, -1);
+                    if(data == -1)    return;
 
-                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id));
-                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id));
+                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(data));
+                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(data));
+                    Log.d(EXTRA_TAG, "ADD CARDS");
+
                     break;
 
                 case CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION://서비스가 사진 정리를 시작했다는 메세지
-                    int isClassifying = msg.arg1;//사진정리중이면 1, 아니면 0이 들어있음
-                    if(isClassifying == 1){
+                    //사진정리중이면 1, 아니면 0이 들어있음
+                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - RECEIPT_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 시작했다는 메세지가 도착했습니다' ");
+
+                    data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, 0);
+                    if(data == 1){
                         ((Section1)(mAdapter.getItem(0))).setLoading();
                         ((Section2)(mAdapter.getItem(1))).setLoading();
                         ((Section3)(mAdapter.getItem(2))).setLoading();
@@ -545,10 +623,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case CONSTANT.END_OF_SINGLE_STORY_GUIDE:
-                    int id_ = msg.arg1;
+                    data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, -1);
+                    if(data == -1)    return;
 
-                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(id_));
-                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(id_));
+                    ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(data));
+                    ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(data));
 
                     ((Section1)(mAdapter.getItem(0))).setRunning();
                     ((Section2)(mAdapter.getItem(1))).setRunning();
@@ -565,50 +644,10 @@ public class MainActivity extends AppCompatActivity {
                     GUIDE.GUIDE_STEP++;
                     break;
                 default:
-                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - Default");
-                    super.handleMessage(msg);
+                    break;
             }
         }
     }
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d("ServiceConnection()", "onServiceConnected() 함수 호출");
-            mService = new Messenger(service);
-            try {
-                Message msg = Message.obtain(null, CONSTANT.MSG_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;//'답장은 mMessenger로 받겠습니다'라는 의미
-                mService.send(msg);//메세지를 보낸다
-            } catch (RemoteException e) {
-
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d("ServiceConnection()", "onServiceDisconnected() 함수 호출");
-            mService = null;
-        }
-    };
-
-    //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
-    //메세지의 형태는 ServiceOfPictureClassification에 정의된 상수를 통해서
-    public void sendMessageToService(int typeOfMessage, int intValueToSend) {
-        if (mIsBound) {
-            if (mService != null) {
-                try {
-                    //START_OF_PICTURE_CLASSIFICATION은 '메세지의 유형'을 정의하는 것
-                    Message msg = Message.obtain(null, typeOfMessage, intValueToSend, 0);
-                    msg.replyTo = mMessenger;//'답장은 mMessenger로 받겠습니다'라는 의미
-                    mService.send(msg);//서비스로 메세지를 보낸다
-                } catch (RemoteException e) {
-                    Log.d(EXTRA_TAG, e.toString());
-                }
-            }
-        }
-    }
-
 
 
 

@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,8 @@ public class Section1 extends Fragment {
     private final static int STATE_SELECT = 2;
 
 
+
+
     private Context mContext;
     private DatabaseHelper db;
 
@@ -53,7 +56,8 @@ public class Section1 extends Fragment {
     private ProgressBar mProgressBar;
 
     private int state;
-    private boolean isDaily;
+    private boolean isDaily = false;
+
 
 //    boolean isSelectMode = false;
     ArrayList<CardData> selected = new ArrayList<>();
@@ -158,21 +162,20 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(db.getGuide() == 0) {//가이드를 완료하지 않았으면
+                if (db.getGuide() == 0) {//가이드를 완료하지 않았으면
                     //서비스에게 가이드 시작을 요청한다
-                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE, 1);
-                }
-                else
-                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION, 1);
+                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE);
+                } else
+                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
             }
         });
 
-        initialize();
 
         //show progress
         mListView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
 
+        initialize();
 
         return root;
 
@@ -204,6 +207,7 @@ public class Section1 extends Fragment {
         @Override
         protected List<Folder> doInBackground(Void... params) {
             //Query the applications
+
             List<Folder> stories = db.getAllFolders();
 
             return stories;
@@ -223,6 +227,8 @@ public class Section1 extends Fragment {
             for(int i = 0; i < storiesNum; i++){
                 addCard(result.get(i));
             }
+
+            Log.d(EXTRA_TAG, "" + storiesNum);
 
             setRunning();
 
@@ -324,7 +330,6 @@ public class Section1 extends Fragment {
     public void initialize(){
         state = STATE_LOADING;
         isDaily = false;
-//        isSelectMode = false;
         int s = selected.size();
         for(int i = 0; i < s; i++) {
             mListView.setSelect(selectedp.get(i));
@@ -355,8 +360,10 @@ public class Section1 extends Fragment {
 
     public void addSingleCard(Folder f){
         if(mListView == null)   return;
-        if(state == STATE_RUNNING)
-            setLoading();
+        if(state == STATE_RUNNING){
+            state = STATE_LOADING;
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
         addCard(f);
     }
 

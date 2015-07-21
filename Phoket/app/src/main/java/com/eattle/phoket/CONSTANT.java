@@ -37,6 +37,11 @@ public class CONSTANT {
 
     public static ArrayList<Activity> actList = new ArrayList<Activity>();
 
+    public static final int ONEDAY = 1440;
+    public static final int CHECK = 10;
+
+
+
     public static final int NOTHING = -1;
     public static final int FOLDER = 0;
     public static final int TAG = 1;
@@ -59,6 +64,12 @@ public class CONSTANT {
     public static final int TAGSCARD = 2;
     public static final int TOPHOKETCARD = 3;
     public static final int NOTIFICARD = 4;
+
+    // Defines a custom Intent action
+    public static final String BROADCAST_ACTION = "com.eattle.phoket.BROADCAST";
+    public static final String EXTENDED_DATA_STATUS = "com.eattle.phoket.STATUS";
+    public static final String EXTENDED_DATA = "com.eattle.phoket.DATA";
+
 
     public static final int MSG_REGISTER_CLIENT = 1;//MainActivity와 Service가 bind 되었을 때
     public static final int MSG_UNREGISTER_CLIENT = 2;//MainActivity와 Service가 bind를 중단하라는 메세지
