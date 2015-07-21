@@ -143,7 +143,7 @@ public class SelectOptionFragment extends Fragment {
         if(db == null)
             db = DatabaseHelper.getInstance(getActivity());
         String storyName = CONSTANT.convertFolderNameToStoryName(db.getFolder(folderID).getName());
-        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?");
+        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?\n(스마트폰 최상단의 Phoket 폴더에 생성됩니다)");
 
         DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -203,9 +203,14 @@ public class SelectOptionFragment extends Fragment {
 
             for(int i=0;i<medias.size();i++){
                 Media media = medias.get(i);
-                File originalPicture = new File(media.getPath());
                 String newPath = folderName+"/"+media.getName();
+                if(newPath.equals(media.getPath()))//동일한 사진을 내보내기 할 경우
+                    continue;
+
+                File originalPicture = new File(media.getPath());
+
                 FolderManage.copyFile(originalPicture,newPath);
+
                 //기존의 사진에서 지우기
                 FolderManage.deleteFile(originalPicture);
                 //Media DB에 업데이트
