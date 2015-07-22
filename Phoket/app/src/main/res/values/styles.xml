@@ -25,6 +25,8 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+        <item name="android:windowFullscreen">true</item>
+
     </style>
 
     <style name="ActionBarTranslucentTheme" parent="Theme.AppCompat.Light.DarkActionBar">

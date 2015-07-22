@@ -1,13 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#99000000">
+    android:orientation="vertical"
+    android:gravity="top">
 
-    <TextView
-        android:text="사진 하나를 클릭해보세요"
-        android:textSize="25dp"
-        android:gravity="center"
-        android:textColor="#ffffff"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="304dp"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="#99000000"
+        android:gravity="center_horizontal"
+        android:id="@+id/back">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guide4Content"
+            android:textColor="#BB000000"
+            android:textSize="16dp"
+            android:gravity="center"
+            android:id="@+id/guide_twotext"
+            android:typeface="serif"
+            android:background="@drawable/bubble_reverse"
+            android:layout_gravity="bottom"
+            android:layout_marginRight="20dp" />
+    </LinearLayout>
+
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/touch"
+        android:src="@drawable/circle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp" />
+
 </LinearLayout>

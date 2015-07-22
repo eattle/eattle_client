@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#99000000">
+    android:gravity="bottom">
 
     <!--선이미지
     <ImageView
@@ -11,25 +11,40 @@
         android:layout_height="wrap_content"
         android:background="@mipmap/line" />-->
 
-    <LinearLayout
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/touch"
+        android:src="@drawable/circle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="20dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
         android:orientation="horizontal"
         android:paddingTop="5dp"
-        android:paddingBottom="5dp">
-
+        android:paddingBottom="5dp"
+        android:background="#99000000"
+        android:gravity="center_horizontal">
+<!--
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="300dp"
-            android:background="@mipmap/fingerdown" />
+            android:background="@mipmap/fingerdown"
+             타임라인 상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n흰 바탕에서 스크롤 해보실래요?
+             />-->
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guide2Content"
+            android:textColor="#BB000000"
+            android:textSize="16dp"
+            android:background="@drawable/bubble"
             android:gravity="center"
-            android:text="타임라인 상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n흰 바탕에서 스크롤 해보실래요?"
-            android:textColor="#ffffff"
-            android:textSize="20dp"/>
+            android:typeface="serif" />
     </LinearLayout>
     <!--선이미지
         <ImageView

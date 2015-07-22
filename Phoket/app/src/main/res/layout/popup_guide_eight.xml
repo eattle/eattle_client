@@ -1,13 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#99000000">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="bottom">
 
-    <TextView
-        android:text="다시한번 상단에서 스크롤하여\n\n 여러분만의 스토리를 만들어보세요! \n\n사진을 정리하고 싶으시다면\n언제든지 스크롤해주세요\n\n포켓이 도와드리겠습니다"
-        android:textSize="20dp"
-        android:gravity="center"
-        android:textColor="#ffffff"
+    <!--선이미지
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:background="@mipmap/line" />-->
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/touch"
+        android:src="@drawable/circle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="20dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="#99000000"
+        android:gravity="center_horizontal">
+        <!--
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="300dp"
+                    android:background="@mipmap/fingerdown"
+                     타임라인 상단에서 스크롤하면\n사진을 자동으로 정리합니다\n\n흰 바탕에서 스크롤 해보실래요?
+                     />-->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guide10Content"
+            android:textColor="#BB000000"
+            android:textSize="16dp"
+            android:background="@drawable/bubble"
+            android:gravity="center"
+            android:typeface="serif" />
+    </LinearLayout>
+    <!--선이미지
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@mipmap/line" />-->
 </LinearLayout>

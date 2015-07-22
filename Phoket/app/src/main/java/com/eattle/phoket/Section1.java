@@ -151,7 +151,7 @@ public class Section1 extends Fragment {
 
                 if(db != null && db.getGuide() == 0) {//가이드 중
                     GUIDE.guide_seven(getActivity());
-                    GUIDE.GUIDE_STEP++;
+                    //GUIDE.GUIDE_STEP++;
                 }
             }
         });

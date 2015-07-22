@@ -197,8 +197,8 @@ public class MainActivity extends AppCompatActivity {
             db.deleteAllTag();
 
             GUIDE.guide_initiate(this);
-            GUIDE.GUIDE_STEP = 0;
-            GUIDE.GUIDE_STEP++;
+            //GUIDE.GUIDE_STEP = 0;
+            //GUIDE.GUIDE_STEP++;
         }
 
         //서비스로부터 오는 브로드케스트를 캐치하기위해
@@ -326,12 +326,19 @@ public class MainActivity extends AppCompatActivity {
 
         if(db == null)
             db = DatabaseHelper.getInstance(MainActivity.this);
-        if(db != null && db.getGuide() == 0){//가이드 도중
-            if(GUIDE.GUIDE_STEP==5){
+
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==6){
                 GUIDE.guide_six(MainActivity.this);
-                GUIDE.GUIDE_STEP++;
+                //GUIDE.GUIDE_STEP++;
             }
-        }
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==8){//마지막 가이드
+                GUIDE.guide_eight(MainActivity.this);
+                db.createGuide(1);//가이드 종료
+                db.deleteAllFolder();
+                db.deleteAllMedia();
+                db.deleteAllMediaTag();
+                db.deleteAllTag();
+            }
     }
     public void deleteAllCard(){
         ((Section1)(mAdapter.getItem(0))).initialize();
@@ -611,7 +618,7 @@ public class MainActivity extends AppCompatActivity {
                     mIsClassifying = false;
 
                     GUIDE.guide_two(MainActivity.this);
-                    GUIDE.GUIDE_STEP++;
+                    //GUIDE.GUIDE_STEP++;
                     break;
                 default:
                     break;

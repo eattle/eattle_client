@@ -125,10 +125,9 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     ((AlbumFullActivity) getActivity()).isTagAppeared = 1;
 
 
-
-                if(db != null && db.getGuide() == 0){//가이드 도중
+                if(db != null && db.getGuide() == 0 && GUIDE.GUIDE_STEP == 5){//가이드 도중
                     GUIDE.guide_five(getActivity());
-                    GUIDE.GUIDE_STEP++;
+                    //GUIDE.GUIDE_STEP++;
                 }
             }
         });

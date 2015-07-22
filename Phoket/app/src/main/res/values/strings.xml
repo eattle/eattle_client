@@ -26,9 +26,21 @@
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_select_option">SelectOptionActivity</string>
 
-    <string name="guide1Title">Phoket 도움말</string>
-    <string name="guide1Content">Phoket으로 추억을 정리해보세요!\n</string>
-    <string name="guide1Button1">튜토리얼 볼래\n</string>
-    <string name="guide1Button2">내가 알아서 할게\n</string>
+    <string name="guide1Title">사진정리를 한번에,\nPhoket</string>
+    <string name="guide1Content">하루에도 수십번씩 찍는 소중한 나의 추억들, Phoket으로 간편하게 정리하고 아름답게 감상하세요.</string>
+    <string name="guide1Button1">튜토리얼 시작하기</string>
+
+    <string name="guide2Content">사진을 정리해볼까요?\n움직이는 원을 따라 당겨보세요!</string>
+
+    <string name="guide3Content">Phoket이 만든 스토리입니다.\n아, 물론 이건 저의 스토리에요.\n당신의 스토리도 곧 만들어줄게요.\n\n스토리를 눌러 감상해볼까요?</string>
+
+    <string name="guide4Content">스토리에 포함된 사진들이에요.\n보고싶은 사진을 눌러주세요!</string>
+    <string name="guide5Content">사진을 좌우로 넘겨보다가,</string>
+    <string name="guide6Content">사진에 대한 추억이 궁금하다면\n사진을 터치!</string>
+    <string name="guide7Content">당신만의 태그를 등록하여\n자유롭게 정리할 수도 있고\n그때 그 순간으로, 바로 이동할 수도 있죠.\n스토리에서 제외하고 싶다면\n휴지통아이콘을 눌러주세요\n\n곧 당신의 스토리를 마음대로 탐험해봐요.\n우선 화면의 아무곳이나 터치해주세요!</string>
+    <string name="guide8Content">스토리를 쭈~욱 눌러보세요.</string>
+    <string name="guide9Content">이 버튼을 눌러\nPhoket이 만든 추억을 공유하거나\n스마트폰에 폴더로 만들 수 있습니다.\n이제 당신의 스토리를 정리해볼까요?\n뒤로가기를 눌러주세요.</string>
+    <string name="guide10Content">기억나세요?\n사진을 한번에 정리하려면\n언제든지 당겨만주세요.\n쭈욱!</string>
+
 
 </resources>

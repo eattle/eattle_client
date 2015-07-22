@@ -35,11 +35,6 @@ public class PopupPictureActivity extends AppCompatActivity {
 
         db = DatabaseHelper.getInstance(getApplicationContext());
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
         Intent intent = getIntent();
         int mediaId = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
 
@@ -53,6 +48,14 @@ public class PopupPictureActivity extends AppCompatActivity {
                 .into(picture);
 
         setTabToTag(db.getMediaById(mediaId));
+
+        ImageView exitStory = (ImageView) findViewById(R.id.exitStory);
+        exitStory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
     }
 
