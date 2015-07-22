@@ -75,6 +75,7 @@ public class ServiceOfPictureClassification extends Service {
 
 
     BroadcastListener broadcastListener = null;
+
     public ServiceOfPictureClassification() {
         super();
     }
@@ -97,7 +98,7 @@ public class ServiceOfPictureClassification extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.i(EXTRA_TAG, "Service onStartCommand");
-        if(intent!=null) {
+        if (intent != null) {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
@@ -172,7 +173,7 @@ public class ServiceOfPictureClassification extends Service {
             NotificationM n = db.getNotification();
             //86400000
             //마지막 푸시를 넣은지 24시간을 넘지 않았으면
-            if(n != null) {
+            if (n != null) {
                 if (System.currentTimeMillis() - n.getNotificationTime() < 86400000L)
                     BroadcastListener.setHowOftenCheck(CONSTANT.ONEDAY);//24시간후에 다시 체크
                 else
@@ -181,7 +182,7 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //Notification을 위한 브로드캐스트 리시버
-            if(broadcastListener == null)
+            if (broadcastListener == null)
                 broadcastListener = new BroadcastListener(getApplicationContext());
             registerReceiver(broadcastListener, new IntentFilter(Intent.ACTION_TIME_TICK));
 
@@ -303,7 +304,7 @@ public class ServiceOfPictureClassification extends Service {
         mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
         calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
 
-        Log.d("pictureClassification","사진 정리 시작");
+        Log.d("pictureClassification", "사진 정리 시작");
         long averageInterval = totalInterval;
         if (totalPictureNum != 0)
             averageInterval /= totalPictureNum;
@@ -327,10 +328,11 @@ public class ServiceOfPictureClassification extends Service {
         int pictureNumInStory = 0;//특정 스토리에 들어가는 사진의 개수를 센다
         String previousStoryName = "";//중복 날짜 스토리를 처리하기 위한 변수
         int overlappedNum = 1;//해당 스토리가 몇번째 중복 스토리인지
-        int tempFixedFolder=0;//고정 스토리 판별을 위한 flag
+        int tempFixedFolder = 0;//고정 스토리 판별을 위한 flag
+        int tempRepresentativeImage = 0;//고정 스토리의 대표 사진 ID
         List<Folder> fixedFolders = db.getFixedFolder();//고정 스토리 목록
-        for(int i=0;i<fixedFolders.size();i++)
-            Log.d(TAG,"고정 스토리 목록 : "+fixedFolders.get(i).getId());
+        for (int i = 0; i < fixedFolders.size(); i++)
+            Log.d(TAG, "고정 스토리 목록 : " + fixedFolders.get(i).getId());
         mCursor.moveToLast();//마지막 사진부터 정리 == 현재에서 가장 가까운 스토리부터
         do {
             final String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
@@ -345,7 +347,7 @@ public class ServiceOfPictureClassification extends Service {
             //picture = new File(path);
             //사진 ID
             pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
-            thumbnail_path = CONSTANT.getThumbnailPath(mCr,pictureID);
+            thumbnail_path = CONSTANT.getThumbnailPath(mCr, pictureID);
 
 
             Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
@@ -390,7 +392,7 @@ public class ServiceOfPictureClassification extends Service {
                         }
                     }
 
-                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID), 0);
+                    Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path, pictureNumInStory, Integer.parseInt(thumbNailID), 0);
                     //db.createFolder(f);
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
                     mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
@@ -405,43 +407,75 @@ public class ServiceOfPictureClassification extends Service {
 
                 //다음 스토리의 ID(folderIDForDB)를 결정하는 부분.(고정 스토리와 중복되지 않도록 한다)
                 int j;
-                while(true) {
+                while (true) {
                     folderIDForDB++;
-                    for(j=0;j<fixedFolders.size();j++){
-                        if(folderIDForDB == fixedFolders.get(j).getId())
+                    for (j = 0; j < fixedFolders.size(); j++) {
+                        if (folderIDForDB == fixedFolders.get(j).getId())
                             break;
                     }
-                    if(j == fixedFolders.size())
+                    if (j == fixedFolders.size())
                         break;
                 }
 
             }
 
-            if((ExistedMedia != null) &&
-                    ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
-                //썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
-                ExistedMedia.setThumbnail_path(thumbnail_path);
-                db.updateMedia(ExistedMedia);
-                Log.d(TAG,"휴지통에 들어있는 사진 || 고정 스토리에 속한 사진");
-                //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지 확인해야한다
-                //TODO File 객체 생성하여 사진 파일 존재여부 체크.
-                //TODO 사진의 경로가 달라졌다면 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
 
-                if(tempFixedFolder == ExistedMedia.getFolder_id())
+            /** --------고정 스토리, 휴지통에 있는 사진을 처리하는 부분--------- **/
+            //고정 스토리를 메인액티비티로 전송해야 할 타이밍
+            if ((ExistedMedia == null || (ExistedMedia != null && ExistedMedia.getIsFixed() == 0)) && tempFixedFolder != 0) {
+                Log.d(TAG, "고정 스토리 메인 액티비티로 전송");
+                //TODO 고정 스토리의 대표 사진을 재선정한다 (없을 수도 있으므로) - 완료
+                Folder fixed = db.getFolder(tempFixedFolder);
+
+                //대표 사진을 재선정한다
+                List<Media> mediaList = db.getAllMediaByFolder(tempFixedFolder);
+                if(mediaList.size() == 0)//TODO 고정 스토리에 사진이 하나도 안남았는지 확인한다(경로 변경으로 인하여), 없으면 보내지 않음 - 완료
+                    db.deleteFolder(tempFixedFolder, true);//해당 스토리를 DB에서 지워버린다
+                else {
+                    //첫번째 사진을 대표로 선정
+                    fixed.setTitleImageID(mediaList.get(0).getId());
+                    fixed.setThumbNail_path(mediaList.get(0).getThumbnail_path());
+                    fixed.setImage(mediaList.get(0).getPath());
+                    //스토리의 사진 개수 수정
+                    fixed.setPicture_num(mediaList.size());
+                    //DB에 업데이트
+                    db.updateFolder(fixed);
+
+                    //MainActivity로 고정 스토리 전송
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, tempFixedFolder);
+                }
+            }
+
+            if ((ExistedMedia != null) &&
+                    ((ExistedMedia.getFolder_id() == -1) || ExistedMedia.getIsFixed() == 1)) {//휴지통에 들어있는 사진 || 고정 스토리에 속한 사진
+                Log.d(TAG, "휴지통에 들어있는 사진 || 고정 스토리에 속한 사진");
+
+                File check = new File(ExistedMedia.getPath());
+                if (!check.exists())//경로에 사진이 존재하지 않을 때
+                    db.deleteMedia(ExistedMedia.getId());//DB에서 해당 사진을 지워버린다
+                else {//경로에 사진이 존재할 때, 썸네일 경로가 바뀌었을 수도 있으므로 업데이트한다
+                    ExistedMedia.setThumbnail_path(thumbnail_path);
+                    db.updateMedia(ExistedMedia);//DB에서 해당 사진을 업데이트한다
+                }
+
+                //TODO 고정 스토리에 속하는 사진들이 외부의 조작으로 인하여 사진의 경로가 달라졌는지(삭제되었는지, 이동되었는지) 확인해야한다
+                //TODO File 객체 생성하여 사진 파일 존재여부 체크.
+                //TODO 사진의 경로가 달라졌다면 해당 사진에 대해 '고정 스토리를 해제하는 절차'를 거쳐야 한다.
+                //TODO 고정 스토리에서 없어진 사진이 해당 폴더의 대표 사진일 경우
+                if (tempFixedFolder == ExistedMedia.getFolder_id())
                     continue;
 
-                if(ExistedMedia.getIsFixed() == 1) {
+                if (ExistedMedia.getIsFixed() == 1) {//특정 고정 스토리에 속한 첫번째 사진에 대해
                     int folderID_ = ExistedMedia.getFolder_id();
-                    Log.d(TAG,"고정 스토리 메인 액티비티로 전송");
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, folderID_);
 
-//                    sendMessageToUI(CONSTANT.END_OF_SINGLE_STORY,folderID_);
                     tempFixedFolder = folderID_;
+                    tempRepresentativeImage = (db.getFolder(folderID_)).getTitleImageID();
                 }
                 continue; //정리에 포함시키지 않는다.
             }
-            //TODO 사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것 -- 유지됨
+            //사진의 경로가 바뀌어도 아이디가 그대로 유지되는지 확인해볼것 -- 유지됨
             tempFixedFolder = 0;//고정 스토리 판별을 위한 flag
+            /** -------------------------------------------------------------------고정 스토리 부분 끝 **/
 
             if (representativeImage.equals("")) {
                 //representativeImage = String.valueOf(pictureID);
@@ -464,23 +498,25 @@ public class ServiceOfPictureClassification extends Service {
 
 
             //DB에 사진 데이터를 넣는다.
-            if (ExistedMedia == null) {//새로운 사진
-                String[] pathArr = path.split("/");
+            if(new File(path).exists()) {//경로에 사진이 존재할 경우에만
+                if (ExistedMedia == null) {//새로운 사진
+                    String[] pathArr = path.split("/");
 
-                Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1] , pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path,0);
-                db.createMedia(m);
-                String folderNameForPicture = pathArr[pathArr.length - 2];
-                if(!folderNameForPicture.contains("스토리"))//사진이 속하는 폴더 이름에 '스토리'가 없을 때에만
-                    db.createTag(folderNameForPicture, pictureID);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
-                Log.d(TAG,"미디어 id "+pictureID+" 에 대해 createMedia() 호출 (folderIDForDB : "+folderIDForDB+")");
-            } else {//기존 사진
-                //업데이트만 한다
-                ExistedMedia.setFolder_id(folderIDForDB);
-                ExistedMedia.setPath(path);
-                ExistedMedia.setThumbnail_path(thumbnail_path);//처음에 정리할때는 내장 썸네일이 없었다가 나중에 생겼을 수도 있음
-                //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
-                db.updateMedia(ExistedMedia);
-                Log.d(TAG,"미디어 id "+pictureID+" 에 대해 updateMedia() 호출 (folderIDForDB : "+folderIDForDB+")");
+                    Media m = new Media(pictureID, folderIDForDB, pathArr[pathArr.length - 1], pictureTakenTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), latitude, longitude, placeName_, path, thumbnail_path, 0);
+                    db.createMedia(m);
+                    String folderNameForPicture = pathArr[pathArr.length - 2];
+                    if (!folderNameForPicture.contains("스토리"))//사진이 속하는 폴더 이름에 '스토리'가 없을 때에만
+                        db.createTag(folderNameForPicture, pictureID);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
+                    Log.d(TAG, "미디어 id " + pictureID + " 에 대해 createMedia() 호출 (folderIDForDB : " + folderIDForDB + ")");
+                } else {//기존 사진
+                    //업데이트만 한다
+                    ExistedMedia.setFolder_id(folderIDForDB);
+                    ExistedMedia.setPath(path);
+                    ExistedMedia.setThumbnail_path(thumbnail_path);//처음에 정리할때는 내장 썸네일이 없었다가 나중에 생겼을 수도 있음
+                    //Log.d(Tag,"기존에 존재하는 사진 : "+ExistedMedia.getId()+" "+ExistedMedia.getFolder_id()+" "+ExistedMedia.getName()+" "+ExistedMedia.getYear()+" "+ExistedMedia.getMonth()+" "+ExistedMedia.getDay()+" "+ExistedMedia.getLatitude()+" "+ExistedMedia.getLongitude()+" "+ExistedMedia.getPlaceName()+" "+ExistedMedia.getPath());
+                    db.updateMedia(ExistedMedia);
+                    Log.d(TAG, "미디어 id " + pictureID + " 에 대해 updateMedia() 호출 (folderIDForDB : " + folderIDForDB + ")");
+                }
             }
             //USB에 사진을 백업
             //1. 이미 USB에 있는 사진일 경우
@@ -497,8 +533,8 @@ public class ServiceOfPictureClassification extends Service {
 
             _pictureTakenTime = pictureTakenTime;
             endFolderID = folderID;
-            Log.d("classification","pictureNumInStory : "+pictureNumInStory);
-            Log.d("classification","------------------------------------------------------------");
+            Log.d("classification", "pictureNumInStory : " + pictureNumInStory);
+            Log.d("classification", "------------------------------------------------------------");
         } while (mCursor.moveToPrevious());
 
         //마지막 남은 폴더를 처리한다.
@@ -518,7 +554,7 @@ public class ServiceOfPictureClassification extends Service {
             }
         }
 
-        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path , pictureNumInStory, Integer.parseInt(thumbNailID), 0);
+        Folder f = new Folder(folderIDForDB, new_name, representativeImage, representativeThumbnail_path, pictureNumInStory, Integer.parseInt(thumbNailID), 0);
 
         mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
 
@@ -534,22 +570,22 @@ public class ServiceOfPictureClassification extends Service {
         //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
         //sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
 
-        Log.d("guide","가이드 시작");
+        Log.d("guide", "가이드 시작");
         db.deleteAllFolder();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
         db.deleteAllMedia();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
         long currentTime = System.currentTimeMillis();//현재 시간
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(currentTime);
-        String folderName = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE)+"의 스토리";
-        Folder f = new Folder(1, folderName, "" , null , 8, 0, 0);
-        Media m1 = new Media(1, 1, "phoket1" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m2 = new Media(2, 1, "phoket2" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m3 = new Media(3, 1, "phoket3" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m4 = new Media(4, 1, "phoket4" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m5 = new Media(5, 1, "phoket5" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m6 = new Media(6, 1, "phoket6" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m7 = new Media(7, 1, "phoket7" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
-        Media m8 = new Media(8, 1, "phoket8" , currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null,0);
+        String folderName = "" + cal.get(Calendar.YEAR) + "_" + (cal.get(Calendar.MONTH) + 1) + "_" + cal.get(Calendar.DATE) + "의 스토리";
+        Folder f = new Folder(1, folderName, "", null, 8, 0, 0);
+        Media m1 = new Media(1, 1, "phoket1", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m2 = new Media(2, 1, "phoket2", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m3 = new Media(3, 1, "phoket3", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m4 = new Media(4, 1, "phoket4", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m5 = new Media(5, 1, "phoket5", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m6 = new Media(6, 1, "phoket6", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m7 = new Media(7, 1, "phoket7", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
+        Media m8 = new Media(8, 1, "phoket8", currentTime, cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.DATE), 0, 0, null, null, null, 0);
         db.createMedia(m1);
         db.createMedia(m2);
         db.createMedia(m3);
@@ -563,30 +599,32 @@ public class ServiceOfPictureClassification extends Service {
         //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
         mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY_GUIDE, db.createFolder(f));
     }
+
     //서비스가 죽었을 때 다시 살리기 위한 함수
     public void registerRestartService() {
         Log.d(EXTRA_TAG, "registerRestartService() 호출");
-        Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
+        Intent intent = new Intent(ServiceOfPictureClassification.this, BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
         intent.putExtra("countForTick", BroadcastListener.getCountForTick());
-        intent.putExtra("HOWOFTENCHECK",BroadcastListener.getHOWOFTENCHECK());
-        Log.d(EXTRA_TAG, "countForTick "+BroadcastListener.getCountForTick());
+        intent.putExtra("HOWOFTENCHECK", BroadcastListener.getHOWOFTENCHECK());
+        Log.d(EXTRA_TAG, "countForTick " + BroadcastListener.getCountForTick());
         Log.d(EXTRA_TAG, "HOWOFTENCHECK " + BroadcastListener.getHOWOFTENCHECK());
         PendingIntent sender = PendingIntent.getBroadcast(
-                ServiceOfPictureClassification.this,0,intent,0);
+                ServiceOfPictureClassification.this, 0, intent, 0);
         long currentTime = SystemClock.elapsedRealtime();//현재 시간
-        currentTime += 1*1000;
-        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        currentTime += 1 * 1000;
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, currentTime, 60 * 1000, sender);
     }
+
     //서비스가 죽었을 때 다시 살리기 위한 함수
-    public void unregisterRestartService(){
-        Log.d(EXTRA_TAG,"unregisterRestartService() 호출");
-        Intent intent = new Intent(ServiceOfPictureClassification.this,BroadcastListener.class);
+    public void unregisterRestartService() {
+        Log.d(EXTRA_TAG, "unregisterRestartService() 호출");
+        Intent intent = new Intent(ServiceOfPictureClassification.this, BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
         PendingIntent sender = PendingIntent.getBroadcast(
-                ServiceOfPictureClassification.this,0,intent,0);
-        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+                ServiceOfPictureClassification.this, 0, intent, 0);
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         am.cancel(sender);
     }
 

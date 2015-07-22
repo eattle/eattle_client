@@ -262,12 +262,14 @@ public class Section1 extends Fragment {
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(f.getId());
             for(int i = 0; i < f.getPicture_num(); i++){
-                if(dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
-                    //원본에서 로드
-                    CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getPath());
-                else
-                    //썸네일에서 로드
-                    CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getThumbnail_path());
+                if(new File(dailyMedia.get(i).getPath()).exists()) {
+                    if (dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
+                        //원본에서 로드
+                        CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getPath());
+                    else
+                        //썸네일에서 로드
+                        CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getThumbnail_path());
+                }
             }
         }else {
             isDaily = false;
