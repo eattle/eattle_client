@@ -13,7 +13,7 @@
         android:background="#000000">
 
         <TextView
-            android:text="추천 스토리"
+            android:text="다음 스토리"
             android:textColor="#ffffff"
             android:textSize="20dp"
             android:gravity="center"

@@ -80,7 +80,8 @@
             android:name=".PopupPictureActivity"
             android:label="@string/title_activity_popup_picture"
             android:theme="@style/FullScreenTheme"
-            android:windowSoftInputMode="stateVisible" >
+            android:windowSoftInputMode="stateVisible">
+            <!--android:windowSoftInputMode="stateVisible" adjustResize-->
         </activity>
         <activity
             android:name=".SearchActivity"

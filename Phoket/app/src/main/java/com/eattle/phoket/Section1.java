@@ -162,6 +162,7 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d("testtest","state : "+state);
                 if(state == STATE_RUNNING) {
                     if (db.getGuide() == 0)
                         //가이드를 완료하지 않았으면

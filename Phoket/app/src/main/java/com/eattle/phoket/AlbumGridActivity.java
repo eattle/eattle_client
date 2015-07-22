@@ -307,6 +307,13 @@ public class AlbumGridActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                if(db == null)
+                    db = DatabaseHelper.getInstance(AlbumGridActivity.this);
+                if(db != null) {
+                    if (db.getGuide() == 0)//가이드 도중에
+                        return true;//백버튼을 막는다
+                }
+
                 CONSTANT.actList.remove(this);
 
                 finish();//현재 띄워져 있던 albumGridActivity 종료(메모리 확보를 위해)

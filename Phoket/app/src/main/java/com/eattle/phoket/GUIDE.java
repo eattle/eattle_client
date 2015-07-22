@@ -255,6 +255,7 @@ public class GUIDE {
                 }
             }
         };
+        d.setCancelable(false);
         d.setPositiveButton("다음", l);
         d.show();*/
     }
