@@ -212,7 +212,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                         pushTabToTag(mMediaList.get(position), position);//다시 보이게 한다
                     }
                 }
-                Log.d(TAG,"onPageSelected에서의 setTabToTag");
+                Log.d(TAG, "onPageSelected에서의 setTabToTag");
                 setTabToTag(mMediaList.get(position), position);
             }
 
@@ -232,10 +232,10 @@ public class AlbumFullActivity extends ActionBarActivity {
         });
 
 
-        if(db == null){
+        if (db == null) {
             db = DatabaseHelper.getInstance(AlbumFullActivity.this);
         }
-        if(db.getGuide() == 0) {//가이드 중
+        if (db.getGuide() == 0) {//가이드 중
             GUIDE.guide_four(AlbumFullActivity.this);
             GUIDE.GUIDE_STEP++;
         }
@@ -295,7 +295,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                 position--;//인덱스 -1이 스토리시작화면!!
             }
 
-            if(position >= 0 && position < mediaList.size())
+            if (position >= 0 && position < mediaList.size())
                 mediaList.remove(position);
             else
                 Log.d(TAG, "지우려는 viewpager 포지션 : " + position + "에 에러가 있음");
@@ -303,14 +303,13 @@ public class AlbumFullActivity extends ActionBarActivity {
             this.notifyDataSetChanged();
 
             //태그 상태 업데이트
-            if(mediaList.size() != 0){//아직 사진이 남아 있을 때
-                Log.d(TAG,"removeView에서의 setTabToTag");
+            if (mediaList.size() != 0) {//아직 사진이 남아 있을 때
+                Log.d(TAG, "removeView에서의 setTabToTag");
 
-                if(position == mediaList.size()) {//마지막 사진
+                if (position == mediaList.size()) {//마지막 사진
                     setTabToTag(mMediaList.get(position - 1), position - 1);
-                    mViewPager.setCurrentItem(position-1);//뷰페이저 초점 이동
-                }
-                else
+                    mViewPager.setCurrentItem(position - 1);//뷰페이저 초점 이동
+                } else
                     setTabToTag(mMediaList.get(position), position);
             }
         }
@@ -342,6 +341,12 @@ public class AlbumFullActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
+                if (db == null)
+                    db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+                if (db != null) {
+                    if (db.getGuide() == 0)//가이드 도중에
+                        return true;//백버튼을 막는다
+                }
                 //불필요한 메모리 정리---------------------------------------------------------------
                 AlbumFullActivity.mViewPager = null;
                 AlbumFullActivity.touchImageAdapter = null;
@@ -399,7 +404,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     void setPlacePopup(Media m) {
         //장소명이 존재하면 태그로 추가할지 묻는다
-        if ((m.getPlaceName() != null) &&!m.getPlaceName().equals("")) {
+        if ((m.getPlaceName() != null) && !m.getPlaceName().equals("")) {
             //일단 m.getPlaceName()이 태그 목록에 있는지 확인한다
             int tagId = db.getTagIdByTagName(m.getPlaceName());
             //1. 해당 장소명으로 태그가 아예 존재하지 않을 때 -> 묻는다
@@ -641,7 +646,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             @Override
             public void run() {
                 try {
-                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr,path,media.getThumbnail_path(), media.getId());//안드로이드 내장 썸네일을 가져온다
+                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path, media.getThumbnail_path(), media.getId());//안드로이드 내장 썸네일을 가져온다
                 } catch (Exception e) {
                     Log.d(TAG, "CONSTANT.getThumbnail() 오류");
                     e.printStackTrace();
@@ -661,6 +666,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
 
     }
+
     @Override
     public void onStop() {
         Log.d(TAG, "onStop() 호출");
@@ -669,6 +675,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         super.onStop();
     }
+
     //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
     public static boolean cancelPotentialWork(String path, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
@@ -721,6 +728,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     /*
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -742,33 +750,22 @@ public class AlbumFullActivity extends ActionBarActivity {
         // Restore state members from saved instance
 
     }
-
-    @Override
-    protected void onUserLeaveHint(){
-        Log.d(TAG,"onUserLeaveHint() 호출");
-        //불필요한 메모리 정리---------------------------------------------------------------
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
-        //아직 스토리에 남아있는 사진 삭제
-        while (AlbumFullActivity.viewPagerImage.size() > 0) {
-            Log.d("TagsOverAlbum", "아직 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if (AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum", "break!");
-
-                break;
-            }
-        }
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
-    }
 */
+    @Override
+    protected void onUserLeaveHint() {
+        Log.d(TAG, "onUserLeaveHint() 호출");
+
+        if (db == null)
+            db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+        //AlbumFullActivity에서 '가이드 도중'에 홈버튼을 누를 경우, MainActivity로 이동해둔다
+        if (db.getGuide() == 0) {
+            Log.d(TAG, "MainActivity로 이동");
+            GUIDE.GUIDE_STEP = 5;
+            for (int i = 0; i < CONSTANT.actList.size(); i++)
+                CONSTANT.actList.get(i).finish();
+        }
+    }
+
 
     private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
         //D  S   X

@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.Glide;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
+import com.eattle.phoket.view.TouchImageView;
 
 
 public class PopupPictureActivity extends AppCompatActivity {
@@ -43,11 +44,12 @@ public class PopupPictureActivity extends AppCompatActivity {
         int mediaId = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
 
         Media m = db.getMediaById(mediaId);
-        ImageView picture = (ImageView)findViewById(R.id.picture);
+        TouchImageView picture = (TouchImageView)findViewById(R.id.picture);
 
 
         Glide.with(this)
                 .load(m.getPath())
+                .placeholder(R.mipmap.loading)
                 .into(picture);
 
         setTabToTag(db.getMediaById(mediaId));
@@ -57,6 +59,8 @@ public class PopupPictureActivity extends AppCompatActivity {
     void setTabToTag(Media m) {
         FragmentTransaction tr = getFragmentManager().beginTransaction();
         TagsOverAlbum ttt = TagsOverAlbum.newInstance(m,1);
+        if(ttt.getView() != null)
+            ttt.getView().findViewById(R.id.storyContentOrder).setVisibility(View.GONE);
         tr.replace(R.id.tagLayout, ttt, "TabToTag");
         tr.setTransition(android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         tr.commit();

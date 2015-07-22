@@ -52,24 +52,6 @@ public class GUIDE {
 
 
     public static void guide_initiate(final Context context) {//앱을 최초 실행했을 때 사진정리를 누르도록 한다.
-        //AlertDialog.Builder d = new AlertDialog.Builder(context);
-        /*new MaterialDialog.Builder(context)
-                .title(R.string.guide1Title)
-                .content(R.string.guide1Content)
-                .positiveText(R.string.guide1Button1)
-                .negativeText(R.string.guide1Button2)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-
-                    }
-                    @Override
-                    public void onNegative(MaterialDialog dialog) {
-
-                    }
-                })
-                .show();*/
-
         AlertDialog.Builder d = new AlertDialog.Builder(context);
         final LinearLayout r = (LinearLayout) View.inflate(context, R.layout.popup_guide_initiate, null);
         d.setView(r);
@@ -170,6 +152,7 @@ public class GUIDE {
                 }
             }
         };
+        d.setCancelable(false);
         d.setPositiveButton("다음", l);
         d.show();
     }

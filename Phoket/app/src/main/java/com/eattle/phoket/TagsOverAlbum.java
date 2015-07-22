@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ public class TagsOverAlbum extends Fragment {
 
     //파일 시스템 관련 변수
     static FileSystem fileSystem;
+
 
     //pushTabToTag를 위해
     public static TagsOverAlbum newInstance(Media m, int position, int totalPictureNum) {
@@ -290,6 +292,11 @@ public class TagsOverAlbum extends Fragment {
                 wantPictureDeleted();
             }
         });
+
+        if(type == 1){//'이 사진을 포켓에 담아주세요'에서 들어왔을 경우
+            RelativeLayout storyContentOrder = (RelativeLayout)root.findViewById(R.id.storyContentOrder);
+            storyContentOrder.setVisibility(View.GONE);
+        }
         return root;
     }
 

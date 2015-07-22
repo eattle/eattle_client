@@ -190,6 +190,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         if (db.getGuide() == 0 && GUIDE.GUIDE_STEP==0) {//앱 최초 실행시
+            //더미데이터 삭제(가이드 도중에 앱이 종료된 경우를 위해)
+            db.deleteAllFolder();
+            db.deleteAllMedia();
+            db.deleteAllMediaTag();
+            db.deleteAllTag();
+
             GUIDE.guide_initiate(this);
             GUIDE.GUIDE_STEP = 0;
             GUIDE.GUIDE_STEP++;
@@ -294,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                     db.deleteAllMediaTag();
                     db.deleteAllTag();
 
-                    endOfGuide();
+                    deleteAllCard();
                 }
             }
         }
@@ -320,23 +326,14 @@ public class MainActivity extends AppCompatActivity {
 
         if(db == null)
             db = DatabaseHelper.getInstance(MainActivity.this);
-        if(db != null){
-
-            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==5){
+        if(db != null && db.getGuide() == 0){//가이드 도중
+            if(GUIDE.GUIDE_STEP==5){
                 GUIDE.guide_six(MainActivity.this);
                 GUIDE.GUIDE_STEP++;
             }
-            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==7){//마지막 가이드
-                GUIDE.guide_eight(MainActivity.this);
-                db.createGuide(1);//가이드 종료
-                db.deleteAllFolder();
-                db.deleteAllMedia();
-                db.deleteAllMediaTag();
-                db.deleteAllTag();
-            }
         }
     }
-    public void endOfGuide(){
+    public void deleteAllCard(){
         ((Section1)(mAdapter.getItem(0))).initialize();
         ((Section2)(mAdapter.getItem(1))).initialize();
     }
@@ -377,6 +374,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK){//백버튼을 통제(비밀번호 유지를 위해)
+            if(db == null)
+                db = DatabaseHelper.getInstance(MainActivity.this);
+            if(db != null) {
+                if (db.getGuide() == 0)//가이드 도중에
+                    return true;//백버튼을 막는다
+            }
+
+
             //선택된 것을 두번째로 끔
             if(state != STATE_RUNNING){
                 state = STATE_RUNNING;
@@ -391,7 +396,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-
     /***************** ViewPager 부분 **********************/
     private void setupViewPager(CustomViewPager viewPager) {
         viewPager.setPagingEnabled();
