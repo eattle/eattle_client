@@ -1,13 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#99000000">
+    android:orientation="vertical">
 
-    <TextView
-        android:text="사진을 터치해 보세요!"
-        android:textSize="25dp"
-        android:textColor="#ffffff"
-        android:gravity="center"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="200dp"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="#99000000"
+        android:gravity="center_horizontal"
+        android:id="@+id/back">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guide6Content"
+            android:textColor="#BB000000"
+            android:textSize="16dp"
+            android:gravity="center"
+            android:id="@+id/guide_twotext"
+            android:typeface="serif"
+            android:background="@drawable/bubble_reverse"
+            android:layout_gravity="bottom" />
+    </LinearLayout>
+
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/touch"
+        android:src="@drawable/circle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="70dp" />
+
 </LinearLayout>

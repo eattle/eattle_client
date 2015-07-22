@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#99000000">
+    android:orientation="vertical"
+    android:gravity="bottom|right">
+
 
     <TextView
-        android:text="하단에 생성된 빨간 버튼을 누르시면\n\n1. 스토리를 스마트폰에 폴더로 만들기\n\n2.드랍박스 등에 공유\n\n가 가능합니다\n\n이제 스마트폰의 뒤로가기 버튼을 눌러주세요!"
-        android:textSize="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/guide9Content"
+        android:textColor="#BB000000"
+        android:textSize="16dp"
+        android:background="@drawable/bubble_right"
         android:gravity="center"
-        android:textColor="#ffffff"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:id="@+id/guide_twotext"
+        android:typeface="serif"
+        android:layout_marginBottom="100dp"
+        android:layout_marginRight="10dp" />
+
+
 </LinearLayout>
+<!--        android:text="하단에 생성된 빨간 버튼을 누르시면\n\n1. 스토리를 스마트폰에 폴더로 만들기\n\n2.드랍박스 등에 공유\n\n가 가능합니다\n\n이제 스마트폰의 뒤로가기 버튼을 눌러주세요!"
+-->

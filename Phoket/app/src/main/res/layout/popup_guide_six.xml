@@ -1,13 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="#99000000">
+    android:orientation="vertical"
+    android:gravity="bottom">
 
-    <TextView
-        android:text="메인화면에 있는 스토리를 길~게 눌러보세요! "
-        android:textSize="25dp"
-        android:textColor="#ffffff"
-        android:gravity="center"
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/touch"
+        android:src="@drawable/circle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="100dp"
+        android:layout_marginBottom="25dp" />
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="350dp" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="#99000000"
+        android:gravity="center_horizontal"
+        android:id="@+id/back">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guide8Content"
+            android:textColor="#BB000000"
+            android:textSize="16dp"
+            android:background="@drawable/bubble"
+            android:gravity="center"
+            android:id="@+id/guide_twotext"
+            android:typeface="serif" />
+
+    </LinearLayout>
+
 </LinearLayout>
+
+
+    <!--<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="#99000000">
+
+        <TextView
+            android:text="메인화면에 있는 스토리를 길~게 눌러보세요! "
+            android:textSize="25dp"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="350dp" />
+    </LinearLayout>-->

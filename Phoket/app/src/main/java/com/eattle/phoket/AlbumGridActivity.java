@@ -150,8 +150,8 @@ public class AlbumGridActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.VISIBLE);
 
         if(db.getGuide() == 0) {//가이드 중
-            GUIDE.guide_three(AlbumGridActivity.this);
-            GUIDE.GUIDE_STEP++;
+            GUIDE.guide_three_one(AlbumGridActivity.this);
+            //GUIDE.GUIDE_STEP++;
         }
     }
 

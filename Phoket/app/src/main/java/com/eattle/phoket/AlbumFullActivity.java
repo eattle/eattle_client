@@ -237,7 +237,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
         if(db.getGuide() == 0) {//가이드 중
             GUIDE.guide_four(AlbumFullActivity.this);
-            GUIDE.GUIDE_STEP++;
+            //GUIDE.GUIDE_STEP++;
         }
     }
 
