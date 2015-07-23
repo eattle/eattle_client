@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="@string/guide6Content"
             android:textColor="#BB000000"
-            android:textSize="16dp"
+            android:textSize="@dimen/bubble_font_size"
             android:gravity="center"
             android:id="@+id/guide_twotext"
             android:typeface="serif"

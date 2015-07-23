@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:text="@string/guide9Content"
         android:textColor="#BB000000"
-        android:textSize="16dp"
+        android:textSize="@dimen/bubble_font_size"
         android:background="@drawable/bubble_right"
         android:gravity="center"
         android:id="@+id/guide_twotext"
