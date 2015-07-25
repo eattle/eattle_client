@@ -130,18 +130,18 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         float scaleFactor = 8;
         float radius = 6;
 
-        Bitmap overlay = Bitmap.createBitmap((int) (view.getMeasuredWidth() / scaleFactor),
-                (int) (view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(overlay);
-        canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
-        canvas.scale(1 / scaleFactor, 1 / scaleFactor);
-        Paint paint = new Paint();
-        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-        canvas.drawBitmap(bkg, 0, 0, paint);
+//        Bitmap overlay = Bitmap.createBitmap((int) (view.getMeasuredWidth() / scaleFactor),
+//                (int) (view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(overlay);
+//        canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
+//        canvas.scale(1 / scaleFactor, 1 / scaleFactor);
+//        Paint paint = new Paint();
+//        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+//        canvas.drawBitmap(bkg, 0, 0, paint);
 
-        overlay = FastBlur.doBlur(overlay, (int)radius, true);
-        Log.d("asdfasdf","블러에 사용되는 바이트 : "+overlay.getByteCount());
-        view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
+//        overlay = FastBlur.doBlur(overlay, (int)radius, true);
+//        Log.d("asdfasdf","블러에 사용되는 바이트 : "+overlay.getByteCount());
+//        view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
         view.setAlpha(0.0f);
 
         /*
