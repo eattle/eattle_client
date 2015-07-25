@@ -313,6 +313,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteFolder(int folderId, boolean should_delete_all_media_in_that_folder) {
+        Log.d("DatabaseHelper", "deleteFolder() 호출");
         SQLiteDatabase db = this.getWritableDatabase();
 
         //check if media in that folder should also be deleted
@@ -330,7 +331,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deleteAllFolder() {
         Log.d("DatabaseHelper", "deleteAllFolder() 호출");
         SQLiteDatabase db = this.getWritableDatabase();
-        //static이 1인 폴더는 지우지 않는다
+        //KEY_ISFIXED ==  1인 폴더는 지우지 않는다
         db.execSQL("DELETE FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 0");
     }
 
@@ -340,7 +341,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
         List<Folder> folders = new ArrayList<Folder>();
-        ;
+
 
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 1";//static이 1인 폴더의 아이디를 얻어온다
@@ -465,6 +466,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /*
+    * getting Single Media by path
+    */
+    public Media getMediaByPath(String path) {
+        Media media = new Media();
+        Log.d("MediaDB", "path : " + path);
+
+        String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_PATH + " = '" + path+"'";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = null;
+        try {
+            c = db.rawQuery(selectQuery, null);
+
+
+            if (c.moveToFirst()) {//media_id에 해당하는 사진이 있을 때
+
+                media.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                media.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
+                media.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                media.setPictureTaken(c.getLong(c.getColumnIndex(KEY_PICTURETAKEN)));
+                media.setYear(c.getInt(c.getColumnIndex(KEY_YEAR)));
+                media.setMonth(c.getInt(c.getColumnIndex(KEY_MONTH)));
+                media.setDay(c.getInt(c.getColumnIndex(KEY_DAY)));
+                media.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
+                media.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
+                media.setPlaceName(c.getString(c.getColumnIndex(KEY_PLACENAME)));
+                media.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+                media.setThumbnail_path(c.getString(c.getColumnIndex(KEY_THUMBNAILPATH)));
+                media.setIsFixed(c.getInt(c.getColumnIndex(KEY_ISFIXED)));
+
+            } else
+                media = null;
+        } finally {
+            if (c != null)
+                c.close();
+        }
+        return media;
+    }
+    /*
      * getting all media
      */
     public List<Media> getAllMedia() {
@@ -507,6 +547,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * getting all media by folder
      */
     public List<Media> getAllMediaByFolder(int folder_id) {
+        Log.d("DatabaseHelper", "getAllMediaByFolder() 호출");
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id;
 
