@@ -37,15 +37,12 @@ import java.util.List;
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator;
 
 
-
 public class Section1 extends Fragment {
     private final static String EXTRA_TAG = "MAIN_SECTION1";
 
     private final static int STATE_LOADING = 0;
     private final static int STATE_RUNNING = 1;
     private final static int STATE_SELECT = 2;
-
-
 
 
     private Context mContext;
@@ -59,7 +56,7 @@ public class Section1 extends Fragment {
     private boolean isDaily = false;
 
 
-//    boolean isSelectMode = false;
+    //    boolean isSelectMode = false;
     ArrayList<CardData> selected = new ArrayList<>();
     ArrayList<Integer> selectedp = new ArrayList<>();
 
@@ -67,7 +64,7 @@ public class Section1 extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View root =  inflater.inflate(R.layout.fragment_section1, container, false);
+        View root = inflater.inflate(R.layout.fragment_section1, container, false);
         mContext = getActivity();
         db = DatabaseHelper.getInstance(mContext);
 
@@ -92,7 +89,7 @@ public class Section1 extends Fragment {
                             selectedp.add(position);
                         } else {
                             selected.remove(data);
-                            selectedp.remove((Integer)position);
+                            selectedp.remove((Integer) position);
                             if (selected.size() <= 0) {
                                 ((MainActivity) getActivity()).setSelectMode();
                                 state = STATE_RUNNING;
@@ -135,21 +132,21 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-                if(state == STATE_RUNNING && mListView.isSelectable(position)){
+                if (state == STATE_RUNNING && mListView.isSelectable(position)) {
                     state = STATE_SELECT;
                     mListView.setSelect(position);
                     selected.add((CardData) view.getTag());
                     selectedp.add(position);
-                    ((MainActivity)getActivity()).setSelectMode();
-                }else if(state == STATE_LOADING){
+                    ((MainActivity) getActivity()).setSelectMode();
+                } else if (state == STATE_LOADING) {
                     Snackbar.make(mSwipeRefreshLayout, "정리가 완료된 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
                 }
 
-                if(db == null)
+                if (db == null)
                     db = DatabaseHelper.getInstance(getActivity());
 
-                if(db != null && db.getGuide() == 0) {//가이드 중
+                if (db != null && db.getGuide() == 0) {//가이드 중
                     GUIDE.guide_seven(getActivity());
                     //GUIDE.GUIDE_STEP++;
                 }
@@ -162,19 +159,19 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d("testtest","state : "+state);
-                if(state == STATE_RUNNING) {
+                Log.d("testtest", "state : " + state);
+                if (state == STATE_RUNNING) {
                     if (db.getGuide() == 0)
                         //가이드를 완료하지 않았으면
                         //서비스에게 가이드 시작을 요청한다
                         ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_GUIDE);
-                    else{
-                        for(int i=0;i<GUIDE.CURRENT_POPUP.size();i++)
+                    else {
+                        for (int i = 0; i < GUIDE.CURRENT_POPUP.size(); i++)
                             GUIDE.CURRENT_POPUP.get(i).dismiss();//가이드 팝업을 지운다
-                        
+
                         ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
                     }
-                }else{
+                } else {
                     mSwipeRefreshLayout.setRefreshing(false);
                     Snackbar.make(mSwipeRefreshLayout, "선택을 취소한 후 다시 시도해주세요", Snackbar.LENGTH_SHORT)
                             .setAction("Action", null).show();
@@ -236,7 +233,7 @@ public class Section1 extends Fragment {
             mListView.clear();
 
             int storiesNum = result.size();
-            for(int i = 0; i < storiesNum; i++){
+            for (int i = 0; i < storiesNum; i++) {
                 addCard(result.get(i));
             }
 
@@ -249,27 +246,28 @@ public class Section1 extends Fragment {
     }
 
 
-
-    private void addCard(Folder f){
+    private void addCard(Folder f) {
         SimpleCard card;
         CardData tag;
         //일상
-        if(f.getPicture_num() <= CONSTANT.BOUNDARY){
-            if(!isDaily){
+        if (f.getPicture_num() <= CONSTANT.BOUNDARY) {
+            if (!isDaily) {
                 isDaily = true;
                 CardManager.setHeaderItem(mListView, mContext, CONSTANT.convertFolderNameToDate(f.getName()));
             }
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(f.getId());
-            for(int i = 0; i < f.getPicture_num(); i++){
-                if(dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
+            for (int i = 0; i < f.getPicture_num(); i++) {
+
+                if (dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
                     //원본에서 로드
                     CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getPath());
                 else
                     //썸네일에서 로드
                     CardManager.setDailyItem(mListView, mContext, f.getId(), i, dailyMedia.get(i).getThumbnail_path());
+
             }
-        }else {
+        } else {
             isDaily = false;
 
             CardManager.setBigStoryItem(mListView, mContext,
@@ -281,7 +279,7 @@ public class Section1 extends Fragment {
 
             List<Tag> storyTags = db.getAllTagsByFolderId(f.getId());
             int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
-            if(storyTagsSize > 0) {
+            if (storyTagsSize > 0) {
                 CardManager.setRelationTagsItem(mListView, mContext,
                         storyTagsSize,
                         storyTags,
@@ -325,7 +323,7 @@ public class Section1 extends Fragment {
                         });
             }
             Media randomMedia = db.getMediaByFolderRandomly(f.getId());
-            if(randomMedia.getThumbnail_path() == null)//썸네일이 없으면
+            if (randomMedia.getThumbnail_path() == null)//썸네일이 없으면
                 CardManager.setRecommendItem(mListView, mContext,
                         randomMedia.getId(),
                         randomMedia.getPath());
@@ -339,18 +337,18 @@ public class Section1 extends Fragment {
 
     //초기화
     //단순히 db에서 값을 가져와서 보여줌
-    public void initialize(){
+    public void initialize() {
         state = STATE_LOADING;
         isDaily = false;
         int s = selected.size();
-        for(int i = 0; i < s; i++) {
+        for (int i = 0; i < s; i++) {
             mListView.setSelect(selectedp.get(i));
         }
         selected.clear();
         selectedp.clear();
-        if(s <= 0) {
+        if (s <= 0) {
             new InitializeApplicationsTask().execute();
-        }else{
+        } else {
             state = STATE_RUNNING;
 
         }
@@ -358,21 +356,21 @@ public class Section1 extends Fragment {
 
     // 상태를 loading으로
     // db자체를 바꾸는 service를 실행
-    public void setLoading(){
+    public void setLoading() {
         state = STATE_LOADING;
         mListView.clear();
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
-    public void setRunning(){
+    public void setRunning() {
         state = STATE_RUNNING;
         isDaily = false;
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
-    public void addSingleCard(Folder f){
-        if(mListView == null)   return;
-        if(state == STATE_RUNNING){
+    public void addSingleCard(Folder f) {
+        if (mListView == null) return;
+        if (state == STATE_RUNNING) {
             state = STATE_LOADING;
             mSwipeRefreshLayout.setRefreshing(true);
         }

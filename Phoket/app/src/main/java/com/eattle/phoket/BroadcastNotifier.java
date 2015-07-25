@@ -3,13 +3,14 @@ package com.eattle.phoket;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 /**
  * Created by GA on 2015. 7. 20..
  */
 
 public class BroadcastNotifier {
-
+    private String TAG = "BroadcastNotifier";
     private LocalBroadcastManager mBroadcaster;
 
     /**
@@ -34,7 +35,7 @@ public class BroadcastNotifier {
      * @param status {@link Integer} denoting a work request status
      */
     public void broadcastIntentWithState(int status) {
-
+        Log.d(TAG, "broadcastIntentWithState(int status) 호출");
         Intent localIntent = new Intent();
 
         // The Intent contains the custom broadcast action for this app
@@ -50,7 +51,7 @@ public class BroadcastNotifier {
     }
 
     public void broadcastIntentWithState(int status, int data) {
-
+        Log.d(TAG, "broadcastIntentWithState(int status, int data) 호출");
         Intent localIntent = new Intent();
 
         // The Intent contains the custom broadcast action for this app

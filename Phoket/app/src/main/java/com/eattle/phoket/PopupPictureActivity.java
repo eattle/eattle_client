@@ -41,14 +41,13 @@ public class PopupPictureActivity extends AppCompatActivity {
         Media m = db.getMediaById(mediaId);
         TouchImageView picture = (TouchImageView)findViewById(R.id.picture);
 
-
-        Glide.with(this)
-                .load(m.getPath())
-                .placeholder(R.mipmap.loading)
-                .into(picture);
-
-        setTabToTag(db.getMediaById(mediaId));
-
+        if(m != null) {
+            Glide.with(this)
+                    .load(m.getPath())
+                    .placeholder(R.mipmap.loading)
+                    .into(picture);
+            setTabToTag(db.getMediaById(mediaId));
+        }
         ImageView exitStory = (ImageView) findViewById(R.id.exitStory);
         exitStory.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -107,6 +107,7 @@ public class CONSTANT {
     public static String convertFolderNameToDate(String folderName) {
         String name = "";
         if (folderName.contains("~")) {//여러 날짜를 포함하는 스토리일 경우
+            Log.d("asdf","folderName : "+folderName);
             String[] bigSplit = folderName.split("~");
             String[] tempName = bigSplit[0].split("_");
             name += tempName[0] + "." + tempName[1] + "." + tempName[2] + " ~ ";
