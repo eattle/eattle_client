@@ -117,6 +117,13 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(db != null && db.getGuide() == 0){
+                    if(GUIDE.GUIDE_STEP != 5){
+                        return;
+                    }
+                    GUIDE.guide_five(getActivity());
+                }
+
                 ((AlbumFullActivity) getActivity()).pushTabToTag(m, _position);
                 ((AlbumFullActivity) getActivity()).setPlacePopup(m);
                 if (((AlbumFullActivity) getActivity()).isTagAppeared == 1)
@@ -125,10 +132,6 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     ((AlbumFullActivity) getActivity()).isTagAppeared = 1;
 
 
-                if(db != null && db.getGuide() == 0 && GUIDE.GUIDE_STEP == 5){//가이드 도중
-                    GUIDE.guide_five(getActivity());
-                    //GUIDE.GUIDE_STEP++;
-                }
             }
         });
 

@@ -201,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
             //GUIDE.GUIDE_STEP++;
         }
 
+
         //서비스로부터 오는 브로드케스트를 캐치하기위해
         //메인에 리시버를 등록
         IntentFilter statusIntentFilter = new IntentFilter(CONSTANT.BROADCAST_ACTION);
@@ -271,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+
             mViewPager.setPagingEnabled();
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fm.beginTransaction();
@@ -280,7 +282,10 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
             mActionMode = null;
+            Log.d("asda", "adsas");
+
             if(state != STATE_RUNNING){
+                Log.d("asda", "adsas");
                 state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
@@ -288,21 +293,21 @@ public class MainActivity extends AppCompatActivity {
 
             if(db == null)
                 db = DatabaseHelper.getInstance(MainActivity.this);
-            if(db != null){
-                if(db.getGuide() == 0 && GUIDE.GUIDE_STEP>=7){
-                    GUIDE.guide_eight(MainActivity.this);
+            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP>=7){
+                GUIDE.guide_eight(MainActivity.this);
 
-                    db.createGuide(1);//가이드 종료했다는 표시
+                db.createGuide(1);//가이드 종료했다는 표시
 
-                    //더미데이터 삭제
-                    db.deleteAllFolder();
-                    db.deleteAllMedia();
-                    db.deleteAllMediaTag();
-                    db.deleteAllTag();
+                //더미데이터 삭제
+                db.deleteAllFolder();
+                db.deleteAllMedia();
+                db.deleteAllMediaTag();
+                db.deleteAllTag();
 
-                    deleteAllCard();
-                }
+                deleteAllCard();
             }
+
+
         }
     };
 
@@ -330,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
             if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==6){
                 GUIDE.guide_six(MainActivity.this);
                 //GUIDE.GUIDE_STEP++;
-            }
+            }/*
             if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==8){//마지막 가이드
                 GUIDE.guide_eight(MainActivity.this);
                 db.createGuide(1);//가이드 종료
@@ -338,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                 db.deleteAllMedia();
                 db.deleteAllMediaTag();
                 db.deleteAllTag();
-            }
+            }*/
     }
     public void deleteAllCard(){
         ((Section1)(mAdapter.getItem(0))).initialize();
@@ -383,17 +388,15 @@ public class MainActivity extends AppCompatActivity {
         if(keyCode == KeyEvent.KEYCODE_BACK){//백버튼을 통제(비밀번호 유지를 위해)
             if(db == null)
                 db = DatabaseHelper.getInstance(MainActivity.this);
-            if(db != null) {
-                if (db.getGuide() == 0)//가이드 도중에
-                    return true;//백버튼을 막는다
-            }
-
+            if (db.getGuide() == 0)//가이드 도중에
+                return true;//백버튼을 막는다
 
             //선택된 것을 두번째로 끔
             if(state != STATE_RUNNING){
-                state = STATE_RUNNING;
-                mFAB.setVisibility(View.INVISIBLE);
-                ((Section1)(mAdapter.getItem(0))).initialize();
+                return true;
+//                state = STATE_RUNNING;
+//                mFAB.setVisibility(View.INVISIBLE);
+//                ((Section1)(mAdapter.getItem(0))).initialize();
             }else{
                 wantCapicUSB();
             }
@@ -617,7 +620,7 @@ public class MainActivity extends AppCompatActivity {
 
                     mIsClassifying = false;
 
-                    GUIDE.guide_two(MainActivity.this);
+                    GUIDE.guide2(MainActivity.this);
                     //GUIDE.GUIDE_STEP++;
                     break;
                 default:

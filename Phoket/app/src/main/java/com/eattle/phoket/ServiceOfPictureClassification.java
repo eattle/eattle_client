@@ -112,6 +112,7 @@ public class ServiceOfPictureClassification extends Service {
                         public void run() {
                             try {//가이드를 시작한다
                                 isClassifying = true;
+                                mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
                                 pictureClassification_guide();
                             } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
