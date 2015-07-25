@@ -281,9 +281,10 @@ public class TagsOverAlbum extends Fragment {
 
         //휴지통(사진 삭제)
         ImageView storyContentDelete = (ImageView) root.findViewById(R.id.storyContentDelete);
-        if( ((db.getAllMediaByFolder(db.getMediaById(media_id).getFolder_id())).size()) <= CONSTANT.BOUNDARY)//일상에서는
+        int folderID = db.getMediaById(media_id).getFolder_id();
+        if( ((db.getAllMediaByFolder(folderID)).size()) <= CONSTANT.BOUNDARY && (db.getFolder(folderID).getIsFixed() == 0))//일상이면서, 고정스토리가 아닐경우
             storyContentDelete.setVisibility(View.GONE);//휴지통이 보이지 않는다
-        else//일상이 아니면
+        else//일상이 아니거나 고정스토리일 경우
             storyContentDelete.setVisibility(View.VISIBLE);//휴지통이 보인다
 
         storyContentDelete.setOnClickListener(new View.OnClickListener() {

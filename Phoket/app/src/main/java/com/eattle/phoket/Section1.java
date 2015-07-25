@@ -250,7 +250,7 @@ public class Section1 extends Fragment {
         SimpleCard card;
         CardData tag;
         //일상
-        if (f.getPicture_num() <= CONSTANT.BOUNDARY) {
+        if (f.getPicture_num() <= CONSTANT.BOUNDARY && f.getIsFixed() == 0) {//사진이 BOUNDARY 이하이면서 고정 스토리가 아닐경우
             if (!isDaily) {
                 isDaily = true;
                 CardManager.setHeaderItem(mListView, mContext, CONSTANT.convertFolderNameToDate(f.getName()));
