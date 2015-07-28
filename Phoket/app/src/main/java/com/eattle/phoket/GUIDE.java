@@ -64,6 +64,7 @@ public class GUIDE {
                         guide1(context);
                     }
                 })
+                .cancelable(false)
                 .show();
     }
 

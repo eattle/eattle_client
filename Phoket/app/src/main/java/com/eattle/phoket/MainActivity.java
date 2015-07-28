@@ -283,10 +283,8 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
             mActionMode = null;
-            Log.d("asda", "adsas");
 
             if(state != STATE_RUNNING){
-                Log.d("asda", "adsas");
                 state = STATE_RUNNING;
                 mFAB.setVisibility(View.INVISIBLE);
                 ((Section1)(mAdapter.getItem(0))).initialize();
@@ -333,10 +331,10 @@ public class MainActivity extends AppCompatActivity {
         if(db == null)
             db = DatabaseHelper.getInstance(MainActivity.this);
 
-            if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==6){
-                GUIDE.guide_six(MainActivity.this);
-                //GUIDE.GUIDE_STEP++;
-            }/*
+        if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==6){
+            GUIDE.guide_six(MainActivity.this);
+            //GUIDE.GUIDE_STEP++;
+        }/*
             if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==8){//마지막 가이드
                 GUIDE.guide_eight(MainActivity.this);
                 db.createGuide(1);//가이드 종료
@@ -346,6 +344,7 @@ public class MainActivity extends AppCompatActivity {
                 db.deleteAllTag();
             }*/
     }
+
     public void deleteAllCard(){
         ((Section1)(mAdapter.getItem(0))).initialize();
         ((Section2)(mAdapter.getItem(1))).initialize();
