@@ -99,7 +99,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         Glide.with(context)
                                 .load(path)
                                 .placeholder(R.mipmap.loading)
-                                .thumbnail(0.3f)
+                                .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
                                 .into(img);
 
 

@@ -168,7 +168,7 @@ public class Section2 extends Fragment {
 
 
     private void addCard(Folder f){
-        if(f.getPicture_num() > CONSTANT.BOUNDARY){
+        if(f.getPicture_num() > CONSTANT.BOUNDARY || f.getIsFixed() == 1){//사진이 BOUNDARY보다 많거나 고정스토리 일 경우
             CardManager.setSmallStoryItem(mListView, mContext,
                     f.getId(),
                     CONSTANT.convertFolderNameToStoryName(f.getName()),

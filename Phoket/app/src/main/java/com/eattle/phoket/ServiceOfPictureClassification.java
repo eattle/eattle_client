@@ -346,15 +346,16 @@ public class ServiceOfPictureClassification extends Service {
                 ExistedMedia.setId(pictureID);//phoketDB에 path에 해당하는 사진의 pictureID 값이 달라졌는지 확인한다(안드로이드 MediaDB상의 ID와 phoketDB상의 ID가 달라지는 경우가 발생-미디어 스캐닝이 새로 이루어 졌을 경우)
                 db.updateMedia(ExistedMedia);
             }
+
+
+
             /** ------------------정리 제외 대상------------------ **/
             if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
                 continue;
-
             if ((ExistedMedia != null && ExistedMedia.getIsFixed() == 1)) {
                 Log.d(TAG,"고정 스토리에 속한 사진은 건너뛴다");
                 continue;//고정 스토리에 속하는 사진은 건너뛴다
             }
-
             //해당 경로에 존재하지 않는 사진은 건너띈다
             if (!isExisted(path)) {
                 Log.d(TAG,"해당 경로에 존재하지 않는 사진은 건너띈다");
