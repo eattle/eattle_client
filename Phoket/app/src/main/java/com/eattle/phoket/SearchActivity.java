@@ -55,13 +55,6 @@ public class SearchActivity extends ActionBarActivity {
         inputTag.setOnBackPressListener(onBackPressListener);
         final TextView btn = (TextView) findViewById(R.id.searchButton);//태그 검색 버튼
 
-        inputTag.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                Log.d("asdad", ""+hasFocus);
-            }
-        });
-
         inputTag.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {

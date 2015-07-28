@@ -39,7 +39,6 @@ public class DailyCardView extends CardItemView<DailyCard> {
                     .into(dailyImage);
         }
         else{//가이드 중일때
-            String asdf = "phoket1";
             Glide.with(getContext())
                     .load(GUIDE.guide_grid(card.getDailyImage()))
                     .into(dailyImage);

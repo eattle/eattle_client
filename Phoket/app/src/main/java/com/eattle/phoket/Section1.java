@@ -183,7 +183,6 @@ public class Section1 extends Fragment {
         //show progress
         mListView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
-
         initialize();
 
         return root;

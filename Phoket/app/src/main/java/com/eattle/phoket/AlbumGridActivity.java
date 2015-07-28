@@ -359,7 +359,6 @@ public class AlbumGridActivity extends AppCompatActivity {
     }
 
     private void addCard(Media m, int order){
-        Log.d("asd", ""+order);
         if(day != m.getDay() || month != m.getMonth() || year != m.getYear()) {
             day = m.getDay();
             month = m.getMonth();
