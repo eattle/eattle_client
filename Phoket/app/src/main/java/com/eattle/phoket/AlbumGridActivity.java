@@ -37,7 +37,6 @@ import java.util.List;
 public class AlbumGridActivity extends AppCompatActivity {
     private final static String EXTRA_TAG = "ALBUM_GRID";
 
-//    String TAG="AlbumGridActivity";
     private DatabaseHelper db;
 
     private MaterialListView mGridView;
@@ -60,9 +59,6 @@ public class AlbumGridActivity extends AppCompatActivity {
     int mediaId;//태그가 눌려진 사진의 아이디
     String tagName;//태그
 
-
-
-    private BlockDevice blockDevice;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CONSTANT.actList.add(this);
@@ -359,7 +355,6 @@ public class AlbumGridActivity extends AppCompatActivity {
     }
 
     private void addCard(Media m, int order){
-        Log.d("asd", ""+order);
         if(day != m.getDay() || month != m.getMonth() || year != m.getYear()) {
             day = m.getDay();
             month = m.getMonth();

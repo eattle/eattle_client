@@ -1,10 +1,13 @@
 package com.eattle.phoket;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -27,6 +30,7 @@ import com.eattle.phoket.Card.manager.CardManager;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.model.Folder;
+import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
@@ -169,7 +173,18 @@ public class Section1 extends Fragment {
                         for (int i = 0; i < GUIDE.CURRENT_POPUP.size(); i++)
                             GUIDE.CURRENT_POPUP.get(i).dismiss();//가이드 팝업을 지운다
 
-                        ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
+                        /** ---------------------------사진 개수 확인--------------------------- **/
+                        ContentResolver mCr = mContext.getContentResolver();
+                        Cursor mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID}, null, null, null);
+
+                        Manager manager = db.getManager();
+                        if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            Snackbar.make(mSwipeRefreshLayout, "최신상태입니다", Snackbar.LENGTH_SHORT)
+                                    .setAction("Action", null).show();
+                        }
+                        else
+                            ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
                     }
                 } else {
                     mSwipeRefreshLayout.setRefreshing(false);
@@ -216,10 +231,13 @@ public class Section1 extends Fragment {
         @Override
         protected List<Folder> doInBackground(Void... params) {
             //Query the applications
-
+            if (db == null)
+                db = DatabaseHelper.getInstance(mContext);
+            Log.d("Section1","TEST] db == null?" + (db==null));
             List<Folder> stories = db.getAllFolders();
 
             return stories;
+
         }
 
         @Override

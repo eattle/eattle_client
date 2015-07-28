@@ -15,6 +15,8 @@ import android.util.Log;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.NotificationM;
 
+import java.util.Date;
+
 /**
  * Created by dh_st_000 on 2015-07-11.
  */
@@ -39,43 +41,10 @@ public class BroadcastListener extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        mCr = context.getContentResolver();
+
         String action = intent.getAction();
         Log.d(TAG, "[브로드캐스트 리시버] " + action);
-        if (action.equals(TIME_TICK)) {
-            // do something when PHONE_STATE_ACTION broadcast occurred.
-            countForTick++;
-            if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
-                /*TODO : ERROR*/
-                if(ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
-                    return;//아무것도 하지 않음
-                if(howOftenCheck == CONSTANT.ONEDAY)//마지막 푸시를 한지 24시간이 지났으면
-                    howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
-                //미디어 DB의 맨 마지막 사진이 Phoket DB에 있는지 확인한다.(사진 하나만 체크, 부하를 줄이기 위해)
-                mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " ASC");
-                mCursor.moveToLast();//제일 최신사진을 확인
-                int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
-
-                if (db == null)
-                    db = DatabaseHelper.getInstance(context);
-
-                if ((db.getMediaById(pictureID) == null) &&
-                        ( db.getNotification() == null || (db.getNotification().getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
-
-                    makeNotification(context);
-                    //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
-                    long currentTime = System.currentTimeMillis();
-                    NotificationM notification = new NotificationM(currentTime,pictureID);
-                    db.createNotification(notification);
-
-                    countForTick = 0;
-                    //하루에 한번 이상 보내지 않는다
-                    howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
-                }
-                mCursor.close();
-            }
-            Log.d(TAG, "[TIME_TICK 도착] countForTick : " + countForTick + " howOftenCheck : "+howOftenCheck);
-        }
-
         //서비스 재시작을 위해 ---------------------------------------
         //앱이 종료되었거나 스마트폰이 재부팅 되었을 때
         if(action.equals(ACTION_RESTART_PERSISTENTSERVICE) ||
@@ -91,6 +60,50 @@ public class BroadcastListener extends BroadcastReceiver {
             intent.putExtra("HOWOFTENCHECK",HOWOFTENCHECK);
 
             context.startService(i);//죽었던 서비스를 다시 시작한다
+        }
+
+        else if (action.equals(TIME_TICK)) {
+            // do something when PHONE_STATE_ACTION broadcast occurred.
+            countForTick++;
+            if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
+                /*TODO : ERROR*/
+                if(ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
+                    return;//아무것도 하지 않음
+                if(howOftenCheck == CONSTANT.ONEDAY)//마지막 푸시를 한지 24시간이 지났으면
+                    howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
+
+                //미디어 DB의 맨 마지막 사진이 Phoket DB에 있는지 확인한다.(사진 하나만 체크, 부하를 줄이기 위해)
+                String[] projection = {MediaStore.MediaColumns._ID};
+                String selection = MediaStore.Images.ImageColumns.DATE_TAKEN +" > ?";
+                String before = ((new Date().getTime() - (CONSTANT.CHECK * 60 * 1000)) / 1000)+"";//최근 10분동안 찍은 사진만 가져온다!!
+                String[] selectionArgs = { before };
+                String sortOrder = MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC";
+                mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,projection,selection,selectionArgs,sortOrder);
+
+                if(mCursor.moveToFirst()) {//제일 최신사진을 확인
+                    int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+
+                    if (db == null)
+                        db = DatabaseHelper.getInstance(context);
+                    if (db != null) {
+                        if ((db.getMediaById(pictureID) == null) &&
+                                (db.getNotification() == null || (db.getNotification() != null && db.getNotification().getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
+
+                            makeNotification(context);
+                            //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
+                            long currentTime = System.currentTimeMillis();
+                            NotificationM notification = new NotificationM(currentTime, pictureID);
+                            db.createNotification(notification);
+
+                            countForTick = 0;
+                            //하루에 한번 이상 보내지 않는다
+                            howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
+                        }
+                    }
+                    mCursor.close();
+                }
+            }
+            Log.d(TAG, "[TIME_TICK 도착] countForTick : " + countForTick + " howOftenCheck : "+howOftenCheck);
         }
 
     }

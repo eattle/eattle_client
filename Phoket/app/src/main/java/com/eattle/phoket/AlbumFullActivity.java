@@ -157,7 +157,7 @@ public class AlbumFullActivity extends ActionBarActivity {
                     ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(1);
 
 
-                Log.d(TAG, "StoryStartFragment : " + (storyStartFragment == null) + " " + storyStartFragment.getView());
+                //Log.d(TAG, "StoryStartFragment : " + (storyStartFragment == null) + " " + storyStartFragment.getView());
                 if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해.
                     FragmentManager fragmentManager = getFragmentManager();

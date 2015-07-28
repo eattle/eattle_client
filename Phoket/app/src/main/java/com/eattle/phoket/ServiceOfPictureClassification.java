@@ -40,7 +40,8 @@ public class ServiceOfPictureClassification extends Service {
 
 
     //사진 정리와 관련된 변수들
-    int totalPictureNum = 0;//사진들의 총 개수
+    int realPictureNum = 0;//분류에 포함되는 사진의 개수
+    int totalPictureNum = 0;//Media DB상의 총 사진의 개수
     long totalInterval;//사진 간격의 총합
     long standardDerivation = 0;//사진 간격의 표준편차
     Cursor mCursor;
@@ -240,39 +241,41 @@ public class ServiceOfPictureClassification extends Service {
     //사진 정리와 관련된 함수들
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
         totalInterval = 0;
-        totalPictureNum = 0;
-        mCursor.moveToLast();
+        realPictureNum = 0;//분류의 대상이 되는 사진의 개수
+        totalPictureNum = mCursor.getCount();//사진의 총 개수
+
 
 //        ImageSetter.setCursor(0, 0);//커서의 위치를 처음으로 이동시킨다.
         long pictureTakenTime = 0;
 
-        do {
-            /** ------------------사진 정보 획득------------------ **/
-            String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-            int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));//사진 고유(안드로이드 상)의 ID
-            Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+        if(mCursor.moveToLast()) {
+            do {
 
-            /** ------------------정리 제외 대상------------------ **/
-            if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
-                continue;
-            //해당 경로에 존재하지 않는 사진은 건너띈다
-            if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
-                //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
-                continue;
+                /** ------------------사진 정보 획득------------------ **/
+                String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));//사진 고유(안드로이드 상)의 ID
+                Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+
+                /** ------------------정리 제외 대상------------------ **/
+                if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
+                    continue;
+                //해당 경로에 존재하지 않는 사진은 건너띈다
+                if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
+                    //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
+                    continue;
 
 
+                //사진이 촬영된 날짜
+                long _pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
+                //_pictureTakenTime *= 1000; //second->millisecond
+                if (pictureTakenTime == 0)
+                    pictureTakenTime = _pictureTakenTime;
 
-
-            //사진이 촬영된 날짜
-            long _pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
-            //_pictureTakenTime *= 1000; //second->millisecond
-            if (pictureTakenTime == 0)
+                totalInterval += pictureTakenTime - _pictureTakenTime;
                 pictureTakenTime = _pictureTakenTime;
-
-            totalInterval += pictureTakenTime - _pictureTakenTime;
-            pictureTakenTime = _pictureTakenTime;
-            totalPictureNum++;
-        }while (mCursor.moveToPrevious());
+                realPictureNum++;
+            } while (mCursor.moveToPrevious());
+        }
     }
 
 
@@ -308,16 +311,30 @@ public class ServiceOfPictureClassification extends Service {
 
 
         /** ---------------------------시간 간격 계산--------------------------- **/
-        calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-        long averageInterval = totalInterval;
-        if (totalPictureNum != 0)
-            averageInterval /= totalPictureNum;
+        long averageInterval = 0;
+        Manager manager = db.getManager();
+        Log.d(TAG,"mCursor.getCount() : "+mCursor.getCount());
+        Log.d(TAG,"manager.getTotalPictureNum() : "+manager.getTotalPictureNum());
+
+        if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
+            CONSTANT.TIMEINTERVAL = manager.getAverageInterval();//calculatePictureInterval()를 하지 않는다
+        }
+        else {
+            calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+            averageInterval = totalInterval;
+
+            if (realPictureNum != 0)
+                averageInterval /= realPictureNum;
+
+            manager.setRealPictureNum(realPictureNum);
+            manager.setTotalPictureNum(totalPictureNum);
+            manager.setAverageInterval(averageInterval);
+            manager.setStandardDerivation(standardDerivation);
+            db.createManager(manager);//Manager DB에 값들을 집어넣음
+
+            CONSTANT.TIMEINTERVAL = averageInterval;
+        }
         Log.d(TAG,"totalInterval : "+totalInterval+" totalPictureNum : "+totalPictureNum);
-        CONSTANT.TIMEINTERVAL = averageInterval;
-        Manager manager = new Manager(totalPictureNum, averageInterval, standardDerivation);
-        db.createManager(manager);//Manager DB에 값들을 집어넣음
-
-
 
         /** ---------------------------DB 초기화--------------------------- **/
         db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(isFixed == 1<- 고정 스토리)은 제외되어 있음

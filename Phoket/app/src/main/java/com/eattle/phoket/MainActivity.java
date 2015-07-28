@@ -93,14 +93,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /*StrictMode*/
-        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-        //        .detectLeakedSqlLiteObjects()
-        //        .detectLeakedClosableObjects()
-        //        .penaltyLog()
-        //        .penaltyDeath()
-        //        .build());
+//        /*StrictMode*/
+//        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+//                .detectLeakedSqlLiteObjects()
+//                .detectLeakedClosableObjects()
+//                .penaltyLog()
+//                .penaltyDeath()
+//                .build());
 
+        Log.d(EXTRA_TAG,"onCreate() 호출");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -368,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
+        Log.d(EXTRA_TAG,"onCreate() 호출");
         super.onStop();
         //stopService(mService);
     }
@@ -529,8 +531,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /***************** Classification Service 부분 **********************/
-
-
     //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
     //bind-> start로 바뀌면서 intent를 보내는 것으로 바뀜
     public void sendMessageToService(int typeOfMessage) {
@@ -538,6 +538,8 @@ public class MainActivity extends AppCompatActivity {
         mService.putExtra("what", typeOfMessage);
         startService(mService);
     }
+
+
 
     //서비스로부터 오는 메세지를 처리한다(ServiceOfPictureClassification -> MainActivity)
     private class ClassificationReceiver extends BroadcastReceiver {

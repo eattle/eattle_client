@@ -231,6 +231,8 @@ public class SelectOptionFragment extends Fragment {
                 // 작업이 진행되면서 호출하며 화면의 업그레이드를 담당하게 된다
                 publishProgress("progress", Integer.toString(i+1));
             }
+
+
             // 수행이 끝나고 리턴하는 값은 다음에 수행될 onProgressUpdate 의 파라미터가 된다
             return totalNum;
         }

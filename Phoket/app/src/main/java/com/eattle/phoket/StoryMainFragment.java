@@ -101,8 +101,6 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                                 .placeholder(R.mipmap.loading)
                                 .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
                                 .into(img);
-
-
                     }
                 }
 
