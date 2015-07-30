@@ -48,12 +48,14 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
     public StoryMainFragment() {
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         context = getActivity();//꼭 여기서 해줘야함
     }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("StoryMainFragment", "onCreateView() 호출(현재 position : " + position + ")");
 
@@ -71,16 +73,14 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         path = m.getPath();//사진의 경로를 가져온다
 
 
-
         final DatabaseHelper db = DatabaseHelper.getInstance(getActivity());
 
-        if(db.getGuide() == 0 && path == null) {//가이드 사진일 경우
+        if (db.getGuide() == 0 && path == null) {//가이드 사진일 경우
             Glide.with(context)
                     .load(GUIDE.guide_grid(m.getName()))
                     .placeholder(R.mipmap.loading)
                     .into(img);
-        }
-        else {
+        } else {
             //TODO 사진 경로에 사진이 없을 경우를 체크한다
             //사진은 USB에서 읽어오는 것을 표준으로 한다
             try {
@@ -99,7 +99,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                         Glide.with(context)
                                 .load(path)
                                 .placeholder(R.mipmap.loading)
-                                .override(CONSTANT.screenWidth,CONSTANT.screenHeight)
+                                .override(CONSTANT.screenWidth, CONSTANT.screenHeight)
                                 .into(img);
                     }
                 }
@@ -115,8 +115,8 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(db != null && db.getGuide() == 0){
-                    if(GUIDE.GUIDE_STEP != 5){
+                if (db != null && db.getGuide() == 0) {
+                    if (GUIDE.GUIDE_STEP != 5) {
                         return;
                     }
                     GUIDE.guide_five(getActivity());
@@ -145,84 +145,4 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
         super.onStop();
     }
-
-    /*
-    public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG, "onActivityCreated() 호출");
-        Log.d(TAG, "img == null? "+(img==null));
-        Glide.with(this)
-                .load(path)
-                .thumbnail(0.1f)
-                .into((ImageView) getView().findViewById(R.id.pagerImage));
-        super.onActivityCreated(savedInstanceState);
-    }*/
-
-    private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
-        //D  S   X
-        //1220879 1870864 2133464
-
-        int result[] = AlbumFullActivity.fileSystem.stringSearch(outString);
-        byte[] dummyBuffer = new byte[(int) AlbumFullActivity.fileSystem.CLUSTERSPACESIZE];
-        //1866136
-        //result[0] = 4096;
-        //result[0] = 6505;
-        Log.d("xxxxxx", "result[0] " + result[0]);
-        if (result[0] == -1) {
-            Toast.makeText(getActivity(), "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
-            return null;
-        } else {
-
-            byte resultbyte[] = new byte[result[4]];
-            //int resultstringaddress = 6085;
-            int resultstringaddress = result[0];
-            //int resultaddress = readIntToBinary(result[0],result[1]+80,LOCATIONSIZE);
-
-            int limit = 0;
-            int bytecnt = 0;
-
-
-            blockDevice.readBlock(resultstringaddress, dummyBuffer);
-
-            while (resultstringaddress != 0) {
-
-                int originalbyteAddress = AlbumFullActivity.fileSystem.readIntToBinary(resultstringaddress, limit, AlbumFullActivity.fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-
-                blockDevice.readBlock(originalbyteAddress, AlbumFullActivity.fileSystem.buffer);
-                for (int i = 0; i < AlbumFullActivity.fileSystem.CLUSTERSPACESIZE; i++) {
-                    if (bytecnt < result[4]) {
-                        resultbyte[bytecnt++] = AlbumFullActivity.fileSystem.buffer[i];
-                    } else
-                        break;
-                }
-                if (bytecnt >= result[4])
-                    break;
-
-                limit += AlbumFullActivity.fileSystem.LOCATIONSIZE;
-
-                if (limit >= AlbumFullActivity.fileSystem.SPACELOCATION) {
-                    resultstringaddress = AlbumFullActivity.fileSystem.readIntToBinary(resultstringaddress, AlbumFullActivity.fileSystem.NEXTLOCATION, AlbumFullActivity.fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
-                    limit = 0;
-                }
-
-            }
-
-
-            Log.d("xxxxxx", "xxxxxxxxxxxx " + resultbyte);
-            Log.d("xxxxxx", "xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
-
-            Toast.makeText(getActivity(), "1 " + resultbyte, Toast.LENGTH_SHORT).show();
-            Toast.makeText(getActivity(), "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();
-
-            Bitmap byteimage = BitmapFactory.decodeByteArray(resultbyte, 0, resultbyte.length);
-            //imageView.setImageBitmap(byteimage);
-
-            //imageView.setImageBitmap(resizeBitmapImageFn(byteimage,540));
-
-            //Bitmap bitmap1 = BitmapFactory.decodeFile("/storage/emulated/0/DCIM/Camera/1.jpg");
-            //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
-            return byteimage;
-        }
-    }
-
 }

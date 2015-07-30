@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,8 +38,7 @@ public class SelectOptionFragment extends Fragment {
     private String TAG = "SelectOptionFragment";
 
     private List<CardData> cards;
-    private DatabaseHelper db;
-    private Context context;
+    private static Context context;
 
     // TODO: Rename and change types and number of parameters
     public static SelectOptionFragment newInstance(List<CardData> cards) {
@@ -64,8 +64,6 @@ public class SelectOptionFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_select_option_frgment, container, false);
 
-        db = DatabaseHelper.getInstance(getActivity());
-
         root.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -83,6 +81,7 @@ public class SelectOptionFragment extends Fragment {
                 for(int i=0;i<cards.size();i++) {
                     exportStoryPopupDialog(cards.get(i).getData());
                 }
+
                 removeFragment();
 
             }
@@ -101,6 +100,7 @@ public class SelectOptionFragment extends Fragment {
                 ArrayList<Uri> imageUris = new ArrayList<Uri>();
                 int cs = cards.size();
                 for (int i = 0; i < cs; i++) {
+                    DatabaseHelper db = DatabaseHelper.getInstance(context);
                     List<Media> medias = db.getAllMediaByFolder(cards.get(i).getData());
                     if (cards.get(i).getType() == CONSTANT.FOLDER) {
                         int ms = medias.size();
@@ -140,8 +140,7 @@ public class SelectOptionFragment extends Fragment {
 
     public void exportStoryPopupDialog(final int folderID){
         AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-        if(db == null)
-            db = DatabaseHelper.getInstance(getActivity());
+        DatabaseHelper db = DatabaseHelper.getInstance(context);
         String storyName = CONSTANT.convertFolderNameToStoryName(db.getFolder(folderID).getName());
         d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?\n(스마트폰 최상단의 Phoket 폴더에 생성됩니다)");
 
@@ -189,9 +188,7 @@ public class SelectOptionFragment extends Fragment {
 
             final int folderID = params[0];
 
-            if(db == null)
-                db = DatabaseHelper.getInstance(mContext);
-
+            DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             Folder folder = db.getFolder(folderID);
             String folderName = CONSTANT.convertFolderNameToStoryFolderName(folder.getName());
             folderName = Environment.getExternalStorageDirectory() + "/PhoKet/" + folderName;

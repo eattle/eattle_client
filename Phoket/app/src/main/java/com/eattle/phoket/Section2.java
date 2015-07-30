@@ -54,12 +54,11 @@ public class Section2 extends Fragment {
     private final static int STATE_RUNNING = 1;
 
 
-    private Context mContext;
-    private DatabaseHelper db;
+    private static Context mContext;
 
-    private MaterialListView mListView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ProgressBar mProgressBar;
+    private static MaterialListView mListView;
+    private static SwipeRefreshLayout mSwipeRefreshLayout;
+    private static ProgressBar mProgressBar;
 
     private int state;
 
@@ -70,7 +69,6 @@ public class Section2 extends Fragment {
         // Inflate the layout for this fragment
         View root =  inflater.inflate(R.layout.fragment_section2, container, false);
         mContext = getActivity();
-        db = DatabaseHelper.getInstance(mContext);
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview2);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -112,6 +110,7 @@ public class Section2 extends Fragment {
                 ContentResolver mCr = mContext.getContentResolver();
                 Cursor mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID}, null, null, null);
 
+                DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                 Manager manager = db.getManager();
                 if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
                     mSwipeRefreshLayout.setRefreshing(false);
@@ -158,6 +157,7 @@ public class Section2 extends Fragment {
         @Override
         protected List<Folder> doInBackground(Void... params) {
             //Query the applications
+            DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             List<Folder> stories = db.getAllFolders();
 
             return stories;

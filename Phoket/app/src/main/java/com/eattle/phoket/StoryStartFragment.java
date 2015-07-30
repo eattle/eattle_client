@@ -2,6 +2,7 @@ package com.eattle.phoket;
 
 import android.app.Fragment;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
@@ -31,7 +32,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     ImageView backImage;
     ImageView filterImage;
     private int position;
-
+    private static Context context;
     public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind, int position) {
 
         StoryStartFragment fragment = new StoryStartFragment();
@@ -53,6 +54,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         String titleName = args.getString("titleName");
         int kind = args.getInt("kind");
         position = args.getInt("position");
+        context = getActivity();
         //대표 이미지
         try {
             ImageView storyStartImage = (ImageView) root.findViewById(R.id.storyStartImage);
@@ -60,8 +62,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
             //화면 크기, 사진 크기에 따라 사진을 최적화 한다
             //Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
             //storyStartImage.setImageBitmap(changedBitmap);
-            DatabaseHelper db = DatabaseHelper.getInstance(getActivity());
-
+            DatabaseHelper db = DatabaseHelper.getInstance(context);
             if(db.getGuide() == 0) {//가이드 사진일 경우
                 Glide.with(getActivity())
                         .load(R.mipmap.phoket1)

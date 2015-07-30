@@ -20,14 +20,12 @@ import com.eattle.phoket.view.ExEditText;
 
 public class SearchActivity extends ActionBarActivity {
 
-    DatabaseHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        db = DatabaseHelper.getInstance(getApplicationContext());
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -59,6 +57,7 @@ public class SearchActivity extends ActionBarActivity {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    DatabaseHelper db = DatabaseHelper.getInstance(SearchActivity.this);
                     int tag_id = db.getTagIdByTagName(inputTag.getText().toString());
                     if (tag_id == 0) {
                         Toast.makeText(getApplicationContext(), "입력하신 포켓은 존재하지 않습니다", Toast.LENGTH_SHORT).show();
@@ -79,6 +78,7 @@ public class SearchActivity extends ActionBarActivity {
         btn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DatabaseHelper db = DatabaseHelper.getInstance(SearchActivity.this);
                 int tag_id = db.getTagIdByTagName(inputTag.getText().toString());
                 if (tag_id == 0) {
                     Toast.makeText(getApplicationContext(), "입력하신 포켓은 존재하지 않습니다", Toast.LENGTH_SHORT).show();

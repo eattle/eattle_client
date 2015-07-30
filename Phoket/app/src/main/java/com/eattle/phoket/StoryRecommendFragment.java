@@ -41,13 +41,13 @@ import java.util.Random;
 public class StoryRecommendFragment extends Fragment {
     String TAG = "storyRecommendFragment";
 
-    DatabaseHelper db;
     int folderID;//현재 보고 있는 스토리의 ID
     static FileSystem fileSystem;
     int randomFolder[];//추천 스토리의 폴더 ID가 들어갈 배열
     int recommendNum = 4;//추천할 스토리의 개수(개수 추가할 경우 story_recommend에 추가해야 함)
     LinearLayout storyRecommend;
     ContentResolver cr;
+    private static Context context;
     public static StoryRecommendFragment newInstance(int folderID) {
 
         fileSystem = FileSystem.getInstance();
@@ -67,10 +67,13 @@ public class StoryRecommendFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null)
             folderID = args.getInt("folderID");
-        db = DatabaseHelper.getInstance(getActivity());
+        context = getActivity();
+
+
 
         //리스트뷰에 들어갈 스토리를 추가한다
         //랜덤하게 4개의 스토리를 얻어온다(3개는 임의로 정한 것)
+        DatabaseHelper db = DatabaseHelper.getInstance(context);
         List<Folder> folders = db.getAllFolders();
         int totalFolderNum=0;
         List<Integer> candidateStory = new ArrayList<Integer>();

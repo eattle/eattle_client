@@ -4,6 +4,7 @@ package com.eattle.phoket;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,7 +41,6 @@ import java.util.List;
 public class TagsOverAlbum extends Fragment {
     private String TAG = "TagsOverAlbum";
 
-    DatabaseHelper db;
     private static int media_id;
     private static int position;
     private static int totalPictureNum;
@@ -48,9 +48,7 @@ public class TagsOverAlbum extends Fragment {
     private static int type;
 
     int a = 0;
-
-    //파일 시스템 관련 변수
-    static FileSystem fileSystem;
+    private static Context context;
 
 
     //pushTabToTag를 위해
@@ -60,8 +58,6 @@ public class TagsOverAlbum extends Fragment {
         setPosition(position);
         setTotalPictureNum(totalPictureNum);
         setType(0);
-
-        fileSystem = FileSystem.getInstance();
 
         TagsOverAlbum ttt = new TagsOverAlbum();
 
@@ -80,8 +76,6 @@ public class TagsOverAlbum extends Fragment {
         setMedia_id(m.getId());
         setType(0);
 
-        fileSystem = FileSystem.getInstance();
-
         TagsOverAlbum ttt = new TagsOverAlbum();
 
         Bundle args = new Bundle();
@@ -96,8 +90,6 @@ public class TagsOverAlbum extends Fragment {
         setMedia(m);
         setMedia_id(m.getId());
         setType(type);
-
-        fileSystem = FileSystem.getInstance();
 
         TagsOverAlbum ttt = new TagsOverAlbum();
 
@@ -117,7 +109,7 @@ public class TagsOverAlbum extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        db = DatabaseHelper.getInstance(getActivity());
+        context = getActivity();
 
         View root = inflater.inflate(R.layout.fragment_tags_over_album, container, false);
 
@@ -128,6 +120,7 @@ public class TagsOverAlbum extends Fragment {
         }
 
         final LinearLayout layout = (LinearLayout) root.findViewById(R.id.tagLayout);
+        DatabaseHelper db = DatabaseHelper.getInstance(context);
         List<Tag> tags = db.getAllTagsByMediaId(media_id);
 
 
@@ -204,7 +197,7 @@ public class TagsOverAlbum extends Fragment {
                         Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
                         return true;
                     }
-
+                    DatabaseHelper db = DatabaseHelper.getInstance(context);
                     int tag_id = db.createTag("" + input, media_id);
                     if (tag_id != -1) {
                         Tag tag = db.getTagByTagId(tag_id);
@@ -244,7 +237,7 @@ public class TagsOverAlbum extends Fragment {
                     Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                DatabaseHelper db = DatabaseHelper.getInstance(context);
                 int tag_id = db.createTag("" + input, media_id);
 
                 if (tag_id != -1) {
@@ -321,9 +314,7 @@ public class TagsOverAlbum extends Fragment {
     }
     public void deletePicture() {
         //데이터베이스 OPEN
-        if(db == null)
-            db = DatabaseHelper.getInstance(getActivity());
-
+        DatabaseHelper db = DatabaseHelper.getInstance(context);
         int folderId = m.getFolder_id();
         List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
         Folder folder = db.getFolder(folderId);

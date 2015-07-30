@@ -34,7 +34,6 @@ import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +48,11 @@ public class Section1 extends Fragment {
     private final static int STATE_SELECT = 2;
 
 
-    private Context mContext;
-    private DatabaseHelper db;
+    private static Context mContext;
 
-    private MaterialListView mListView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ProgressBar mProgressBar;
+    private static MaterialListView mListView;
+    private static SwipeRefreshLayout mSwipeRefreshLayout;
+    private static ProgressBar mProgressBar;
 
     private int state;
     private boolean isDaily = false;
@@ -70,7 +68,7 @@ public class Section1 extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_section1, container, false);
         mContext = getActivity();
-        db = DatabaseHelper.getInstance(mContext);
+
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview1);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -113,6 +111,7 @@ public class Section1 extends Fragment {
                                 mContext.startActivity(intent);
                                 break;
                             case CONSTANT.DAILY:
+                                DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                                 List<Media> dailyMedia = db.getAllMediaByFolder(data.getData());
                                 intent = new Intent(mContext, AlbumFullActivity.class);
                                 intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(dailyMedia));
@@ -147,9 +146,8 @@ public class Section1 extends Fragment {
                             .setAction("Action", null).show();
                 }
 
-                if (db == null)
-                    db = DatabaseHelper.getInstance(getActivity());
 
+                DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                 if (db != null && db.getGuide() == 0) {//가이드 중
                     GUIDE.guide_seven(getActivity());
                     //GUIDE.GUIDE_STEP++;
@@ -165,6 +163,7 @@ public class Section1 extends Fragment {
             public void onRefresh() {
                 Log.d("testtest", "state : " + state);
                 if (state == STATE_RUNNING) {
+                    DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                     if (db.getGuide() == 0)
                         //가이드를 완료하지 않았으면
                         //서비스에게 가이드 시작을 요청한다
@@ -178,12 +177,11 @@ public class Section1 extends Fragment {
                         Cursor mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID}, null, null, null);
 
                         Manager manager = db.getManager();
-                        if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
+                        if (mCursor.getCount() == manager.getTotalPictureNum()) {//사진에 변동이 없다고 판단되면
                             mSwipeRefreshLayout.setRefreshing(false);
                             Snackbar.make(mSwipeRefreshLayout, "최신상태입니다", Snackbar.LENGTH_SHORT)
                                     .setAction("Action", null).show();
-                        }
-                        else
+                        } else
                             ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
                     }
                 } else {
@@ -230,19 +228,15 @@ public class Section1 extends Fragment {
         @Override
         protected List<Folder> doInBackground(Void... params) {
             //Query the applications
-            if (db == null)
-                db = DatabaseHelper.getInstance(mContext);
-            Log.d("Section1","TEST] db == null?" + (db==null));
+            DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             List<Folder> stories = db.getAllFolders();
-
+            //Log.d("Section1","" + mProgressBar.toString());
             return stories;
 
         }
 
         @Override
         protected void onPostExecute(List<Folder> result) {
-
-
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
@@ -254,8 +248,6 @@ public class Section1 extends Fragment {
                 addCard(result.get(i));
             }
 
-            Log.d(EXTRA_TAG, "" + storiesNum);
-
             setRunning();
 
             super.onPostExecute(result);
@@ -266,6 +258,9 @@ public class Section1 extends Fragment {
     private void addCard(Folder f) {
         SimpleCard card;
         CardData tag;
+
+        DatabaseHelper db = DatabaseHelper.getInstance(mContext);
+        Log.d(EXTRA_TAG,"addSingleCard()");
         //일상
         if (f.getPicture_num() <= CONSTANT.BOUNDARY && f.getIsFixed() == 0) {//사진이 BOUNDARY 이하이면서 고정 스토리가 아닐경우
             if (!isDaily) {
@@ -363,8 +358,10 @@ public class Section1 extends Fragment {
         }
         selected.clear();
         selectedp.clear();
+
         if (s <= 0) {
             new InitializeApplicationsTask().execute();
+
         } else {
             state = STATE_RUNNING;
 
@@ -386,6 +383,7 @@ public class Section1 extends Fragment {
     }
 
     public void addSingleCard(Folder f) {
+        Log.d(EXTRA_TAG,"addSingleCard()");
         if (mListView == null) return;
         if (state == STATE_RUNNING) {
             state = STATE_LOADING;

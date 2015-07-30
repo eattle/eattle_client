@@ -44,11 +44,9 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     private String TAG = "AlbumFullActivity";
 
-    DatabaseHelper db;
     static List<Media> mMediaList;
     int initialMediaPosition;
-    //USB에서 사진을 불러오기 위한 변수
-    static FileSystem fileSystem;
+
     static int totalPictureNum;
 
     //'스토리 시작'을 통해 들어왔을 경우
@@ -79,7 +77,7 @@ public class AlbumFullActivity extends ActionBarActivity {
             viewPagerImage = new ArrayList<ImageView>();//나중에 비트맵 메모리 해제를 위한 리스트
         CONSTANT.actList.add(this);
 
-        db = DatabaseHelper.getInstance(getApplicationContext());
+        DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album_full);
 
@@ -123,16 +121,8 @@ public class AlbumFullActivity extends ActionBarActivity {
             titleImageId = mMediaList.get(0).getId();
             totalPictureNum = mMediaList.size();
         }
-        /*
-        totalPictureNum = intent.getIntExtra("totalPictureNum", 0);
-        if (initialMediaPosition == -1) {//'스토리 시작'버튼으로 들어왔을 경우
-            titleName = intent.getStringExtra("titleName");
-            titleImagePath = intent.getStringExtra("titleImagePath");
-        }
-        titleImageId = intent.getStringExtra("titleImageId");
-        */
 
-        fileSystem = FileSystem.getInstance();
+
         cr = this.getContentResolver();
 
         //뷰페이저 생성
@@ -341,31 +331,29 @@ public class AlbumFullActivity extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK://백버튼을 통제(비밀번호 유지를 위해)
-                if (db == null)
-                    db = DatabaseHelper.getInstance(AlbumFullActivity.this);
-                if (db != null) {
-                    if (db.getGuide() == 0)//가이드 도중에
-                        return true;//백버튼을 막는다
-                }
-                //불필요한 메모리 정리---------------------------------------------------------------
-                AlbumFullActivity.mViewPager = null;
-                AlbumFullActivity.touchImageAdapter = null;
-                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
-                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
-                //아직 스토리에 남아있는 사진 삭제
-                while (AlbumFullActivity.viewPagerImage.size() > 0) {
-                    Log.d(TAG, "아직 ViewPager에 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
-                    ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-                    AlbumFullActivity.viewPagerImage.remove(0);
-                    CONSTANT.releaseImageMemory(temp);
+                DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+                if (db.getGuide() == 0)//가이드 도중에
+                    return true;//백버튼을 막는다
 
-                    if (AlbumFullActivity.viewPagerImage.size() == 0) {
-                        Log.d(TAG, "ViewPager에 남아있는 사진이 없습니다");
-                        break;
-                    }
-                }
-                System.gc();//garbage collector
-                Runtime.getRuntime().gc();//garbage collector
+//                //불필요한 메모리 정리---------------------------------------------------------------
+//                AlbumFullActivity.mViewPager = null;
+//                AlbumFullActivity.touchImageAdapter = null;
+//                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
+//                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
+//                //아직 스토리에 남아있는 사진 삭제
+//                while (AlbumFullActivity.viewPagerImage.size() > 0) {
+//                    Log.d(TAG, "아직 ViewPager에 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
+//                    ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+//                    AlbumFullActivity.viewPagerImage.remove(0);
+//                    CONSTANT.releaseImageMemory(temp);
+//
+//                    if (AlbumFullActivity.viewPagerImage.size() == 0) {
+//                        Log.d(TAG, "ViewPager에 남아있는 사진이 없습니다");
+//                        break;
+//                    }
+//                }
+//                System.gc();//garbage collector
+//                Runtime.getRuntime().gc();//garbage collector
                 finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                 return false;
         }
@@ -406,6 +394,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         //장소명이 존재하면 태그로 추가할지 묻는다
         if ((m.getPlaceName() != null) && !m.getPlaceName().equals("")) {
             //일단 m.getPlaceName()이 태그 목록에 있는지 확인한다
+            DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
             int tagId = db.getTagIdByTagName(m.getPlaceName());
             //1. 해당 장소명으로 태그가 아예 존재하지 않을 때 -> 묻는다
             if (tagId == 0) {
@@ -641,6 +630,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         };
 
         //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
+        DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
         final Media media = db.getMediaById(mediaId);
         new Thread(new Runnable() {
             @Override
@@ -755,83 +745,13 @@ public class AlbumFullActivity extends ActionBarActivity {
     protected void onUserLeaveHint() {
         Log.d(TAG, "onUserLeaveHint() 호출");
 
-        if (db == null)
-            db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+        DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
         //AlbumFullActivity에서 '가이드 도중'에 홈버튼을 누를 경우, MainActivity로 이동해둔다
         if (db.getGuide() == 0) {
             Log.d(TAG, "MainActivity로 이동");
             GUIDE.GUIDE_STEP = 5;
             for (int i = 0; i < CONSTANT.actList.size(); i++)
                 CONSTANT.actList.get(i).finish();
-        }
-    }
-
-
-    private Bitmap fileoutimage(String outString, CachedBlockDevice blockDevice) {//USB -> 스마트폰
-        //D  S   X
-        //1220879 1870864 2133464
-
-        int result[] = AlbumFullActivity.fileSystem.stringSearch(outString);
-        byte[] dummyBuffer = new byte[(int) AlbumFullActivity.fileSystem.CLUSTERSPACESIZE];
-        //1866136
-        //result[0] = 4096;
-        //result[0] = 6505;
-        Log.d("xxxxxx", "result[0] " + result[0]);
-        if (result[0] == -1) {
-            Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
-            return null;
-        } else {
-
-            byte resultbyte[] = new byte[result[4]];
-            //int resultstringaddress = 6085;
-            int resultstringaddress = result[0];
-            //int resultaddress = readIntToBinary(result[0],result[1]+80,LOCATIONSIZE);
-
-            int limit = 0;
-            int bytecnt = 0;
-
-
-            blockDevice.readBlock(resultstringaddress, dummyBuffer);
-
-            while (resultstringaddress != 0) {
-
-                int originalbyteAddress = AlbumFullActivity.fileSystem.readIntToBinary(resultstringaddress, limit, AlbumFullActivity.fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-
-                blockDevice.readBlock(originalbyteAddress, AlbumFullActivity.fileSystem.buffer);
-                for (int i = 0; i < AlbumFullActivity.fileSystem.CLUSTERSPACESIZE; i++) {
-                    if (bytecnt < result[4]) {
-                        resultbyte[bytecnt++] = AlbumFullActivity.fileSystem.buffer[i];
-                    } else
-                        break;
-                }
-                if (bytecnt >= result[4])
-                    break;
-
-                limit += AlbumFullActivity.fileSystem.LOCATIONSIZE;
-
-                if (limit >= AlbumFullActivity.fileSystem.SPACELOCATION) {
-                    resultstringaddress = AlbumFullActivity.fileSystem.readIntToBinary(resultstringaddress, AlbumFullActivity.fileSystem.NEXTLOCATION, AlbumFullActivity.fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
-                    limit = 0;
-                }
-
-            }
-
-
-            Log.d("xxxxxx", "xxxxxxxxxxxx " + resultbyte);
-            Log.d("xxxxxx", "xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
-
-            Toast.makeText(this, "1 " + resultbyte, Toast.LENGTH_SHORT).show();
-            Toast.makeText(this, "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();
-
-            Bitmap byteimage = BitmapFactory.decodeByteArray(resultbyte, 0, resultbyte.length);
-            //imageView.setImageBitmap(byteimage);
-
-            //imageView.setImageBitmap(resizeBitmapImageFn(byteimage,540));
-
-            //Bitmap bitmap1 = BitmapFactory.decodeFile("/storage/emulated/0/DCIM/Camera/1.jpg");
-            //imageView.setImageBitmap(resizeBitmapImageFn(bitmap1,540));
-            return byteimage;
         }
     }
 }

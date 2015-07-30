@@ -154,12 +154,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return Instance;
     }
 
-    public DatabaseHelper(Context context) {
-
-
+    private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
+        //context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
     }
 
     //적절한 때에 databasehelper를 닫아주기위한 함수
