@@ -32,7 +32,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     private String path = "";
     private Media m;
     public int imageIdForTaskExecute = CONSTANT.COUNTIMAGE++;//imageview객체마다 고유의 아이디를 부여한다(task 중복 실행을 방지하기 위해)
-    private Context context;
+    private static Context context;
 
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
         Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
@@ -66,6 +66,8 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         position = args.getInt("position");
         final int mediaListSize = args.getInt("mediaListSize");
 
+
+
         if (position == -1 || position == mediaListSize)//제목화면 또는 추천스토리 부분은 아무것도 안함(onPageSelected에서 해줌)
             return root;//아무것도 설정하지 않은 fragment를 반환(//배경사진 fragment만 보이게 한다 또는 추천스토리 fragment만 보이게 한다)
         FrameLayout frameLayout = (FrameLayout) root.findViewById(R.id.storyMain);
@@ -73,7 +75,8 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
         path = m.getPath();//사진의 경로를 가져온다
 
 
-        final DatabaseHelper db = DatabaseHelper.getInstance(getActivity());
+        final DatabaseHelper db = DatabaseHelper.getInstance(context);
+
 
         if (db.getGuide() == 0 && path == null) {//가이드 사진일 경우
             Glide.with(context)
@@ -81,33 +84,30 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     .placeholder(R.mipmap.loading)
                     .into(img);
         } else {
+
             //TODO 사진 경로에 사진이 없을 경우를 체크한다
             //사진은 USB에서 읽어오는 것을 표준으로 한다
             try {
-                if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때
-                    //Bitmap bm = fileoutimage(m.getName() + ".jpg", CONSTANT.BLOCKDEVICE);
-                    //img.setImageBitmap(bm);
-                } else {
-                    File isExist = new File(path);
-                    if (!isExist.exists()) {
-                        //사진 파일이 로컬에 존재하지 않고 USB에만 있다고 판단될 때
-                        Toast.makeText(getActivity(), "사진이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-                        //return null;
-                    } else {
-                        //일단 썸네일을 부르면서 사진 로딩 시작
-                        //((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
-                        Glide.with(context)
-                                .load(path)
-                                .placeholder(R.mipmap.loading)
-                                .override(CONSTANT.screenWidth, CONSTANT.screenHeight)
-                                .into(img);
-                    }
-                }
+                File isExist = new File(path);
 
+                if (!isExist.exists()) {
+                    //사진 파일이 로컬에 존재하지 않고 USB에만 있다고 판단될 때
+                    Toast.makeText(context, "사진이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+                    //return null;
+                } else {
+
+                    //일단 썸네일을 부르면서 사진 로딩 시작
+                    //((AlbumFullActivity) getActivity()).loadBitmap(path, img, m.getId(), imageIdForTaskExecute);
+                    Glide.with(context)
+                            .load(path)
+                            .placeholder(R.mipmap.loading)
+                            .into(img);
+                }
             } catch (OutOfMemoryError e) {
                 Log.e("warning", "이미지가 너무 큽니다");
             }
         }
+
 
         final int _position = position;
 
@@ -119,15 +119,15 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                     if (GUIDE.GUIDE_STEP != 5) {
                         return;
                     }
-                    GUIDE.guide_five(getActivity());
+                    GUIDE.guide_five(context);
                 }
 
-                ((AlbumFullActivity) getActivity()).pushTabToTag(m, _position);
-                ((AlbumFullActivity) getActivity()).setPlacePopup(m);
-                if (((AlbumFullActivity) getActivity()).isTagAppeared == 1)
-                    ((AlbumFullActivity) getActivity()).isTagAppeared = 0;
-                else if (((AlbumFullActivity) getActivity()).isTagAppeared == 0)
-                    ((AlbumFullActivity) getActivity()).isTagAppeared = 1;
+                ((AlbumFullActivity) context).pushTabToTag(m, _position);
+                ((AlbumFullActivity) context).setPlacePopup(m);
+                if (((AlbumFullActivity) context).isTagAppeared == 1)
+                    ((AlbumFullActivity) context).isTagAppeared = 0;
+                else if (((AlbumFullActivity) context).isTagAppeared == 0)
+                    ((AlbumFullActivity) context).isTagAppeared = 1;
 
 
             }
@@ -140,8 +140,8 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     @Override
     public void onStop() {
         Log.d(TAG, "onStop() 호출");
-        Glide.get(getActivity()).clearMemory();
-        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        Glide.get(context).clearMemory();
+        Glide.get(context).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 
         super.onStop();
     }

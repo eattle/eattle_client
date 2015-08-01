@@ -37,8 +37,8 @@ import java.util.List;
 public class AlbumGridActivity extends AppCompatActivity {
     private final static String EXTRA_TAG = "ALBUM_GRID";
 
-    private MaterialListView mGridView;
-    private ProgressBar mProgressBar;
+    private static MaterialListView mGridView;
+    private static ProgressBar mProgressBar;
 
     //folderId or tagId
     private int id;
@@ -58,23 +58,52 @@ public class AlbumGridActivity extends AppCompatActivity {
     String tagName;//태그
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        CONSTANT.actList.add(this);
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d(EXTRA_TAG,"onSaveInstanceState() 호출");
+        Bundle bundle = new Bundle();
+        bundle.putInt("id",id);
+        bundle.putInt("kind", kind);
+        bundle.putInt("mediaId", mediaId);
+        bundle.putString("tagName", tagName);
 
+        outState.putBundle("save_data", bundle);
+        super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_album_grid);
+
+        Log.d(EXTRA_TAG, "onCreate() 호출");
 
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumGridActivity.this);
+        setContentView(R.layout.activity_album_grid);
+        CONSTANT.actList.add(this);
 
-        Intent intent = new Intent(this.getIntent());
-
-        id = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
-        kind = intent.getIntExtra("kind", -1);
-        if (kind == CONSTANT.DEFAULT_TAG) {
-            mediaId = intent.getIntExtra("mediaId", -1);
+        if ( savedInstanceState != null )
+        {
+            Log.d(EXTRA_TAG,"savedInstanceState != null 호출");
+            Bundle bundle = savedInstanceState.getBundle("save_data");
+            id = bundle.getInt("id",-1);
+            kind = bundle.getInt("kind", -1);
+            mediaId = bundle.getInt("mediaId", -1);
             mediaByTag = db.getMediaById(mediaId);
-            tagName = intent.getStringExtra("tagName");
+            tagName = bundle.getString("tagName", "");
+
         }
+        else {
+            Intent intent = new Intent(this.getIntent());
+
+            id = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
+            kind = intent.getIntExtra("kind", -1);
+            if (kind == CONSTANT.DEFAULT_TAG) {
+                mediaId = intent.getIntExtra("mediaId", -1);
+                mediaByTag = db.getMediaById(mediaId);
+                tagName = intent.getStringExtra("tagName");
+            }
+        }
+
         refreshGrid();
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -147,6 +176,8 @@ public class AlbumGridActivity extends AppCompatActivity {
             GUIDE.guide3(AlbumGridActivity.this);
             //GUIDE.GUIDE_STEP++;
         }
+
+
     }
 
     @Override
@@ -203,10 +234,11 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
+        Log.d(EXTRA_TAG, "onRestart() 호출");
         refreshGrid();
         //변경사항 적용
         new InitializeApplicationsTask().execute();
-        super.onResume();
+        super.onRestart();
     }
 
     @Override

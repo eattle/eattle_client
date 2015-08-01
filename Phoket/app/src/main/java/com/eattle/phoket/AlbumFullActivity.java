@@ -65,16 +65,15 @@ public class AlbumFullActivity extends ActionBarActivity {
     StoryStartFragment storyStartFragment;
     StoryRecommendFragment storyRecommendFragment;
 
-    static ArrayList<ImageView> viewPagerImage;
+    //static ArrayList<ImageView> viewPagerImage;
 
-    private Bitmap mPlaceHolderBitmap = null;//이미지를 처리하는 동안 보여줄 이미지
-    ContentResolver cr;
+    //ContentResolver cr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate() 호출");
-        if (viewPagerImage == null)
-            viewPagerImage = new ArrayList<ImageView>();//나중에 비트맵 메모리 해제를 위한 리스트
+        //if (viewPagerImage == null)
+        //    viewPagerImage = new ArrayList<ImageView>();//나중에 비트맵 메모리 해제를 위한 리스트
         CONSTANT.actList.add(this);
 
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
@@ -89,7 +88,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         kind = intent.getIntExtra("kind", 0);
         tagName = intent.getStringExtra("tagName");
         initialMediaPosition = intent.getIntExtra("position", 0);
-        Log.d("AlbumFullPicture", Id + " " + mediaId + " " + kind + " " + initialMediaPosition + "!!!!");
+        Log.d("AlbumFullPicture", mMediaList.size()+" " + Id + " " + mediaId + " " + kind + " "+tagName+" " + initialMediaPosition + "!!!!");
         if (kind == CONSTANT.FOLDER) {//스토리를 타고 들어왔을 경우
             Folder folder = db.getFolder(Id);
             totalPictureNum = folder.getPicture_num();
@@ -123,7 +122,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
 
 
-        cr = this.getContentResolver();
+        //cr = this.getContentResolver();
 
         //뷰페이저 생성
         mViewPager = (ViewPager) findViewById(R.id.albumFullViewPager);
@@ -335,25 +334,6 @@ public class AlbumFullActivity extends ActionBarActivity {
                 if (db.getGuide() == 0)//가이드 도중에
                     return true;//백버튼을 막는다
 
-//                //불필요한 메모리 정리---------------------------------------------------------------
-//                AlbumFullActivity.mViewPager = null;
-//                AlbumFullActivity.touchImageAdapter = null;
-//                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.storyStartImage));
-//                CONSTANT.releaseImageMemory((ImageView) findViewById(R.id.blurImage));
-//                //아직 스토리에 남아있는 사진 삭제
-//                while (AlbumFullActivity.viewPagerImage.size() > 0) {
-//                    Log.d(TAG, "아직 ViewPager에 남아있는 사진의 개수 : " + AlbumFullActivity.viewPagerImage.size());
-//                    ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-//                    AlbumFullActivity.viewPagerImage.remove(0);
-//                    CONSTANT.releaseImageMemory(temp);
-//
-//                    if (AlbumFullActivity.viewPagerImage.size() == 0) {
-//                        Log.d(TAG, "ViewPager에 남아있는 사진이 없습니다");
-//                        break;
-//                    }
-//                }
-//                System.gc();//garbage collector
-//                Runtime.getRuntime().gc();//garbage collector
                 finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
                 return false;
         }
@@ -549,113 +529,114 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
     };
 
-    public void loadBitmap(final String path, final ImageView imageView, int mediaId, int imageIdForTaskExecute) {
 
-
-             /*
-            //original-------------------------------------------------------------------
-            try {
-                mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-            if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
-                Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
-                mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
-            }
-            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
-            imageView.setImageDrawable(asyncDrawable);
-            EventRegistration eventRegistration = new EventRegistration(callbackForImageLoading);
-            //eventRegistration.doWork(task,path_);
-            task.execute(path);
-            */
-
-            /* 2차 수정(glide 대체 전)
-            //작은 이미지(썸네일)처리가 완료되면,
-            //imageView에 비트맵을 붙이고 task.execute()을 해주는 부분
-            final Handler handler = new Handler(){
-
-                public void handleMessage(Message msg){
-                    switch(msg.what){
-                        case CONSTANT.END_OF_DECODING_THUMBNAIL:
-                            Log.d(TAG,"썸네일 Decoding 완료");
-                            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
-                            imageView.setImageDrawable(asyncDrawable);
-                            task.execute(path);
-                            break;
-                    }
-                }
-
-            };
-
-            //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
-                    }catch(Exception e){
-                        Log.d(TAG, "CONSTANT.getThumbnail() 오류");
-                        e.printStackTrace();
-                    }
-                    if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
-                        Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
-                        mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
-                    }
-
-                    Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);
-                    handler.sendMessage(m);//썸네일 생성이 완료되었다는 메세지
-                }
-            }).start();
-            */
-
-
-        //작은 이미지(썸네일)처리가 완료되면,
-        //imageView에 비트맵을 붙이고 task.execute()을 해주는 부분
-        final Handler handler = new Handler() {
-
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case CONSTANT.END_OF_DECODING_THUMBNAIL:
-                        Log.d(TAG, "썸네일 Decoding 완료");
-                        Drawable mPlaceHolder = new BitmapDrawable(getResources(), mPlaceHolderBitmap);
-                        Glide.with(getApplicationContext())
-                                .load(path)
-                                .placeholder(mPlaceHolder)
-                                .into(imageView);
-                        //.placeholder(mPlaceHolder)
-                        break;
-                }
-            }
-        };
-
-        //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
-        DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
-        final Media media = db.getMediaById(mediaId);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path, media.getThumbnail_path(), media.getId());//안드로이드 내장 썸네일을 가져온다
-                } catch (Exception e) {
-                    Log.d(TAG, "CONSTANT.getThumbnail() 오류");
-                    e.printStackTrace();
-                }
-                if (mPlaceHolderBitmap == null) {//내장 썸네일이 혹시 존재하지 않을 경우에만
-                    Log.d(TAG, "썸네일이 존재하지 않아 직접 생성");
-                    mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
-                    int degree = CONSTANT.GetExifOrientation(media.getPath());//사진 방향은 originalPath로만 알 수 있다
-                    mPlaceHolderBitmap = CONSTANT.GetRotatedBitmap(mPlaceHolderBitmap, degree);
-                }
-
-                Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);
-                handler.sendMessage(m);//썸네일 생성이 완료되었다는 메세지
-
-            }
-        }).start();
-
-
-    }
+//    public void loadBitmap(final String path, final ImageView imageView, int mediaId, int imageIdForTaskExecute) {
+//
+//
+//             /*
+//            //original-------------------------------------------------------------------
+//            try {
+//                mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
+//            }catch(Exception e){
+//                e.printStackTrace();
+//            }
+//            if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
+//                Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
+//                mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+//            }
+//            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+//            imageView.setImageDrawable(asyncDrawable);
+//            EventRegistration eventRegistration = new EventRegistration(callbackForImageLoading);
+//            //eventRegistration.doWork(task,path_);
+//            task.execute(path);
+//            */
+//
+//            /* 2차 수정(glide 대체 전)
+//            //작은 이미지(썸네일)처리가 완료되면,
+//            //imageView에 비트맵을 붙이고 task.execute()을 해주는 부분
+//            final Handler handler = new Handler(){
+//
+//                public void handleMessage(Message msg){
+//                    switch(msg.what){
+//                        case CONSTANT.END_OF_DECODING_THUMBNAIL:
+//                            Log.d(TAG,"썸네일 Decoding 완료");
+//                            final AsyncDrawable asyncDrawable = new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);
+//                            imageView.setImageDrawable(asyncDrawable);
+//                            task.execute(path);
+//                            break;
+//                    }
+//                }
+//
+//            };
+//
+//            //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path);//안드로이드 내장 썸네일을 가져온다
+//                    }catch(Exception e){
+//                        Log.d(TAG, "CONSTANT.getThumbnail() 오류");
+//                        e.printStackTrace();
+//                    }
+//                    if(mPlaceHolderBitmap == null){//내장 썸네일이 혹시 존재하지 않을 경우에만
+//                        Log.d(TAG, "썸네일이 존재하지 않아 직접 만들었습니다");
+//                        mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+//                    }
+//
+//                    Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);
+//                    handler.sendMessage(m);//썸네일 생성이 완료되었다는 메세지
+//                }
+//            }).start();
+//            */
+//
+//
+//        //작은 이미지(썸네일)처리가 완료되면,
+//        //imageView에 비트맵을 붙이고 task.execute()을 해주는 부분
+//        final Handler handler = new Handler() {
+//
+//            public void handleMessage(Message msg) {
+//                switch (msg.what) {
+//                    case CONSTANT.END_OF_DECODING_THUMBNAIL:
+//                        Log.d(TAG, "썸네일 Decoding 완료");
+//                        Drawable mPlaceHolder = new BitmapDrawable(getResources(), mPlaceHolderBitmap);
+//                        Glide.with(getApplicationContext())
+//                                .load(path)
+//                                .placeholder(mPlaceHolder)
+//                                .into(imageView);
+//                        //.placeholder(mPlaceHolder)
+//                        break;
+//                }
+//            }
+//        };
+//
+//        //썸네일 불러오기는 쓰레드를 생성해서 처리한다.
+//        DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
+//        final Media media = db.getMediaById(mediaId);
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    mPlaceHolderBitmap = CONSTANT.getThumbnail(cr, path, media.getThumbnail_path(), media.getId());//안드로이드 내장 썸네일을 가져온다
+//                } catch (Exception e) {
+//                    Log.d(TAG, "CONSTANT.getThumbnail() 오류");
+//                    e.printStackTrace();
+//                }
+//                if (mPlaceHolderBitmap == null) {//내장 썸네일이 혹시 존재하지 않을 경우에만
+//                    Log.d(TAG, "썸네일이 존재하지 않아 직접 생성");
+//                    mPlaceHolderBitmap = CONSTANT.decodeSampledBitmapFromPath(path, 10);//직접 만든다
+//                    int degree = CONSTANT.GetExifOrientation(media.getPath());//사진 방향은 originalPath로만 알 수 있다
+//                    mPlaceHolderBitmap = CONSTANT.GetRotatedBitmap(mPlaceHolderBitmap, degree);
+//                }
+//
+//                Message m = Message.obtain(null, CONSTANT.END_OF_DECODING_THUMBNAIL);
+//                handler.sendMessage(m);//썸네일 생성이 완료되었다는 메세지
+//
+//            }
+//        }).start();
+//
+//
+//    }
 
     @Override
     public void onStop() {

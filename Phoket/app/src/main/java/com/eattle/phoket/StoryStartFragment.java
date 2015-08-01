@@ -64,12 +64,12 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
             //storyStartImage.setImageBitmap(changedBitmap);
             DatabaseHelper db = DatabaseHelper.getInstance(context);
             if(db.getGuide() == 0) {//가이드 사진일 경우
-                Glide.with(getActivity())
+                Glide.with(context)
                         .load(R.mipmap.phoket1)
                         .into(storyStartImage);
             }
             else {
-                Glide.with(getActivity())
+                Glide.with(context)
                         .load(titleImagePath)
                         .thumbnail(0.5f)
                         .into(storyStartImage);
@@ -182,34 +182,34 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     @Override
     public void onStop() {
         Log.d(TAG, "onStop() 호출");
-        Glide.get(getActivity()).clearMemory();
-        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        Glide.get(context).clearMemory();
+        Glide.get(context).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 
-        if (backImage != null) {
-            for(int i=0;i<3;i++) {
-                Drawable d = null;
-                if(i==0)
-                    d = backImage.getDrawable();
-                else if(i==1)
-                    d = blurImage.getDrawable();
-                else if(i==2)
-                    d = filterImage.getDrawable();
-
-                if (d instanceof BitmapDrawable) {
-                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                    if (bitmap != null && !bitmap.isRecycled()) {
-                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
-                        backImage.setImageBitmap(null);
-                        bitmap.recycle();
-                        bitmap = null;
-                        d.setCallback(null);
-                    }
-                }
-            }
-        }
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
+//        if (backImage != null) {
+//            for(int i=0;i<3;i++) {
+//                Drawable d = null;
+//                if(i==0)
+//                    d = backImage.getDrawable();
+//                else if(i==1)
+//                    d = blurImage.getDrawable();
+//                else if(i==2)
+//                    d = filterImage.getDrawable();
+//
+//                if (d instanceof BitmapDrawable) {
+//                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+//                    if (bitmap != null && !bitmap.isRecycled()) {
+//                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
+//                        backImage.setImageBitmap(null);
+//                        bitmap.recycle();
+//                        bitmap = null;
+//                        d.setCallback(null);
+//                    }
+//                }
+//            }
+//        }
+//
+//        System.gc();//garbage collector
+//        Runtime.getRuntime().gc();//garbage collector
         super.onStop();
     }
 }

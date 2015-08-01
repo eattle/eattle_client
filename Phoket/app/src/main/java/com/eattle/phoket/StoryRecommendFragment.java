@@ -151,7 +151,7 @@ public class StoryRecommendFragment extends Fragment {
 
             Glide.with(getActivity())
                     .load(folder.getImage())
-                    .override(CONSTANT.screenWidth, 300)
+//                    .override(CONSTANT.screenWidth, 300)
                     .centerCrop()
                     .into(storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
@@ -168,36 +168,10 @@ public class StoryRecommendFragment extends Fragment {
 
         return root;
     }
+
     //백버튼을 눌렀을 때, 메모리 정리를 한다
-
     public void onRecommendClick(int num) {
-        //불필요한 메모리 정리---------------------------------------------------------------
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.blurImage));
-        //추천 이미지 삭제
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.firstImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.secondImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.thirdImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.fourthImage));
-        //아직 스토리에 남아있는 사진 삭제
-        while(AlbumFullActivity.viewPagerImage.size() > 0){
-            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if(AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum","break!");
-
-                break;
-            }
-        }
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료
         //-----------------------------------------------------------------------------------
         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
         intent.putExtra("kind", CONSTANT.FOLDER);
