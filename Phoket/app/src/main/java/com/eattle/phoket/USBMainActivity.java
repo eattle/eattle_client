@@ -37,8 +37,6 @@ public class USBMainActivity extends ActionBarActivity {
     List<Folder> folderList;
     List<Tag> tagList;
     int mode=0;//0이면 story별, 1이면 tag별
-    //데이터베이스 관련
-    DatabaseHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +44,7 @@ public class USBMainActivity extends ActionBarActivity {
 
         //USB에서 사진 목록들을 읽어온다
         //TODO USB실제파일 목록과 USB DB 내용을 비교해봐야함
-        db = DatabaseHelper.getInstance(this);
+        DatabaseHelper db = DatabaseHelper.getInstance(USBMainActivity.this);
         //Folder DB를 읽는다 -> 그리드뷰
         folderList = db.getAllFolders();
         Toast.makeText(this,""+folderList.size(),Toast.LENGTH_SHORT).show();
@@ -81,6 +79,7 @@ public class USBMainActivity extends ActionBarActivity {
     private void showUSBByStory(){
         mode = 0;
         //1. Folder DB를 읽는다 -> 그리드뷰
+        DatabaseHelper db = DatabaseHelper.getInstance(USBMainActivity.this);
         folderList = db.getAllFolders();
         //2. 그리드뷰를 refresh한다
         //Adapter.notifyDataSetChanged();
@@ -89,6 +88,7 @@ public class USBMainActivity extends ActionBarActivity {
     private void showUSBByTag(){
         mode = 1;
         //1. Folder DB를 읽는다 -> 그리드뷰
+        DatabaseHelper db = DatabaseHelper.getInstance(USBMainActivity.this);
         tagList = db.getAllTags();
         Log.d("showUSBByTag","taglist.size() : "+tagList.size());
         //2. 그리드뷰를 refresh한다

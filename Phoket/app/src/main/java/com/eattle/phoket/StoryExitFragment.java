@@ -21,39 +21,39 @@ public class StoryExitFragment extends Fragment {
         exitStory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clearMemory();
+//                clearMemory();
                 getActivity().finish();
             }
         });
         return root;
     }
 
-    //불필요한 메모리 정리---------------------------------------------------------------
-    private void clearMemory() {
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView)getActivity().findViewById(R.id.blurImage));
-        //아직 스토리에 남아있는 사진 삭제
-
-        //아직 스토리에 남아있는 사진 삭제
-        while(AlbumFullActivity.viewPagerImage.size() > 0){
-            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if(AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum","break!");
-
-                break;
-            }
-        }
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
-        //-----------------------------------------------------------------------------------
-    }
+//    //불필요한 메모리 정리---------------------------------------------------------------
+//    private void clearMemory() {
+//        AlbumFullActivity.mViewPager = null;
+//        AlbumFullActivity.touchImageAdapter = null;
+//
+//        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
+//        CONSTANT.releaseImageMemory((ImageView)getActivity().findViewById(R.id.blurImage));
+//        //아직 스토리에 남아있는 사진 삭제
+//
+//        //아직 스토리에 남아있는 사진 삭제
+//        while(AlbumFullActivity.viewPagerImage.size() > 0){
+//            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
+//            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
+//            AlbumFullActivity.viewPagerImage.remove(0);
+//            CONSTANT.releaseImageMemory(temp);
+//
+//            if(AlbumFullActivity.viewPagerImage.size() == 0) {
+//                Log.d("TagsOverAlbum","break!");
+//
+//                break;
+//            }
+//        }
+//
+//        System.gc();//garbage collector
+//        Runtime.getRuntime().gc();//garbage collector
+//        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+//        //-----------------------------------------------------------------------------------
+//    }
 }

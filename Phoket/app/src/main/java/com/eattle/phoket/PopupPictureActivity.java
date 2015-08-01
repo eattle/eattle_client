@@ -25,16 +25,13 @@ import com.eattle.phoket.view.TouchImageView;
 
 public class PopupPictureActivity extends AppCompatActivity {
 
-    DatabaseHelper db;
-//    int mediaId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CONSTANT.actList.add(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_popup_picture);
 
-        db = DatabaseHelper.getInstance(getApplicationContext());
-
+        DatabaseHelper db = DatabaseHelper.getInstance(PopupPictureActivity.this);
         Intent intent = getIntent();
         int mediaId = intent.getIntExtra("id", -1);//folderId가 될수도 있고 TagId가 될 수도 있다
 

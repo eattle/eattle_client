@@ -16,8 +16,6 @@ import java.util.List;
 
 public class PopupForTagAddition extends Activity {
 
-    DatabaseHelper db;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +25,6 @@ public class PopupForTagAddition extends Activity {
         setContentView(R.layout.popup_for_tag_addition);
 
         View popup = (View)findViewById(R.id.popup);
-        db = DatabaseHelper.getInstance(getApplicationContext());
 
         Intent intent = getIntent();
         final DataForTagAddition data= intent.getParcelableExtra("dataForTagAddition");
@@ -40,6 +37,7 @@ public class PopupForTagAddition extends Activity {
             @Override
             public void onClick(View v) {
                 //해당 사진이 속한 폴더의 모든 사진에 태그를 등록한다
+                DatabaseHelper db = DatabaseHelper.getInstance(PopupForTagAddition.this);
                 List<Media> mediaList = db.getAllMediaByFolder(data.getFolderId());
                 for (int i = 0; i < mediaList.size(); i++) {
                     db.createTag(data.getTagName(), mediaList.get(i).getId(), data.getFolderId());
@@ -60,6 +58,4 @@ public class PopupForTagAddition extends Activity {
 
 
     }
-
-
 }

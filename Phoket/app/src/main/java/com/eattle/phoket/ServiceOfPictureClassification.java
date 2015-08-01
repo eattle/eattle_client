@@ -4,10 +4,12 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -23,6 +25,7 @@ import com.eattle.phoket.model.NotificationM;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,14 +43,12 @@ public class ServiceOfPictureClassification extends Service {
 
 
     //사진 정리와 관련된 변수들
-    int totalPictureNum = 0;//사진들의 총 개수
+    int realPictureNum = 0;//분류에 포함되는 사진의 개수
+    int totalPictureNum = 0;//Media DB상의 총 사진의 개수
     long totalInterval;//사진 간격의 총합
     long standardDerivation = 0;//사진 간격의 표준편차
     Cursor mCursor;
     ContentResolver mCr;
-
-    //데이터베이스 관련 변수들
-    DatabaseHelper db;
 
     //장소 관련(역지오코딩)
 //    LocationManager mLocMan;
@@ -74,6 +75,11 @@ public class ServiceOfPictureClassification extends Service {
         serviceOfEattle.start();
         mBroadcaster = new BroadcastNotifier(this);
 
+
+        //Notification을 위한 브로드캐스트 리시버
+        if (broadcastListener == null)
+            broadcastListener = new BroadcastListener(getApplicationContext());
+        registerReceiver(broadcastListener, new IntentFilter(Intent.ACTION_TIME_TICK));
     }
 
     @Override
@@ -84,45 +90,14 @@ public class ServiceOfPictureClassification extends Service {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    if (!isClassifying) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {//사진 정리를 시작한다
-                                    isClassifying = true;
-                                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                                    pictureClassification();
-                                } catch (IOException e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                } catch (Exception e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                } finally {
-                                    isClassifying = false;
-                                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
-                                }
-                            }
-                        }).start();
-                    }
+                    if (!isClassifying)
+                        new classificationStart(getApplicationContext()).execute(0);//AsyncTask를 통한 사진 정리 시작
 
                     break;
                 case CONSTANT.START_OF_GUIDE:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {//가이드를 시작한다
-                                isClassifying = true;
-                                mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                                pictureClassification_guide();
-                            } catch (IOException e) {
-                                Log.d("PictureClassification", e.getMessage());
-                            } catch (Exception e) {
-                                Log.d("PictureClassification", e.getMessage());
-                            } finally {
-                                isClassifying = false;
-                            }
-                        }
-                    }).start();
+                    new classificationStart(getApplicationContext()).execute(1);//AsyncTask를 통한 가이드 시작
+
                     break;
 
                 default:
@@ -151,7 +126,7 @@ public class ServiceOfPictureClassification extends Service {
 
         public void run() {
             Log.d(EXTRA_TAG, "ServiceOfPictureClassification Run() 호출");
-            db = DatabaseHelper.getInstance(getApplicationContext());
+            DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
 
             NotificationM n = db.getNotification();
             //86400000
@@ -164,115 +139,50 @@ public class ServiceOfPictureClassification extends Service {
             }
 
 
-            //Notification을 위한 브로드캐스트 리시버
-            if (broadcastListener == null)
-                broadcastListener = new BroadcastListener(getApplicationContext());
-            registerReceiver(broadcastListener, new IntentFilter(Intent.ACTION_TIME_TICK));
 
             Looper.prepare();
         }
     }
 
-    /*
-    //MainActivity로 부터 온 메세지를 받는 부분
-    private static class IncomingHandler extends Handler {
-        private final WeakReference<ServiceOfPictureClassification> mReference;
-
-        IncomingHandler(ServiceOfPictureClassification service) {
-            mReference = new WeakReference<>(service);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final ServiceOfPictureClassification service = mReference.get();
-            switch (msg.what) {
-                case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    if (service != null && !isClassifying) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {//사진 정리를 시작한다
-                                    isClassifying = true;
-                                    service.mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                                    service.pictureClassification();
-                                } catch (IOException e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                } catch (Exception e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                }finally {
-                                    isClassifying = false;
-                                    service.mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
-                                }
-                            }
-                        }).start();
-                    }
-
-                    break;
-                case CONSTANT.START_OF_GUIDE:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
-                    if (service != null) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {//가이드를 시작한다
-                                    isClassifying = true;
-                                    service.pictureClassification_guide();
-                                } catch (IOException e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                } catch (Exception e) {
-                                    Log.d("PictureClassification", e.getMessage());
-                                }finally {
-                                    isClassifying = false;
-                                }
-                            }
-                        }).start();
-                    }
-                    break;
-
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }*/
-
-
     //사진 정리와 관련된 함수들
     private void calculatePictureInterval() {//사진간 시간 간격을 계산하는 함수
         totalInterval = 0;
-        totalPictureNum = 0;
-        mCursor.moveToLast();
+        realPictureNum = 0;//분류의 대상이 되는 사진의 개수
+        totalPictureNum = mCursor.getCount();//사진의 총 개수
+
 
 //        ImageSetter.setCursor(0, 0);//커서의 위치를 처음으로 이동시킨다.
         long pictureTakenTime = 0;
+        DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
 
-        do {
-            /** ------------------사진 정보 획득------------------ **/
-            String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-            int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));//사진 고유(안드로이드 상)의 ID
-            Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+        if(mCursor.moveToLast()) {
+            do {
 
-            /** ------------------정리 제외 대상------------------ **/
-            if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
-                continue;
-            //해당 경로에 존재하지 않는 사진은 건너띈다
-            if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
-                //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
-                continue;
+                /** ------------------사진 정보 획득------------------ **/
+                String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));//사진 고유(안드로이드 상)의 ID
+                Media ExistedMedia = db.getMediaById(pictureID);//pictureID에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
+
+                /** ------------------정리 제외 대상------------------ **/
+                if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
+                    continue;
+                //해당 경로에 존재하지 않는 사진은 건너띈다
+                if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
+                    //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
+                    continue;
 
 
+                //사진이 촬영된 날짜
+                long _pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
+                //_pictureTakenTime *= 1000; //second->millisecond
+                if (pictureTakenTime == 0)
+                    pictureTakenTime = _pictureTakenTime;
 
-
-            //사진이 촬영된 날짜
-            long _pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));
-            //_pictureTakenTime *= 1000; //second->millisecond
-            if (pictureTakenTime == 0)
+                totalInterval += pictureTakenTime - _pictureTakenTime;
                 pictureTakenTime = _pictureTakenTime;
-
-            totalInterval += pictureTakenTime - _pictureTakenTime;
-            pictureTakenTime = _pictureTakenTime;
-            totalPictureNum++;
-        }while (mCursor.moveToPrevious());
+                realPictureNum++;
+            } while (mCursor.moveToPrevious());
+        }
     }
 
 
@@ -288,6 +198,7 @@ public class ServiceOfPictureClassification extends Service {
         Log.d(TAG, "사진 정리 시작");
 
         /** ---------------------------변수--------------------------- **/
+        DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
         //----> 스토리는 'end_Y_M_D~start_Y_M_D의 스토리'형태로 DB에 들어간다
         String start_Y_M_D = "";
         String end_Y_M_D = "!";
@@ -308,16 +219,30 @@ public class ServiceOfPictureClassification extends Service {
 
 
         /** ---------------------------시간 간격 계산--------------------------- **/
-        calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
-        long averageInterval = totalInterval;
-        if (totalPictureNum != 0)
-            averageInterval /= totalPictureNum;
+        long averageInterval = 0;
+        Manager manager = db.getManager();
+        Log.d(TAG,"mCursor.getCount() : "+mCursor.getCount());
+        Log.d(TAG,"manager.getTotalPictureNum() : "+manager.getTotalPictureNum());
+
+        if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
+            CONSTANT.TIMEINTERVAL = manager.getAverageInterval();//calculatePictureInterval()를 하지 않는다
+        }
+        else {
+            calculatePictureInterval();//사진의 시간간격의 총합을 구한다.
+            averageInterval = totalInterval;
+
+            if (realPictureNum != 0)
+                averageInterval /= realPictureNum;
+
+            manager.setRealPictureNum(realPictureNum);
+            manager.setTotalPictureNum(totalPictureNum);
+            manager.setAverageInterval(averageInterval);
+            manager.setStandardDerivation(standardDerivation);
+            db.createManager(manager);//Manager DB에 값들을 집어넣음
+
+            CONSTANT.TIMEINTERVAL = averageInterval;
+        }
         Log.d(TAG,"totalInterval : "+totalInterval+" totalPictureNum : "+totalPictureNum);
-        CONSTANT.TIMEINTERVAL = averageInterval;
-        Manager manager = new Manager(totalPictureNum, averageInterval, standardDerivation);
-        db.createManager(manager);//Manager DB에 값들을 집어넣음
-
-
 
         /** ---------------------------DB 초기화--------------------------- **/
         db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(isFixed == 1<- 고정 스토리)은 제외되어 있음
@@ -529,6 +454,7 @@ public class ServiceOfPictureClassification extends Service {
     //고정 스토리에 대한 전처리. 사진에 변동이 있는지 등을 확인
     public void checkFixedStory() throws Exception {
         String TAG = "handleFixedStory";
+        DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
         List<Folder> fixedFolders = db.getFixedFolder();//고정 스토리 목록
         for (int i = 0; i < fixedFolders.size(); i++) {
             Folder fixed = fixedFolders.get(i);
@@ -575,6 +501,7 @@ public class ServiceOfPictureClassification extends Service {
 
     //MainActivity로 보내야할 고정 스토리가 있는지 확인한다
     public void isThereFixedStoryToSend(int titleImageID) {
+        DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
         Media normalStoryTitle = db.getMediaById(titleImageID);
         long pictureTakenTime = normalStoryTitle.getPictureTaken();
 
@@ -605,6 +532,7 @@ public class ServiceOfPictureClassification extends Service {
         //sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
 
         Log.d("guide", "가이드 시작");
+        DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
         db.deleteAllFolder();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
         db.deleteAllMedia();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
         long currentTime = System.currentTimeMillis();//현재 시간
@@ -664,4 +592,51 @@ public class ServiceOfPictureClassification extends Service {
         am.cancel(sender);
     }
 
+
+    //Notification을 위한 AsyncTask
+    private class classificationStart extends AsyncTask<Integer, String, Integer> {
+
+        private Context mContext;
+
+        public classificationStart(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... params) {
+            Log.d(EXTRA_TAG, "classificationStart doInBackground 호출()");
+            int guideOrNot = params[0];//1이면 guide,0이면 보통
+
+            if(guideOrNot == 0) {
+                try {//사진 정리를 시작한다
+                    isClassifying = true;
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                    pictureClassification();
+                } catch (IOException e) {
+                    Log.d("PictureClassification", e.getMessage());
+                } catch (Exception e) {
+                    Log.d("PictureClassification", e.getMessage());
+                } finally {
+                    isClassifying = false;
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
+                }
+            }
+            else if(guideOrNot == 1){
+                try {//가이드를 시작한다
+                    isClassifying = true;
+                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                    pictureClassification_guide();
+                } catch (IOException e) {
+                    Log.d("PictureClassification", e.getMessage());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    Log.d("PictureClassification", e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    isClassifying = false;
+                }
+            }
+            return 0;
+        }
+    }
 }

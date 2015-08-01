@@ -2,8 +2,11 @@ package com.eattle.phoket;
 
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -30,6 +33,7 @@ import com.eattle.phoket.Card.manager.CardManager;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.model.Folder;
+import com.eattle.phoket.model.Manager;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
@@ -50,12 +54,11 @@ public class Section2 extends Fragment {
     private final static int STATE_RUNNING = 1;
 
 
-    private Context mContext;
-    private DatabaseHelper db;
+    private static Context mContext;
 
-    private MaterialListView mListView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ProgressBar mProgressBar;
+    private static MaterialListView mListView;
+    private static SwipeRefreshLayout mSwipeRefreshLayout;
+    private static ProgressBar mProgressBar;
 
     private int state;
 
@@ -66,7 +69,6 @@ public class Section2 extends Fragment {
         // Inflate the layout for this fragment
         View root =  inflater.inflate(R.layout.fragment_section2, container, false);
         mContext = getActivity();
-        db = DatabaseHelper.getInstance(mContext);
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview2);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -101,7 +103,22 @@ public class Section2 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
+                for (int i = 0; i < GUIDE.CURRENT_POPUP.size(); i++)
+                    GUIDE.CURRENT_POPUP.get(i).dismiss();//가이드 팝업을 지운다
+
+                /** ---------------------------사진 개수 확인--------------------------- **/
+                ContentResolver mCr = mContext.getContentResolver();
+                Cursor mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID}, null, null, null);
+
+                DatabaseHelper db = DatabaseHelper.getInstance(mContext);
+                Manager manager = db.getManager();
+                if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    Snackbar.make(mSwipeRefreshLayout, "최신상태입니다", Snackbar.LENGTH_SHORT)
+                            .setAction("Action", null).show();
+                }
+                else
+                    ((MainActivity) getActivity()).sendMessageToService(CONSTANT.START_OF_PICTURE_CLASSIFICATION);
             }
         });
 
@@ -140,6 +157,7 @@ public class Section2 extends Fragment {
         @Override
         protected List<Folder> doInBackground(Void... params) {
             //Query the applications
+            DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             List<Folder> stories = db.getAllFolders();
 
             return stories;

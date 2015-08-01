@@ -41,13 +41,13 @@ import java.util.Random;
 public class StoryRecommendFragment extends Fragment {
     String TAG = "storyRecommendFragment";
 
-    DatabaseHelper db;
     int folderID;//현재 보고 있는 스토리의 ID
     static FileSystem fileSystem;
     int randomFolder[];//추천 스토리의 폴더 ID가 들어갈 배열
     int recommendNum = 4;//추천할 스토리의 개수(개수 추가할 경우 story_recommend에 추가해야 함)
     LinearLayout storyRecommend;
     ContentResolver cr;
+    private static Context context;
     public static StoryRecommendFragment newInstance(int folderID) {
 
         fileSystem = FileSystem.getInstance();
@@ -67,10 +67,13 @@ public class StoryRecommendFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null)
             folderID = args.getInt("folderID");
-        db = DatabaseHelper.getInstance(getActivity());
+        context = getActivity();
+
+
 
         //리스트뷰에 들어갈 스토리를 추가한다
         //랜덤하게 4개의 스토리를 얻어온다(3개는 임의로 정한 것)
+        DatabaseHelper db = DatabaseHelper.getInstance(context);
         List<Folder> folders = db.getAllFolders();
         int totalFolderNum=0;
         List<Integer> candidateStory = new ArrayList<Integer>();
@@ -148,7 +151,7 @@ public class StoryRecommendFragment extends Fragment {
 
             Glide.with(getActivity())
                     .load(folder.getImage())
-                    .override(CONSTANT.screenWidth, 300)
+//                    .override(CONSTANT.screenWidth, 300)
                     .centerCrop()
                     .into(storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));
@@ -165,36 +168,10 @@ public class StoryRecommendFragment extends Fragment {
 
         return root;
     }
+
     //백버튼을 눌렀을 때, 메모리 정리를 한다
-
     public void onRecommendClick(int num) {
-        //불필요한 메모리 정리---------------------------------------------------------------
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.blurImage));
-        //추천 이미지 삭제
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.firstImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.secondImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.thirdImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.fourthImage));
-        //아직 스토리에 남아있는 사진 삭제
-        while(AlbumFullActivity.viewPagerImage.size() > 0){
-            Log.d("TagsOverAlbum","아직 남아있는 사진의 개수 : "+AlbumFullActivity.viewPagerImage.size());
-            ImageView temp = AlbumFullActivity.viewPagerImage.get(0);
-            AlbumFullActivity.viewPagerImage.remove(0);
-            CONSTANT.releaseImageMemory(temp);
-
-            if(AlbumFullActivity.viewPagerImage.size() == 0) {
-                Log.d("TagsOverAlbum","break!");
-
-                break;
-            }
-        }
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
-        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료(메모리 확보를 위해)
+        getActivity().finish();//현재 띄워져 있던 albumFullActivity 종료
         //-----------------------------------------------------------------------------------
         Intent intent = new Intent(getActivity(), AlbumGridActivity.class);
         intent.putExtra("kind", CONSTANT.FOLDER);

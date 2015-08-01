@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     //UI 관련 변수
-    private CustomViewPager mViewPager;
-    private Adapter mAdapter;
-    private FloatingActionButton mFAB;
+    private static CustomViewPager mViewPager;
+    private static Adapter mAdapter;
+    private static FloatingActionButton mFAB;
 
 
     //파일 시스템 관련 변수
@@ -78,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
     private UsbDeviceHost usbDeviceHost;
     private CachedBlockDevice blockDevice;
 
-    //DB관련 변수
-    DatabaseHelper db;
 
     //service에 메시지를 보내기 위해 데이터를 담는 intent
     private Intent mService;
@@ -94,13 +92,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         /*StrictMode*/
-        //StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-        //        .detectLeakedSqlLiteObjects()
-        //        .detectLeakedClosableObjects()
-        //        .penaltyLog()
-        //        .penaltyDeath()
-        //        .build());
+//        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+//                .detectLeakedSqlLiteObjects()
+//                .detectLeakedClosableObjects()
+//                .penaltyLog()
+//                .penaltyDeath()
+//                .build());
 
+        Log.d(EXTRA_TAG,"onCreate() 호출");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -113,31 +112,11 @@ public class MainActivity extends AppCompatActivity {
         final Button toUSB = (Button) findViewById(R.id.toUSB);
         toUSB.setVisibility(View.GONE);//하단에 USB 버튼을 일단 없앤다
 
-        /*FileSystem*/
-        //fileSystem = FileSystem.getInstance();
+        mViewPager = (CustomViewPager) findViewById(R.id.pager);
+        if (mViewPager != null) {
+            setupViewPager(mViewPager);
+        }
 
-        //usbDeviceHost = new UsbDeviceHost();
-        //usbDeviceHost.start(this, new BlockDeviceApp() {
-        //    @Override
-        //    public void onConnected(BlockDevice originalBlockDevice) {
-        //        CachedBlockDevice blockDevice = new CachedUsbMassStorageBlockDevice(originalBlockDevice);
-//
-        //        fileSystem.incaseSearchTable(blockDevice);
-//
-        //        CONSTANT.BLOCKDEVICE = blockDevice;//temp
-        //        setBlockDevice(blockDevice);
-        //        //USB가 스마트폰에 연결되었을 떄
-        //        CONSTANT.ISUSBCONNECTED = 1;
-        //        toUSB.setVisibility(View.VISIBLE);//USB가 연결되었으면 하단에 USB 버튼을 보여준다
-        //        //fileSystem.delete(DatabaseHelper.DATABASE_NAME,blockDevice);
-        //        //fileSystem.delete(DatabaseHelper.DATABASE_NAME+"tt",blockDevice);
-//
-        //    }
-        //});
-
-        //데이터베이스 OPEN
-
-        db = DatabaseHelper.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -189,6 +168,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        //데이터베이스 OPEN
+        DatabaseHelper db = DatabaseHelper.getInstance(getApplicationContext());
+
         if (db.getGuide() == 0 && GUIDE.GUIDE_STEP==0) {//앱 최초 실행시
             //더미데이터 삭제(가이드 도중에 앱이 종료된 경우를 위해)
             db.deleteAllFolder();
@@ -210,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mClassificationReceiver,
                 statusIntentFilter);
+
 
     }
 
@@ -289,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
                 ((Section1)(mAdapter.getItem(0))).initialize();
             }
 
-            if(db == null)
-                db = DatabaseHelper.getInstance(MainActivity.this);
+            //데이터베이스 OPEN
+            DatabaseHelper db = DatabaseHelper.getInstance(MainActivity.this);
             if(db.getGuide() == 0 && GUIDE.GUIDE_STEP>=7){
                 GUIDE.guide_eight(MainActivity.this);
 
@@ -327,9 +311,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(EXTRA_TAG, "onResume() 호출");
         super.onResume();
 
-        if(db == null)
-            db = DatabaseHelper.getInstance(MainActivity.this);
-
+        DatabaseHelper db = DatabaseHelper.getInstance(MainActivity.this);
         if(db.getGuide() == 0 && GUIDE.GUIDE_STEP==6){
             GUIDE.guide_six(MainActivity.this);
             //GUIDE.GUIDE_STEP++;
@@ -342,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
                 db.deleteAllMediaTag();
                 db.deleteAllTag();
             }*/
+
     }
 
     public void deleteAllCard(){
@@ -367,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
+        Log.d(EXTRA_TAG, "onStop() 호출");
         super.onStop();
         //stopService(mService);
     }
@@ -385,8 +369,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK){//백버튼을 통제(비밀번호 유지를 위해)
-            if(db == null)
-                db = DatabaseHelper.getInstance(MainActivity.this);
+            DatabaseHelper db = DatabaseHelper.getInstance(MainActivity.this);
             if (db.getGuide() == 0)//가이드 도중에
                 return true;//백버튼을 막는다
 
@@ -405,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
     /***************** ViewPager 부분 **********************/
     private void setupViewPager(CustomViewPager viewPager) {
         viewPager.setPagingEnabled();
@@ -528,8 +512,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /***************** Classification Service 부분 **********************/
-
-
     //서비스로 메세지를 보낸다(MainActivity -> ServiceOfPictureClassification)
     //bind-> start로 바뀌면서 intent를 보내는 것으로 바뀜
     public void sendMessageToService(int typeOfMessage) {
@@ -537,6 +519,8 @@ public class MainActivity extends AppCompatActivity {
         mService.putExtra("what", typeOfMessage);
         startService(mService);
     }
+
+
 
     //서비스로부터 오는 메세지를 처리한다(ServiceOfPictureClassification -> MainActivity)
     private class ClassificationReceiver extends BroadcastReceiver {
@@ -546,8 +530,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context,final Intent intent) {
             int data;
+            DatabaseHelper db = DatabaseHelper.getInstance(MainActivity.this);
             switch (intent.getIntExtra(CONSTANT.EXTENDED_DATA_STATUS,
                     CONSTANT.END_OF_PICTURE_CLASSIFICATION)) {
 
@@ -555,8 +540,6 @@ public class MainActivity extends AppCompatActivity {
                 case CONSTANT.END_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
-                    //mSectionsPagerAdapter.notifyDataSetChanged();
-
                     ((Section1)(mAdapter.getItem(0))).setRunning();
                     ((Section2)(mAdapter.getItem(1))).setRunning();
                     ((Section3)(mAdapter.getItem(2))).initialize();
@@ -572,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
+                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_SINGLE_STORY || 'Service가 하나의 스토리를 완성했다는 메세지 도착' ");
                     data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, -1);
                     if(data == -1)    return;
 
@@ -579,12 +563,12 @@ public class MainActivity extends AppCompatActivity {
                     ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(data));
                     Log.d(EXTRA_TAG, "ADD CARDS");
 
+
                     break;
 
                 case CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION://서비스가 사진 정리를 시작했다는 메세지
                     //사진정리중이면 1, 아니면 0이 들어있음
                     Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - RECEIPT_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 시작했다는 메세지가 도착했습니다' ");
-
                     data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, 0);
                     if(data == 1){
                         ((Section1)(mAdapter.getItem(0))).setLoading();
@@ -621,6 +605,7 @@ public class MainActivity extends AppCompatActivity {
 
                     GUIDE.guide2(MainActivity.this);
                     //GUIDE.GUIDE_STEP++;
+
                     break;
                 default:
                     break;

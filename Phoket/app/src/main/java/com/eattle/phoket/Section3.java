@@ -43,12 +43,11 @@ public class Section3 extends Fragment {
     private final static int STATE_LOADING = 0;
     private final static int STATE_RUNNING = 1;
 
-    private Context mContext;
-    private DatabaseHelper db;
+    private static Context mContext;
 
-    private MaterialListView mListView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ProgressBar mProgressBar;
+    private static MaterialListView mListView;
+    private static SwipeRefreshLayout mSwipeRefreshLayout;
+    private static ProgressBar mProgressBar;
 
     private int state;
 
@@ -59,7 +58,6 @@ public class Section3 extends Fragment {
         // Inflate the layout for this fragment
         View root =  inflater.inflate(R.layout.fragment_section3, container, false);
         mContext = getActivity();
-        db = DatabaseHelper.getInstance(mContext);
 
         mListView = (MaterialListView) root.findViewById(R.id.section_listview3);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
@@ -133,6 +131,7 @@ public class Section3 extends Fragment {
         @Override
         protected List<Tag> doInBackground(Void... params) {
             //Query the applications
+            DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             List<Tag> tags = db.getAllTags();
 
             return tags;

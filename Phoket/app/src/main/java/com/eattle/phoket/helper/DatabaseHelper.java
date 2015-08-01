@@ -19,6 +19,7 @@ import com.eattle.phoket.model.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by GA on 2015. 3. 19..
@@ -27,6 +28,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private String TAG = " DatabaseHelper";
 
     private static DatabaseHelper Instance;
+    private SQLiteDatabase mDatabase;
+    private AtomicInteger mOpenCounter = new AtomicInteger();//DB open현황을 체크
 
     private static final int DATABASE_VERSION = 31;
 
@@ -81,6 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //manager
     private static final String KEY_TOTALPICTURENUM = "totalPictureNum";
+    private static final String KEY_REALPICTURENUM = "realPictureNum";
     private static final String KEY_AVERAGEINTERVAL = "averageInterval";
     private static final String KEY_STANDARDDERIVATION = "standardDerivation";
     //notification
@@ -143,6 +147,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_MANAGER =
             "CREATE TABLE " + TABLE_MANAGER + " ("
                     + KEY_TOTALPICTURENUM + " INTEGER PRIMARY KEY NOT NULL, "
+                    + KEY_REALPICTURENUM + " INTEGER NOT NULL, "
                     + KEY_AVERAGEINTERVAL + " LONG, "
                     + KEY_STANDARDDERIVATION + " LONG "
                     + ")";
@@ -158,21 +163,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_GUIDEENDED + " INTEGER NOT NULL "
                     + ")";
 
-    public static DatabaseHelper getInstance(Context context) {
+    public synchronized static DatabaseHelper getInstance(Context context) {
         if (Instance == null) {
             Instance = new DatabaseHelper(context);
         }
         return Instance;
     }
 
-    public DatabaseHelper(Context context) {
-
-
+    private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
+        //context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
     }
 
+    //적절한 때에 databasehelper를 닫아주기위한 함수
+    public synchronized SQLiteDatabase openDatabase() {
+        if(mOpenCounter.incrementAndGet() == 1) {
+            // Opening new database
+            mDatabase = Instance.getWritableDatabase();
+        }
+        return mDatabase;
+    }
+    public synchronized void closeDatabase() {
+        if(mOpenCounter.decrementAndGet() == 0) {
+            // Closing database
+            mDatabase.close();
+        }
+    }
+
+
+    @Override
+    public synchronized void close() {
+        if (Instance != null)
+            Instance.close();
+
+        super.close();
+
+    }
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d("DatabaseHelper", "Database Helper onCreate 함수 호출");
@@ -217,7 +244,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Creating folder
      */
     public int createFolder(Folder folder) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, folder.getId());
@@ -228,7 +256,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
         values.put(KEY_ISFIXED, folder.getIsFixed());
 
-        return (int) db.insert(TABLE_FOLDER, null, values);
+        int result = (int) db.insert(TABLE_FOLDER, null, values);
+
+        this.closeDatabase();
+        return result;
     }
 
     /*
@@ -238,7 +269,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Folder> folders = new ArrayList<Folder>();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -260,6 +292,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return folders;
     }
@@ -271,7 +305,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Folder folder = new Folder();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ID + " = " + id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -289,6 +324,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return folder;
     }
@@ -299,7 +336,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * return number of updated row
      */
     public int updateFolder(Folder folder) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, folder.getId());
@@ -309,7 +347,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PICTURE_NUM_IN_STORY, folder.getPicture_num());
         values.put(KEY_TITLEIMAGEID, folder.getTitleImageID());
         values.put(KEY_ISFIXED, folder.getIsFixed());
-        return db.update(TABLE_FOLDER, values, KEY_ID + " = ? ", new String[]{String.valueOf(folder.getId())});
+
+        int result = db.update(TABLE_FOLDER, values, KEY_ID + " = ? ", new String[]{String.valueOf(folder.getId())});
+        this.closeDatabase();
+
+        return result;
     }
 
     /*
@@ -317,7 +359,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
 
     public void deleteFolder(Folder folder, boolean should_delete_all_media_in_that_folder) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         //check if media in that folder should also be deleted
         if (should_delete_all_media_in_that_folder) {
@@ -329,11 +372,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         db.delete(TABLE_MEDIA, KEY_ID + " = ? ", new String[]{String.valueOf(folder.getId())});
+        this.closeDatabase();
     }
 
     public void deleteFolder(int folderId, boolean should_delete_all_media_in_that_folder) {
         Log.d("DatabaseHelper", "deleteFolder() 호출");
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         //check if media in that folder should also be deleted
         if (should_delete_all_media_in_that_folder) {
@@ -345,13 +390,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         db.delete(TABLE_MEDIA, KEY_ID + " = ? ", new String[]{String.valueOf(folderId)});
+        this.closeDatabase();
     }
 
     public void deleteAllFolder() {
         Log.d("DatabaseHelper", "deleteAllFolder() 호출");
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         //KEY_ISFIXED ==  1인 폴더는 지우지 않는다
         db.execSQL("DELETE FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 0");
+        this.closeDatabase();
     }
 
     //고정된 스토리의 아이디값들을 얻어온다
@@ -362,7 +410,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Folder> folders = new ArrayList<Folder>();
 
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 1";//static이 1인 폴더의 아이디를 얻어온다
         Cursor c = null;
 
@@ -384,6 +434,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return folders;
     }
@@ -397,7 +449,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating media
      */
     public int createMedia(Media media) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, media.getId());
@@ -414,14 +467,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
         values.put(KEY_ISFIXED, media.getIsFixed());
 
-        return (int) db.insert(TABLE_MEDIA, null, values);
+        int result = (int) db.insert(TABLE_MEDIA, null, values);
+        this.closeDatabase();
+        return result;
     }
 
     //Media 여러개를 넣는다(속도 향상을 위해)
     //주고 받는 Media 배열의 크기가 커지면 복사하는 과정도 속도 저하의 요인
     //insert를 할때 ContentValues를 통해 하는 것도 속도 저하의 요인
     public int createSeveralMedia(ArrayList<Media> medias) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         for (int i = 0; i < medias.size(); i++) {
             ContentValues values = new ContentValues();
@@ -440,7 +496,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             db.insert(TABLE_MEDIA, null, values);
         }
-
+        this.closeDatabase();
         return 0;
     }
 
@@ -453,7 +509,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_ID + " = " + media_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -480,6 +537,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return media;
     }
@@ -493,7 +551,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_PATH + " = '" + path+"'";
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -520,6 +580,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -530,7 +592,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -558,6 +622,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -570,7 +636,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_FOLDER_ID + " = " + folder_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -598,6 +666,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -612,7 +682,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Cursor c = null;
         try {
-            SQLiteDatabase db = this.getReadableDatabase();
+            //SQLiteDatabase db = this.getReadableDatabase();
+            SQLiteDatabase db = this.openDatabase();
             c = db.rawQuery(selectQuery, null);
 
             if (c.moveToFirst()) {
@@ -632,6 +703,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         } finally {
             c.close();
+            this.closeDatabase();
         }
         return m;
     }
@@ -644,7 +716,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT " + TABLE_MEDIA + ".* FROM " + TABLE_MEDIA + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_MEDIA + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " = " + tag_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -673,6 +746,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return media;
     }
@@ -684,7 +758,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_YEAR + " = " + year;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+//        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -713,6 +789,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -724,7 +802,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_MONTH + " = " + month;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -752,6 +832,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -763,7 +845,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_DAY + " = " + day;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -791,6 +875,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return media;
     }
@@ -799,7 +885,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * updating media
      */
     public int updateMedia(Media media) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_FOLDER_ID, media.getFolder_id());
@@ -815,7 +902,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_THUMBNAILPATH, media.getThumbnail_path());
         values.put(KEY_ISFIXED, media.getIsFixed());
 
-        return db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[]{String.valueOf(media.getId())});
+        int result = db.update(TABLE_MEDIA, values, KEY_ID + " = ? ", new String[]{String.valueOf(media.getId())});
+        this.closeDatabase();
+        return result;
     }
 
     /*
@@ -823,17 +912,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public void deleteMedia(int id) {
         Log.d("DatabaseHelper", "deleteMedia(id) 호출");
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_MEDIA, KEY_ID + " = ?", new String[]{String.valueOf(id)});
         deleteMediaTagByMediaId(id);
+
+        this.closeDatabase();
     }
 
     public void deleteAllMedia() {
         Log.d("DatabaseHelper", "deleteAllMedia() 호출");
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         //KEY_ISFIXED = 1인 놈은 지우지 않는다
         db.execSQL("DELETE FROM " + TABLE_MEDIA + " WHERE " + KEY_ISFIXED + " = 0");
         deleteAllMediaTag();
+
+        this.closeDatabase();
     }
 
     /**
@@ -844,7 +941,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating tag at media_id
      */
     public int createTag(String tag_name, int media_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         int tag_id = getTagIdByTagName(tag_name);
         if (tag_id == 0) {
@@ -861,7 +959,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             tag_id = (int) db.insert(TABLE_TAG, null, values);
         }
 
-        return (createMediaTag(tag_id, media_id) == -1) ? -1 : tag_id;
+        int result = (createMediaTag(tag_id, media_id) == -1) ? -1 : tag_id;
+
+        this.closeDatabase();
+        return result;
 
     }
 
@@ -897,7 +998,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int createTagByFolder(String tag_name, int folder_id, int color) {
         List<Media> media = getAllMediaByFolder(folder_id);
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         //일단 태그 만들어줌
         int tag_id = getTagIdByTagName(tag_name);
@@ -913,6 +1015,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             createMediaTag(tag_id, media.get(i).getId());
         }
 
+        this.closeDatabase();
         return tag_id;
     }
 
@@ -923,7 +1026,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Tag> tags = new ArrayList<Tag>();
         String selectQuery = "SELECT * FROM " + TABLE_TAG;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -942,6 +1047,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return tags;
     }
@@ -954,7 +1061,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        List<Tag> tags = new ArrayList<Tag>();
         String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_ID + " = " + tag_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -968,6 +1077,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return tag;
     }
@@ -980,7 +1091,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        List<Tag> tags = new ArrayList<Tag>();
         String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " AND " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " = " + media_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -998,6 +1111,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return tags;
     }
@@ -1027,6 +1141,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return tags;
 
@@ -1039,7 +1155,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int getTagIdByTagName(String tag_name) {
         String selectQuery = "SELECT * FROM " + TABLE_TAG + " WHERE " + KEY_NAME + " = \"" + tag_name + "\"";
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -1050,6 +1168,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+
+            this.closeDatabase();
         }
         return 0;
     }
@@ -1060,7 +1180,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * 태그 이름이 바뀔 경우 사용
      */
     public int updateTag(Tag tag) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, tag.getId());
@@ -1068,35 +1189,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_COLOR, tag.getColor());
 
 
-        return db.update(TABLE_TAG, values, KEY_ID + " = ? ", new String[]{String.valueOf(tag.getId())});
+        int result = db.update(TABLE_TAG, values, KEY_ID + " = ? ", new String[]{String.valueOf(tag.getId())});
+        this.closeDatabase();
+        return result;
     }
 
     /*
      * Deleting tag by id
      */
     public void deleteTagById(int id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.delete(TABLE_TAG, KEY_ID + " = ?", new String[]{String.valueOf(id)});
 
         deleteMediaTagByTagId(id);
+        this.closeDatabase();
     }
 
     /*
      * Deleting tag by name
      */
     public void deleteTagByName(String name) {
-        SQLiteDatabase db = this.getWritableDatabase();
         int tag_id = getTagIdByTagName(name);
         deleteTagById(tag_id);
         deleteMediaTagByTagId(tag_id);
-//        db.delete(TABLE_TAG, KEY_NAME + " = ?", new String[]{String.valueOf(name)});
     }
 
 
     public void deleteAllTag() {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.openDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.execSQL("DELETE FROM " + TABLE_TAG);
         deleteAllMediaTag();
+        this.closeDatabase();
     }
 
 
@@ -1108,7 +1233,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating media to tag relation
      */
     public int createMediaTag(Media_Tag relation) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         int id = getMediaTagByIds(relation.getTag_id(), relation.getMedia_id());
         if (id == 0) {
@@ -1118,7 +1244,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             id = (int) db.insert(TABLE_MEDIA_TAG, null, values);
         }
-
+        this.closeDatabase();
         return id;
     }
 
@@ -1126,7 +1252,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating media to tag relation
      */
     public int createMediaTag(int tag_id, int media_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         int id = getMediaTagByIds(tag_id, media_id);
         if (id == 0) {
@@ -1139,13 +1266,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return -1;
         }
 
+        this.closeDatabase();
         return id;
     }
 
     public int getMediaTagByIds(int tag_id, int media_id) {
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG + " WHERE " + KEY_MEDIA_ID + " = " + media_id + " AND " + KEY_TAG_ID + " = " + tag_id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -1156,6 +1285,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return 0;
     }
@@ -1164,7 +1294,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media_Tag> mediaTag = new ArrayList<Media_Tag>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA_TAG;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -1182,6 +1314,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return mediaTag;
     }
@@ -1191,38 +1324,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * deleting single media to tag relation
      */
     public void deleteMediaTag(int tag_id, int media_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
+        this.closeDatabase();
     }
 
     public void deleteMediaTag(String tag_name, int media_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         int tag_id = getTagIdByTagName(tag_name);
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
+        this.closeDatabase();
     }
 
     /*
      * deleting media to tag relation by tag_id
      */
     public void deleteMediaTagByTagId(int tag_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ?", new String[]{String.valueOf(tag_id)});
+        this.closeDatabase();
     }
 
     /*
      * deleting media to tag relation by media_id
      */
     public void deleteMediaTagByMediaId(int media_Id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.delete(TABLE_MEDIA_TAG, KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(media_Id)});
+        this.closeDatabase();
     }
 
     /*
      * deleting media to tag relation by media_id
      */
     public void deleteAllMediaTag() {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         db.execSQL("DELETE FROM " + TABLE_MEDIA_TAG);
+        this.closeDatabase();
     }
 
 
@@ -1413,61 +1556,71 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating Manager
      */
     public int createManager(Manager manager) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_MANAGER, null, null);//기존의 데이터들을 모두 삭제한다.
 
         ContentValues values = new ContentValues();
         values.put(KEY_TOTALPICTURENUM, manager.getTotalPictureNum());
+        values.put(KEY_REALPICTURENUM, manager.getRealPictureNum());
         values.put(KEY_AVERAGEINTERVAL, manager.getAverageInterval());
         values.put(KEY_STANDARDDERIVATION, manager.getStandardDerivation());
 
-        return (int) db.insert(TABLE_MANAGER, null, values);
+        int result = (int) db.insert(TABLE_MANAGER, null, values);
+        this.closeDatabase();
+        return result;
     }
 
-    public List<Manager> getManagers() {
-        List<Manager> managers = new ArrayList<Manager>();
+    public Manager getManager() {
         String selectQuery = "SELECT * FROM " + TABLE_MANAGER;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
+        Manager m = new Manager();
         try {
             c = db.rawQuery(selectQuery, null);
 
             if (c.moveToFirst()) {
-                do {
-                    Manager m = new Manager();
-                    m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
-                    m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
-                    m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
-                    managers.add(m);
-                } while (c.moveToNext());
+                m.setTotalPictureNum(c.getInt(c.getColumnIndex(KEY_TOTALPICTURENUM)));
+                m.setRealPictureNum(c.getInt(c.getColumnIndex(KEY_REALPICTURENUM)));
+                m.setAverageInterval(c.getLong(c.getColumnIndex(KEY_AVERAGEINTERVAL)));
+                m.setStandardDerivation(c.getLong(c.getColumnIndex(KEY_STANDARDDERIVATION)));
             }
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
-        return managers;
-
+        return m;
     }
 
     /**
      * **************** NOTIFICATION ******************
      */
     public int createNotification(NotificationM n) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_NOTIFICATION, null, null);//기존의 데이터들을 모두 삭제한다.
 
         ContentValues values = new ContentValues();
         values.put(KEY_LASTNOTIFICATION, n.getNotificationTime());
         values.put(KEY_LASTPICTUREID, n.getLastPictureID());
 
-        return (int) db.insert(TABLE_NOTIFICATION, null, values);
+        int result = (int) db.insert(TABLE_NOTIFICATION, null, values);
+        this.closeDatabase();
+        return result;
     }
 
     public NotificationM getNotification() {
         String selectQuery = "SELECT * FROM " + TABLE_NOTIFICATION;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         NotificationM n = null;
         try {
@@ -1481,6 +1634,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return n;
     }
@@ -1489,19 +1643,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * **************** GUIDE ******************
      */
     public int createGuide(int guide) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_GUIDE, null, null);//기존의 데이터들을 모두 삭제한다.
 
         ContentValues values = new ContentValues();
         values.put(KEY_GUIDEENDED, guide);
 
-        return (int) db.insert(TABLE_GUIDE, null, values);
+        int result = (int) db.insert(TABLE_GUIDE, null, values);
+        this.closeDatabase();
+        return result;
     }
 
     public int getGuide() {
         String selectQuery = "SELECT * FROM " + TABLE_GUIDE;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
+
         Cursor c = null;
         int guideEnded = 0;
         try {
@@ -1513,6 +1673,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             if (c != null)
                 c.close();
+            this.closeDatabase();
         }
         return guideEnded;//가이드가 완료되지 않았다면 0을 반환, 완료되었으면 1을 반환함
     }

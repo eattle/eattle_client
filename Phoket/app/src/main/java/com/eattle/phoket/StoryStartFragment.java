@@ -2,6 +2,7 @@ package com.eattle.phoket;
 
 import android.app.Fragment;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
@@ -31,7 +32,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     ImageView backImage;
     ImageView filterImage;
     private int position;
-
+    private static Context context;
     public static StoryStartFragment newInstance(String titleImagePath, String titleName, int kind, int position) {
 
         StoryStartFragment fragment = new StoryStartFragment();
@@ -53,6 +54,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         String titleName = args.getString("titleName");
         int kind = args.getInt("kind");
         position = args.getInt("position");
+        context = getActivity();
         //대표 이미지
         try {
             ImageView storyStartImage = (ImageView) root.findViewById(R.id.storyStartImage);
@@ -60,15 +62,14 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
             //화면 크기, 사진 크기에 따라 사진을 최적화 한다
             //Bitmap changedBitmap = CONSTANT.decodeSampledBitmapFromPath(titleImagePath, CONSTANT.screenWidth, CONSTANT.screenHeight);
             //storyStartImage.setImageBitmap(changedBitmap);
-            DatabaseHelper db = DatabaseHelper.getInstance(getActivity());
-
+            DatabaseHelper db = DatabaseHelper.getInstance(context);
             if(db.getGuide() == 0) {//가이드 사진일 경우
-                Glide.with(getActivity())
+                Glide.with(context)
                         .load(R.mipmap.phoket1)
                         .into(storyStartImage);
             }
             else {
-                Glide.with(getActivity())
+                Glide.with(context)
                         .load(titleImagePath)
                         .thumbnail(0.5f)
                         .into(storyStartImage);
@@ -181,34 +182,34 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     @Override
     public void onStop() {
         Log.d(TAG, "onStop() 호출");
-        Glide.get(getActivity()).clearMemory();
-        Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
+        Glide.get(context).clearMemory();
+        Glide.get(context).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 
-        if (backImage != null) {
-            for(int i=0;i<3;i++) {
-                Drawable d = null;
-                if(i==0)
-                    d = backImage.getDrawable();
-                else if(i==1)
-                    d = blurImage.getDrawable();
-                else if(i==2)
-                    d = filterImage.getDrawable();
-
-                if (d instanceof BitmapDrawable) {
-                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                    if (bitmap != null && !bitmap.isRecycled()) {
-                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
-                        backImage.setImageBitmap(null);
-                        bitmap.recycle();
-                        bitmap = null;
-                        d.setCallback(null);
-                    }
-                }
-            }
-        }
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
+//        if (backImage != null) {
+//            for(int i=0;i<3;i++) {
+//                Drawable d = null;
+//                if(i==0)
+//                    d = backImage.getDrawable();
+//                else if(i==1)
+//                    d = blurImage.getDrawable();
+//                else if(i==2)
+//                    d = filterImage.getDrawable();
+//
+//                if (d instanceof BitmapDrawable) {
+//                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+//                    if (bitmap != null && !bitmap.isRecycled()) {
+//                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
+//                        backImage.setImageBitmap(null);
+//                        bitmap.recycle();
+//                        bitmap = null;
+//                        d.setCallback(null);
+//                    }
+//                }
+//            }
+//        }
+//
+//        System.gc();//garbage collector
+//        Runtime.getRuntime().gc();//garbage collector
         super.onStop();
     }
 }
