@@ -41,7 +41,6 @@ public class CONSTANT {
     public static final int CHECK = 10;
 
 
-
     public static final int NOTHING = -1;
     public static final int FOLDER = 0;
     public static final int TAG = 1;

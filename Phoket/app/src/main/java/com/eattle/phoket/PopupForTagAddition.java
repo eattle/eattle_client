@@ -42,7 +42,7 @@ public class PopupForTagAddition extends Activity {
                 //해당 사진이 속한 폴더의 모든 사진에 태그를 등록한다
                 List<Media> mediaList = db.getAllMediaByFolder(data.getFolderId());
                 for (int i = 0; i < mediaList.size(); i++) {
-                    db.createTag(data.getTagName(), mediaList.get(i).getId());
+                    db.createTag(data.getTagName(), mediaList.get(i).getId(), data.getFolderId());
                 }
                 finish();
             }

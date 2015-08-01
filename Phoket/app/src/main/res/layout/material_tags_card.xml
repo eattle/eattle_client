@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.eattle.phoket.Card.view.TagsCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     style="@style/MainLayout"
     android:paddingBottom="1dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="연관된 포켓"
+            android:id="@+id/textView"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:textSize="@dimen/subtitle_font_size" />
+
+    </LinearLayout>
 
 
     <LinearLayout
@@ -17,7 +35,8 @@
             android:layout_weight="1"
             android:id="@+id/tag1"
             android:clickable="true"
-            >
+            android:visibility="visible"
+            android:layout_marginLeft="1dp">
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -26,22 +45,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_button" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="10dp"
-                android:src="@mipmap/phoket"
-                android:id="@+id/tagIcon1"
-                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
+                android:layout_gravity="center"
                 android:id="@+id/tagtext1"
-                android:layout_marginBottom="12dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:singleLine="false"
+                android:textSize="10sp"
+                android:background="#88000000"
+                android:padding="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp" />
 
         </FrameLayout>
         <FrameLayout
@@ -51,7 +66,8 @@
             android:id="@+id/tag2"
             android:clickable="true"
 
-            >
+            android:visibility="visible"
+            android:layout_marginLeft="1dp">
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -61,21 +77,18 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_button" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="10dp"
-                android:src="@mipmap/phoket"
-                android:id="@+id/tagIcon2"
-                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
+                android:layout_gravity="center"
                 android:id="@+id/tagtext2"
-                android:layout_marginBottom="12dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:singleLine="false"
+                android:textSize="10sp"
+                android:background="#88000000"
+                android:padding="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp" />
 
         </FrameLayout>
         <FrameLayout
@@ -85,7 +98,8 @@
             android:id="@+id/tag3"
             android:clickable="true"
 
-            >
+            android:visibility="visible"
+            android:layout_marginLeft="1dp">
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -94,22 +108,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_button" />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="10dp"
-                android:src="@mipmap/phoket"
-                android:id="@+id/tagIcon3"
-                android:visibility="invisible"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
+                android:layout_gravity="center"
                 android:id="@+id/tagtext3"
-                android:layout_marginBottom="12dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:singleLine="false"
+                android:textSize="10sp"
+                android:background="#88000000"
+                android:padding="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp" />
 
         </FrameLayout>
         <FrameLayout
@@ -119,7 +130,8 @@
             android:id="@+id/tag4"
             android:clickable="true"
 
-            >
+            android:visibility="visible"
+            android:layout_marginLeft="1dp">
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -130,21 +142,18 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_button" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="10dp"
-                android:src="@mipmap/phoket"
-                android:id="@+id/tagIcon4"
-                android:visibility="invisible"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
+                android:layout_gravity="center"
                 android:id="@+id/tagtext4"
-                android:layout_marginBottom="12dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:singleLine="false"
+                android:textSize="10sp"
+                android:background="#88000000"
+                android:padding="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp" />
 
         </FrameLayout>
         <FrameLayout
@@ -154,7 +163,9 @@
             android:id="@+id/tag5"
             android:clickable="true"
 
-            >
+            android:visibility="visible"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp">
             <com.eattle.phoket.view.SquareImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -163,22 +174,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_button" />
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top"
-                android:layout_marginTop="10dp"
-                android:src="@mipmap/phoket"
-                android:id="@+id/tagIcon5"
-                android:visibility="invisible"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|bottom"
+                android:layout_gravity="center"
                 android:id="@+id/tagtext5"
-                android:layout_marginBottom="12dp"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:singleLine="false"
+                android:textSize="10sp"
+                android:background="#88000000"
+                android:padding="4dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp" />
 
         </FrameLayout>
     </LinearLayout>

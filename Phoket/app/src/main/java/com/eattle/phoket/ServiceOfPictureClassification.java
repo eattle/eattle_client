@@ -417,7 +417,7 @@ public class ServiceOfPictureClassification extends Service {
                 db.createMedia(m);
                 String folderNameForPicture = pathArr[pathArr.length - 2];//사진이 속하는 폴더 이름
                 if (!folderNameForPicture.contains("스토리"))//사진이 속하는 폴더 이름에 '스토리'가 없을 때에만
-                    db.createTag(folderNameForPicture, pictureID);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
+                    db.createTag(folderNameForPicture, pictureID, folderIDForDB);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
                 Log.d(TAG, "미디어 id " + pictureID + " 에 대해 createMedia() 호출 (folderIDForDB : " + folderIDForDB + ")");
             } else {//기존 사진은 업데이트만 한다
                 ExistedMedia.setFolder_id(folderIDForDB);

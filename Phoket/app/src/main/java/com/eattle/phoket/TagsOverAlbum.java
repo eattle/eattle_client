@@ -205,7 +205,7 @@ public class TagsOverAlbum extends Fragment {
                         return true;
                     }
 
-                    int tag_id = db.createTag("" + input, media_id);
+                    int tag_id = db.createTag("" + input, media_id, db.getMediaById(media_id).getFolder_id());
                     if (tag_id != -1) {
                         Tag tag = db.getTagByTagId(tag_id);
                         FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
@@ -245,7 +245,7 @@ public class TagsOverAlbum extends Fragment {
                     return;
                 }
 
-                int tag_id = db.createTag("" + input, media_id);
+                int tag_id = db.createTag("" + input, media_id, db.getMediaById(media_id).getFolder_id());
 
                 if (tag_id != -1) {
 
@@ -329,12 +329,18 @@ public class TagsOverAlbum extends Fragment {
         Folder folder = db.getFolder(folderId);
         int totalPictureNum = allMediaByFolder.size();
 
+        List<Tag> tags = db.getAllTagsByMediaId(m.getId());
+        for(int i = 0; i < tags.size();i++){
+            db.deleteFolderTag(tags.get(i).getId(), folderId);
+        }
+
         //해당 사진의 folderID를 변경한다.
         m.setFolder_id(-1);//휴지통의 folderID는 -1(유령폴더)
         db.updateMedia(m);//DB에 업데이트
 
         //사진에 '휴지통'태그를 등록한다.
         db.createTag("휴지통", m.getId());
+
 
         //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때
         if ((totalPictureNum-1) == 0) {
