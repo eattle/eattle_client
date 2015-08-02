@@ -3,29 +3,16 @@ package com.eattle.phoket;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
-import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
-import android.widget.ImageView;
-
-import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
-
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -53,7 +40,6 @@ public class CONSTANT {
     public static int ISUSBCONNECTED = 0; //USB가 연결되어 있으면 1, 아니면 0
     public static int PASSWORD = 0;//비밀번호 해제 안됬으면 0, 해제 됬으면 1
     public static int PASSWORD_TRIAL = 5; //비밀번호가 PASSWORD_TRIAL보다 많이 틀릴 경우 앱 종료
-    public static CachedBlockDevice BLOCKDEVICE;
 
     public static final String PACKAGENAME = "com.example.cds.eattle_prototype_2";
     public static final String appDBPath = "/data/" + CONSTANT.PACKAGENAME + "/databases/" + DatabaseHelper.DATABASE_NAME;//스마트폰 앱단의 DB 경로
@@ -164,7 +150,6 @@ public class CONSTANT {
                 thumbnailPath = caa.getString(caa.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
                 caa.close();
             }
-            Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
             ca.close();
 
             return thumbnailPath;
@@ -184,7 +169,6 @@ public class CONSTANT {
             thumbnailPath = caa.getString(caa.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
 
         }
-        Log.d("CONSTANT", "썸네일 경로 : " + thumbnailPath);
         caa.close();
         return thumbnailPath;
     }
@@ -192,10 +176,8 @@ public class CONSTANT {
 
     //화면 크기,사진 크기에 따라 Options.inSampleSize 값을 어떻게 해야하는지 알려주는 함수
     public static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
-        Log.d("CONSTANT", "reqWidth & reqHeight & rawWidth & rawHeight :: " + reqWidth + " " + reqHeight + " " + width + " " + height);
         //모든 사진에 대해서 width가 height보다 크다. 따라서 스마트폰 가로모드에서는 width, height 값을 바꿀 필요가 없다!
         if (reqWidth < reqHeight && width > height) {//스마트폰 세로모드에서, 가로 사진 로드시
-            Log.d("CONSTANT", "스마트폰 세로모드에서, 가로 사진 로드시");
             int temp = width;
             width = height;
             height = temp;
@@ -214,7 +196,6 @@ public class CONSTANT {
                     && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
-            //Log.d("CONSTANT","최종 width & height  "+halfWidth/inSampleSize+" "+halfHeight/inSampleSize);
         }
 
 
@@ -231,7 +212,6 @@ public class CONSTANT {
 
         // inSampleSize를 계산한다
         options.inSampleSize = calculateInSampleSize(options.outWidth, options.outHeight, reqWidth, reqHeight);
-        Log.d("CONSTANT", "[decodeSampledBitmapFromPath] inSampleSize : " + options.inSampleSize);
         // 비트맵 생성 후 반환
         options.inJustDecodeBounds = false;
         final Bitmap beforeRotate = BitmapFactory.decodeFile(path, options);
@@ -299,25 +279,6 @@ public class CONSTANT {
         return bitmap;
     }
 
-    //Bitmap 메모리 해제를 위한 함수
-    public static void releaseImageMemory(ImageView img) {
-
-        if (img != null) {
-            Drawable d = img.getDrawable();
-            if (d instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    Log.d("StoryRecommendFragment", bitmap.getByteCount() + " recycle() & gc() 호출");
-                    img.setImageBitmap(null);
-                    bitmap.recycle();
-                    bitmap = null;
-                    d.setCallback(null);
-                }
-            }
-
-            img = null;
-        }
-    }
 
     public static int dpFromPx(final Context context, final float px) {
         return Math.round(px / context.getResources().getDisplayMetrics().density);

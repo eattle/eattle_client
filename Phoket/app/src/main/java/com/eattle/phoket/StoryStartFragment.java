@@ -46,7 +46,6 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView() 호출");
         View root = inflater.inflate(R.layout.story_start, container, false);
         Bundle args = getArguments();
 
@@ -75,7 +74,7 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
                         .into(storyStartImage);
             }
         } catch (OutOfMemoryError e) {
-            Log.e("warning", "이미지가 너무 큽니다");
+            Log.e("warning", e.getMessage());
         }
 
 
@@ -110,7 +109,6 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG, "onActivityCreated() 호출");
     }
     private void applyBlur() {
         backImage.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -130,36 +128,10 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
         long startMs = System.currentTimeMillis();
         float scaleFactor = 8;
         float radius = 6;
-
-//        Bitmap overlay = Bitmap.createBitmap((int) (view.getMeasuredWidth() / scaleFactor),
-//                (int) (view.getMeasuredHeight() / scaleFactor), Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(overlay);
-//        canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
-//        canvas.scale(1 / scaleFactor, 1 / scaleFactor);
-//        Paint paint = new Paint();
-//        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-//        canvas.drawBitmap(bkg, 0, 0, paint);
-
-//        overlay = FastBlur.doBlur(overlay, (int)radius, true);
-//        Log.d("asdfasdf","블러에 사용되는 바이트 : "+overlay.getByteCount());
-//        view.setImageDrawable(new BitmapDrawable(getResources(), overlay));
-        view.setAlpha(0.0f);
-
-        /*
-        Glide.with(this)
-                .
-                .placeHolder(new BitmapDrawable(getResources(), overlay))
-                .into(view);
-        */
-
-
         if(position != -1){
             showBlur(1.0f);
         }
 
-
-
-        Log.d("Blur", System.currentTimeMillis() - startMs + "ms");
     }
 
     public void setGrayScale(ImageView v){
@@ -181,35 +153,9 @@ public class StoryStartFragment extends Fragment {//'스토리시작'을 눌렀�
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop() 호출");
         Glide.get(context).clearMemory();
         Glide.get(context).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 
-//        if (backImage != null) {
-//            for(int i=0;i<3;i++) {
-//                Drawable d = null;
-//                if(i==0)
-//                    d = backImage.getDrawable();
-//                else if(i==1)
-//                    d = blurImage.getDrawable();
-//                else if(i==2)
-//                    d = filterImage.getDrawable();
-//
-//                if (d instanceof BitmapDrawable) {
-//                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-//                    if (bitmap != null && !bitmap.isRecycled()) {
-//                        Log.d("StoryMainFragment", "[onStop]에서 " + bitmap.getByteCount() + "만큼 recycle() & gc() 호출");
-//                        backImage.setImageBitmap(null);
-//                        bitmap.recycle();
-//                        bitmap = null;
-//                        d.setCallback(null);
-//                    }
-//                }
-//            }
-//        }
-//
-//        System.gc();//garbage collector
-//        Runtime.getRuntime().gc();//garbage collector
         super.onStop();
     }
 }

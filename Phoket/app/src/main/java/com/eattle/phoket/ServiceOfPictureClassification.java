@@ -66,8 +66,6 @@ public class ServiceOfPictureClassification extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        Log.d(EXTRA_TAG, "서비스 onCreate() 호출");
         unregisterRestartService();
 
         //쓰레드를 생성하여 사진 관련 서비스 시작
@@ -84,11 +82,9 @@ public class ServiceOfPictureClassification extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(EXTRA_TAG, "Service onStartCommand");
         if (intent != null) {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
 
                     if (!isClassifying) {
                         new Thread(new Runnable() {
@@ -112,7 +108,6 @@ public class ServiceOfPictureClassification extends Service {
 
                     break;
                 case CONSTANT.START_OF_GUIDE:
-                    Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -122,10 +117,8 @@ public class ServiceOfPictureClassification extends Service {
                                 pictureClassification_guide();
                             } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
-
                             } catch (Exception e) {
                                 Log.d("PictureClassification", e.getMessage());
-
                             } finally {
                                 isClassifying = false;
                             }
@@ -144,13 +137,11 @@ public class ServiceOfPictureClassification extends Service {
 
     @Override
     public IBinder onBind(Intent arg0) {
-        Log.i(EXTRA_TAG, "Service onBind");
         return null;
     }
 
     @Override
     public void onDestroy() {
-        Log.i(EXTRA_TAG, "Service onDestroy");
         unregisterReceiver(broadcastListener);
         registerRestartService();//서비스가 죽으면 다시 살리기 위해서
     }
@@ -159,7 +150,6 @@ public class ServiceOfPictureClassification extends Service {
     class PictureThread extends Thread {
 
         public void run() {
-            Log.d(EXTRA_TAG, "ServiceOfPictureClassification Run() 호출");
             DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
 
             NotificationM n = db.getNotification();
@@ -234,7 +224,6 @@ public class ServiceOfPictureClassification extends Service {
     int DATE;
     private void pictureClassification() throws Exception {//시간간격을 바탕으로 사진들을 분류하는 함수
         String TAG = "classification";
-        Log.d(TAG, "사진 정리 시작");
 
         /** ---------------------------변수--------------------------- **/
         DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
@@ -260,8 +249,6 @@ public class ServiceOfPictureClassification extends Service {
         /** ---------------------------시간 간격 계산--------------------------- **/
         long averageInterval = 0;
         Manager manager = db.getManager();
-        Log.d(TAG,"mCursor.getCount() : "+mCursor.getCount());
-        Log.d(TAG,"manager.getTotalPictureNum() : "+manager.getTotalPictureNum());
 
         if(mCursor.getCount() == manager.getTotalPictureNum()){//사진에 변동이 없다고 판단되면
             CONSTANT.TIMEINTERVAL = manager.getAverageInterval();//calculatePictureInterval()를 하지 않는다
@@ -281,7 +268,6 @@ public class ServiceOfPictureClassification extends Service {
 
             CONSTANT.TIMEINTERVAL = averageInterval;
         }
-        Log.d(TAG,"totalInterval : "+totalInterval+" totalPictureNum : "+totalPictureNum);
 
         /** ---------------------------DB 초기화--------------------------- **/
         db.deleteAllFolder();//DB에 있는 폴더 데이터를 초기화 한다(isFixed == 1<- 고정 스토리)은 제외되어 있음
@@ -291,7 +277,6 @@ public class ServiceOfPictureClassification extends Service {
         /** ------------------고정 스토리는 미리 처리해둔다(전처리)------------------ **/
         checkFixedStory();
         fixedFolders = db.getFixedFolder();//고정 스토리 목록을 다시 불러온다(없어진 고정스토리가 있을 수도 있음)
-        Log.d(TAG,"fixedFolder의 개수 : "+fixedFolders.size());
 
 
         /** ------------------본격적인 사진 정리 시작------------------ **/
@@ -303,8 +288,6 @@ public class ServiceOfPictureClassification extends Service {
             final String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));//사진이 존재하는 경로
             long pictureTakenTime = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN));//사진이 촬영된 날짜
             String Y_M_D = getYMD(pictureTakenTime);//millisecond -> Y_M_D
-            Log.d(TAG," [Y_M_D] : "+Y_M_D);
-            Log.d(TAG, "[pictureID] : " + String.valueOf(pictureID) + " [pictureTakenTime] : " + Long.toString(pictureTakenTime) + " [path] : " + path);
             Media ExistedMedia = db.getMediaByPath(path);//path에 해당하는 사진이 이미 DB에 등록되어 있는지 확인한다
             if(ExistedMedia != null) {
                 ExistedMedia.setId(pictureID);//phoketDB에 path에 해당하는 사진의 pictureID 값이 달라졌는지 확인한다(안드로이드 MediaDB상의 ID와 phoketDB상의 ID가 달라지는 경우가 발생-미디어 스캐닝이 새로 이루어 졌을 경우)
@@ -317,12 +300,10 @@ public class ServiceOfPictureClassification extends Service {
             if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
                 continue;
             if (ExistedMedia != null && ((ExistedMedia.getIsFixed() == 1) || (ExistedMedia.getFolder_id() == -1))) {
-                Log.d(TAG,"고정 스토리 or 휴지통에 속한 사진");
                 continue;//고정 스토리 or 휴지통에 속한 사진은 건너뛴다
             }
             //해당 경로에 존재하지 않는 사진은 건너띈다
             if (!isExisted(path)) {
-                Log.d(TAG,"해당 경로에 존재하지 않는 사진");
                 if (ExistedMedia != null)//ExistedMedia에 있는 사진인데 경로에 없다면 DB에서 지우고 continue
                     db.deleteMedia(pictureID);
                 continue;
@@ -332,10 +313,8 @@ public class ServiceOfPictureClassification extends Service {
 
             /** ---------------------------스토리 구분--------------------------- **/
             //이전에 읽었던 사진과 시간 차이가 CONSTANT.TIMEINTERVAL보다 크면 새로 폴더를 만든다.
-            Log.d(TAG, "두 사진의 시간 차이 = " + Math.abs(_pictureTakenTime - pictureTakenTime) + " CONSTANT.TIMEINTERVAL " + CONSTANT.TIMEINTERVAL);
             if ((Math.abs(_pictureTakenTime - pictureTakenTime) > CONSTANT.TIMEINTERVAL)) {
                 //이전에 만들어진 폴더의 이름을 바꾼다
-                Log.d(TAG, "start_Y_M_D  " + start_Y_M_D + " end_Y_M_D : " + end_Y_M_D);
                 String new_name = changeFolderName(start_Y_M_D, end_Y_M_D, pictureNumInStory);//start_Y_M_D == ""일 경우 new_name은 null이 된다.
                 if (new_name != null) {
                     Folder f = new Folder(folderIDForDB, new_name, titleImagePath, titleImageThumbnailPath, pictureNumInStory, titleImageID, 0);
@@ -345,7 +324,6 @@ public class ServiceOfPictureClassification extends Service {
 
                     //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
                     mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
-                    Log.d(TAG, "END_OF_SINGLE_STORY & Folder DB 입력 완료");
                 }
 
                 pictureNumInStory = 0;//데이터 초기화
@@ -366,7 +344,6 @@ public class ServiceOfPictureClassification extends Service {
             double latitude = 0.0;
 
             if (ExistedMedia != null) {//해당 사진이 기존에 있었을 경우
-                Log.d(EXTRA_TAG, "기존에 존재하는 사진에 대해서 위치 조회 안함");
                 placeName_ = ExistedMedia.getPlaceName();
             } else {//새로운 사진
 
@@ -382,21 +359,16 @@ public class ServiceOfPictureClassification extends Service {
                 String folderNameForPicture = pathArr[pathArr.length - 2];//사진이 속하는 폴더 이름
                 if (!folderNameForPicture.contains("스토리"))//사진이 속하는 폴더 이름에 '스토리'가 없을 때에만
                     db.createTag(folderNameForPicture, pictureID, folderIDForDB);//사진이 속했던 폴더 이름으로 태그 만들기(디폴트 태그)
-                Log.d(TAG, "미디어 id " + pictureID + " 에 대해 createMedia() 호출 (folderIDForDB : " + folderIDForDB + ")");
             } else {//기존 사진은 업데이트만 한다
                 ExistedMedia.setFolder_id(folderIDForDB);
                 ExistedMedia.setPath(path);
                 ExistedMedia.setThumbnail_path(thumbnail_path);//처음에 정리할때는 내장 썸네일이 없었다가 나중에 생겼을 수도 있음
                 db.updateMedia(ExistedMedia);
-                Log.d(TAG, "미디어 id " + pictureID + " 에 대해 updateMedia() 호출 (folderIDForDB : " + folderIDForDB + ")");
             }
 
             pictureNumInStory++;//경로에 사진이 존재할 경우에만 카운트를 증가시킨다(경로에 없는 사진은 이부분까지 도달하지 못함)
             _pictureTakenTime = pictureTakenTime;
             end_Y_M_D = Y_M_D;
-            Log.d("classification", "pictureNumInStory : " + pictureNumInStory);
-            Log.d("classification", "------------------------------------------------------------");
-
         } while (mCursor.moveToPrevious());
 
 
@@ -404,7 +376,6 @@ public class ServiceOfPictureClassification extends Service {
         /** ---------------------------마지막 남은 폴더를 처리--------------------------- **/
         //이전에 만들어진 폴더의 이름을 바꾼다(start_Y_M_D ~ end_Y_M_D)
         String new_name = changeFolderName(start_Y_M_D, end_Y_M_D, pictureNumInStory);//start_Y_M_D == ""일 경우 new_name은 null이 된다.
-        Log.d(TAG,"마지막 남은 폴더를 처리 : "+new_name);
         if (new_name != null) {
             Folder f = new Folder(folderIDForDB, new_name, titleImagePath, titleImageThumbnailPath, pictureNumInStory, titleImageID, 0);
 
@@ -413,12 +384,10 @@ public class ServiceOfPictureClassification extends Service {
 
             //메인 액티비티에게 하나의 스토리가 정리되었음을 알린다
             mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, db.createFolder(f));
-            Log.d(TAG, "END_OF_SINGLE_STORY & Folder DB 입력 완료");
         }
 
 
         //아직 남아있는 '고정 스토리'들을 모두 보낸다
-        Log.d(TAG,"아직 남아있는 '고정 스토리'들을 모두 보낸다");
         for (int i = 0; i < fixedFolders.size();i++) {
             mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_SINGLE_STORY, fixedFolders.get(i).getId());
         }
@@ -454,11 +423,9 @@ public class ServiceOfPictureClassification extends Service {
 
             if (pictureNumInStory > CONSTANT.BOUNDARY) {//'일상'이 아닌 '스토리'에 대해
                 if (previousStoryName.equals(new_name)) {//중복 날짜 스토리
-                    Log.d("MainActivity", "중복 날짜 스토리 : " + new_name);
                     overlappedNum++;
                     new_name += (" - " + overlappedNum);//스토리 이름 뒤에 숫자를 붙여준다
                 } else {//중복 날짜 스토리가 아니면
-                    Log.d("MainActivity", "중복 날짜가 아닌 스토리 : " + new_name);
                     overlappedNum = 1;
                     previousStoryName = new_name;
                 }
@@ -497,12 +464,10 @@ public class ServiceOfPictureClassification extends Service {
         List<Folder> fixedFolders = db.getFixedFolder();//고정 스토리 목록
         for (int i = 0; i < fixedFolders.size(); i++) {
             Folder fixed = fixedFolders.get(i);
-            Log.d(TAG, "고정 스토리 목록 - ID :" + fixed.getId() + " / NAME : " + fixed.getName());
 
             List<Media> mediaList = db.getAllMediaByFolder(fixed.getId());
             for (int j = 0; j < mediaList.size(); j++) {//고정 스토리에 속한 사진들을 순회한다
                 Media media = mediaList.get(j);
-                Log.d(TAG,"고정 스토리의 사진 ID : "+media.getId());
 
 
 
@@ -570,7 +535,6 @@ public class ServiceOfPictureClassification extends Service {
         //MainActivity에게 사진 정리를 시작했다는 메세지를 보낸다.
         //sendMessageToUI(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION,isClassifying);
 
-        Log.d("guide", "가이드 시작");
         DatabaseHelper db = DatabaseHelper.getInstance(ServiceOfPictureClassification.this);
         db.deleteAllFolder();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
         db.deleteAllMedia();//가이드 도중에 앱을 종료하고 다시 시작할 경우를 대비
@@ -605,13 +569,10 @@ public class ServiceOfPictureClassification extends Service {
      * ----------서비스가 죽었을 때 다시 살리기 위한 함수들---------- *
      */
     public void registerRestartService() {
-        Log.d(EXTRA_TAG, "registerRestartService() 호출");
         Intent intent = new Intent(ServiceOfPictureClassification.this, BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
         intent.putExtra("countForTick", BroadcastListener.getCountForTick());
         intent.putExtra("HOWOFTENCHECK", BroadcastListener.getHOWOFTENCHECK());
-        Log.d(EXTRA_TAG, "countForTick " + BroadcastListener.getCountForTick());
-        Log.d(EXTRA_TAG, "HOWOFTENCHECK " + BroadcastListener.getHOWOFTENCHECK());
         PendingIntent sender = PendingIntent.getBroadcast(
                 ServiceOfPictureClassification.this, 0, intent, 0);
         long currentTime = SystemClock.elapsedRealtime();//현재 시간
@@ -622,7 +583,6 @@ public class ServiceOfPictureClassification extends Service {
 
     //서비스가 죽었을 때 다시 살리기 위한 함수
     public void unregisterRestartService() {
-        Log.d(EXTRA_TAG, "unregisterRestartService() 호출");
         Intent intent = new Intent(ServiceOfPictureClassification.this, BroadcastListener.class);
         intent.setAction(BroadcastListener.ACTION_RESTART_PERSISTENTSERVICE);
         PendingIntent sender = PendingIntent.getBroadcast(

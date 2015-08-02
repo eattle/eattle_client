@@ -47,13 +47,11 @@ public class BroadcastListener extends BroadcastReceiver {
         mCr = context.getContentResolver();
 
         String action = intent.getAction();
-        Log.d(TAG, "[브로드캐스트 리시버] " + action);
         //서비스 재시작을 위해 ---------------------------------------
         //앱이 종료되었거나 스마트폰이 재부팅 되었을 때
         if (action.equals(ACTION_RESTART_PERSISTENTSERVICE) ||
                 action.equals(Intent.ACTION_BOOT_COMPLETED)) {
 
-            Log.d(TAG, "ACTION_RESTART_PERSISTENTSERVICE || ACTION_BOOT_COMPLETED");
             int countForTick = intent.getIntExtra("countForTick", 0);
             int HOWOFTENCHECK = intent.getIntExtra("HOWOFTENCHECK", 10);
 
@@ -65,9 +63,7 @@ public class BroadcastListener extends BroadcastReceiver {
             context.startService(i);//죽었던 서비스를 다시 시작한다
         } else if (action.equals(TIME_TICK)) {
             countForTick++;
-            //if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
-                /*TODO : ERROR*/
-                Log.d(TAG, "ServiceOfPictureClassification.isClassifying ? " + ServiceOfPictureClassification.isClassifying);
+            if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
                 if (ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
                     return;//아무것도 하지 않음
                 if (howOftenCheck == CONSTANT.TWODAY)//마지막 푸시를 한지 24시간이 지났으면
@@ -107,8 +103,7 @@ public class BroadcastListener extends BroadcastReceiver {
                     }
                 }
                 mCursor.close();
-            //}
-            Log.d(TAG, "[TIME_TICK 도착] countForTick : " + countForTick + " howOftenCheck : " + howOftenCheck);
+            }
         }
 
     }
@@ -120,11 +115,11 @@ public class BroadcastListener extends BroadcastReceiver {
 
         NotificationCompat.Builder mCompatBuilder = new NotificationCompat.Builder(context);
         mCompatBuilder.setSmallIcon(R.mipmap.icon);
-        mCompatBuilder.setTicker("새로운 사진으로 편리하게 스토리를 만들어 보세요");
+        mCompatBuilder.setTicker("새로운 사진을 편리하게 스토리로 만들어 보세요");
         mCompatBuilder.setWhen(System.currentTimeMillis());
         //mCompatBuilder.setNumber(1);
         mCompatBuilder.setContentTitle("Phoket");
-        mCompatBuilder.setContentText("새로운 사진으로 편리하게 스토리를 만들어 보세요");
+        mCompatBuilder.setContentText("새로운 사진을 편리하게 스토리로 만들어 보세요");
         mCompatBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
         mCompatBuilder.setContentIntent(pendingIntent);
         mCompatBuilder.setAutoCancel(true);

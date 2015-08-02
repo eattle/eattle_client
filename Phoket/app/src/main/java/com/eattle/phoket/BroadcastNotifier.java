@@ -33,8 +33,6 @@ public class BroadcastNotifier {
      * @param status {@link Integer} denoting a work request status
      */
     public void broadcastIntentWithState(int status) {
-        Log.d(TAG, "broadcastIntentWithState(int status) 호출");
-
         Intent localIntent = new Intent();
 
         // The Intent contains the custom broadcast action for this app
@@ -46,12 +44,9 @@ public class BroadcastNotifier {
 
         // Broadcasts the Intent
         mBroadcaster.sendBroadcast(localIntent);
-        Log.d(TAG,"여기까지 도달??");
     }
 
     public void broadcastIntentWithState(int status, int data) {
-        Log.d(TAG, "broadcastIntentWithState(int status, int data) 호출");
-
         Intent localIntent = new Intent();
 
         // The Intent contains the custom broadcast action for this app
@@ -65,6 +60,5 @@ public class BroadcastNotifier {
 
         // Broadcasts the Intent
         mBroadcaster.sendBroadcast(localIntent);
-        Log.d(TAG, "여기까지 도달??");
     }
 }

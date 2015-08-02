@@ -1,7 +1,6 @@
 package com.eattle.phoket;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -33,9 +32,7 @@ import android.widget.Button;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
-import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.host.UsbDeviceHost;
 import com.eattle.phoket.view.CustomViewPager;
 
 import java.util.ArrayList;
@@ -74,15 +71,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /*StrictMode*/
-//        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-//                .detectLeakedSqlLiteObjects()
-//                .detectLeakedClosableObjects()
-//                .penaltyLog()
-//                .penaltyDeath()
-//                .build());
 
-        Log.d(EXTRA_TAG,"onCreate() 호출");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -261,13 +250,12 @@ public class MainActivity extends AppCompatActivity {
                 GUIDE.guide_eight(MainActivity.this);
 
                 db.createGuide(1);//가이드 종료했다는 표시
-
+                GUIDE.GUIDE_STEP = -1;
                 //더미데이터 삭제
                 db.deleteAllFolder();
                 db.deleteAllMedia();
                 db.deleteAllMediaTag();
                 db.deleteAllTag();
-
                 deleteAllCard();
             }
 
@@ -285,12 +273,10 @@ public class MainActivity extends AppCompatActivity {
         mService = new Intent(this, ServiceOfPictureClassification.class);
         startService(mService);
 
-        Log.d(EXTRA_TAG, "onStart");
     }
 
     @Override
     protected void onResume() {
-        Log.d(EXTRA_TAG, "onResume() 호출");
         super.onResume();
 
         DatabaseHelper db = DatabaseHelper.getInstance(MainActivity.this);
@@ -316,7 +302,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.d(EXTRA_TAG, "onRestart() 호출");
         if(mIsClassifying || state != STATE_RUNNING)  return;
 
         if(CONSTANT.FLAG_REFRESH) {
@@ -331,14 +316,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(EXTRA_TAG,"onPause() 호출");
         Glide.get(this).clearMemory();
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
     }
 
     @Override
     public void onStop() {
-        Log.d(EXTRA_TAG, "onStop() 호출");
         super.onStop();
         //stopService(mService);
     }
@@ -346,7 +329,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        Log.d(EXTRA_TAG, "onDestroy() 호출");
         if (mClassificationReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mClassificationReceiver);
             mClassificationReceiver = null;
@@ -526,7 +508,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // Logs "started" state
                 case CONSTANT.END_OF_PICTURE_CLASSIFICATION:
-                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 완료했다는 메세지가 도착했습니다' ");
                     //pictureDialog.dismiss();
                     ((Section1)(mAdapter.getItem(0))).setRunning();
                     ((Section2)(mAdapter.getItem(1))).setRunning();
@@ -543,20 +524,17 @@ public class MainActivity extends AppCompatActivity {
                     //exportDB();//Sqlite DB 추출(USB와의 동기화를 위해)
                     break;
                 case CONSTANT.END_OF_SINGLE_STORY://하나의 스토리가 정리 되었을 때
-                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - END_OF_SINGLE_STORY || 'Service가 하나의 스토리를 완성했다는 메세지 도착' ");
                     data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, -1);
                     if(data == -1)    return;
 
                     ((Section1)(mAdapter.getItem(0))).addSingleCard(db.getFolder(data));
                     ((Section2)(mAdapter.getItem(1))).addSingleCard(db.getFolder(data));
-                    Log.d(EXTRA_TAG, "ADD CARDS");
 
 
                     break;
 
                 case CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION://서비스가 사진 정리를 시작했다는 메세지
                     //사진정리중이면 1, 아니면 0이 들어있음
-                    Log.d("IncomingHandler", "[MainActivity]message 수신! handleMessage() - RECEIPT_OF_PICTURE_CLASSIFICATION || 'Service가 사진 정리를 시작했다는 메세지가 도착했습니다' ");
                     data = intent.getIntExtra(CONSTANT.EXTENDED_DATA, 0);
                     if(data == 1){
                         ((Section1)(mAdapter.getItem(0))).setLoading();
@@ -613,6 +591,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
                     }
+
                     @Override
                     public void onNegative(MaterialDialog dialog) {
                         moveTaskToBack(true);
@@ -622,27 +601,6 @@ public class MainActivity extends AppCompatActivity {
 
                 })
                 .show();
-
-//        AlertDialog.Builder d = new AlertDialog.Builder(this);
-//        d.setTitle("종료하시겠습니까?");
-////        final LinearLayout r = (LinearLayout) View.inflate(this, R.layout.popup_capic_usb_dialog, null);
-////        d.setView(r);
-//        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                switch (which) {
-//                    case DialogInterface.BUTTON_POSITIVE:
-//                        moveTaskToBack(true);
-//                        finish();
-//                        break;
-//                    case DialogInterface.BUTTON_NEGATIVE:
-//                        break;
-//
-//                }
-//            }
-//        };
-//        d.setPositiveButton("Yes", l);
-//        d.setNegativeButton("No", l);
-//        d.show();
     }
 
     public void wantBackUp() {//사진 정리가 완료되고 USB에 백업된 후에, 스마트폰에서 사진을 지울 것인지 물어본다
@@ -664,185 +622,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-//    /***************** File System 부분 **********************/
-//
-//    public FileSystem getFileSystem() {
-//        return this.fileSystem;
-//    }
-//
-//    public void setFileSystem(FileSystem fileSystem) {
-//        this.fileSystem = fileSystem;
-//    }
-//
-//    public CachedBlockDevice getBlockDevice() {
-//        return blockDevice;
-//    }
-//
-//    public void setBlockDevice(CachedBlockDevice blockDevice) {
-//        this.blockDevice = blockDevice;
-//    }
-//
-//    /***************** File System DB 호환 부분 **********************/
-//
-//    //[DB] 앱 -> USB
-//    File sd = Environment.getExternalStorageDirectory();
-//    File data = Environment.getDataDirectory();
-//
-//    private void exportDB() {
-//        // TODO Auto-generated method stub
-//        if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 export
-//            String middlePoint = "/CaPic/" + DatabaseHelper.DATABASE_NAME;
-//
-//            FileChannel src = null;
-//            FileChannel dst = null;
-//            File currentDB = null;
-//            try {
-//
-//                if (sd.canWrite()) {
-//
-//                    FolderManage.makeDirectory(sd + "/CaPic/");//스마트폰 최상단 폴더에 CaPic 폴더를 만든다-DB 저장을 위해(기존에 있으면 안만듬)
-//                    currentDB = new File(data, CONSTANT.appDBPath);
-//                    File backupDB = new File(sd, middlePoint);
-//
-//                    src = new FileInputStream(currentDB).getChannel();
-//                    dst = new FileOutputStream(backupDB).getChannel();
-//                    dst.transferFrom(src, 0, src.size());
-//                    src.close();
-//                    dst.close();
-//                    //Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_SHORT).show();
-//                    Log.d(EXTRA_TAG, "[exportDB]" + backupDB.toString());
-//
-//                }
-//            } catch (Exception e) {
-//                Toast.makeText(getBaseContext(), "[exportDB]" + e.toString(), Toast.LENGTH_LONG).show();
-//            }
-//            //일단은 2단계로 구성. 추후에 한번에 USB로 가도록
-//            fileSystem.delete(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
-//            fileSystem.addElementPush(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE, sd + middlePoint);
-//            Log.d(EXTRA_TAG, "[exportDB] APP->USB 성공");
-//            Toast.makeText(getBaseContext(), "[exportDB] export후 APP DB 존재여부 " + currentDB.exists(), Toast.LENGTH_LONG).show();
-//
-//            Toast.makeText(this, "[exportDB] APP->USB 성공", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    //[DB] USB -> 앱
-//    private void importDB() {
-//        // TODO Auto-generated method stub
-//        if (CONSTANT.ISUSBCONNECTED == 1) {//USB가 연결되어 있을 때만 import
-//            //기존의 APP DB를 삭제한다
-//            getBaseContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
-//
-//            File sd = Environment.getExternalStorageDirectory();
-//            File data = Environment.getDataDirectory();
-//            //일단 USB -> 스마트폰 /CaPic 폴더
-//            File middlePointFile = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
-//            Log.d(EXTRA_TAG, "[importDB]middlePointFile 값? " + middlePointFile);
-//
-//            byte tempDBArray[] = getDBFromUSB(DatabaseHelper.DATABASE_NAME, CONSTANT.BLOCKDEVICE);
-//            if (tempDBArray == null) {
-//                Log.d(EXTRA_TAG, "[importDB]tempDBArray == null 에러! importDB 중단");
-//                return;
-//            } else
-//                Log.d(EXTRA_TAG, "[importDB]tempDBArray != null import 성공!, tempDBArray Length " + tempDBArray.length);
-//
-//            try {
-//                if (middlePointFile != null && tempDBArray != null) {
-//                    FileOutputStream fos = new FileOutputStream(middlePointFile);
-//                    fos.write(tempDBArray);
-//                    fos.close();
-//                    Log.d(EXTRA_TAG, "[importDB]FileOutputStream Success ! ");
-//                }
-//            } catch (IOException e) {
-//                Log.d(EXTRA_TAG, "[importDB]FileOutputStream Error ! " + e.toString());
-//            }
-//
-//            // /CaPic/에서 앱 DB로
-//            try {
-//                if (sd.canWrite()) {
-//                    File backupDB = new File(data, CONSTANT.appDBPath);
-//                    if (!backupDB.exists())
-//                        FolderManage.makeFile(backupDB, data + CONSTANT.appDBPath);
-//                    Toast.makeText(getBaseContext(), "[importDB] backupDB 존재여부 " + backupDB.exists(), Toast.LENGTH_LONG).show();
-//                    File currentDB = new File(sd, "/CaPic/" + DatabaseHelper.DATABASE_NAME);
-//                    Toast.makeText(getBaseContext(), "[importDB] currentDB 존재여부 " + currentDB.exists(), Toast.LENGTH_LONG).show();
-//
-//                    FileChannel src = new FileInputStream(currentDB).getChannel();
-//                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
-//                    dst.transferFrom(src, 0, src.size());
-//                    src.close();
-//                    dst.close();
-//                    Log.d(EXTRA_TAG, "[importDB] USB->APP 성공");
-//                    Toast.makeText(getBaseContext(), "[importDB] USB->APP 성공", Toast.LENGTH_LONG).show();
-//                }
-//            } catch (Exception e) {
-//                Toast.makeText(getBaseContext(), "[importDB]" + e.toString(), Toast.LENGTH_LONG).show();
-//            }
-//
-//        }
-//    }
-//
-//    private byte[] getDBFromUSB(String outString, CachedBlockDevice blockDevice) {//내보내기
-//        //D  S   X
-//        //1220879 1870864 2133464
-//
-//        int result[] = fileSystem.stringSearch(outString);
-//        byte[] dummyBuffer = new byte[(int) fileSystem.CLUSTERSPACESIZE];
-//        //1866136
-//        //result[0] = 4096;
-//        //result[0] = 6505;
-//        Log.d("xxxxxx", "result[0] " + result[0]);
-//        if (result[0] == -1) {
-//            Log.d(EXTRA_TAG, "[getDBFromUSB]값이 잘못들어왔습니다");
-//            //Toast.makeText(this, "값이 잘못들어왔습니다", Toast.LENGTH_SHORT).show();
-//            return null;
-//        } else {
-//
-//            byte resultbyte[] = new byte[result[4]];
-//            //int resultstringaddress = 6085;
-//            int resultstringaddress = result[0];
-//            //int resultaddress = readIntToBinary(result[0],result[1]+80,LOCATIONSIZE);
-//
-//            int limit = 0;
-//            int bytecnt = 0;
-//
-//
-//            blockDevice.readBlock(resultstringaddress, dummyBuffer);
-//
-//            while (resultstringaddress != 0) {
-//
-//                int originalbyteAddress = fileSystem.readIntToBinary(resultstringaddress, limit, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-//
-//                blockDevice.readBlock(originalbyteAddress, fileSystem.buffer);
-//                for (int i = 0; i < fileSystem.CLUSTERSPACESIZE; i++) {
-//                    if (bytecnt < result[4]) {
-//                        resultbyte[bytecnt++] = fileSystem.buffer[i];
-//                    } else
-//                        break;
-//                }
-//                if (bytecnt >= result[4])
-//                    break;
-//
-//                limit += fileSystem.LOCATIONSIZE;
-//
-//                if (limit >= fileSystem.SPACELOCATION) {
-//                    resultstringaddress = fileSystem.readIntToBinary(resultstringaddress, fileSystem.NEXTLOCATION, fileSystem.LOCATIONSIZE, dummyBuffer, blockDevice);
-//                    blockDevice.readBlock(resultstringaddress, dummyBuffer);
-//                    limit = 0;
-//                }
-//
-//            }
-//
-//
-//            Log.d("xxxxxx", "xxxxxxxxxxxx " + resultbyte);
-//            Log.d("xxxxxx", "xxxxxxxxxxxxxxxxxxx " + resultbyte.length);
-//
-//            //Toast.makeText(this, "1 " + resultbyte, Toast.LENGTH_SHORT).show();
-//            //Toast.makeText(this, "1 " + resultbyte.length, Toast.LENGTH_SHORT).show();
-//
-//            return resultbyte;
-//        }
-//    }
 }

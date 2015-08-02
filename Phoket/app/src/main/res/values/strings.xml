@@ -27,7 +27,7 @@
     <string name="title_activity_select_option">SelectOptionActivity</string>
 
     <string name="guide1Title">사진정리를 한번에,\nPhoket</string>
-    <string name="guide1Content">하루에도 수십번씩 찍는 소중한 나의 추억들, Phoket으로 간편하게 정리하고 아름답게 감상하세요. \n(튜토리얼은 대략 1분정도 소요됩니다)</string>
+    <string name="guide1Content">하루에도 수십번씩 찍는 소중한 나의 추억들, Phoket으로 간편하게 정리하고 아름답게 감상하세요. \n튜토리얼은 대략 1분정도 소요됩니다</string>
     <string name="guide1Button1">튜토리얼 시작하기</string>
     <string name="guide1Button2">튜토리얼 생략</string>
 

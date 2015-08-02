@@ -84,6 +84,7 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemClick(CardItemView view, int position) {
+                if(GUIDE.GUIDE_STEP == 7) return;//가이드에서 롱클릭 해야할 때 짧은 클릭을 막는다
                 CardData data = (CardData) view.getTag();
 
                 switch (state) {
@@ -139,6 +140,7 @@ public class Section1 extends Fragment {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
+                if(GUIDE.GUIDE_STEP == 2) return;//가이드 도중(STEP = 2) 롱클릭 막는다
                 if (state == STATE_RUNNING && mListView.isSelectable(position)) {
                     state = STATE_SELECT;
                     mListView.setSelect(position);
@@ -231,7 +233,6 @@ public class Section1 extends Fragment {
             mDlg = new ProgressDialog(mContext);
             mDlg.setMessage("잠시만 기다려주세요..");
             mDlg.show();
-            Log.d(EXTRA_TAG,"mDlg == null? "+ (mDlg==null));
             super.onPreExecute();
         }
 
@@ -276,7 +277,6 @@ public class Section1 extends Fragment {
         CardData tag;
 
         DatabaseHelper db = DatabaseHelper.getInstance(mContext);
-        Log.d(EXTRA_TAG,"addSingleCard()");
         //일상
         if (f.getPicture_num() <= CONSTANT.BOUNDARY && f.getIsFixed() == 0) {//사진이 BOUNDARY 이하이면서 고정 스토리가 아닐경우
             if (!isDaily) {
@@ -405,7 +405,6 @@ public class Section1 extends Fragment {
     }
 
     public void addSingleCard(Folder f) {
-        Log.d(EXTRA_TAG,"addSingleCard()");
         if (mListView == null) return;
         if (state == STATE_RUNNING) {
             state = STATE_LOADING;

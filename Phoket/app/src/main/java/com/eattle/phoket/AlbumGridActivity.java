@@ -10,7 +10,6 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +24,6 @@ import com.dexafree.materialList.model.CardItemView;
 import com.dexafree.materialList.view.MaterialListView;
 import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.Card.manager.CardManager;
-import com.eattle.phoket.device.BlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
@@ -59,7 +57,6 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(EXTRA_TAG,"onSaveInstanceState() 호출");
         Bundle bundle = new Bundle();
         bundle.putInt("id",id);
         bundle.putInt("kind", kind);
@@ -75,15 +72,12 @@ public class AlbumGridActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(EXTRA_TAG, "onCreate() 호출");
-
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumGridActivity.this);
         setContentView(R.layout.activity_album_grid);
         CONSTANT.actList.add(this);
 
         if ( savedInstanceState != null )
         {
-            Log.d(EXTRA_TAG,"savedInstanceState != null 호출");
             Bundle bundle = savedInstanceState.getBundle("save_data");
             id = bundle.getInt("id",-1);
             kind = bundle.getInt("kind", -1);
@@ -147,7 +141,6 @@ public class AlbumGridActivity extends AppCompatActivity {
 
             @Override
             public void onItemLongClick(CardItemView view, int position) {
-//                Log.d("LONG_CLICK", view.getTag().toString());
             }
         });
 
@@ -234,7 +227,6 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
-        Log.d(EXTRA_TAG, "onRestart() 호출");
         refreshGrid();
         //변경사항 적용
         new InitializeApplicationsTask().execute();
@@ -256,7 +248,6 @@ public class AlbumGridActivity extends AppCompatActivity {
         //1. CONSTANT.FOLDER 2. CONSTANT.DEFAULT_TAG 3.CONSTANT.TAG
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumGridActivity.this);
         if (kind == CONSTANT.FOLDER) {//스토리(폴더)로 보고있을 때
-            Log.d("onResume()", "스토리(폴더)");
             Folder f = db.getFolder(id);
             mMediaList = db.getAllMediaByFolder(id);
 
@@ -265,7 +256,6 @@ public class AlbumGridActivity extends AppCompatActivity {
             //titleThumbnailPath = f.getThumbNail_path();//대표 사진의 썸네일 경로를 얻는다.
 
         } else if (kind == CONSTANT.DEFAULT_TAG) {//기본 태그(날짜, 장소)를 타고 들어왔을 경우
-            Log.d("onResume()", "디폴트 태그");
             if (tagName.contains("년")) {
                 mMediaList = db.getAllMediaByYear(mediaByTag.getYear());
             } else if (tagName.contains("월")) {
@@ -277,7 +267,6 @@ public class AlbumGridActivity extends AppCompatActivity {
             titleImagePath = mMediaList.get(0).getPath();
 
         } else if (kind == CONSTANT.TAG) {
-            Log.d("onResume()", "사용자가 등록한 태그");
             Tag t = db.getTagByTagId(id);
             //Media mediaByTag = db.getMediaById(intent.getIntExtra("mediaId", -1));
             mMediaList = db.getAllMediaByTagId(id);
@@ -354,7 +343,6 @@ public class AlbumGridActivity extends AppCompatActivity {
         }
 
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumGridActivity.this);
-        Log.d(EXTRA_TAG,"db 호출");
         if (db.getGuide() == 1) {//가이드가 아닐 때(평상시)
 
             if (m.getThumbnail_path() == null)//내장 썸네일이 혹시 존재하지 않을 경우에만

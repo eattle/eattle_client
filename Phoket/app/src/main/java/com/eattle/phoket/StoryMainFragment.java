@@ -2,8 +2,6 @@ package com.eattle.phoket;
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +11,6 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.view.TouchImageView;
@@ -35,7 +32,6 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     private static Context context;
 
     public static StoryMainFragment newInstance(Media m, int position, int mediaListSize) {
-        Log.d("StoryMainFragment", "newInstance() 호출(현재 position : " + position + ")");
         final StoryMainFragment fragment = new StoryMainFragment();
         Bundle args = new Bundle();
         args.putParcelable("m", m);
@@ -57,7 +53,6 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("StoryMainFragment", "onCreateView() 호출(현재 position : " + position + ")");
 
         final View root = inflater.inflate(R.layout.story_main, container, false);
 
@@ -104,7 +99,7 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
                             .into(img);
                 }
             } catch (OutOfMemoryError e) {
-                Log.e("warning", "이미지가 너무 큽니다");
+                Log.e("warning", e.getMessage());
             }
         }
 
@@ -139,7 +134,6 @@ public class StoryMainFragment extends android.support.v4.app.Fragment {
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop() 호출");
         Glide.get(context).clearMemory();
         Glide.get(context).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
 

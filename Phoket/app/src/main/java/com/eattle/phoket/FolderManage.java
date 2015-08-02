@@ -17,9 +17,7 @@ public class FolderManage {
         if (!dir.exists())
         {
             dir.mkdirs();
-            Log.i(TAG, dir_path + " 폴더 생성 완료");
         }else{
-            Log.i( TAG , dir_path+" 폴더가 이미 존재" );
         }
 
         return dir;
@@ -32,16 +30,13 @@ public class FolderManage {
         if(dir.isDirectory()){
             file = new File(file_path);
             if(file!=null&&!file.exists()){
-                Log.i( TAG , "!file.exists" );
                 try {
                     isSuccess = file.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally{
-                    Log.i(TAG, "파일생성 여부 = " + isSuccess);
                 }
             }else{
-                Log.i( TAG , "file.exists" );
             }
         }
         return file;
@@ -71,7 +66,6 @@ public class FolderManage {
             file.delete();    //root 삭제
 
             result = true;
-            Log.d("FolderManage","deleteFile() 성공");
         }else{
             result = false;
         }
@@ -118,7 +112,6 @@ public class FolderManage {
             if(!new_name.exists()) {//이미 존재하지 않는 폴더 이름이라면
                 file.renameTo(new_name);
                 result = new_name.getName();
-                Log.d("FolderManage", "폴더 이름 변경 성공  "+result);
             }
             else{//이미 존재하는 폴더 이름이라면
                 //폴더 이름에 적절한 숫자를 붙인다.
@@ -135,11 +128,9 @@ public class FolderManage {
                     i++;
                 }
                 result=temp.getName();
-                Log.d("FolderManage", "폴더 이름 변경 성공   "+result);
 
             }
         }else{
-            Log.d("FolderManage","폴더 이름 변경 실패");
             result="";
         }
         return result;
@@ -186,7 +177,6 @@ public class FolderManage {
                 byte[] buffer = new byte[readcount];
                 fis.read(buffer);
                 for(int i=0 ; i<file.length();i++){
-                    Log.d(TAG, ""+buffer[i]);
                 }
                 fis.close();
             } catch (Exception e) {
@@ -214,7 +204,6 @@ public class FolderManage {
                 e.printStackTrace();
             }
             result = true;
-            Log.d("FolderManager","copyFile() 성공");
         }else{
             result = false;
         }

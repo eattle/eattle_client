@@ -57,7 +57,6 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate() 호출");
         //if (viewPagerImage == null)
         //    viewPagerImage = new ArrayList<ImageView>();//나중에 비트맵 메모리 해제를 위한 리스트
         CONSTANT.actList.add(this);
@@ -74,7 +73,6 @@ public class AlbumFullActivity extends ActionBarActivity {
         kind = intent.getIntExtra("kind", 0);
         tagName = intent.getStringExtra("tagName");
         initialMediaPosition = intent.getIntExtra("position", 0);
-        Log.d("AlbumFullPicture", mMediaList.size()+" " + Id + " " + mediaId + " " + kind + " "+tagName+" " + initialMediaPosition + "!!!!");
         if (kind == CONSTANT.FOLDER) {//스토리를 타고 들어왔을 경우
             Folder folder = db.getFolder(Id);
             totalPictureNum = folder.getPicture_num();
@@ -123,16 +121,11 @@ public class AlbumFullActivity extends ActionBarActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-
-                Log.d(TAG, "onpageselected호출(현재 position : " + position + ")");
-                Log.d(TAG, "StoryStartFragment : " + (storyStartFragment == null));
-
                 makeStoryStartFragment(position);
                 if (position >= 0)
                     ((StoryStartFragment) (getFragmentManager().findFragmentById(R.id.storyStart))).showBlur(1);
 
 
-                //Log.d(TAG, "StoryStartFragment : " + (storyStartFragment == null) + " " + storyStartFragment.getView());
                 if (initialMediaPosition == -1) {  //스토리 제목(타이틀 화면)부터 시작해야 하는 경우
                     position--;//첫화면에 제목화면을 넣기 위해.
                     FragmentManager fragmentManager = getFragmentManager();
@@ -187,7 +180,6 @@ public class AlbumFullActivity extends ActionBarActivity {
                         pushTabToTag(mMediaList.get(position), position);//다시 보이게 한다
                     }
                 }
-                Log.d(TAG, "onPageSelected에서의 setTabToTag");
                 setTabToTag(mMediaList.get(position), position);
             }
 
@@ -231,7 +223,6 @@ public class AlbumFullActivity extends ActionBarActivity {
         @Override
         //상관없음
         public int getItemPosition(Object object) {//뷰페이저 업데이트를 위해 반드시 있어야 함
-            Log.d(TAG, "getItemPosition 호출 : " + object);
             return POSITION_NONE;
         }
 
@@ -247,7 +238,6 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         @Override
         public android.support.v4.app.Fragment getItem(int position) {
-            Log.d("albumFullActivity", "getItem 호출(현재 position : " + position + ")");
 
             if (initialMediaPosition == -1) {  //스토리 제목부터 시작해야 하는 경우
                 position--;//첫화면에 제목화면을 넣기 위해.
@@ -265,21 +255,14 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
 
         public void removeView(int position) {//뷰페이저 업데이트를 위해 선언
-            Log.d(TAG, "지우려는 viewpager 포지션 : " + position);
-//            if (initialMediaPosition == -1) {  //스토리 제목부터 시작한 경우
-//                position--;//인덱스 -1이 스토리시작화면!!
-//            }
 
             if (position >= 0 && position < mediaList.size())
                 mediaList.remove(position);
-            else
-                Log.d(TAG, "지우려는 viewpager 포지션 : " + position + "에 에러가 있음");
 
             this.notifyDataSetChanged();
 
             //태그 상태 업데이트
             if (mediaList.size() != 0) {//아직 사진이 남아 있을 때
-                Log.d(TAG, "removeView에서의 setTabToTag");
 
                 if (position == mediaList.size()) {//마지막 사진
                     setTabToTag(mMediaList.get(position - 1), position - 1);
@@ -295,7 +278,6 @@ public class AlbumFullActivity extends ActionBarActivity {
     }
 
     public void makeStoryStartFragment(int position) {
-        Log.d(TAG, "makeStoryStartFragment(position) 호출");
         //화면이 회전될 때, 안드로이드자체가 fragment를 다시 생성해 주지만 storyStartFragment 변수에 할당이 안될 수 있음
         //즉, 일단 storyStartFragment가 있는지 확인
         Fragment tempForStoryStartFragment = getFragmentManager().findFragmentById(R.id.storyStart);
@@ -307,7 +289,6 @@ public class AlbumFullActivity extends ActionBarActivity {
             storyStartFragment = StoryStartFragment.newInstance(titleImagePath, titleName, kind, position);
             fragmentTransaction.add(R.id.storyStart, storyStartFragment, "StoryStartFragment");
             fragmentTransaction.commit();
-            Log.d(TAG, "makeStoryStartFragment(position) -- storyStartFragment == null? " + (storyStartFragment == null));
         }
     }
 
@@ -383,8 +364,6 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop() 호출");
-
         Glide.get(this).clearMemory();
         Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         super.onStop();
@@ -414,12 +393,8 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     @Override
     protected void onUserLeaveHint() {
-        Log.d(TAG, "onUserLeaveHint() 호출");
-
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumFullActivity.this);
-        //AlbumFullActivity에서 '가이드 도중'에 홈버튼을 누를 경우, MainActivity로 이동해둔다
         if (db.getGuide() == 0) {
-            Log.d(TAG, "MainActivity로 이동");
             GUIDE.GUIDE_STEP = 5;
             for (int i = 0; i < CONSTANT.actList.size(); i++)
                 CONSTANT.actList.get(i).finish();

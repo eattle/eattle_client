@@ -305,22 +305,6 @@ public class TagsOverAlbum extends Fragment {
     }
 
     public void wantPictureDeleted() {//사진을 삭제할지
-//        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-//        d.setTitle("사진을 스토리에서 제외하시겠습니까? ");
-//        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                switch (which) {
-//                    case DialogInterface.BUTTON_POSITIVE:
-//                        deletePicture();
-//                        break;
-//                    case DialogInterface.BUTTON_NEGATIVE:
-//                        break;
-//                }
-//            }
-//        };
-//        d.setPositiveButton("Yes", l);
-//        d.setNegativeButton("No", l);
-//        d.show();
         new MaterialDialog.Builder(getActivity())
                 .title("사진을 스토리에서 제외하시겠습니까?")
                 .content("스토리에 나타나지 않을 뿐이지 파일이 삭제되는 것은 아닙니다. 제외된 사진은 '휴지통' 포켓에 보관됩니다.")
