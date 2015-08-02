@@ -39,7 +39,6 @@ public class SelectOptionFragment extends Fragment {
     private List<CardData> cards;
     private static Context context;
 
-    private static LinearLayout fabLocal;
 
 
     public static SelectOptionFragment newInstance(List<CardData> cards) {
@@ -74,7 +73,6 @@ public class SelectOptionFragment extends Fragment {
                 return true;
             }
         });
-        fabLocal = (LinearLayout)root.findViewById(R.id.fabLocal);
         //스마트폰 로컬에 폴더 만들어서 내보내기
         root.findViewById(R.id.fabLocal).setOnClickListener(new View.OnClickListener() {
             @Override
