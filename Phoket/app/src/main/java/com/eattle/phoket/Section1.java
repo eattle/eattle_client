@@ -165,7 +165,6 @@ public class Section1 extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d("testtest", "state : " + state);
                 if (state == STATE_RUNNING) {
                     DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                     if (db.getGuide() == 0)

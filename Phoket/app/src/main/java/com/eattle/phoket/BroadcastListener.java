@@ -13,8 +13,10 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.NotificationM;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -63,14 +65,14 @@ public class BroadcastListener extends BroadcastReceiver {
             context.startService(i);//죽었던 서비스를 다시 시작한다
         } else if (action.equals(TIME_TICK)) {
             countForTick++;
-            if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
+            //if (countForTick % howOftenCheck == 0) {//일정시간마다 체크
                 /*TODO : ERROR*/
                 Log.d(TAG, "ServiceOfPictureClassification.isClassifying ? " + ServiceOfPictureClassification.isClassifying);
                 if (ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
                     return;//아무것도 하지 않음
                 if (howOftenCheck == CONSTANT.TWODAY)//마지막 푸시를 한지 24시간이 지났으면
                     howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
-                String[] projection = {MediaStore.MediaColumns._ID};
+                String[] projection = {MediaStore.MediaColumns._ID, MediaStore.Images.ImageColumns.DATA};
                 String selection = MediaStore.Images.ImageColumns.DATE_TAKEN + " > ?";
                 String before = ((new Date().getTime() - (CONSTANT.CHECK * 60 * 1000)) / 1000) + "";//최근 10분동안 찍은 사진만 가져온다!!
                 String[] selectionArgs = {before};
@@ -79,23 +81,19 @@ public class BroadcastListener extends BroadcastReceiver {
 
                 if (mCursor.moveToFirst()) {//제일 최신사진을 확인
                     int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
-
                     DatabaseHelper db = DatabaseHelper.getInstance(mContext);
                     Media m = db.getMediaById(pictureID);
                     NotificationM notificationM = db.getNotification();
                     if ((m == null) &&
                             (db.getNotification() == null || (notificationM != null && notificationM.getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
-
                         //정리 제외 대상인지 확인한다
                         /** ------------------정리 제외 대상------------------ **/
                         String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));//사진이 존재하는 경로
-
                         if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
                             return;
                         //해당 경로에 존재하지 않는 사진은 건너띈다
-                        if (!(new File(path)).exists())
+                        if (!((new File(path)).exists()))
                             return;
-
 
                         makeNotification(mContext);
                         //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
@@ -109,7 +107,7 @@ public class BroadcastListener extends BroadcastReceiver {
                     }
                 }
                 mCursor.close();
-            }
+            //}
             Log.d(TAG, "[TIME_TICK 도착] countForTick : " + countForTick + " howOftenCheck : " + howOftenCheck);
         }
 
