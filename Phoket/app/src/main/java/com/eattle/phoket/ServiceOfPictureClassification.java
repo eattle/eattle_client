@@ -84,20 +84,50 @@ public class ServiceOfPictureClassification extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(EXTRA_TAG, "Service onStartCommand");
         if (intent != null) {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    if (!isClassifying)
-                        new classificationStart(getApplicationContext()).execute(0);//AsyncTask를 통한 사진 정리 시작
+                    if (!isClassifying) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {//사진 정리를 시작한다
+                                    isClassifying = true;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                    pictureClassification();
+                                } catch (IOException e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } catch (Exception e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } finally {
+                                    isClassifying = false;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
+                                }
+                            }
+                        }).start();
+                    }
 
                     break;
                 case CONSTANT.START_OF_GUIDE:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
-                    new classificationStart(getApplicationContext()).execute(1);//AsyncTask를 통한 가이드 시작
-
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {//가이드를 시작한다
+                                isClassifying = true;
+                                mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                pictureClassification_guide();
+                            } catch (IOException e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            } catch (Exception e) {
+                                Log.d("PictureClassification", e.getMessage());
+                            } finally {
+                                isClassifying = false;
+                            }
+                        }
+                    }).start();
                     break;
 
                 default:
@@ -592,51 +622,4 @@ public class ServiceOfPictureClassification extends Service {
         am.cancel(sender);
     }
 
-
-    //Notification을 위한 AsyncTask
-    private class classificationStart extends AsyncTask<Integer, String, Integer> {
-
-        private Context mContext;
-
-        public classificationStart(Context context){
-            mContext = context;
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            Log.d(EXTRA_TAG, "classificationStart doInBackground 호출()");
-            int guideOrNot = params[0];//1이면 guide,0이면 보통
-
-            if(guideOrNot == 0) {
-                try {//사진 정리를 시작한다
-                    isClassifying = true;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                    pictureClassification();
-                } catch (IOException e) {
-                    Log.d("PictureClassification", e.getMessage());
-                } catch (Exception e) {
-                    Log.d("PictureClassification", e.getMessage());
-                } finally {
-                    isClassifying = false;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
-                }
-            }
-            else if(guideOrNot == 1){
-                try {//가이드를 시작한다
-                    isClassifying = true;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                    pictureClassification_guide();
-                } catch (IOException e) {
-                    Log.d("PictureClassification", e.getMessage());
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    Log.d("PictureClassification", e.getMessage());
-                    e.printStackTrace();
-                } finally {
-                    isClassifying = false;
-                }
-            }
-            return 0;
-        }
-    }
 }

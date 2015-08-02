@@ -240,7 +240,7 @@ public class TagsOverAlbum extends Fragment {
                     return;
                 }
                 DatabaseHelper db = DatabaseHelper.getInstance(context);
-                
+
                 int tag_id = db.createTag("" + input, media_id, db.getMediaById(media_id).getFolder_id());
 
                 if (tag_id != -1) {

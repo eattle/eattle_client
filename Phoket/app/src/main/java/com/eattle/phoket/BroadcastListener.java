@@ -79,8 +79,32 @@ public class BroadcastListener extends BroadcastReceiver {
                     return;//아무것도 하지 않음
                 if (howOftenCheck == CONSTANT.ONEDAY)//마지막 푸시를 한지 24시간이 지났으면
                     howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
+                String[] projection = {MediaStore.MediaColumns._ID};
+                String selection = MediaStore.Images.ImageColumns.DATE_TAKEN + " > ?";
+                String before = ((new Date().getTime() - (CONSTANT.CHECK * 60 * 1000)) / 1000) + "";//최근 10분동안 찍은 사진만 가져온다!!
+                String[] selectionArgs = {before};
+                String sortOrder = MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC";
+                mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, sortOrder);
 
-                new checkNewPicture(context).execute();
+                if (mCursor.moveToFirst()) {//제일 최신사진을 확인
+                    int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
+
+                    DatabaseHelper db = DatabaseHelper.getInstance(mContext);
+                    if ((db.getMediaById(pictureID) == null) &&
+                            (db.getNotification() == null || (db.getNotification() != null && db.getNotification().getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
+
+                        makeNotification(mContext);
+                        //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
+                        long currentTime = System.currentTimeMillis();
+                        NotificationM notification = new NotificationM(currentTime, pictureID);
+                        db.createNotification(notification);
+
+                        countForTick = 0;
+                        //하루에 한번 이상 보내지 않는다
+                        howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
+                    }
+                }
+                mCursor.close();
             }
             Log.d(TAG, "[TIME_TICK 도착] countForTick : " + countForTick + " howOftenCheck : " + howOftenCheck);
         }
@@ -118,47 +142,4 @@ public class BroadcastListener extends BroadcastReceiver {
         howOftenCheck = howOftenCheck1;
     }
 
-    //Notification을 위한 AsyncTask
-    private class checkNewPicture extends AsyncTask<Integer, String, Integer> {
-
-        private Context mContext;
-
-        public checkNewPicture(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            Log.d(TAG, "checkNewPicture doInBackground 호출()");
-            //미디어 DB의 맨 마지막 사진이 Phoket DB에 있는지 확인한다.(사진 하나만 체크, 부하를 줄이기 위해)
-            String[] projection = {MediaStore.MediaColumns._ID};
-            String selection = MediaStore.Images.ImageColumns.DATE_TAKEN + " > ?";
-            String before = ((new Date().getTime() - (CONSTANT.CHECK * 60 * 1000)) / 1000) + "";//최근 10분동안 찍은 사진만 가져온다!!
-            String[] selectionArgs = {before};
-            String sortOrder = MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC";
-            mCursor = mCr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, sortOrder);
-
-            if (mCursor.moveToFirst()) {//제일 최신사진을 확인
-                int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
-
-                DatabaseHelper db = DatabaseHelper.getInstance(mContext);
-                if ((db.getMediaById(pictureID) == null) &&
-                        (db.getNotification() == null || (db.getNotification() != null && db.getNotification().getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
-
-                    makeNotification(mContext);
-                    //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
-                    long currentTime = System.currentTimeMillis();
-                    NotificationM notification = new NotificationM(currentTime, pictureID);
-                    db.createNotification(notification);
-
-                    countForTick = 0;
-                    //하루에 한번 이상 보내지 않는다
-                    howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
-                }
-            }
-            mCursor.close();
-
-            return 0;
-        }
-    }
 }

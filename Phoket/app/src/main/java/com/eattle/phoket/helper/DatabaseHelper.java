@@ -31,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private SQLiteDatabase mDatabase;
     private AtomicInteger mOpenCounter = new AtomicInteger();//DB open현황을 체크
 
-    private static final int DATABASE_VERSION = 31;
+    private static final int DATABASE_VERSION = 33;
 
     public static final String DATABASE_NAME = "PhoketDB";
 
@@ -73,6 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //    private static final String KEY_TAG_ID = "tag_id";
 //    private static final String KEY_FOLDER_ID = "folder_id";
     private static final String KEY_COUNT = "count";
+
 
     //folder
     //private static final String KEY_ID = "id";
@@ -209,7 +210,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_TAG);
         db.execSQL(CREATE_TABLE_MEDIA_TAG);
         db.execSQL(CREATE_TABLE_FOLDER_TAG);
-
         db.execSQL(CREATE_TABLE_FOLDER);
         db.execSQL(CREATE_TABLE_MANAGER);
         db.execSQL(CREATE_TABLE_NOTIFICATION);
@@ -966,11 +966,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    /*
- * creating tag at media_id
- */
     public int createTag(String tag_name, int media_id, int folder_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         int tag_id = getTagIdByTagName(tag_name);
         if (tag_id == 0) {
@@ -989,8 +987,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         createFolderTag(tag_id, folder_id);
         return (createMediaTag(tag_id, media_id) == -1) ? -1 : tag_id;
-
     }
+
 
     /*
     * creating tag at folder_id
@@ -1120,12 +1118,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 * getting Tags by Media id
 */
     public List<Tag> getAllTagsByFolderId(int folder_id) {
-        List<Tag> tags = new ArrayList<Tag>();
-        String selectQuery = "SELECT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_FOLDER_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_FOLDER_TAG + "." + KEY_TAG_ID + " AND " + TABLE_FOLDER_TAG + "." + KEY_FOLDER_ID + " = " + folder_id;
+        List<Media> medias = getAllMediaByFolder(folder_id);
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        List<Tag> tags = new ArrayList<Tag>();
+//        List<Tag> tags = new ArrayList<Tag>();
+        String selectQuery = "SELECT DISTINCT " + TABLE_TAG + "." + KEY_ID + ", " + TABLE_TAG + "." + KEY_NAME + ", " + TABLE_TAG + "." + KEY_COLOR + " FROM " + TABLE_TAG + " INNER JOIN " + TABLE_MEDIA_TAG + " ON " + TABLE_TAG + "." + KEY_ID + " = " + TABLE_MEDIA_TAG + "." + KEY_TAG_ID + " WHERE " + TABLE_MEDIA_TAG + "." + KEY_MEDIA_ID + " IN (";
+
+        int mediaSize = medias.size();
+        for (int i = 0; i < mediaSize; i++) {
+            selectQuery += medias.get(i).getId();
+            if (i != mediaSize - 1)
+                selectQuery += ", ";
+        }
+        selectQuery += ")";
+
+        //Log.d("adadsa", selectQuery);
+
         Cursor c = null;
         try {
+            //SQLiteDatabase db = this.getReadableDatabase();
+            SQLiteDatabase db = this.openDatabase();
             c = db.rawQuery(selectQuery, null);
 
             if (c.moveToFirst()) {
@@ -1145,7 +1157,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             this.closeDatabase();
         }
         return tags;
-
     }
 
 
@@ -1368,7 +1379,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         this.closeDatabase();
     }
 
-
     /**
      * **************** FOLDER_TAG ******************
      */
@@ -1376,15 +1386,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /*
      * creating media to tag relation
      */
-    public int createFolderTag(Folder_Tag relation) {
-        return createFolderTag(relation.getTag_id(), relation.getFolder_id());
-    }
-
-    /*
-     * creating media to tag relation
-     */
     public int createFolderTag(int tag_id, int folder_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         int id;
 
@@ -1409,7 +1412,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER_TAG + " WHERE " + KEY_FOLDER_ID + " = " + folder_id + " AND " + KEY_TAG_ID + " = " + tag_id;
 
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -1433,7 +1436,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Folder_Tag getFolderTagById(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER_TAG + " WHERE " + KEY_ID + " = " + id;
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
             c = db.rawQuery(selectQuery, null);
@@ -1453,32 +1456,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return null;
     }
-    public List<Folder_Tag> getAllFolderTag() {
-        List<Folder_Tag> folderTag = new ArrayList<Folder_Tag>();
-        String selectQuery = "SELECT * FROM " + TABLE_FOLDER_TAG;
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor c = null;
-        try {
-            c = db.rawQuery(selectQuery, null);
-
-            if (c.moveToFirst()) {
-                do {
-                    Folder_Tag t = new Folder_Tag();
-                    t.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-                    t.setTag_id(c.getInt(c.getColumnIndex(KEY_TAG_ID)));
-                    t.setFolder_id(c.getInt(c.getColumnIndex(KEY_FOLDER_ID)));
-                    t.setCount(c.getInt(c.getColumnIndex(KEY_COUNT)));
-
-                    folderTag.add(t);
-                } while (c.moveToNext());
-            }
-        } finally {
-            if (c != null)
-                c.close();
-        }
-        return folderTag;
-    }
 
 
     /*
@@ -1486,7 +1463,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * return number of updated row
      */
     public int updateFolderTag(Folder_Tag ft) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, ft.getId());
@@ -1511,42 +1488,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteFolderTag(int id) {
-        Folder_Tag ft = getFolderTagById(id);
-        ft.setCount(ft.getCount() - 1);
-        if(ft.getCount() <= 0){
-            SQLiteDatabase db = this.getWritableDatabase();
-            db.delete(TABLE_FOLDER_TAG, KEY_ID + " = ?", new String[]{String.valueOf(ft.getId())});
-        }else{
-            updateFolderTag(ft);
-        }
-
-    }
-
-
-    /*
-     * deleting media to tag relation by tag_id
-     */
-    public void deleteFolderTagByTagId(int tag_id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FOLDER_TAG, KEY_TAG_ID + " = ?", new String[]{String.valueOf(tag_id)});
-    }
-
-    /*
-     * deleting media to tag relation by media_id
-     */
-    public void deleteFolderTagByFolderId(int folder_Id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FOLDER_TAG, KEY_FOLDER_ID + " = ?", new String[]{String.valueOf(folder_Id)});
-    }
-
-    /*
-     * deleting media to tag relation by media_id
-     */
-    public void deleteAllFolderTag() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM " + TABLE_FOLDER_TAG);
-    }
+//    public void deleteFolderTag(int id) {
+//        Folder_Tag ft = getFolderTagById(id);
+//        ft.setCount(ft.getCount() - 1);
+//        if(ft.getCount() <= 0){
+//            SQLiteDatabase db = this.getWritableDatabase();
+//            db.delete(TABLE_FOLDER_TAG, KEY_ID + " = ?", new String[]{String.valueOf(ft.getId())});
+//        }else{
+//            updateFolderTag(ft);
+//        }
+//
+//    }
+//
+//
+//    /*
+//     * deleting media to tag relation by tag_id
+//     */
+//    public void deleteFolderTagByTagId(int tag_id) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        db.delete(TABLE_FOLDER_TAG, KEY_TAG_ID + " = ?", new String[]{String.valueOf(tag_id)});
+//    }
+//
+//    /*
+//     * deleting media to tag relation by media_id
+//     */
+//    public void deleteFolderTagByFolderId(int folder_Id) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        db.delete(TABLE_FOLDER_TAG, KEY_FOLDER_ID + " = ?", new String[]{String.valueOf(folder_Id)});
+//    }
+//
+//    /*
+//     * deleting media to tag relation by media_id
+//     */
+//    public void deleteAllFolderTag() {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        db.execSQL("DELETE FROM " + TABLE_FOLDER_TAG);
+//    }
+//
 
 
     /**

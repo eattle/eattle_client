@@ -12,7 +12,6 @@ import android.util.Log;
 public class BroadcastNotifier {
     private String TAG = "BroadcastNotifier";
     private LocalBroadcastManager mBroadcaster;
-    private Context context;
     /**
      * Creates a BroadcastNotifier containing an instance of LocalBroadcastManager.
      * LocalBroadcastManager is more efficient than BroadcastManager; because it only
@@ -21,7 +20,6 @@ public class BroadcastNotifier {
      * @param context a Context from which to get the LocalBroadcastManager
      */
     public BroadcastNotifier(Context context) {
-        this.context = context;
         // Gets an instance of the support library local broadcastmanager
         mBroadcaster = LocalBroadcastManager.getInstance(context);
 
@@ -36,9 +34,6 @@ public class BroadcastNotifier {
      */
     public void broadcastIntentWithState(int status) {
         Log.d(TAG, "broadcastIntentWithState(int status) 호출");
-        Log.d(TAG,"mBroadcaster == null?? "+(mBroadcaster==null));
-        if(mBroadcaster == null)
-            mBroadcaster = LocalBroadcastManager.getInstance(context);
 
         Intent localIntent = new Intent();
 
@@ -56,9 +51,6 @@ public class BroadcastNotifier {
 
     public void broadcastIntentWithState(int status, int data) {
         Log.d(TAG, "broadcastIntentWithState(int status, int data) 호출");
-        Log.d(TAG,"mBroadcaster == null?? "+(mBroadcaster==null));
-        if(mBroadcaster == null)
-            mBroadcaster = LocalBroadcastManager.getInstance(context);
 
         Intent localIntent = new Intent();
 
