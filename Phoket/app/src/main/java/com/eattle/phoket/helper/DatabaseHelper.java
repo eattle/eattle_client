@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 
+import com.eattle.phoket.CONSTANT;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Folder_Tag;
 import com.eattle.phoket.model.Manager;
@@ -929,6 +930,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating tag at media_id
      */
     public int createTag(String tag_name, int media_id) {
+        CONSTANT.FLAG_REFRESH = true;//MainActivity에서 뷰를 새로 그릴 필요가 있음
+
         //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
@@ -955,7 +958,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public int createTag(String tag_name, int media_id, int folder_id) {
-        //SQLiteDatabase db = this.getWritableDatabase();
+        CONSTANT.FLAG_REFRESH = true;//MainActivity에서 뷰를 새로 그릴 필요가 있음
+
         SQLiteDatabase db = this.openDatabase();
 
         int tag_id = getTagIdByTagName(tag_name);
@@ -982,6 +986,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     * creating tag at folder_id
     */
     public int createTagByFolder(String tag_name, int folder_id, int color) {
+        CONSTANT.FLAG_REFRESH = true;//MainActivity에서 뷰를 새로 그릴 필요가 있음
+
         List<Media> media = getAllMediaByFolder(folder_id);
 
         //SQLiteDatabase db = this.getWritableDatabase();

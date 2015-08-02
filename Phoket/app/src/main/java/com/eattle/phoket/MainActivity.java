@@ -1,6 +1,7 @@
 package com.eattle.phoket;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -179,18 +180,17 @@ public class MainActivity extends AppCompatActivity {
             db.deleteAllMediaTag();
             db.deleteAllTag();
 
-            GUIDE.guide_initiate(this);
+            GUIDE.guide_initiate(MainActivity.this);
             //GUIDE.GUIDE_STEP = 0;
             //GUIDE.GUIDE_STEP++;
         }
-
 
         //서비스로부터 오는 브로드케스트를 캐치하기위해
         //메인에 리시버를 등록
         IntentFilter statusIntentFilter = new IntentFilter(CONSTANT.BROADCAST_ACTION);
         statusIntentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         mClassificationReceiver = new ClassificationReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(
                 mClassificationReceiver,
                 statusIntentFilter);
 
@@ -336,8 +336,14 @@ public class MainActivity extends AppCompatActivity {
         super.onRestart();
         Log.d(EXTRA_TAG, "onRestart() 호출");
         if(mIsClassifying || state != STATE_RUNNING)  return;
-        ((Section1)(mAdapter.getItem(0))).initialize();
-        ((Section2)(mAdapter.getItem(1))).initialize();
+
+        if(CONSTANT.FLAG_REFRESH) {
+            Log.d(EXTRA_TAG,"FLAG_REFRESH");
+            ((Section1) (mAdapter.getItem(0))).initialize();
+            ((Section2) (mAdapter.getItem(1))).initialize();
+
+            CONSTANT.FLAG_REFRESH = false;
+        }
     }
 
     @Override

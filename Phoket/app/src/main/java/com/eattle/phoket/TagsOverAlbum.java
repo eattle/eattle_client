@@ -269,6 +269,7 @@ public class TagsOverAlbum extends Fragment {
                 }
                 inputTag.clearFocus();
                 inputTag.setText(null);
+
             }
         });
 
@@ -323,7 +324,9 @@ public class TagsOverAlbum extends Fragment {
     public void deletePicture() {
         //데이터베이스 OPEN
         DatabaseHelper db = DatabaseHelper.getInstance(context);
+
         int folderId = m.getFolder_id();
+
         List<Media> allMediaByFolder = db.getAllMediaByFolder(folderId);
         Folder folder = db.getFolder(folderId);
         int totalPictureNum = allMediaByFolder.size();
@@ -339,7 +342,6 @@ public class TagsOverAlbum extends Fragment {
 
         //사진에 '휴지통'태그를 등록한다.
         db.createTag("휴지통", m.getId());
-
 
         //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때
         if ((totalPictureNum - 1) == 0) {
@@ -380,11 +382,7 @@ public class TagsOverAlbum extends Fragment {
         folder.setPicture_num(--totalPictureNum);//폴더에 속한 사진의 개수를 감소시킨다
         db.updateFolder(folder);//DB에 업데이트
 
-        Log.d(TAG, "폴더 삭제 완료");
-
         Toast.makeText(getActivity(), "사진이 스토리에서 제외되었습니다", Toast.LENGTH_SHORT).show();
-
-        Log.d(TAG, "AlbumFullActivity.touchImageAdapter == null?" + (AlbumFullActivity.touchImageAdapter == null));
         AlbumFullActivity.touchImageAdapter.removeView(position);//뷰페이저 업데이트
     }
 

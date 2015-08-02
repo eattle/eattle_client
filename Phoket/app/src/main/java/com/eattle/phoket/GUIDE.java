@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.eattle.phoket.helper.DatabaseHelper;
 
 import java.util.ArrayList;
 
@@ -57,11 +58,20 @@ public class GUIDE {
         new MaterialDialog.Builder(context)
                 .title(R.string.guide1Title)
                 .content(R.string.guide1Content)
+                .negativeText(R.string.guide1Button2)
                 .positiveText(R.string.guide1Button1)
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
                         guide1(context);
+                    }
+                    @Override
+                    public void onNegative(MaterialDialog dialog){
+
+                        guide_eight(context);
+                        //튜토리얼을 생략한다
+                        DatabaseHelper db = DatabaseHelper.getInstance(context);
+                        db.createGuide(1);
                     }
                 })
                 .cancelable(false)
@@ -280,7 +290,7 @@ public class GUIDE {
         CURRENT_POPUP.add(mPopupWindow);
     }
 
-    public static void guide_eight(final Context context) {//앱을 최초 실행했을 때 사진정리를 누르도록 한다.
+    public static void guide_eight(final Context context) {
         GUIDE_STEP = 9;
 
         for(int i=0;i<CURRENT_POPUP.size();i++)

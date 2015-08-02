@@ -204,20 +204,6 @@ public class StoryRecommendFragment extends Fragment {
         Glide.get(getActivity()).clearMemory();
         Glide.get(getActivity()).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
 
-        //불필요한 메모리 정리---------------------------------------------------------------
-        AlbumFullActivity.mViewPager = null;
-        AlbumFullActivity.touchImageAdapter = null;
-
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.storyStartImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.blurImage));
-        //추천 이미지 삭제
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.firstImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.secondImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.thirdImage));
-        CONSTANT.releaseImageMemory((ImageView) getActivity().findViewById(R.id.fourthImage));
-
-        System.gc();//garbage collector
-        Runtime.getRuntime().gc();//garbage collector
         super.onStop();
     }
 }

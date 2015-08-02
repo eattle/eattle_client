@@ -166,8 +166,8 @@ public class ServiceOfPictureClassification extends Service {
             //86400000
             //마지막 푸시를 넣은지 24시간을 넘지 않았으면
             if (n != null) {
-                if (System.currentTimeMillis() - n.getNotificationTime() < 86400000L)
-                    BroadcastListener.setHowOftenCheck(CONSTANT.ONEDAY);//24시간후에 다시 체크
+                if (System.currentTimeMillis() - n.getNotificationTime() < (CONSTANT.TWODAY * 60 * 1000L))
+                    BroadcastListener.setHowOftenCheck(CONSTANT.TWODAY);//48시간후에 다시 체크
                 else
                     BroadcastListener.setHowOftenCheck(CONSTANT.CHECK);//10분마다 체크
             }
