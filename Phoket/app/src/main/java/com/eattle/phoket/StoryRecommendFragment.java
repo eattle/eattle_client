@@ -151,7 +151,6 @@ public class StoryRecommendFragment extends Fragment {
 
             Glide.with(getActivity())
                     .load(folder.getImage())
-//                    .override(CONSTANT.screenWidth, 300)
                     .centerCrop()
                     .into(storyRecommendImage);
             storyRecommendTitle.setText(CONSTANT.convertFolderNameToStoryName(folder.getName()));

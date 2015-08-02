@@ -25,12 +25,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private String TAG = " DatabaseHelper";
+    private static final int DATABASE_VERSION = 31;
 
     private static DatabaseHelper Instance;
     private SQLiteDatabase mDatabase;
-    private AtomicInteger mOpenCounter = new AtomicInteger();//DB open현황을 체크
+    private AtomicInteger mOpenCounter = new AtomicInteger();//DB open 개수 체크(안쓰면 close하기 위해)
 
-    private static final int DATABASE_VERSION = 30;
+
 
     public static final String DATABASE_NAME = "PhoketDB";
 
@@ -147,7 +148,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + KEY_GUIDEENDED + " INTEGER NOT NULL "
                     + ")";
 
-    public synchronized static DatabaseHelper getInstance(Context context) {
+    public static DatabaseHelper getInstance(Context context) {
         if (Instance == null) {
             Instance = new DatabaseHelper(context);
         }
@@ -157,33 +158,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
-        //context.openOrCreateDatabase(DATABASE_NAME, context.MODE_PRIVATE, null);
     }
 
     //적절한 때에 databasehelper를 닫아주기위한 함수
     public synchronized SQLiteDatabase openDatabase() {
         if(mOpenCounter.incrementAndGet() == 1) {
-            // Opening new database
             mDatabase = Instance.getWritableDatabase();
         }
         return mDatabase;
     }
     public synchronized void closeDatabase() {
         if(mOpenCounter.decrementAndGet() == 0) {
-            // Closing database
             mDatabase.close();
         }
     }
-
 
     @Override
     public synchronized void close() {
         if (Instance != null)
             Instance.close();
-
         super.close();
-
     }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d("DatabaseHelper", "Database Helper onCreate 함수 호출");
@@ -225,7 +221,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * Creating folder
      */
     public int createFolder(Folder folder) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
@@ -250,7 +245,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Folder> folders = new ArrayList<Folder>();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER;
 
-        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
@@ -286,7 +280,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Folder folder = new Folder();
         String selectQuery = "SELECT * FROM " + TABLE_FOLDER + " WHERE " + KEY_ID + " = " + id;
 
-        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
         Cursor c = null;
         try {
@@ -317,7 +310,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * return number of updated row
      */
     public int updateFolder(Folder folder) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         ContentValues values = new ContentValues();
@@ -340,7 +332,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
 
     public void deleteFolder(Folder folder, boolean should_delete_all_media_in_that_folder) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         //check if media in that folder should also be deleted
@@ -358,7 +349,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteFolder(int folderId, boolean should_delete_all_media_in_that_folder) {
         Log.d("DatabaseHelper", "deleteFolder() 호출");
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         //check if media in that folder should also be deleted
@@ -376,7 +366,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteAllFolder() {
         Log.d("DatabaseHelper", "deleteAllFolder() 호출");
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
         //KEY_ISFIXED ==  1인 폴더는 지우지 않는다
         db.execSQL("DELETE FROM " + TABLE_FOLDER + " WHERE " + KEY_ISFIXED + " = 0");
@@ -739,7 +728,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Media> media = new ArrayList<Media>();
         String selectQuery = "SELECT * FROM " + TABLE_MEDIA + " WHERE " + KEY_YEAR + " = " + year;
 
-//        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         Cursor c = null;
@@ -1185,7 +1174,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public void deleteAllTag() {
-        //SQLiteDatabase db = this.openDatabase();
+        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
         db.execSQL("DELETE FROM " + TABLE_TAG);
         deleteAllMediaTag();
@@ -1231,7 +1220,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             id = (int) db.insert(TABLE_MEDIA_TAG, null, values);
         } else {
-            return -1;
+            id = -1;
         }
 
         this.closeDatabase();
@@ -1299,7 +1288,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteMediaTag(String tag_name, int media_id) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
         int tag_id = getTagIdByTagName(tag_name);
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ? AND " + KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(tag_id), String.valueOf(media_id)});
@@ -1310,8 +1298,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * deleting media to tag relation by tag_id
      */
     public void deleteMediaTagByTagId(int tag_id) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_MEDIA_TAG, KEY_TAG_ID + " = ?", new String[]{String.valueOf(tag_id)});
         this.closeDatabase();
     }
@@ -1320,8 +1308,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * deleting media to tag relation by media_id
      */
     public void deleteMediaTagByMediaId(int media_Id) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
         db.delete(TABLE_MEDIA_TAG, KEY_MEDIA_ID + " = ?", new String[]{String.valueOf(media_Id)});
         this.closeDatabase();
     }
@@ -1330,8 +1318,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * deleting media to tag relation by media_id
      */
     public void deleteAllMediaTag() {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
         db.execSQL("DELETE FROM " + TABLE_MEDIA_TAG);
         this.closeDatabase();
     }
@@ -1344,8 +1332,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * creating Manager
      */
     public int createManager(Manager manager) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
 
         db.delete(TABLE_MANAGER, null, null);//기존의 데이터들을 모두 삭제한다.
 
@@ -1363,8 +1351,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Manager getManager() {
         String selectQuery = "SELECT * FROM " + TABLE_MANAGER;
 
-        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
 
         Cursor c = null;
         Manager m = new Manager();
@@ -1389,8 +1377,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * **************** NOTIFICATION ******************
      */
     public int createNotification(NotificationM n) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
 
         db.delete(TABLE_NOTIFICATION, null, null);//기존의 데이터들을 모두 삭제한다.
 
@@ -1406,8 +1394,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public NotificationM getNotification() {
         String selectQuery = "SELECT * FROM " + TABLE_NOTIFICATION;
 
-        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
 
         Cursor c = null;
         NotificationM n = null;
@@ -1431,8 +1419,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * **************** GUIDE ******************
      */
     public int createGuide(int guide) {
-        //SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db = this.openDatabase();
+
 
         db.delete(TABLE_GUIDE, null, null);//기존의 데이터들을 모두 삭제한다.
 
@@ -1447,7 +1435,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public int getGuide() {
         String selectQuery = "SELECT * FROM " + TABLE_GUIDE;
 
-        //SQLiteDatabase db = this.getReadableDatabase();
         SQLiteDatabase db = this.openDatabase();
 
         Cursor c = null;

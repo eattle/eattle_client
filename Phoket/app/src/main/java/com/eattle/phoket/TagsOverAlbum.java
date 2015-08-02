@@ -124,7 +124,7 @@ public class TagsOverAlbum extends Fragment {
         List<Tag> tags = db.getAllTagsByMediaId(media_id);
 
 
-        if(type == 1){
+        if(type == 1){//PopupPictureActivity에서 들어왔을 때
             ExEditText inputTag = (ExEditText)root.findViewById(R.id.editText);
             inputTag.setOnBackPressListener(onBackPressListener);
         }
@@ -188,22 +188,22 @@ public class TagsOverAlbum extends Fragment {
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
         final TextView btn = (TextView) root.findViewById(R.id.button);//태그 추가 버튼
 
-        inputTag.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
-                    if(input == ""){
-                        Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    DatabaseHelper db = DatabaseHelper.getInstance(context);
-                    int tag_id = db.createTag("" + input, media_id);
-                    if (tag_id != -1) {
-                        Tag tag = db.getTagByTagId(tag_id);
-                        FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
-                        ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
-                        layout.addView(tagButton);
+                        inputTag.setOnKeyListener(new View.OnKeyListener() {
+                            @Override
+                            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                                    if(input == ""){
+                                        Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                                        return true;
+                                    }
+                                    DatabaseHelper db = DatabaseHelper.getInstance(context);
+                                    int tag_id = db.createTag("" + input, media_id);
+                                    if (tag_id != -1) {
+                                        Tag tag = db.getTagByTagId(tag_id);
+                                        FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
+                                        ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
+                                        layout.addView(tagButton);
                         final int id = tag.getId();
 
                         tagButton.setOnClickListener(new Button.OnClickListener() {
@@ -275,7 +275,9 @@ public class TagsOverAlbum extends Fragment {
         //휴지통(사진 삭제)
         ImageView storyContentDelete = (ImageView) root.findViewById(R.id.storyContentDelete);
         int folderID = db.getMediaById(media_id).getFolder_id();
-        if( ((db.getAllMediaByFolder(folderID)).size()) <= CONSTANT.BOUNDARY && (db.getFolder(folderID).getIsFixed() == 0))//일상이면서, 고정스토리가 아닐경우
+
+        if( (((db.getAllMediaByFolder(folderID)).size()) <= CONSTANT.BOUNDARY && (db.getFolder(folderID).getIsFixed() == 0))
+                || false)//일상이면서, 고정스토리가 아닐경우 || 태그를 타고 들어왔을 경우
             storyContentDelete.setVisibility(View.GONE);//휴지통이 보이지 않는다
         else//일상이 아니거나 고정스토리일 경우
             storyContentDelete.setVisibility(View.VISIBLE);//휴지통이 보인다

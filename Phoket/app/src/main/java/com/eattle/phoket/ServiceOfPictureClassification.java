@@ -90,13 +90,48 @@ public class ServiceOfPictureClassification extends Service {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
-                    if (!isClassifying)
-                        new classificationStart(getApplicationContext()).execute(0);//AsyncTask를 통한 사진 정리 시작
+                    if (!isClassifying){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {//사진 정리를 시작한다
+                                    isClassifying = true;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                    pictureClassification();
+                                } catch (IOException e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } catch (Exception e) {
+                                    Log.d("PictureClassification", e.getMessage());
+                                } finally {
+                                    isClassifying = false;
+                                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
+                                }
+                            }
+                        }).start();
+
+                    }
 
                     break;
                 case CONSTANT.START_OF_GUIDE:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_GUIDE || 'MainActivity가 가이드 시작을 요청하였습니다' ");
-                    new classificationStart(getApplicationContext()).execute(1);//AsyncTask를 통한 가이드 시작
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {//가이드를 시작한다
+                                isClassifying = true;
+                                mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
+                                pictureClassification_guide();
+                            } catch (IOException e) {
+                                Log.d("PictureClassification", e.getMessage());
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                Log.d("PictureClassification", e.getMessage());
+                                e.printStackTrace();
+                            } finally {
+                                isClassifying = false;
+                            }
+                        }
+                    }).start();
 
                     break;
 
@@ -168,6 +203,11 @@ public class ServiceOfPictureClassification extends Service {
                     continue;
                 //해당 경로에 존재하지 않는 사진은 건너띈다
                 if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
+                    //TODO : 속도 향상 방법
+                    /**
+                    * !isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0에
+                     * 해당하는 사진들의 ID를 db 한번의 접근으로 모두 가져오도록 한다
+                    */
                     //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
                     continue;
 
@@ -277,13 +317,13 @@ public class ServiceOfPictureClassification extends Service {
             /** ------------------정리 제외 대상------------------ **/
             if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
                 continue;
-            if ((ExistedMedia != null && ExistedMedia.getIsFixed() == 1)) {
-                Log.d(TAG,"고정 스토리에 속한 사진은 건너뛴다");
-                continue;//고정 스토리에 속하는 사진은 건너뛴다
+            if (ExistedMedia != null && ((ExistedMedia.getIsFixed() == 1) || (ExistedMedia.getFolder_id() == -1))) {
+                Log.d(TAG,"고정 스토리 or 휴지통에 속한 사진");
+                continue;//고정 스토리 or 휴지통에 속한 사진은 건너뛴다
             }
             //해당 경로에 존재하지 않는 사진은 건너띈다
             if (!isExisted(path)) {
-                Log.d(TAG,"해당 경로에 존재하지 않는 사진은 건너띈다");
+                Log.d(TAG,"해당 경로에 존재하지 않는 사진");
                 if (ExistedMedia != null)//ExistedMedia에 있는 사진인데 경로에 없다면 DB에서 지우고 continue
                     db.deleteMedia(pictureID);
                 continue;
@@ -593,50 +633,4 @@ public class ServiceOfPictureClassification extends Service {
     }
 
 
-    //Notification을 위한 AsyncTask
-    private class classificationStart extends AsyncTask<Integer, String, Integer> {
-
-        private Context mContext;
-
-        public classificationStart(Context context){
-            mContext = context;
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            Log.d(EXTRA_TAG, "classificationStart doInBackground 호출()");
-            int guideOrNot = params[0];//1이면 guide,0이면 보통
-
-            if(guideOrNot == 0) {
-                try {//사진 정리를 시작한다
-                    isClassifying = true;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                    pictureClassification();
-                } catch (IOException e) {
-                    Log.d("PictureClassification", e.getMessage());
-                } catch (Exception e) {
-                    Log.d("PictureClassification", e.getMessage());
-                } finally {
-                    isClassifying = false;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.END_OF_PICTURE_CLASSIFICATION);
-                }
-            }
-            else if(guideOrNot == 1){
-                try {//가이드를 시작한다
-                    isClassifying = true;
-                    mBroadcaster.broadcastIntentWithState(CONSTANT.RECEIPT_OF_PICTURE_CLASSIFICATION, 1);
-                    pictureClassification_guide();
-                } catch (IOException e) {
-                    Log.d("PictureClassification", e.getMessage());
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    Log.d("PictureClassification", e.getMessage());
-                    e.printStackTrace();
-                } finally {
-                    isClassifying = false;
-                }
-            }
-            return 0;
-        }
-    }
 }
