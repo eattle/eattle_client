@@ -13,8 +13,10 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.eattle.phoket.helper.DatabaseHelper;
+import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.NotificationM;
 
+import java.io.File;
 import java.util.Date;
 
 /**
