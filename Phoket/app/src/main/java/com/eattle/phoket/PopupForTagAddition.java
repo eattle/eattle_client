@@ -40,7 +40,7 @@ public class PopupForTagAddition extends Activity {
                 DatabaseHelper db = DatabaseHelper.getInstance(PopupForTagAddition.this);
                 List<Media> mediaList = db.getAllMediaByFolder(data.getFolderId());
                 for (int i = 0; i < mediaList.size(); i++) {
-                    db.createTag(data.getTagName(), mediaList.get(i).getId());
+                    db.createTag(data.getTagName(), mediaList.get(i).getId(), data.getFolderId());
                 }
                 finish();
             }

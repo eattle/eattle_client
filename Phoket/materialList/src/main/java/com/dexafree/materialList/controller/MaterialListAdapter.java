@@ -114,19 +114,19 @@ public class MaterialListAdapter extends RecyclerView.Adapter<MaterialListAdapte
 
     public void addAtStart(Card card){
 		mCardList.add(0, card);
-		notifyItemInserted(0);
+		notifyItemChanged(0);
 	}
 
 	public void add(int position, Card card){
 		if(position >= mCardList.size())
 			return;
 		mCardList.add(position, card);
-		notifyItemInserted(position);
+		notifyItemChanged(position);
 	}
 
 	public void add(Card card) {
 		mCardList.add(card);
-		notifyItemInserted(mCardList.size()-1);
+		notifyItemChanged(mCardList.size()-1);
 //		notifyDataSetChanged();
 	}
 

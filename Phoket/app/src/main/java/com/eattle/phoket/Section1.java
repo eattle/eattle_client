@@ -35,6 +35,7 @@ import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator;
@@ -61,6 +62,8 @@ public class Section1 extends Fragment {
     //    boolean isSelectMode = false;
     ArrayList<CardData> selected = new ArrayList<>();
     ArrayList<Integer> selectedp = new ArrayList<>();
+
+//    HashMap<Integer, List<Media>> mediaList = new HashMap<>();
 
 
     @Override
@@ -230,7 +233,12 @@ public class Section1 extends Fragment {
             //Query the applications
             DatabaseHelper db = DatabaseHelper.getInstance(mContext);
             List<Folder> stories = db.getAllFolders();
-            //Log.d("Section1","" + mProgressBar.toString());
+
+//            if(mediaList.isEmpty()){
+//                for(int i = 0; i < stories.size(); i++){
+//                    mediaList.put(stories.get(i).getId(), db.getAllMediaByFolder(stories.get(i).getId()));
+//                }
+//            }
             return stories;
 
         }
@@ -269,6 +277,7 @@ public class Section1 extends Fragment {
             }
             //daily card 추가
             List<Media> dailyMedia = db.getAllMediaByFolder(f.getId());
+//            List<Media> dailyMedia = mediaList.get(f.getId());
             for (int i = 0; i < f.getPicture_num(); i++) {
 
                 if (dailyMedia.get(i).getThumbnail_path() == null)//썸네일이 없으면
@@ -289,9 +298,13 @@ public class Section1 extends Fragment {
                     CONSTANT.convertFolderNameToDate(f.getName()),
                     f.getPicture_num());
 
+//            List<Tag> storyTags = db.getAllTagsByFolderId(f.getId());
             List<Tag> storyTags = db.getAllTagsByFolderId(f.getId());
-            int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
+            int storyTagsSize = storyTags.size();
+//            int storyTagsSize = storyTags.size() < 5 ? storyTags.size() : 5;
             if (storyTagsSize > 0) {
+//                CardManager.setRelationTagsItem(mListView, mContext, storyTags);
+
                 CardManager.setRelationTagsItem(mListView, mContext,
                         storyTagsSize,
                         storyTags,
@@ -374,6 +387,7 @@ public class Section1 extends Fragment {
         state = STATE_LOADING;
         mListView.clear();
         mSwipeRefreshLayout.setRefreshing(true);
+//        mediaList.clear();
     }
 
     public void setRunning() {
@@ -389,6 +403,7 @@ public class Section1 extends Fragment {
             state = STATE_LOADING;
             mSwipeRefreshLayout.setRefreshing(true);
         }
+//        mediaList.put(f.getId(), db.getAllMediaByFolder(f.getId()));
         addCard(f);
     }
 

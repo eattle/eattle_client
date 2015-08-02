@@ -124,8 +124,8 @@ public class TagsOverAlbum extends Fragment {
         List<Tag> tags = db.getAllTagsByMediaId(media_id);
 
 
-        if(type == 1){//PopupPictureActivity에서 들어왔을 때
-            ExEditText inputTag = (ExEditText)root.findViewById(R.id.editText);
+        if (type == 1) {//PopupPictureActivity에서 들어왔을 때
+            ExEditText inputTag = (ExEditText) root.findViewById(R.id.editText);
             inputTag.setOnBackPressListener(onBackPressListener);
         }
 
@@ -138,7 +138,7 @@ public class TagsOverAlbum extends Fragment {
         for (int i = 0; i < s; i++) {
             //Button tagButton = new Button(getActivity());
             FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
-            ((TextView)tagButton.findViewById(R.id.tagName)).setText("" + tags.get(i).getName());
+            ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tags.get(i).getName());
             layout.addView(tagButton);
             final int id = tags.get(i).getId();
 
@@ -160,7 +160,7 @@ public class TagsOverAlbum extends Fragment {
         for (int i = 0; i < 3; i++) {
             FrameLayout defaultTagButton = (FrameLayout) inflater.inflate(R.layout.view_default_tag_button, null);
 
-            String tagName="";
+            String tagName = "";
             if (i == 0)
                 tagName = Integer.toString(m.getYear()) + "년";
             else if (i == 1)
@@ -168,7 +168,7 @@ public class TagsOverAlbum extends Fragment {
             else if (i == 2)
                 tagName = Integer.toString(m.getDay()) + "일";
 
-            ((TextView)defaultTagButton.findViewById(R.id.tagName)).setText("" + tagName);
+            ((TextView) defaultTagButton.findViewById(R.id.tagName)).setText("" + tagName);
             final String tagName_ = tagName;
             defaultTagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -188,22 +188,26 @@ public class TagsOverAlbum extends Fragment {
         final EditText inputTag = (EditText) root.findViewById(R.id.editText);//태그 입력 창
         final TextView btn = (TextView) root.findViewById(R.id.button);//태그 추가 버튼
 
-                        inputTag.setOnKeyListener(new View.OnKeyListener() {
-                            @Override
-                            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
-                                    if(input == ""){
-                                        Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
-                                        return true;
-                                    }
-                                    DatabaseHelper db = DatabaseHelper.getInstance(context);
-                                    int tag_id = db.createTag("" + input, media_id);
-                                    if (tag_id != -1) {
-                                        Tag tag = db.getTagByTagId(tag_id);
-                                        FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
-                                        ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
-                                        layout.addView(tagButton);
+
+        inputTag.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
+                    if (input == "") {
+                        Toast.makeText(context, "포켓을 입력해주세요", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+
+                    DatabaseHelper db = DatabaseHelper.getInstance(context);
+                    int tag_id = db.createTag("" + input, media_id, db.getMediaById(media_id).getFolder_id());
+
+                    if (tag_id != -1) {
+                        Tag tag = db.getTagByTagId(tag_id);
+                        FrameLayout tagButton = (FrameLayout) inflater.inflate(R.layout.view_tag_button, null);
+                        ((TextView) tagButton.findViewById(R.id.tagName)).setText("" + tag.getName());
+                        layout.addView(tagButton);
+
                         final int id = tag.getId();
 
                         tagButton.setOnClickListener(new Button.OnClickListener() {
@@ -233,12 +237,13 @@ public class TagsOverAlbum extends Fragment {
             @Override
             public void onClick(View v) {
                 String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
-                if(input == ""){
-                    Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                if (input == "") {
+                    Toast.makeText(getActivity(), "포켓을 입력해주세요", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 DatabaseHelper db = DatabaseHelper.getInstance(context);
-                int tag_id = db.createTag("" + input, media_id);
+
+                int tag_id = db.createTag("" + input, media_id, db.getMediaById(media_id).getFolder_id());
 
                 if (tag_id != -1) {
 
@@ -276,7 +281,7 @@ public class TagsOverAlbum extends Fragment {
         ImageView storyContentDelete = (ImageView) root.findViewById(R.id.storyContentDelete);
         int folderID = db.getMediaById(media_id).getFolder_id();
 
-        if( (((db.getAllMediaByFolder(folderID)).size()) <= CONSTANT.BOUNDARY && (db.getFolder(folderID).getIsFixed() == 0))
+        if ((((db.getAllMediaByFolder(folderID)).size()) <= CONSTANT.BOUNDARY && (db.getFolder(folderID).getIsFixed() == 0))
                 || false)//일상이면서, 고정스토리가 아닐경우 || 태그를 타고 들어왔을 경우
             storyContentDelete.setVisibility(View.GONE);//휴지통이 보이지 않는다
         else//일상이 아니거나 고정스토리일 경우
@@ -289,8 +294,8 @@ public class TagsOverAlbum extends Fragment {
             }
         });
 
-        if(type == 1){//'이 사진을 포켓에 담아주세요'에서 들어왔을 경우
-            RelativeLayout storyContentOrder = (RelativeLayout)root.findViewById(R.id.storyContentOrder);
+        if (type == 1) {//'이 사진을 포켓에 담아주세요'에서 들어왔을 경우
+            RelativeLayout storyContentOrder = (RelativeLayout) root.findViewById(R.id.storyContentOrder);
             storyContentOrder.setVisibility(View.GONE);
         }
         return root;
@@ -314,6 +319,7 @@ public class TagsOverAlbum extends Fragment {
         d.setNegativeButton("No", l);
         d.show();
     }
+
     public void deletePicture() {
         //데이터베이스 OPEN
         DatabaseHelper db = DatabaseHelper.getInstance(context);
@@ -322,6 +328,11 @@ public class TagsOverAlbum extends Fragment {
         Folder folder = db.getFolder(folderId);
         int totalPictureNum = allMediaByFolder.size();
 
+        List<Tag> tags = db.getAllTagsByMediaId(m.getId());
+        for (int i = 0; i < tags.size(); i++) {
+            db.deleteFolderTag(tags.get(i).getId(), folderId);
+        }
+
         //해당 사진의 folderID를 변경한다.
         m.setFolder_id(-1);//휴지통의 folderID는 -1(유령폴더)
         db.updateMedia(m);//DB에 업데이트
@@ -329,8 +340,9 @@ public class TagsOverAlbum extends Fragment {
         //사진에 '휴지통'태그를 등록한다.
         db.createTag("휴지통", m.getId());
 
+
         //해당 사진이 지워짐으로서 폴더에 사진이 하나도 안남게 되었을 때
-        if ((totalPictureNum-1) == 0) {
+        if ((totalPictureNum - 1) == 0) {
             db.deleteFolder(folderId, true);//폴더(스토리) 자체를 지운다
             this.getActivity().finish();//뷰페이저(AlbumFullActivity) 종료
             return;
@@ -338,7 +350,7 @@ public class TagsOverAlbum extends Fragment {
 
 
         //TODO 삭제하려는 사진이 folder의 대표 사진인지 확인한다 -> 대표사진을 지울 경우에는 다른 사진을 대표로 대체
-        if(media_id == AlbumFullActivity.titleImageId) {
+        if (media_id == AlbumFullActivity.titleImageId) {
             for (int i = 0; i < allMediaByFolder.size(); i++) {
                 if (allMediaByFolder.get(i).getId() == media_id) {
                     //TODO 일단 그 다음 혹은 이전 사진을 대표사진으로 변경한다 -> 대표 사진 선정 방식 고민
@@ -370,24 +382,21 @@ public class TagsOverAlbum extends Fragment {
 
         Log.d(TAG, "폴더 삭제 완료");
 
-        Toast.makeText(getActivity(),"사진이 스토리에서 제외되었습니다",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "사진이 스토리에서 제외되었습니다", Toast.LENGTH_SHORT).show();
 
-        Log.d(TAG,"AlbumFullActivity.touchImageAdapter == null?" + (AlbumFullActivity.touchImageAdapter==null));
+        Log.d(TAG, "AlbumFullActivity.touchImageAdapter == null?" + (AlbumFullActivity.touchImageAdapter == null));
         AlbumFullActivity.touchImageAdapter.removeView(position);//뷰페이저 업데이트
     }
 
 
-    private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener()
-    {
+    private ExEditText.OnBackPressListener onBackPressListener = new ExEditText.OnBackPressListener() {
         @Override
-        public void onBackPress()
-        {
+        public void onBackPress() {
             didBackPressOnEditText();
         }
     };
 
-    private void didBackPressOnEditText()
-    {
+    private void didBackPressOnEditText() {
         getActivity().finish();
     }
 
