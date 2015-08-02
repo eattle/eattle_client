@@ -3,28 +3,19 @@ package com.eattle.phoket;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.eattle.phoket.helper.DatabaseHelper;
-import com.eattle.phoket.model.Folder;
-import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.NotificationM;
 
-import java.io.File;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by dh_st_000 on 2015-07-11.

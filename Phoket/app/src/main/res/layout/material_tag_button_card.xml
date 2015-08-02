@@ -19,20 +19,20 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-        android:id="@+id/interactionEffect"
+            android:id="@+id/interactionEffect"
+            android:background="@drawable/ripple_button" />
 
-        android:background="@drawable/ripple_button" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/tagName"
             android:textColor="#ffffff"
-            android:singleLine="false"
             android:textSize="@dimen/title_font_size"
             android:background="#66000000"
             android:padding="10dp"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"
+            android:maxLines="5" />
 
     </FrameLayout>
 </com.eattle.phoket.Card.view.TagButtonCardView>

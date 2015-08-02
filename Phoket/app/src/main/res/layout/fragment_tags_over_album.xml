@@ -38,28 +38,29 @@
 
         <com.eattle.phoket.view.ExEditText
             android:id="@+id/editText"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:textSize="13dp"
+            android:textSize="@dimen/title_font_size"
             android:textColorHint="#ffffff"
             android:drawableLeft="@mipmap/phoket"
             android:drawablePadding="10dp"
-
             android:hint="어떤 포켓에 넣으실 건가요?"
             android:singleLine="true"
-            android:layout_marginLeft="10dp"
             android:textColor="#ffffff"
-            android:layout_marginRight="10dp" /><!--hint size는 textSize를 따라간다-->
+            android:layout_weight="0.7"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp" /><!--hint size는 textSize를 따라간다-->
         <TextView
             android:id="@+id/button"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_weight="0.3"
             android:text="추가"
-            android:textSize="15dp"
-            android:layout_marginRight="20dp"
+            android:textSize="@dimen/title_font_size"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:layout_marginRight="8dp"
             android:textColor="#ffffff" />
 
 

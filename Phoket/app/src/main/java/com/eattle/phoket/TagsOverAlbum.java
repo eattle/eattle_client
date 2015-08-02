@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
@@ -236,7 +238,7 @@ public class TagsOverAlbum extends Fragment {
             public void onClick(View v) {
                 String input = inputTag.getText().toString().replaceAll("\\p{Space}", "");
                 if(input == ""){
-                    Toast.makeText(getActivity(),"포켓을 입력해주세요",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "포켓을 입력해주세요", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 DatabaseHelper db = DatabaseHelper.getInstance(context);
@@ -298,22 +300,40 @@ public class TagsOverAlbum extends Fragment {
     }
 
     public void wantPictureDeleted() {//사진을 삭제할지
-        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
-        d.setTitle("사진을 스토리에서 제외하시겠습니까? ");
-        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
+//        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+//        d.setTitle("사진을 스토리에서 제외하시겠습니까? ");
+//        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int which) {
+//                switch (which) {
+//                    case DialogInterface.BUTTON_POSITIVE:
+//                        deletePicture();
+//                        break;
+//                    case DialogInterface.BUTTON_NEGATIVE:
+//                        break;
+//                }
+//            }
+//        };
+//        d.setPositiveButton("Yes", l);
+//        d.setNegativeButton("No", l);
+//        d.show();
+        new MaterialDialog.Builder(getActivity())
+                .title("사진을 스토리에서 제외하시겠습니까?")
+                .content("스토리에 나타나지 않을 뿐이지 파일이 삭제되는 것은 아닙니다. 제외된 사진은 '휴지통' 포켓에 보관됩니다.")
+                .positiveText(R.string.positiveAnswer)
+                .negativeText(R.string.negativeAnswer)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
                         deletePicture();
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
-                }
-            }
-        };
-        d.setPositiveButton("Yes", l);
-        d.setNegativeButton("No", l);
-        d.show();
+                    }
+                    @Override
+                    public void onNegative(MaterialDialog dialog) {
+
+                    }
+
+                })
+                .show();
+
     }
     public void deletePicture() {
         //데이터베이스 OPEN
@@ -377,7 +397,12 @@ public class TagsOverAlbum extends Fragment {
 
         Log.d(TAG, "폴더 삭제 완료");
 
-        Toast.makeText(getActivity(),"사진이 스토리에서 제외되었습니다",Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(),"사진이 스토리에서 제외되었습니다",Toast.LENGTH_SHORT).show();
+
+        Snackbar s = Snackbar.make(AlbumFullActivity.mViewPager, "사진이 스토리에서 제외되었습니다", Snackbar.LENGTH_SHORT);
+        s.getView().setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        s.setAction("Action", null).show();
+
 
         Log.d(TAG,"AlbumFullActivity.touchImageAdapter == null?" + (AlbumFullActivity.touchImageAdapter==null));
         AlbumFullActivity.touchImageAdapter.removeView(position);//뷰페이저 업데이트

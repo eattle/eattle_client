@@ -43,4 +43,9 @@
     <string name="guide10Content">기억나세요?\n사진을 한번에 정리하려면\n언제든지 당겨만주세요.\n쭈욱!</string>
 
 
+    <string name="exitComment">Phoket을\n종료하시겠습니까?</string>
+    <string name="positiveAnswer">Yes</string>
+    <string name="negativeAnswer">No</string>
+
+
 </resources>

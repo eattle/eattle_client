@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.eattle.phoket.Card.manager.CardData;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
@@ -139,28 +140,48 @@ public class SelectOptionFragment extends Fragment {
 
 
     public void exportStoryPopupDialog(final int folderID){
-        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
         DatabaseHelper db = DatabaseHelper.getInstance(context);
         String storyName = CONSTANT.convertFolderNameToStoryName(db.getFolder(folderID).getName());
-        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?\n(스마트폰 최상단의 Phoket 폴더에 생성됩니다)");
 
-        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        //makeLocalFolder(folderID);
-                        Log.d(TAG, " context : "+context);
+        new MaterialDialog.Builder(getActivity())
+                .title("스토리 내보내기")
+                .content("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?\n(스마트폰 최상단의 Phoket 폴더에 생성됩니다)")
+                .positiveText(R.string.positiveAnswer)
+                .negativeText(R.string.negativeAnswer)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
                         new exportStoryToFolder(context).execute(folderID);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        break;
 
-                }
-            }
-        };
-        d.setPositiveButton("Yes", l);
-        d.setNegativeButton("No", l);
-        d.show();
+                    }
+                    @Override
+                    public void onNegative(MaterialDialog dialog) {
+
+                    }
+
+                })
+                .show();
+
+//        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+//        d.setMessage("스마트폰에 \n'" + storyName + "'\n폴더를 생성하시겠습니까?\n(스마트폰 최상단의 Phoket 폴더에 생성됩니다)");
+//
+//        DialogInterface.OnClickListener l = new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int which) {
+//                switch (which) {
+//                    case DialogInterface.BUTTON_POSITIVE:
+//                        //makeLocalFolder(folderID);
+//                        Log.d(TAG, " context : "+context);
+//                        new exportStoryToFolder(context).execute(folderID);
+//                        break;
+//                    case DialogInterface.BUTTON_NEGATIVE:
+//                        break;
+//
+//                }
+//            }
+//        };
+//        d.setPositiveButton("Yes", l);
+//        d.setNegativeButton("No", l);
+//        d.show();
     }
 
     //스토리 내보내기를 위한 AsyncTask

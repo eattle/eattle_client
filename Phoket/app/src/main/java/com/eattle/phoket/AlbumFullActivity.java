@@ -5,18 +5,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.ComponentCallbacks2;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -25,18 +16,13 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.eattle.phoket.device.CachedBlockDevice;
 import com.eattle.phoket.helper.DatabaseHelper;
 import com.eattle.phoket.model.Folder;
 import com.eattle.phoket.model.Media;
 import com.eattle.phoket.model.Tag;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 //스토리 그리드뷰에서 특정 사진을 클릭했을 때, 뷰페이저를 만들어주는 부분
@@ -395,7 +381,7 @@ public class AlbumFullActivity extends ActionBarActivity {
 
     }
 
-    //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
+/*    //이미지 최적화 작업(ex. inSampleSize)등을 백그라운드에서 하도록 하는 클래스
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
         private String TAG = "BitmapWorkerTask";
         public final WeakReference<ImageView> imageViewReference;
@@ -647,7 +633,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
+/*    //동일한 imageview를 가리키고 있는 여러 작업들이 있다면, 더 오래된 작업을 중단한다
     public static boolean cancelPotentialWork(String path, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
 
@@ -677,7 +663,7 @@ public class AlbumFullActivity extends ActionBarActivity {
         }
         return null;
     }
-
+*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
