@@ -2,6 +2,7 @@ package com.eattle.phoket;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -149,8 +150,14 @@ public class Section2 extends Fragment {
      */
     private class InitializeApplicationsTask extends AsyncTask<Void, Void, List<Folder>> {
 
+//        private ProgressDialog mDlg;
+
         @Override
         protected void onPreExecute() {
+//            mDlg = new ProgressDialog(mContext);
+//            mDlg.setMessage("잠시만 기다려주세요..");
+//            mDlg.show();
+
             super.onPreExecute();
         }
 
@@ -179,6 +186,7 @@ public class Section2 extends Fragment {
             }
             setRunning();
 
+//            mDlg.dismiss();
             super.onPostExecute(result);
         }
     }

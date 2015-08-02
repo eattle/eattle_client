@@ -68,7 +68,7 @@ public class BroadcastListener extends BroadcastReceiver {
                 Log.d(TAG, "ServiceOfPictureClassification.isClassifying ? " + ServiceOfPictureClassification.isClassifying);
                 if (ServiceOfPictureClassification.isClassifying)//사진을 정리하고 있으면
                     return;//아무것도 하지 않음
-                if (howOftenCheck == CONSTANT.ONEDAY)//마지막 푸시를 한지 24시간이 지났으면
+                if (howOftenCheck == CONSTANT.TWODAY)//마지막 푸시를 한지 24시간이 지났으면
                     howOftenCheck = CONSTANT.CHECK;//다시 10분마다 체크를 한다.
                 String[] projection = {MediaStore.MediaColumns._ID};
                 String selection = MediaStore.Images.ImageColumns.DATE_TAKEN + " > ?";
@@ -81,8 +81,21 @@ public class BroadcastListener extends BroadcastReceiver {
                     int pictureID = mCursor.getInt(mCursor.getColumnIndex(MediaStore.MediaColumns._ID));
 
                     DatabaseHelper db = DatabaseHelper.getInstance(mContext);
-                    if ((db.getMediaById(pictureID) == null) &&
-                            (db.getNotification() == null || (db.getNotification() != null && db.getNotification().getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
+                    Media m = db.getMediaById(pictureID);
+                    NotificationM notificationM = db.getNotification();
+                    if ((m == null) &&
+                            (db.getNotification() == null || (notificationM != null && notificationM.getLastPictureID() != pictureID))) {//새로운 사진이 들어온 경우
+
+                        //정리 제외 대상인지 확인한다
+                        /** ------------------정리 제외 대상------------------ **/
+                        String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));//사진이 존재하는 경로
+
+                        if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
+                            return;
+                        //해당 경로에 존재하지 않는 사진은 건너띈다
+                        if (!(new File(path)).exists())
+                            return;
+
 
                         makeNotification(mContext);
                         //푸시한 시간을 DB에 입력한다(푸시간에 최소한의 시간간격을 유지하기 위함 & 중간에 서비스 재시작되는경우)
@@ -91,8 +104,8 @@ public class BroadcastListener extends BroadcastReceiver {
                         db.createNotification(notification);
 
                         countForTick = 0;
-                        //하루에 한번 이상 보내지 않는다
-                        howOftenCheck = CONSTANT.ONEDAY; //다음 확인은 최소 하루가 지난후에
+                        //이틀에 한번 이상 보내지 않는다
+                        howOftenCheck = CONSTANT.TWODAY; //다음 확인은 최소 이틀이 지난후에
                     }
                 }
                 mCursor.close();
@@ -109,11 +122,11 @@ public class BroadcastListener extends BroadcastReceiver {
 
         NotificationCompat.Builder mCompatBuilder = new NotificationCompat.Builder(context);
         mCompatBuilder.setSmallIcon(R.mipmap.icon);
-        mCompatBuilder.setTicker("새로운 사진이 있네요! 스토리를 만들어 보세요");
+        mCompatBuilder.setTicker("새로운 사진으로 편리하게 스토리를 만들어 보세요");
         mCompatBuilder.setWhen(System.currentTimeMillis());
         //mCompatBuilder.setNumber(1);
         mCompatBuilder.setContentTitle("Phoket");
-        mCompatBuilder.setContentText("새로운 사진이 있네요! 스토리를 만들어 보세요");
+        mCompatBuilder.setContentText("새로운 사진으로 편리하게 스토리를 만들어 보세요");
         mCompatBuilder.setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
         mCompatBuilder.setContentIntent(pendingIntent);
         mCompatBuilder.setAutoCancel(true);

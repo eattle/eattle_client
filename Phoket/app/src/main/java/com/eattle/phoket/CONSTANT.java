@@ -37,7 +37,7 @@ public class CONSTANT {
 
     public static ArrayList<Activity> actList = new ArrayList<Activity>();
 
-    public static final int ONEDAY = 1440;
+    public static final int TWODAY = 2880;
     public static final int CHECK = 10;
 
 
@@ -86,6 +86,8 @@ public class CONSTANT {
     public static int COUNTIMAGE = 0;
 
     public static Snackbar snackbar;
+
+    public static boolean FLAG_REFRESH = false;//메인화면에서 refresh를 해야할 필요가 있으면 true, 없으면 false
 
     public static String convertFolderNameToStoryName(String folderName) {
         String name = "";

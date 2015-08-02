@@ -89,6 +89,7 @@ public class ServiceOfPictureClassification extends Service {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
+
                     if (!isClassifying) {
                         new Thread(new Runnable() {
                             @Override
@@ -121,13 +122,16 @@ public class ServiceOfPictureClassification extends Service {
                                 pictureClassification_guide();
                             } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
+
                             } catch (Exception e) {
                                 Log.d("PictureClassification", e.getMessage());
+
                             } finally {
                                 isClassifying = false;
                             }
                         }
                     }).start();
+
                     break;
 
                 default:
@@ -162,8 +166,8 @@ public class ServiceOfPictureClassification extends Service {
             //86400000
             //마지막 푸시를 넣은지 24시간을 넘지 않았으면
             if (n != null) {
-                if (System.currentTimeMillis() - n.getNotificationTime() < 86400000L)
-                    BroadcastListener.setHowOftenCheck(CONSTANT.ONEDAY);//24시간후에 다시 체크
+                if (System.currentTimeMillis() - n.getNotificationTime() < (CONSTANT.TWODAY * 60 * 1000L))
+                    BroadcastListener.setHowOftenCheck(CONSTANT.TWODAY);//48시간후에 다시 체크
                 else
                     BroadcastListener.setHowOftenCheck(CONSTANT.CHECK);//10분마다 체크
             }
@@ -198,6 +202,11 @@ public class ServiceOfPictureClassification extends Service {
                     continue;
                 //해당 경로에 존재하지 않는 사진은 건너띈다
                 if (!isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0)
+                    //TODO : 속도 향상 방법
+                    /**
+                    * !isExisted(path) && ExistedMedia != null && ExistedMedia.getIsFixed() == 0에
+                     * 해당하는 사진들의 ID를 db 한번의 접근으로 모두 가져오도록 한다
+                    */
                     //ExistedMedia에 있는 사진인데 경로에 없으면서 고정 스토리에 속한 사진이 아닐 경우
                     continue;
 
@@ -307,13 +316,13 @@ public class ServiceOfPictureClassification extends Service {
             /** ------------------정리 제외 대상------------------ **/
             if (path.contains("thumbnail") || path.contains("Screenshot") || path.contains("screenshot"))
                 continue;
-            if ((ExistedMedia != null && ExistedMedia.getIsFixed() == 1)) {
-                Log.d(TAG,"고정 스토리에 속한 사진은 건너뛴다");
-                continue;//고정 스토리에 속하는 사진은 건너뛴다
+            if (ExistedMedia != null && ((ExistedMedia.getIsFixed() == 1) || (ExistedMedia.getFolder_id() == -1))) {
+                Log.d(TAG,"고정 스토리 or 휴지통에 속한 사진");
+                continue;//고정 스토리 or 휴지통에 속한 사진은 건너뛴다
             }
             //해당 경로에 존재하지 않는 사진은 건너띈다
             if (!isExisted(path)) {
-                Log.d(TAG,"해당 경로에 존재하지 않는 사진은 건너띈다");
+                Log.d(TAG,"해당 경로에 존재하지 않는 사진");
                 if (ExistedMedia != null)//ExistedMedia에 있는 사진인데 경로에 없다면 DB에서 지우고 continue
                     db.deleteMedia(pictureID);
                 continue;

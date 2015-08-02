@@ -266,9 +266,9 @@ public class AlbumFullActivity extends ActionBarActivity {
 
         public void removeView(int position) {//뷰페이저 업데이트를 위해 선언
             Log.d(TAG, "지우려는 viewpager 포지션 : " + position);
-            if (initialMediaPosition == -1) {  //스토리 제목부터 시작한 경우
-                position--;//인덱스 -1이 스토리시작화면!!
-            }
+//            if (initialMediaPosition == -1) {  //스토리 제목부터 시작한 경우
+//                position--;//인덱스 -1이 스토리시작화면!!
+//            }
 
             if (position >= 0 && position < mediaList.size())
                 mediaList.remove(position);

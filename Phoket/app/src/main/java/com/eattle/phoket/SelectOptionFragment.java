@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -32,16 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SelectOptionFragment extends Fragment {
     private String TAG = "SelectOptionFragment";
 
     private List<CardData> cards;
     private static Context context;
 
-    // TODO: Rename and change types and number of parameters
+    private static LinearLayout fabLocal;
+
+
     public static SelectOptionFragment newInstance(List<CardData> cards) {
         SelectOptionFragment fragment = new SelectOptionFragment();
         Bundle args = new Bundle();
@@ -74,12 +74,12 @@ public class SelectOptionFragment extends Fragment {
                 return true;
             }
         });
-
+        fabLocal = (LinearLayout)root.findViewById(R.id.fabLocal);
         //스마트폰 로컬에 폴더 만들어서 내보내기
         root.findViewById(R.id.fabLocal).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i=0;i<cards.size();i++) {
+                for (int i = 0; i < cards.size(); i++) {
                     exportStoryPopupDialog(cards.get(i).getData());
                 }
 
@@ -265,7 +265,7 @@ public class SelectOptionFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Integer result) {
+         protected void onPostExecute(Integer result) {
             mDlg.dismiss();
             Toast.makeText(mContext, "스토리 폴더 생성 완료", Toast.LENGTH_SHORT).show();
         }

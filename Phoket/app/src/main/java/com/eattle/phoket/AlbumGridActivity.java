@@ -243,43 +243,10 @@ public class AlbumGridActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
-        Glide.get(this).clearMemory();
-        Glide.get(this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
+        Glide.get(AlbumGridActivity.this).clearMemory();
+        Glide.get(AlbumGridActivity.this).trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
         super.onStop();
     }
-
-    /*
-    public void onClick(View v){
-        switch(v.getId()){
-            case R.id.storyStart://스토리 시작
-
-                Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
-                intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
-                intent.putExtra("position",-1);//-1을 넘겨주면 스토리 '맨 처음'부터 시작(제목화면부터)
-                intent.putExtra("IDForStoryOrTag", id);// folder ID
-                intent.putExtra("tagName",tagName);//디폴트 태그는 tag이름을 통해서 작동
-                intent.putExtra("mediaId",mediaId);// 태그클릭->그리드뷰->풀픽쳐 인 경우에 필요
-                intent.putExtra("kind", kind);// 그리드 종류(스토리,디폴트태그,태그)
-                startActivity(intent);
-                break;
-        }
-    }
-
-    //그리드 뷰 아이템 클릭
-    AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            Intent intent = new Intent(getApplicationContext(), AlbumFullActivity.class);
-            intent.putParcelableArrayListExtra("mediaList", new ArrayList<Parcelable>(mMediaList));
-            intent.putExtra("position", position);//어디에서 시작할지
-            intent.putExtra("IDForStoryOrTag", Id);// 스토리를 위한 folderID, 또는 사용자 태그를 위한 tagID
-            intent.putExtra("tagName",tagName);// 디폴트 태그를 위한 tagName
-            intent.putExtra("mediaId",mediaId);// 태그클릭->그리드뷰->풀픽쳐 인 경우에 필요
-            intent.putExtra("kind", kind);// 그리드 종류(스토리,디폴트태그,태그)
-
-            startActivity(intent);
-        }
-    };*/
 
     public void refreshGrid() {
         day = 0;
@@ -378,6 +345,7 @@ public class AlbumGridActivity extends AppCompatActivity {
     }
 
     private void addCard(Media m, int order) {
+
         if (day != m.getDay() || month != m.getMonth() || year != m.getYear()) {
             day = m.getDay();
             month = m.getMonth();
@@ -386,7 +354,9 @@ public class AlbumGridActivity extends AppCompatActivity {
         }
 
         DatabaseHelper db = DatabaseHelper.getInstance(AlbumGridActivity.this);
-        if (db.getGuide() == 1) {//가이드가 종료되었을 경우
+        Log.d(EXTRA_TAG,"db 호출");
+        if (db.getGuide() == 1) {//가이드가 아닐 때(평상시)
+
             if (m.getThumbnail_path() == null)//내장 썸네일이 혹시 존재하지 않을 경우에만
                 CardManager.setMediaItem(mGridView, AlbumGridActivity.this, m.getId(), order, m.getPath());
             else
