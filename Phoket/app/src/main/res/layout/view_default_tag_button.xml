@@ -10,17 +10,17 @@
         android:textColor="#ffffff"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp" />-->
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tagName"
+        android:background="@drawable/tagbutton"
+        android:enabled="false"
         android:gravity="center"
-        android:background="@mipmap/currenttag"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_gravity="right|center"
-        android:paddingLeft="5dp"/>
+        android:textColor="@color/text"
+        android:textSize="@dimen/subtitle_font_size"
+        android:text=""
+        android:layout_marginLeft="2dp" />
 
 
 </FrameLayout>
