@@ -84,14 +84,13 @@ public class ServiceOfPictureClassification extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(EXTRA_TAG, "Service onStartCommand");
         if (intent != null) {
             switch (intent.getIntExtra("what", -1)) {
                 case CONSTANT.START_OF_PICTURE_CLASSIFICATION:
                     Log.d("IncomingHandler", "[ServiceOfPictureClassification]message 수신! handleMessage() - START_OF_PICTURE_CLASSIFICATION || 'MainActivity가 사진 정리를 요청하였습니다' ");
 
-                    if (!isClassifying){
+                    if (!isClassifying) {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -109,7 +108,6 @@ public class ServiceOfPictureClassification extends Service {
                                 }
                             }
                         }).start();
-
                     }
 
                     break;
@@ -124,10 +122,10 @@ public class ServiceOfPictureClassification extends Service {
                                 pictureClassification_guide();
                             } catch (IOException e) {
                                 Log.d("PictureClassification", e.getMessage());
-                                e.printStackTrace();
+
                             } catch (Exception e) {
                                 Log.d("PictureClassification", e.getMessage());
-                                e.printStackTrace();
+
                             } finally {
                                 isClassifying = false;
                             }
@@ -632,6 +630,5 @@ public class ServiceOfPictureClassification extends Service {
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         am.cancel(sender);
     }
-
 
 }
